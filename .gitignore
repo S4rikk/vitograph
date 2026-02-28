@@ -1,0 +1,13 @@
+node_modules/
+.next/
+dist/
+build/
+.env*
+!.env.example
+trash/
+.ruff_cache/
+.vscode/
+coverage/
+*.log
+.eslintcache
+*.tsbuildinfo
