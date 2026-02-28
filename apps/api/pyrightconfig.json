@@ -1,0 +1,19 @@
+{
+    "include": [
+        "."
+    ],
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        "**/.ruff_cache",
+        "**/.pytest_cache",
+        "**/supabase/migrations",
+        "../web"
+    ],
+    "typeCheckingMode": "off",
+    "reportMissingImports": false,
+    "reportMissingTypeStubs": false,
+    "pythonVersion": "3.12",
+    "venvPath": ".",
+    "venv": ".venv"
+}

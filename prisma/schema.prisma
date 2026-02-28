@@ -1,0 +1,1004 @@
+// ═══════════════════════════════════════════════════════════════════════
+// VITOGRAPH — Prisma Schema (PostgreSQL / Supabase)
+// ═══════════════════════════════════════════════════════════════════════
+//
+// Maps health-core.ts (25+ TypeScript entities) to PostgreSQL tables.
+// Existing SQL tables (profiles, biomarkers, etc.) are mirrored with @@map.
+//
+// INDEXING STRATEGY:
+//   • Every FK column gets an explicit @@index (PG does NOT auto-index FKs).
+//   • Time-series tables (CgmReading, HrvReading, EnvironmentReading,
+//     SleepSession) have composite @@index([userId, recordedAt/date])
+//     for fast user-scoped temporal range queries.
+//   • Unique business keys use @@unique (e.g., one norm per user+biomarker).
+//   • JSONB columns rely on native GIN indexes via post-migration raw SQL.
+//
+// ═══════════════════════════════════════════════════════════════════════
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// ENUMS — Fixed value sets mapped from TypeScript union types
+// ─────────────────────────────────────────────────────────────────────
+
+enum BiologicalSex {
+  male
+  female
+  other
+}
+
+enum ActivityLevel {
+  sedentary
+  light
+  moderate
+  active
+  very_active
+}
+
+enum StressLevel {
+  low
+  moderate
+  high
+  very_high
+}
+
+enum ClimateZone {
+  tropical
+  dry
+  temperate
+  continental
+  polar
+}
+
+enum SunExposure {
+  minimal
+  moderate
+  high
+}
+
+enum DietType {
+  omnivore
+  vegetarian
+  vegan
+  pescatarian
+  keto
+  other
+}
+
+enum AlcoholFrequency {
+  none
+  occasional
+  moderate
+  heavy
+}
+
+enum PregnancyStatus {
+  not_applicable
+  pregnant
+  breastfeeding
+}
+
+enum WorkLifestyle {
+  office_sedentary
+  office_active
+  manual_labor
+  remote_flexible
+  shift_work
+}
+
+enum BiomarkerCategory {
+  vitamin
+  mineral
+  hormone
+  enzyme
+  lipid
+  metabolic
+  inflammatory
+  hematologic
+  other
+}
+
+enum TestSessionStatus {
+  pending
+  processing
+  completed
+  error
+}
+
+enum TestResultSource {
+  manual
+  ocr_upload
+  api_integration
+}
+
+enum AdjustmentType {
+  absolute
+  percentage
+  override
+}
+
+enum AdjustmentOperation {
+  add
+  multiply
+  percentage
+}
+
+enum Zygosity {
+  homozygous
+  heterozygous
+  hemizygous
+  unknown
+}
+
+enum ClinicalSignificance {
+  pathogenic
+  likely_pathogenic
+  uncertain
+  likely_benign
+  benign
+  risk_factor
+}
+
+enum GeneticSource {
+  twenty_three_and_me
+  ancestrydna
+  clinical_lab
+  manual
+}
+
+enum MedicationType {
+  prescription
+  otc
+  supplement
+  herbal
+}
+
+enum MedicationRoute {
+  oral
+  topical
+  injection
+  sublingual
+  inhaled
+  other
+}
+
+enum InteractionType {
+  drug_drug
+  drug_supplement
+  drug_gene
+  supplement_supplement
+}
+
+enum InteractionSeverity {
+  contraindicated
+  major
+  moderate
+  minor
+  informational
+}
+
+enum EvidenceLevel {
+  strong
+  moderate
+  weak
+  theoretical
+}
+
+enum MealType {
+  breakfast
+  lunch
+  dinner
+  snack
+  drink
+}
+
+enum GlucoseTrend {
+  rising_rapidly
+  rising
+  stable
+  falling
+  falling_rapidly
+}
+
+enum WaterQualitySource {
+  municipal_data
+  home_test_kit
+  manual
+}
+
+enum PollenLevel {
+  none
+  low
+  moderate
+  high
+  very_high
+}
+
+enum WearableSource {
+  oura
+  whoop
+  apple_watch
+  garmin
+  fitbit
+  samsung
+  manual
+  other
+}
+
+enum SleepStageType {
+  deep
+  rem
+  light
+  awake
+}
+
+enum HrvMeasurementContext {
+  sleep
+  morning
+  post_exercise
+  spot_check
+}
+
+enum ReadinessRecommendation {
+  peak_performance
+  normal_activity
+  light_activity
+  rest_day
+}
+
+enum ScoreFactorDomain {
+  bio_data
+  metabolic
+  recovery
+  environment
+  genetics
+}
+
+enum ScoreFactorImpact {
+  positive
+  neutral
+  negative
+}
+
+enum InsightTrigger {
+  new_lab_results
+  sleep_quality_drop
+  cgm_pattern_detected
+  medication_interaction
+  score_threshold_crossed
+  environmental_alert
+  periodic_review
+  user_requested
+}
+
+enum InsightCategory {
+  nutrition
+  sleep
+  exercise
+  supplementation
+  medication_review
+  biomarker_trend
+  gut_health
+  environmental
+  general_wellness
+}
+
+enum InsightPriority {
+  critical
+  high
+  medium
+  low
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// §1  DOMAIN 1 — USER CONTEXT & ENVIRONMENT
+// ═══════════════════════════════════════════════════════════════════════
+
+/// Extended user profile — 1:1 with auth.users.
+/// Stores lifestyle/environment factors for Dynamic Norm computation.
+model Profile {
+  id                            String            @id @db.Uuid
+  displayName                   String?           @map("display_name")
+  dateOfBirth                   DateTime?         @map("date_of_birth") @db.Date
+  biologicalSex                 BiologicalSex?    @map("biological_sex")
+  heightCm                      Decimal?          @map("height_cm") @db.Decimal(5, 1)
+  weightKg                      Decimal?          @map("weight_kg") @db.Decimal(5, 1)
+  activityLevel                 ActivityLevel?    @map("activity_level")
+  stressLevel                   StressLevel?      @map("stress_level")
+  sleepHoursAvg                 Decimal?          @map("sleep_hours_avg") @db.Decimal(3, 1)
+  climateZone                   ClimateZone?      @map("climate_zone")
+  sunExposure                   SunExposure?      @map("sun_exposure")
+  dietType                      DietType?         @map("diet_type")
+  isSmoker                      Boolean           @default(false) @map("is_smoker")
+  alcoholFrequency              AlcoholFrequency? @map("alcohol_frequency")
+  pregnancyStatus               PregnancyStatus?  @map("pregnancy_status")
+  chronicConditions             Json              @default("[]") @map("chronic_conditions") @db.JsonB
+  medications                   Json              @default("[]") @map("medications") @db.JsonB
+  city                          String?
+  timezone                      String?
+  // Phase 11 additions
+  workLifestyle                 WorkLifestyle?    @map("work_lifestyle")
+  baselineMentalStress          Int?              @map("baseline_mental_stress")
+  physicalActivityMinutesWeekly Int?              @map("physical_activity_minutes_weekly")
+
+  // Phase 25 additions (Core 50 markers payload)
+  lifestyleMarkers              Json              @default("{}") @map("lifestyle_markers") @db.JsonB
+
+  // Phase 48 additions (Food Zones)
+  foodContraindicationZones     Json              @default("{}") @map("food_contraindication_zones") @db.JsonB
+
+  // Phase 50 additions (Supplement Protocol)
+  activeSupplementProtocol      Json              @default("{}") @map("active_supplement_protocol") @db.JsonB
+
+  // Phase 53 additions (AI-Driven Nutrition Targets)
+  activeNutritionTargets        Json              @default("{}") @map("active_nutrition_targets") @db.JsonB
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  // ── Relations ──
+  testSessions          TestSession[]
+  testResults           TestResult[]
+  userDynamicNorms      UserDynamicNorm[]
+  geneticVariants       GeneticVariant[]
+  userMedications       Medication[]
+  interactionAlerts     InteractionAlert[]
+  mealLogs              MealLog[]
+  cgmReadings           CgmReading[]
+  gutSymptomLogs        GutSymptomLog[]
+  sleepSessions         SleepSession[]
+  hrvReadings           HrvReading[]
+  readinessScores       ReadinessScore[]
+  healthspanScores      HealthspanScore[]
+  aiInsights            AiInsight[]
+  environmentReadings   EnvironmentReading[]
+  waterQualitySnapshots WaterQualitySnapshot[]
+  waterLogs             WaterLog[]
+  feedback              Feedback[]
+  activeConditionKnowledgeBases ActiveConditionKnowledgeBase[]
+
+  // Phase 51 additions (Supplement Tracking)
+  supplementLogs                SupplementLog[]
+
+  aiChatMessages                AiChatMessage[]
+
+  @@map("profiles")
+}
+
+/// User feedback (bug reports, suggestions, etc)
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  userId    String   @map("user_id") @db.Uuid
+  category  String   @default("general")
+  message   String
+  status    String   @default("new")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("feedback")
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// §6  DOMAIN 6 — AI MEDICAL KNOWLEDGE (Phase 49)
+// ═══════════════════════════════════════════════════════════════════════
+
+/// Temporary/Active Knowledge Base tied to a specific user clinical condition
+/// (e.g., Latent Anemia). Injected into AI context until resolved.
+model ActiveConditionKnowledgeBase {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  profileId      String    @map("profile_id") @db.Uuid
+  profile        Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  /// Nazvanie sostoyaniya (e.g. "Latent Anemia", "Insulin Resistance")
+  conditionName  String    @map("condition_name")
+  
+  /// Full JSON block with knowledge (pathogenesis, cofactors, inhibitors, lifestyle rules)
+  knowledgeData  Json      @map("knowledge_data") @db.JsonB
+  
+  /// Severity level: "mild", "moderate", "severe"
+  severity       String    @default("moderate")
+  
+  /// Date when the condition was detected/knowledge base created
+  detectedAt     DateTime  @default(now()) @map("detected_at") @db.Timestamptz
+  
+  /// Status: active or resolved (by a follow-up test)
+  isActive       Boolean   @default(true) @map("is_active")
+  
+  /// Optional: ID of the report that initiated this knowledge base
+  sourceReportId String?   @map("source_report_id")
+
+  @@index([profileId, isActive])
+  @@map("active_condition_knowledge_bases")
+}
+
+/// Real-time environmental telemetry (AQI, UV, pollen).
+/// Composite index on (userId, recordedAt) for fast time-range queries.
+model EnvironmentReading {
+  id                 Int          @id @default(autoincrement())
+  userId             String       @map("user_id") @db.Uuid
+  recordedAt         DateTime     @map("recorded_at") @db.Timestamptz
+  latitude           Decimal?     @db.Decimal(9, 6)
+  longitude          Decimal?     @db.Decimal(9, 6)
+  region             String?
+  // Air quality
+  aqi                Int?
+  primaryPollutant   String?      @map("primary_pollutant")
+  pm25               Decimal?     @db.Decimal(7, 2)
+  // Weather
+  temperatureCelsius Decimal?     @map("temperature_celsius") @db.Decimal(5, 1)
+  humidityPercent    Decimal?     @map("humidity_percent") @db.Decimal(5, 1)
+  uvIndex            Decimal?     @map("uv_index") @db.Decimal(4, 1)
+  // Biological
+  pollenLevel        PollenLevel? @map("pollen_level")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Composite index for user-scoped time-series queries:
+  // SELECT * FROM environment_readings WHERE user_id = ? AND recorded_at BETWEEN ? AND ?
+  @@index([userId, recordedAt])
+  @@index([userId])
+  @@map("environment_readings")
+}
+
+/// Periodic drinking water quality snapshot.
+model WaterQualitySnapshot {
+  id          Int                @id @default(autoincrement())
+  userId      String             @map("user_id") @db.Uuid
+  measuredAt  DateTime           @map("measured_at") @db.Timestamptz
+  source      WaterQualitySource
+  tdsPpm      Decimal?           @map("tds_ppm") @db.Decimal(8, 1)
+  hardnessMgl Decimal?           @map("hardness_mgl") @db.Decimal(8, 2)
+  ph          Decimal?           @db.Decimal(4, 2)
+  leadPpb     Decimal?           @map("lead_ppb") @db.Decimal(8, 3)
+  fluorideMgl Decimal?           @map("fluoride_mgl") @db.Decimal(6, 3)
+  chlorineMgl Decimal?           @map("chlorine_mgl") @db.Decimal(6, 3)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, measuredAt])
+  @@index([userId])
+  @@map("water_quality_snapshots")
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// §2  DOMAIN 2 — BIO-DATA & GENETICS
+// ═══════════════════════════════════════════════════════════════════════
+
+/// Reference catalog of all supported blood/lab markers.
+/// Read-only for users; writable via service_role.
+model Biomarker {
+  id               Int               @id @default(autoincrement())
+  code             String            @unique
+  nameEn           String            @map("name_en")
+  nameRu           String?           @map("name_ru")
+  category         BiomarkerCategory
+  unit             String
+  refRangeLow      Decimal?          @map("ref_range_low") @db.Decimal(10, 3)
+  refRangeHigh     Decimal?          @map("ref_range_high") @db.Decimal(10, 3)
+  optimalRangeLow  Decimal?          @map("optimal_range_low") @db.Decimal(10, 3)
+  optimalRangeHigh Decimal?          @map("optimal_range_high") @db.Decimal(10, 3)
+  description      String?
+  aliases          Json              @default("[]") @db.JsonB
+  isActive         Boolean           @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  // ── Relations ──
+  testResults      TestResult[]
+  dynamicNormRules DynamicNormRule[]
+  userDynamicNorms UserDynamicNorm[]
+
+  @@index([category])
+  @@map("biomarkers")
+}
+
+/// Groups multiple test_results from the same blood draw.
+model TestSession {
+  id             Int               @id @default(autoincrement())
+  userId         String            @map("user_id") @db.Uuid
+  testDate       DateTime          @map("test_date") @db.Date
+  labName        String?           @map("lab_name")
+  sourceFilePath String?           @map("source_file_path")
+  status         TestSessionStatus @default(pending)
+  notes          String?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user        Profile      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  testResults TestResult[]
+
+  @@index([userId])
+  @@map("test_sessions")
+}
+
+/// Individual biomarker measurement from a lab report.
+/// Composite index on (userId, testDate DESC) for timeline queries.
+model TestResult {
+  id             Int              @id @default(autoincrement())
+  userId         String           @map("user_id") @db.Uuid
+  biomarkerId    Int              @map("biomarker_id")
+  sessionId      Int?             @map("session_id")
+  value          Decimal          @db.Decimal(10, 3)
+  unit           String
+  testDate       DateTime         @map("test_date") @db.Date
+  labName        String?          @map("lab_name")
+  source         TestResultSource @default(manual)
+  sourceFilePath String?          @map("source_file_path")
+  notes          String?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user      Profile      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  biomarker Biomarker    @relation(fields: [biomarkerId], references: [id])
+  session   TestSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  // Fast user timeline: WHERE user_id = ? ORDER BY test_date DESC
+  @@index([userId, testDate(sort: Desc)])
+  @@index([userId])
+  @@index([biomarkerId])
+  @@index([sessionId])
+  @@map("test_results")
+}
+
+/// Rules for shifting biomarker reference ranges based on lifestyle factors.
+/// Core intellectual property of the Dynamic Norm engine.
+model DynamicNormRule {
+  id              Int                 @id @default(autoincrement())
+  biomarkerId     Int                 @map("biomarker_id")
+  factorType      String              @map("factor_type")
+  factorValue     String              @map("factor_value")
+  adjustmentType  AdjustmentType      @map("adjustment_type")
+  operation       AdjustmentOperation @default(add)
+  adjustmentValue Decimal             @default(0) @map("adjustment_value") @db.Decimal(10, 3)
+  lowAdjustment   Decimal             @default(0) @map("low_adjustment") @db.Decimal(10, 3)
+  highAdjustment  Decimal             @default(0) @map("high_adjustment") @db.Decimal(10, 3)
+  priority        Int                 @default(0)
+  rationale       String?
+  sourceReference String?             @map("source_reference")
+  isActive        Boolean             @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  biomarker Biomarker @relation(fields: [biomarkerId], references: [id])
+
+  // Composite index for fast rule lookup by biomarker + factor
+  @@index([biomarkerId, factorType, factorValue])
+  @@index([biomarkerId])
+  @@map("dynamic_norm_rules")
+}
+
+/// Cached personalized reference range per user per biomarker.
+/// Recalculated when profile or rules change.
+model UserDynamicNorm {
+  id           Int      @id @default(autoincrement())
+  userId       String   @map("user_id") @db.Uuid
+  biomarkerId  Int      @map("biomarker_id")
+  computedLow  Decimal  @map("computed_low") @db.Decimal(10, 3)
+  computedHigh Decimal  @map("computed_high") @db.Decimal(10, 3)
+  appliedRules Json     @default("[]") @map("applied_rules") @db.JsonB
+  computedAt   DateTime @default(now()) @map("computed_at") @db.Timestamptz
+
+  user      Profile   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  biomarker Biomarker @relation(fields: [biomarkerId], references: [id])
+
+  // Business constraint: one norm per user per biomarker
+  @@unique([userId, biomarkerId])
+  @@index([userId])
+  @@index([biomarkerId])
+  @@map("user_dynamic_norms")
+}
+
+/// Stores conversation history for the AI assistant and food diary.
+/// This prevents Prisma from dropping the table during `db push`.
+model AiChatMessage {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  threadId  String   @map("thread_id")
+  role      String
+  content   String
+  imageUrl  String?  @map("image_url")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user      Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, threadId])
+  @@index([userId])
+  @@map("ai_chat_messages")
+}
+
+// ── Genetics (Phase 11) ──────────────────────────────────────────────
+
+/// Known genetic variant/polymorphism from DNA testing services.
+/// CYP1A2, MTHFR, APOE, MCM6, etc.
+model GeneticVariant {
+  id                   Int                  @id @default(autoincrement())
+  userId               String               @map("user_id") @db.Uuid
+  gene                 String
+  rsid                 String?
+  variant              String
+  zygosity             Zygosity
+  clinicalSignificance ClinicalSignificance @map("clinical_significance")
+  phenotypeSummary     String               @map("phenotype_summary")
+  source               GeneticSource
+  rawDataPath          String?              @map("raw_data_path")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user              Profile            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  interactionAlerts InteractionAlert[]
+
+  @@index([userId])
+  @@index([gene])
+  @@map("genetic_variants")
+}
+
+/// Current medication or supplement a user is taking.
+model Medication {
+  id                Int             @id @default(autoincrement())
+  userId            String          @map("user_id") @db.Uuid
+  name              String
+  type              MedicationType
+  dosage            String
+  frequency         String
+  route             MedicationRoute
+  startDate         DateTime?       @map("start_date") @db.Date
+  endDate           DateTime?       @map("end_date") @db.Date
+  prescribingReason String?         @map("prescribing_reason")
+  isActive          Boolean         @default(true) @map("is_active")
+  rxnormCode        String?         @map("rxnorm_code")
+  atcCode           String?         @map("atc_code")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  user               Profile            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  interactionAlertsA InteractionAlert[] @relation("InteractionMedicationA")
+  interactionAlertsB InteractionAlert[] @relation("InteractionMedicationB")
+
+  @@index([userId])
+  @@index([isActive])
+  @@map("medications")
+}
+
+/// Phase 51: Supplement intake log for compliance tracking
+model SupplementLog {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id") @db.Uuid
+  supplementName  String   @map("supplement_name")
+  dosageTaken     String   @map("dosage_taken")
+  takenAt         DateTime @default(now()) @map("taken_at") @db.Timestamptz
+  wasOnTime       Boolean  @default(true) @map("was_on_time")
+  source          String   @default("manual")
+
+  profile         Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, takenAt])
+  @@map("supplement_logs")
+}
+
+/// AI-generated alert for drug–drug, drug–supplement, or drug–gene interactions.
+model InteractionAlert {
+  id               Int                 @id @default(autoincrement())
+  userId           String              @map("user_id") @db.Uuid
+  medicationIdA    Int                 @map("medication_id_a")
+  medicationIdB    Int?                @map("medication_id_b")
+  geneticVariantId Int?                @map("genetic_variant_id")
+  interactionType  InteractionType     @map("interaction_type")
+  severity         InteractionSeverity
+  description      String
+  recommendation   String
+  evidenceLevel    EvidenceLevel       @map("evidence_level")
+  sourceReference  String?             @map("source_reference")
+  isDismissed      Boolean             @default(false) @map("is_dismissed")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user           Profile         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  medicationA    Medication      @relation("InteractionMedicationA", fields: [medicationIdA], references: [id])
+  medicationB    Medication?     @relation("InteractionMedicationB", fields: [medicationIdB], references: [id])
+  geneticVariant GeneticVariant? @relation(fields: [geneticVariantId], references: [id])
+
+  @@index([userId])
+  @@index([medicationIdA])
+  @@index([medicationIdB])
+  @@index([geneticVariantId])
+  @@map("interaction_alerts")
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// §3  DOMAIN 3 — METABOLIC & GUT HEALTH
+// ═══════════════════════════════════════════════════════════════════════
+
+/// User-logged water intake
+model WaterLog {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  amountGlasses Int      @map("amount_glasses")
+  loggedAt      DateTime @default(now()) @map("logged_at") @db.Timestamptz
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, loggedAt])
+  @@map("water_logs")
+}
+
+/// Reference food item with nutritional profile (not user-scoped).
+model FoodItem {
+  id              Int      @id @default(autoincrement())
+  nameEn          String   @map("name_en")
+  nameRu          String?  @map("name_ru")
+  category        String
+  caloriesPer100g Decimal  @map("calories_per_100g") @db.Decimal(8, 2)
+  proteinG        Decimal  @map("protein_g") @db.Decimal(7, 2)
+  fatG            Decimal  @map("fat_g") @db.Decimal(7, 2)
+  carbsG          Decimal  @map("carbs_g") @db.Decimal(7, 2)
+  fiberG          Decimal  @map("fiber_g") @db.Decimal(7, 2)
+  glycemicIndex   Int?     @map("glycemic_index")
+  glycemicLoad    Decimal? @map("glycemic_load") @db.Decimal(6, 1)
+  /// JSONB: { "vitamin_c_mg": 53, "iron_mg": 2.1, ... }
+  micronutrients  Json     @default("{}") @db.JsonB
+  /// JSONB: ["gluten", "dairy", ...]
+  commonAllergens Json     @default("[]") @map("common_allergens") @db.JsonB
+  isActive        Boolean  @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  mealItems MealItem[]
+
+  @@index([category])
+  @@map("food_items")
+}
+
+/// A logged meal with timing and AI-computed quality score.
+model MealLog {
+  id               Int      @id @default(autoincrement())
+  userId           String   @map("user_id") @db.Uuid
+  loggedAt         DateTime @map("logged_at") @db.Timestamptz
+  mealType         MealType @map("meal_type")
+  totalCalories    Decimal? @map("total_calories") @db.Decimal(8, 1)
+  notes            String?
+  photoPath        String?  @map("photo_path")
+  /// AI-computed nutrition quality (0–100).
+  mealQualityScore Int?     @map("meal_quality_score")
+  /// AI-computed short explanation of the score
+  mealQualityReason String? @map("meal_quality_reason")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user           Profile         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items          MealItem[]
+  gutSymptomLogs GutSymptomLog[]
+
+  // Fast user timeline: WHERE user_id = ? AND logged_at BETWEEN ? AND ?
+  @@index([userId, loggedAt])
+  @@index([userId])
+  @@map("meal_logs")
+}
+
+/// Explicit join: a food item in a meal with portion size.
+model MealItem {
+  id           Int      @id @default(autoincrement())
+  mealLogId    Int      @map("meal_log_id")
+  foodItemId   Int      @map("food_item_id")
+  foodName     String   @map("food_name")
+  portionGrams Decimal  @map("portion_grams") @db.Decimal(8, 1)
+  calories     Decimal? @db.Decimal(8, 1)
+
+  mealLog  MealLog  @relation(fields: [mealLogId], references: [id], onDelete: Cascade)
+  foodItem FoodItem @relation(fields: [foodItemId], references: [id])
+
+  @@index([mealLogId])
+  @@index([foodItemId])
+  @@map("meal_items")
+}
+
+/// CGM time-series data point (every 1–15 minutes).
+/// Composite index on (userId, recordedAt) — critical for glucose curve queries.
+model CgmReading {
+  id           Int           @id @default(autoincrement())
+  userId       String        @map("user_id") @db.Uuid
+  deviceId     String?       @map("device_id")
+  recordedAt   DateTime      @map("recorded_at") @db.Timestamptz
+  glucoseMmol  Decimal       @map("glucose_mmol") @db.Decimal(5, 2)
+  glucoseMgdl  Decimal       @map("glucose_mgdl") @db.Decimal(6, 1)
+  rateOfChange Decimal?      @map("rate_of_change") @db.Decimal(5, 3)
+  trend        GlucoseTrend?
+  isFasting    Boolean       @default(false) @map("is_fasting")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // PRIMARY TIME-SERIES INDEX: most-queried path for glucose analysis.
+  // The AI engine correlates CGM spikes with meals (MealLog.loggedAt ± 2h).
+  @@index([userId, recordedAt])
+  @@index([userId])
+  @@map("cgm_readings")
+}
+
+/// User-reported gut/digestive symptom log.
+/// Linked to meals for food–symptom correlation.
+model GutSymptomLog {
+  id                Int      @id @default(autoincrement())
+  userId            String   @map("user_id") @db.Uuid
+  loggedAt          DateTime @map("logged_at") @db.Timestamptz
+  /// JSONB: ["bloating", "gas", "cramps", ...]
+  symptoms          Json     @db.JsonB
+  severity          Int
+  onsetDelayMinutes Int?     @map("onset_delay_minutes")
+  linkedMealId      Int?     @map("linked_meal_id")
+  bristolScale      Int?     @map("bristol_scale")
+  notes             String?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user       Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  linkedMeal MealLog? @relation(fields: [linkedMealId], references: [id], onDelete: SetNull)
+
+  @@index([userId, loggedAt])
+  @@index([userId])
+  @@index([linkedMealId])
+  @@map("gut_symptom_logs")
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// §4  DOMAIN 4 — RECOVERY & WEARABLES
+// ═══════════════════════════════════════════════════════════════════════
+
+/// A single night's sleep session from a wearable device.
+/// Composite index for fast date-range queries per user.
+model SleepSession {
+  id                       Int            @id @default(autoincrement())
+  userId                   String         @map("user_id") @db.Uuid
+  deviceSource             WearableSource @map("device_source")
+  sleepStart               DateTime       @map("sleep_start") @db.Timestamptz
+  sleepEnd                 DateTime       @map("sleep_end") @db.Timestamptz
+  totalDurationMinutes     Int            @map("total_duration_minutes")
+  // Sleep architecture
+  deepSleepMinutes         Int            @map("deep_sleep_minutes")
+  remSleepMinutes          Int            @map("rem_sleep_minutes")
+  lightSleepMinutes        Int            @map("light_sleep_minutes")
+  awakeMinutes             Int            @map("awake_minutes")
+  // Quality metrics
+  sleepEfficiency          Decimal?       @map("sleep_efficiency") @db.Decimal(5, 2)
+  awakeningsCount          Int?           @map("awakenings_count")
+  sleepOnsetLatencyMinutes Int?           @map("sleep_onset_latency_minutes")
+  deviceScore              Int?           @map("device_score")
+  // Context
+  roomTemperatureCelsius   Decimal?       @map("room_temperature_celsius") @db.Decimal(4, 1)
+  /// JSONB array of sleep stages: [{stage, start, end, duration_minutes}]
+  stages                   Json           @default("[]") @db.JsonB
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // User-scoped sleep timeline for trend analysis
+  @@index([userId, sleepStart])
+  @@index([userId])
+  @@map("sleep_sessions")
+}
+
+/// Heart Rate Variability reading — the master recovery indicator.
+/// Captured during sleep or morning spot-check.
+model HrvReading {
+  id                 Int                   @id @default(autoincrement())
+  userId             String                @map("user_id") @db.Uuid
+  deviceSource       WearableSource        @map("device_source")
+  recordedAt         DateTime              @map("recorded_at") @db.Timestamptz
+  rmssdMs            Decimal               @map("rmssd_ms") @db.Decimal(7, 2)
+  sdnnMs             Decimal?              @map("sdnn_ms") @db.Decimal(7, 2)
+  restingHrBpm       Int?                  @map("resting_hr_bpm")
+  hfPower            Decimal?              @map("hf_power") @db.Decimal(12, 2)
+  lfPower            Decimal?              @map("lf_power") @db.Decimal(12, 2)
+  measurementContext HrvMeasurementContext @map("measurement_context")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Time-series index: 7-day HRV trend is a key recovery metric
+  @@index([userId, recordedAt])
+  @@index([userId])
+  @@map("hrv_readings")
+}
+
+/// Morning readiness score computed from sleep + HRV.
+/// One per user per day.
+model ReadinessScore {
+  id             Int                     @id @default(autoincrement())
+  userId         String                  @map("user_id") @db.Uuid
+  date           DateTime                @db.Date
+  deviceSource   WearableSource          @map("device_source")
+  score          Int
+  /// JSONB: { sleepQuality, hrvBalance, recoveryIndex, ... }
+  components     Json                    @db.JsonB
+  recommendation ReadinessRecommendation
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // One readiness score per user per day
+  @@unique([userId, date])
+  @@index([userId])
+  @@map("readiness_scores")
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// §5  DOMAIN 5 — AI SCORING ENGINE
+// ═══════════════════════════════════════════════════════════════════════
+
+/// Master "Biological Age" / Healthspan Score record.
+/// Synthesizes data from all 4 input domains into a single composite score.
+model HealthspanScore {
+  id                 Int      @id @default(autoincrement())
+  userId             String   @map("user_id") @db.Uuid
+  computedAt         DateTime @map("computed_at") @db.Timestamptz
+  computationVersion String   @map("computation_version")
+  // Headline scores
+  overallScore       Int      @map("overall_score")
+  biologicalAge      Decimal  @map("biological_age") @db.Decimal(5, 1)
+  chronologicalAge   Decimal  @map("chronological_age") @db.Decimal(5, 1)
+  scoreDelta         Decimal? @map("score_delta") @db.Decimal(6, 2)
+  /// JSONB: { biomarkerHealth, metabolicFitness, recoveryCapacity, ... }
+  subScores          Json     @map("sub_scores") @db.JsonB
+  /// JSONB array of ScoreFactor objects
+  factors            Json     @default("[]") @db.JsonB
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Score history timeline for trend visualization
+  @@index([userId, computedAt])
+  @@index([userId])
+  @@map("healthspan_scores")
+}
+
+/// AI-generated insight/recommendation from cross-domain analysis.
+model AiInsight {
+  id              Int             @id @default(autoincrement())
+  userId          String          @map("user_id") @db.Uuid
+  generatedAt     DateTime        @map("generated_at") @db.Timestamptz
+  triggerEvent    InsightTrigger  @map("trigger_event")
+  title           String
+  body            String
+  /// JSONB: ["bio_data", "metabolic", ...]
+  sourceDomains   Json            @map("source_domains") @db.JsonB
+  /// JSONB: [{ entityType, entityId }, ...]
+  relatedEntities Json            @default("[]") @map("related_entities") @db.JsonB
+  priority        InsightPriority
+  category        InsightCategory
+  isRead          Boolean         @default(false) @map("is_read")
+  isActionable    Boolean         @default(true) @map("is_actionable")
+  /// JSONB: [{ text, isCompleted, dueDate }, ...]
+  actionItems     Json?           @map("action_items") @db.JsonB
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Fast unread insights for notification badge
+  @@index([userId, isRead])
+  // Insight timeline for history
+  @@index([userId, generatedAt])
+  @@index([userId])
+  @@map("ai_insights")
+}

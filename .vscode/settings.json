@@ -1,0 +1,83 @@
+{
+    // ═══════════════════════════════════════════════════════════════
+    // FILE WATCHER — Stop OS-level inotify/ReadDirectoryChanges
+    // on directories that never contain user-authored source code.
+    // ═══════════════════════════════════════════════════════════════
+    "files.watcherExclude": {
+        "**/node_modules/**": true,
+        "**/.next/**": true,
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/__pycache__/**": true,
+        "**/.ruff_cache/**": true,
+        "**/.pytest_cache/**": true,
+        "**/prisma/migrations/**": true,
+        "**/.turbo/**": true,
+        "**/tsconfig.tsbuildinfo": true
+    },
+    // ═══════════════════════════════════════════════════════════════
+    // SEARCH EXCLUDE — Remove noisy results from Ctrl+Shift+F
+    // ═══════════════════════════════════════════════════════════════
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/.next": true,
+        "**/__pycache__": true,
+        "**/.ruff_cache": true,
+        "**/.pytest_cache": true,
+        "**/package-lock.json": true,
+        "**/tsconfig.tsbuildinfo": true,
+        "**/*.sql": false
+    },
+    // ═══════════════════════════════════════════════════════════════
+    // FILE EXCLUDE — Hide non-essential clutter from Explorer
+    // ═══════════════════════════════════════════════════════════════
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/.ruff_cache": true,
+        "**/.pytest_cache": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true
+    },
+    // ═══════════════════════════════════════════════════════════════
+    // PYTHON (Pylance) — Offload linting to Ruff, minimize analysis
+    // ═══════════════════════════════════════════════════════════════
+    "python.analysis.typeCheckingMode": "off",
+    "python.analysis.diagnosticMode": "openFilesOnly",
+    "python.analysis.autoImportCompletions": false,
+    "python.analysis.indexing": false,
+    "python.analysis.exclude": [
+        "**/node_modules",
+        "**/.next",
+        "**/__pycache__",
+        "**/.ruff_cache",
+        "**/.pytest_cache",
+        "apps/web/**"
+    ],
+    // ═══════════════════════════════════════════════════════════════
+    // TYPESCRIPT — Reduce TSServer memory footprint
+    // ═══════════════════════════════════════════════════════════════
+    "typescript.tsserver.maxTsServerMemory": 2048,
+    "typescript.tsserver.watchOptions": {
+        "watchFile": "dynamicPriorityPolling",
+        "watchDirectory": "dynamicPriorityPolling",
+        "fallbackPolling": "dynamicPriorityPolling",
+        "excludeDirectories": [
+            "**/node_modules",
+            "**/.next",
+            "**/__pycache__"
+        ]
+    },
+    "sqltools.connections": [
+        {
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "aws-1-ap-southeast-2.pooler.supabase.com",
+            "port": 6543,
+            "askForPassword": true,
+            "driver": "PostgreSQL",
+            "name": "Supa",
+            "database": "postgres",
+            "username": "postgres.edsfslhypcbcrcenufdf"
+        }
+    ]
+}
