@@ -242,7 +242,7 @@ async function fetchUserContext(token: string, userId: string) {
         .limit(20),
       supabase
         .from("meal_logs")
-        .select("food_name, weight_g, calories, protein, fat, carbs, micronutrients, logged_at")
+        .select("id, logged_at, total_calories, micronutrients, meal_items(food_name, portion_grams, calories, protein_g, fat_g, carbs_g)")
         .eq("user_id", userId)
         .gte("logged_at", startOfDay.toISOString())
         .order("logged_at", { ascending: true }),
@@ -293,12 +293,21 @@ function formatMealLogs(meals: any[] | null): string {
       hour: '2-digit', minute: '2-digit'
     });
 
-    let text = `- [${time}] ${m.food_name || 'Неизвестное блюдо'}`;
-    if (m.weight_g) text += ` (${m.weight_g}г)`;
-    text += `: ${Math.round(m.calories || 0)} ккал`;
-    text += `, Б${Math.round(m.protein || 0)}г`;
-    text += `, Ж${Math.round(m.fat || 0)}г`;
-    text += `, У${Math.round(m.carbs || 0)}г`;
+    let text = `- [${time}]`;
+    let mTotalCal = 0, mTotalP = 0, mTotalF = 0, mTotalC = 0;
+
+    if (m.meal_items && Array.isArray(m.meal_items) && m.meal_items.length > 0) {
+      const itemsText = m.meal_items.map((i: any) => {
+        mTotalCal += i.calories || 0;
+        mTotalP += i.protein_g || 0;
+        mTotalF += i.fat_g || 0;
+        mTotalC += i.carbs_g || 0;
+        return `${i.food_name || 'Неизвестное блюдо'} (${i.portion_grams}г)`;
+      }).join(', ');
+      text += ` ${itemsText}: ${Math.round(mTotalCal)} ккал, Б${Math.round(mTotalP)}г, Ж${Math.round(mTotalF)}г, У${Math.round(mTotalC)}г`;
+    } else {
+      text += ` Приём пищи (без деталей)`;
+    }
 
     if (m.micronutrients && typeof m.micronutrients === 'object') {
       const micros = Object.entries(m.micronutrients)
@@ -349,10 +358,14 @@ function formatTodayProgress(meals: any[] | null): string {
   const microTotals: Record<string, number> = {};
 
   for (const m of meals) {
-    totalCal += m.calories || 0;
-    totalP += m.protein || 0;
-    totalF += m.fat || 0;
-    totalC += m.carbs || 0;
+    totalCal += m.total_calories || 0;
+    if (m.meal_items && Array.isArray(m.meal_items)) {
+      for (const i of m.meal_items) {
+        totalP += i.protein_g || 0;
+        totalF += i.fat_g || 0;
+        totalC += i.carbs_g || 0;
+      }
+    }
     if (m.micronutrients && typeof m.micronutrients === 'object') {
       for (const [key, val] of Object.entries(m.micronutrients)) {
         if (typeof val === 'number') {
@@ -556,6 +569,23 @@ export async function handleChat(
       if (token) {
         const dbContext = await fetchUserContext(token, req.user.id);
         if (dbContext) {
+          // 🚨 PREVENT TOKEN EXPLOSION 🚨
+          // Strip out massive arrays and objects that are already formatted elsewhere 
+          // or contain huge JSON dumps (like PDF lab reports).
+          const safeProfile = { ...dbContext.profile };
+          delete safeProfile.lab_diagnostic_reports; // Formatted by formatLabDiagnosticReport
+          delete safeProfile.active_supplement_protocol; // Formatted by formatActiveSupplementProtocol
+          delete safeProfile.food_contraindication_zones; // Formatted by formatLabDiagnosticReport
+
+          // If nail_analysis_history is huge, keep only the most recent one
+          if (safeProfile.somatic_data && Array.isArray(safeProfile.somatic_data.nail_analysis_history)) {
+            const hist = safeProfile.somatic_data.nail_analysis_history;
+            safeProfile.somatic_data = {
+              ...safeProfile.somatic_data,
+              nail_analysis_history: hist.length > 0 ? [hist[hist.length - 1]] : []
+            };
+          }
+
           const systemPrompt = `You are a Strict but Supportive Friend. You are an AI Assistant that helps the user interpret their health data and keeps them accountable to their goals.
 ROLE:
 - Act as a "Strict but Supportive Friend".
@@ -584,7 +614,7 @@ STRICT DIETARY ENFORCEMENT RULES:
 USER CLINICAL CONTEXT:
 
 --- PROFILE OVERVIEW ---
-${JSON.stringify(dbContext.profile)}
+${JSON.stringify(safeProfile)}
 ${formatDietaryRestrictions(dbContext.profile)}
 --- RECENT BLOOD TESTS (Анализы Крови) ---
 ${formatTestResults(dbContext.recentTests)}
@@ -1037,13 +1067,20 @@ export async function handleAnalyzeFood(
           global: { headers: { Authorization: `Bearer ${token}` } },
         });
 
-        const mealRows: any[] = result.items.map((item) => {
-          // Calculate micronutrients based on estimated weight
+        const mealLogsToInsert: any[] = [];
+        const mealItemsToInsert: any[] = [];
+
+        // 1. Group recognized items into a single meal_log per user request
+        const totalMicros: Record<string, number> = {};
+        const isoNow = new Date().toISOString();
+        let totalCals = 0;
+
+        result.items.forEach((item) => {
+          totalCals += item.estimated_total.calories_kcal || 0;
           const calcMicro = (valuePer100g: number | null | undefined) => {
-            if (typeof valuePer100g !== 'number') return null;
+            if (typeof valuePer100g !== 'number') return 0;
             return Number(((valuePer100g * item.estimated_weight_g) / 100).toFixed(2));
           };
-
           const p100 = item.per_100g;
           const microsRaw = {
             "Витамин A (мкг)": calcMicro(p100.vitamin_a_mcg),
@@ -1060,69 +1097,75 @@ export async function handleAnalyzeFood(
             "Калий (мг)": calcMicro(p100.potassium_mg),
             "Натрий (мг)": calcMicro(p100.sodium_mg),
           };
-
-          // Filter out nulls and zeros
-          const micronutrients = Object.entries(microsRaw).reduce((acc, [key, val]) => {
-            if (val !== null && val > 0) {
-              acc[key] = val;
-            }
-            return acc;
-          }, {} as Record<string, number>);
-
-          return {
-            user_id: userId,
-            food_name: item.name_ru,
-            weight_g: item.estimated_weight_g,
-            calories: item.estimated_total.calories_kcal,
-            protein: item.estimated_total.protein_g,
-            fat: item.estimated_total.fat_g,
-            carbs: item.estimated_total.carbs_g,
-            micronutrients, // Inject the new JSONB field
-            source: "photo",
-            logged_at: new Date().toISOString(),
-            meal_quality_score: result.meal_quality_score,
-            meal_quality_reason: result.meal_quality_reason,
-          };
+          Object.entries(microsRaw).forEach(([k, v]) => {
+            if (v > 0) totalMicros[k] = (totalMicros[k] || 0) + v;
+          });
         });
 
-        // Map supplements
         if (result.supplements) {
           for (const suppl of result.supplements) {
-            const microsDb: Record<string, number> = {};
             if (suppl.active_ingredients && Array.isArray(suppl.active_ingredients)) {
               for (const ing of suppl.active_ingredients) {
                 const key = `${ing.ingredient_name} (${ing.unit})`;
-                microsDb[key] = ing.amount;
+                totalMicros[key] = (totalMicros[key] || 0) + ing.amount;
               }
             }
-
-            mealRows.push({
-              user_id: userId,
-              food_name: suppl.name_ru + (suppl.serving_size_taken > 1 ? ` (${suppl.serving_size_taken} порц.)` : ""),
-              weight_g: 0, // Not applicable for pills
-              calories: 0,
-              protein: 0,
-              fat: 0,
-              carbs: 0,
-              micronutrients: microsDb,
-              source: "photo",
-              logged_at: new Date().toISOString(),
-              meal_quality_score: result.meal_quality_score,
-              meal_quality_reason: result.meal_quality_reason,
-            });
           }
         }
 
-        const { error: insertError } = await supabase
+        const { data: logArray, error: logError } = await supabase
           .from("meal_logs")
-          .insert(mealRows);
+          .insert({
+            user_id: userId,
+            meal_type: "snack", // default for vision
+            total_calories: totalCals,
+            micronutrients: totalMicros,
+            source: "photo",
+            logged_at: isoNow,
+            meal_quality_score: result.meal_quality_score,
+            meal_quality_reason: result.meal_quality_reason,
+            notes: "Vision AI Logged"
+          }).select("id");
 
-        if (insertError) {
-          console.error("[FoodVision] Failed to save to meal_logs:", insertError);
+        if (logError || !logArray || logArray.length === 0) {
+          console.error("[FoodVision] Failed to save to meal_logs:", logError);
         } else {
-          console.log(
-            `[FoodVision] Saved ${mealRows.length} items to meal_logs for user ${userId}`,
-          );
+          const logId = logArray[0].id;
+
+          result.items.forEach((item) => {
+            mealItemsToInsert.push({
+              meal_log_id: logId,
+              food_name: item.name_ru,
+              weight_g: item.estimated_weight_g,
+              calories: item.estimated_total.calories_kcal,
+              protein_g: item.estimated_total.protein_g,
+              fat_g: item.estimated_total.fat_g,
+              carbs_g: item.estimated_total.carbs_g,
+            });
+          });
+
+          if (result.supplements) {
+            for (const suppl of result.supplements) {
+              mealItemsToInsert.push({
+                meal_log_id: logId,
+                food_name: suppl.name_ru + (suppl.serving_size_taken > 1 ? ` (${suppl.serving_size_taken} порц.)` : ""),
+                weight_g: 0,
+                calories: 0,
+                protein_g: 0,
+                fat_g: 0,
+                carbs_g: 0,
+              });
+            }
+          }
+
+          if (mealItemsToInsert.length > 0) {
+            const { error: itemsError } = await supabase.from("meal_items").insert(mealItemsToInsert);
+            if (itemsError) {
+              console.error("[FoodVision] Failed to save to meal_items:", itemsError);
+            } else {
+              console.log(`[FoodVision] Saved ${mealItemsToInsert.length} items to meal_items for user ${userId}`);
+            }
+          }
         }
 
         // --- Save to ai_chat_messages ---
