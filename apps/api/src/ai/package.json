@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
+    "start": "node dist/server.js",
     "dev": "npx tsx src/server.ts",
     "test:ai": "npx tsx src/test-ai.ts",
     "typecheck": "tsc --noEmit"
