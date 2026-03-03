@@ -323,7 +323,7 @@ class AiApiClient {
 
     // Fix: Backend routes are at /api/v1/integration, not /api/v1/ai/integration.
     // effectiveUrl: http://localhost:3001/api/v1/integration/parse
-    const integrationUrl = this.baseUrl.replace("/ai", "/integration/parse");
+    const integrationUrl = "/api/v1/integration/parse";
 
     const response = await fetch(integrationUrl, {
       method: "POST",
@@ -359,7 +359,7 @@ class AiApiClient {
     }
 
     // Direct to backend, bypassing Next.js proxy (Vision OCR takes 30-60s)
-    const integrationUrl = getDirectAiUrl().replace("/ai", "/integration/parse-image");
+    const integrationUrl = "/api/v1/integration/parse-image";
 
     const response = await fetch(integrationUrl, {
       method: "POST",
@@ -389,7 +389,7 @@ class AiApiClient {
    * Uses DIRECT backend URL to bypass Next.js proxy timeout (~30s).
    */
   async analyzeLabReport(biomarkers: BiomarkerResult[]): Promise<LabDiagnosticReport> {
-    const directUrl = `${getDirectAiUrl()}/analyze-lab-report`;
+    const directUrl = `${this.baseUrl}/analyze-lab-report`;
     const token = await getAuthToken();
     const headers: HeadersInit = { "Content-Type": "application/json" };
     if (token) headers["Authorization"] = `Bearer ${token}`;
