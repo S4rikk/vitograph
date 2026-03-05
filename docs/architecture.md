@@ -1,5 +1,9 @@
 # VITOGRAPH — Architecture: Database Schema & API Structure
 
+> **Последнее обновление:** 5 марта 2026 (Phase 53f)
+>
+> Смотрите также: [API Reference](./api_reference.md) | [Frontend Components](./frontend_components.md) | [AI Pipeline](./ai_pipeline.md)
+
 > **Slogan:** "Feed your cells, find balance."
 >
 > **Purpose:** Health-tech AI platform that calculates a **Dynamic Norm** for vitamins and minerals
@@ -9,15 +13,15 @@
 
 ## 1. Tech Stack Overview
 
-| Layer       | Technology                                     |
-|-------------|------------------------------------------------|
-| Frontend    | Next.js (App Router, Server Components)        |
-| AI/App API  | Node.js / Express (Port 3001) - *Hybrid Layer* |
-| Core API    | Python 3.12+, FastAPI (async-first)            |
-| Database    | Supabase (PostgreSQL 15+, pgvector, RLS)       |
-| Auth        | Supabase Auth (JWT, RLS integration)           |
-| Storage     | Supabase Storage (blood test PDFs / images)    |
-| AI/ML       | pgvector for embeddings, external LLM services |
+| Layer      | Technology                                     |
+| ---------- | ---------------------------------------------- |
+| Frontend   | Next.js (App Router, Server Components)        |
+| AI/App API | Node.js / Express (Port 3001) - *Hybrid Layer* |
+| Core API   | Python 3.12+, FastAPI (async-first)            |
+| Database   | Supabase (PostgreSQL 15+, pgvector, RLS)       |
+| Auth       | Supabase Auth (JWT, RLS integration)           |
+| Storage    | Supabase Storage (blood test PDFs / images)    |
+| AI/ML      | pgvector for embeddings, external LLM services |
 
 ---
 
@@ -40,19 +44,19 @@
 
 > Extends `auth.users` via a 1-to-1 relationship. Stores lifestyle and environment factors needed for Dynamic Norm calculation.
 
-| Column               | Type                  | Constraints / Notes                                                        |
-|----------------------|-----------------------|----------------------------------------------------------------------------|
-| `id`                 | `uuid`                | PK, references `auth.users(id)` on delete cascade                         |
-| `display_name`       | `text`                | Nullable                                                                   |
-| `date_of_birth`      | `date`                | Nullable, for age-based norm adjustments                                   |
-| `biological_sex`     | `text`                | Check: `male`, `female`, `other`. Required for reference ranges            |
-| `height_cm`          | `numeric(5,1)`        | Nullable                                                                   |
-| `weight_kg`          | `numeric(5,1)`        | Nullable                                                                   |
-| `lifestyle_markers`  | `jsonb`               | **CRITICAL:** Stores the remaining 40+ onboarding markers defined in [`docs/core_markers_50.md`](./core_markers_50.md). This object is updated dynamically by the LangGraph AI. |
-| `city`               | `text`                | Nullable, for geo-environmental factors                                    |
-| `timezone`           | `text`                | IANA timezone, e.g. `Asia/Singapore`                                       |
-| `created_at`         | `timestamptz`         | Default `now()`                                                            |
-| `updated_at`         | `timestamptz`         | Default `now()`, updated by trigger                                        |
+| Column              | Type           | Constraints / Notes                                                                                                                                                             |
+| ------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                | `uuid`         | PK, references `auth.users(id)` on delete cascade                                                                                                                               |
+| `display_name`      | `text`         | Nullable                                                                                                                                                                        |
+| `date_of_birth`     | `date`         | Nullable, for age-based norm adjustments                                                                                                                                        |
+| `biological_sex`    | `text`         | Check: `male`, `female`, `other`. Required for reference ranges                                                                                                                 |
+| `height_cm`         | `numeric(5,1)` | Nullable                                                                                                                                                                        |
+| `weight_kg`         | `numeric(5,1)` | Nullable                                                                                                                                                                        |
+| `lifestyle_markers` | `jsonb`        | **CRITICAL:** Stores the remaining 40+ onboarding markers defined in [`docs/core_markers_50.md`](./core_markers_50.md). This object is updated dynamically by the LangGraph AI. |
+| `city`              | `text`         | Nullable, for geo-environmental factors                                                                                                                                         |
+| `timezone`          | `text`         | IANA timezone, e.g. `Asia/Singapore`                                                                                                                                            |
+| `created_at`        | `timestamptz`  | Default `now()`                                                                                                                                                                 |
+| `updated_at`        | `timestamptz`  | Default `now()`, updated by trigger                                                                                                                                             |
 
 > **RLS Policy:** User can only read/write their own profile (`auth.uid() = id`).
 
@@ -62,23 +66,23 @@
 
 > Reference table containing the master list of all biomarkers the platform supports, with their standard reference ranges.
 
-| Column                  | Type                  | Constraints / Notes                                                  |
-|-------------------------|-----------------------|----------------------------------------------------------------------|
-| `id`                    | `bigint identity`     | PK                                                                   |
-| `code`                  | `text`                | Unique, machine-readable code, e.g. `VIT_D_25OH`, `FERRITIN`        |
-| `name_en`               | `text`                | English display name                                                 |
-| `name_ru`               | `text`                | Russian display name (nullable)                                      |
-| `category`              | `text`                | Check: `vitamin`, `mineral`, `hormone`, `enzyme`, `lipid`, `other`   |
-| `unit`                  | `text`                | Measurement unit, e.g. `ng/mL`, `µmol/L`, `pg/mL`                   |
-| `ref_range_low`         | `numeric(10,3)`       | Standard lower bound of reference range                              |
-| `ref_range_high`        | `numeric(10,3)`       | Standard upper bound of reference range                              |
-| `optimal_range_low`     | `numeric(10,3)`       | Optimal (functional) lower bound (nullable)                          |
-| `optimal_range_high`    | `numeric(10,3)`       | Optimal (functional) upper bound (nullable)                          |
-| `description`           | `text`                | Short description of what this marker indicates                      |
-| `aliases`               | `jsonb`               | Alternate names, e.g. `["25-hydroxyvitamin D", "Calcidiol"]`        |
-| `is_active`             | `boolean`             | Default `true`, soft-delete flag                                     |
-| `created_at`            | `timestamptz`         | Default `now()`                                                      |
-| `updated_at`            | `timestamptz`         | Default `now()`                                                      |
+| Column               | Type              | Constraints / Notes                                                |
+| -------------------- | ----------------- | ------------------------------------------------------------------ |
+| `id`                 | `bigint identity` | PK                                                                 |
+| `code`               | `text`            | Unique, machine-readable code, e.g. `VIT_D_25OH`, `FERRITIN`       |
+| `name_en`            | `text`            | English display name                                               |
+| `name_ru`            | `text`            | Russian display name (nullable)                                    |
+| `category`           | `text`            | Check: `vitamin`, `mineral`, `hormone`, `enzyme`, `lipid`, `other` |
+| `unit`               | `text`            | Measurement unit, e.g. `ng/mL`, `µmol/L`, `pg/mL`                  |
+| `ref_range_low`      | `numeric(10,3)`   | Standard lower bound of reference range                            |
+| `ref_range_high`     | `numeric(10,3)`   | Standard upper bound of reference range                            |
+| `optimal_range_low`  | `numeric(10,3)`   | Optimal (functional) lower bound (nullable)                        |
+| `optimal_range_high` | `numeric(10,3)`   | Optimal (functional) upper bound (nullable)                        |
+| `description`        | `text`            | Short description of what this marker indicates                    |
+| `aliases`            | `jsonb`           | Alternate names, e.g. `["25-hydroxyvitamin D", "Calcidiol"]`       |
+| `is_active`          | `boolean`         | Default `true`, soft-delete flag                                   |
+| `created_at`         | `timestamptz`     | Default `now()`                                                    |
+| `updated_at`         | `timestamptz`     | Default `now()`                                                    |
 
 > **RLS Policy:** Read-only for all authenticated users. Write restricted to `service_role`.
 >
@@ -90,19 +94,19 @@
 
 > Stores individual biomarker values from a user's blood test upload.
 
-| Column              | Type                  | Constraints / Notes                                                    |
-|---------------------|-----------------------|------------------------------------------------------------------------|
-| `id`                | `bigint identity`     | PK                                                                     |
-| `user_id`           | `uuid`                | FK → `profiles(id)` on delete cascade. **Indexed.**                    |
-| `biomarker_id`      | `bigint`              | FK → `biomarkers(id)`. **Indexed.**                                    |
-| `value`             | `numeric(10,3)`       | The measured value                                                     |
-| `unit`              | `text`                | Unit as reported on the test (may differ from biomarker canonical unit)|
-| `test_date`         | `date`                | When the blood test was taken                                          |
-| `lab_name`          | `text`                | Nullable, lab that performed the test                                  |
-| `source`            | `text`                | Check: `manual`, `ocr_upload`, `api_integration`                       |
-| `source_file_path`  | `text`                | Nullable, Supabase Storage path to uploaded PDF/image                  |
-| `notes`             | `text`                | Nullable, user notes                                                   |
-| `created_at`        | `timestamptz`         | Default `now()`                                                        |
+| Column             | Type              | Constraints / Notes                                                     |
+| ------------------ | ----------------- | ----------------------------------------------------------------------- |
+| `id`               | `bigint identity` | PK                                                                      |
+| `user_id`          | `uuid`            | FK → `profiles(id)` on delete cascade. **Indexed.**                     |
+| `biomarker_id`     | `bigint`          | FK → `biomarkers(id)`. **Indexed.**                                     |
+| `value`            | `numeric(10,3)`   | The measured value                                                      |
+| `unit`             | `text`            | Unit as reported on the test (may differ from biomarker canonical unit) |
+| `test_date`        | `date`            | When the blood test was taken                                           |
+| `lab_name`         | `text`            | Nullable, lab that performed the test                                   |
+| `source`           | `text`            | Check: `manual`, `ocr_upload`, `api_integration`                        |
+| `source_file_path` | `text`            | Nullable, Supabase Storage path to uploaded PDF/image                   |
+| `notes`            | `text`            | Nullable, user notes                                                    |
+| `created_at`       | `timestamptz`     | Default `now()`                                                         |
 
 > **RLS Policy:** User can only CRUD their own test results (`auth.uid() = user_id`).
 >
@@ -117,16 +121,16 @@
 
 > Groups multiple `test_results` from the same blood test into a single session.
 
-| Column              | Type                  | Constraints / Notes                                            |
-|---------------------|-----------------------|----------------------------------------------------------------|
-| `id`                | `bigint identity`     | PK                                                             |
-| `user_id`           | `uuid`                | FK → `profiles(id)` on delete cascade. **Indexed.**            |
-| `test_date`         | `date`                | Date when the blood test was taken                             |
-| `lab_name`          | `text`                | Nullable                                                       |
-| `source_file_path`  | `text`                | Nullable, Supabase Storage path                                |
-| `status`            | `text`                | Check: `pending`, `processing`, `completed`, `error`           |
-| `notes`             | `text`                | Nullable                                                       |
-| `created_at`        | `timestamptz`         | Default `now()`                                                |
+| Column             | Type              | Constraints / Notes                                  |
+| ------------------ | ----------------- | ---------------------------------------------------- |
+| `id`               | `bigint identity` | PK                                                   |
+| `user_id`          | `uuid`            | FK → `profiles(id)` on delete cascade. **Indexed.**  |
+| `test_date`        | `date`            | Date when the blood test was taken                   |
+| `lab_name`         | `text`            | Nullable                                             |
+| `source_file_path` | `text`            | Nullable, Supabase Storage path                      |
+| `status`           | `text`            | Check: `pending`, `processing`, `completed`, `error` |
+| `notes`            | `text`            | Nullable                                             |
+| `created_at`       | `timestamptz`     | Default `now()`                                      |
 
 > **Relation:** `test_results` should also have a `session_id` FK → `test_sessions(id)` (nullable for backward compatibility).
 >
@@ -139,21 +143,21 @@
 > Stores the rules that define how lifestyle/environment factors shift the standard reference range.
 > These rules are the **core intellectual property** of the platform's Dynamic Norm engine.
 
-| Column              | Type                  | Constraints / Notes                                                       |
-|---------------------|-----------------------|---------------------------------------------------------------------------|
-| `id`                | `bigint identity`     | PK                                                                        |
-| `biomarker_id`      | `bigint`              | FK → `biomarkers(id)`. **Indexed.**                                       |
-| `factor_type`       | `text`                | The profile field this rule applies to, e.g. `activity_level`, `climate_zone`, `stress_level`, `pregnancy_status` |
-| `factor_value`      | `text`                | The specific value of the factor, e.g. `very_active`, `tropical`, `pregnant` |
-| `adjustment_type`   | `text`                | Check: `absolute`, `percentage`, `override`                               |
-| `low_adjustment`    | `numeric(10,3)`       | Shift applied to `ref_range_low` (positive = increase, negative = decrease)|
-| `high_adjustment`   | `numeric(10,3)`       | Shift applied to `ref_range_high`                                         |
-| `priority`          | `integer`             | Default `0`. Higher priority rules override lower when conflicts arise    |
-| `rationale`         | `text`                | Scientific rationale / reference for this rule                            |
-| `source_reference`  | `text`                | Nullable, link to study / guideline                                       |
-| `is_active`         | `boolean`             | Default `true`                                                            |
-| `created_at`        | `timestamptz`         | Default `now()`                                                           |
-| `updated_at`        | `timestamptz`         | Default `now()`                                                           |
+| Column             | Type              | Constraints / Notes                                                                                               |
+| ------------------ | ----------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `id`               | `bigint identity` | PK                                                                                                                |
+| `biomarker_id`     | `bigint`          | FK → `biomarkers(id)`. **Indexed.**                                                                               |
+| `factor_type`      | `text`            | The profile field this rule applies to, e.g. `activity_level`, `climate_zone`, `stress_level`, `pregnancy_status` |
+| `factor_value`     | `text`            | The specific value of the factor, e.g. `very_active`, `tropical`, `pregnant`                                      |
+| `adjustment_type`  | `text`            | Check: `absolute`, `percentage`, `override`                                                                       |
+| `low_adjustment`   | `numeric(10,3)`   | Shift applied to `ref_range_low` (positive = increase, negative = decrease)                                       |
+| `high_adjustment`  | `numeric(10,3)`   | Shift applied to `ref_range_high`                                                                                 |
+| `priority`         | `integer`         | Default `0`. Higher priority rules override lower when conflicts arise                                            |
+| `rationale`        | `text`            | Scientific rationale / reference for this rule                                                                    |
+| `source_reference` | `text`            | Nullable, link to study / guideline                                                                               |
+| `is_active`        | `boolean`         | Default `true`                                                                                                    |
+| `created_at`       | `timestamptz`     | Default `now()`                                                                                                   |
+| `updated_at`       | `timestamptz`     | Default `now()`                                                                                                   |
 
 > **RLS Policy:** Read-only for authenticated users. Write restricted to `service_role`.
 >
@@ -167,15 +171,15 @@
 
 > Caches the computed Dynamic Norm per user per biomarker. Recalculated when profile or rules change.
 
-| Column              | Type                  | Constraints / Notes                                                     |
-|---------------------|-----------------------|-------------------------------------------------------------------------|
-| `id`                | `bigint identity`     | PK                                                                      |
-| `user_id`           | `uuid`                | FK → `profiles(id)` on delete cascade. **Indexed.**                     |
-| `biomarker_id`      | `bigint`              | FK → `biomarkers(id)`. **Indexed.**                                     |
-| `computed_low`      | `numeric(10,3)`       | Personalized lower bound                                                |
-| `computed_high`     | `numeric(10,3)`       | Personalized upper bound                                                |
-| `applied_rules`     | `jsonb`               | Array of rule IDs and adjustments that produced this norm               |
-| `computed_at`       | `timestamptz`         | When the norm was last computed                                         |
+| Column          | Type              | Constraints / Notes                                       |
+| --------------- | ----------------- | --------------------------------------------------------- |
+| `id`            | `bigint identity` | PK                                                        |
+| `user_id`       | `uuid`            | FK → `profiles(id)` on delete cascade. **Indexed.**       |
+| `biomarker_id`  | `bigint`          | FK → `biomarkers(id)`. **Indexed.**                       |
+| `computed_low`  | `numeric(10,3)`   | Personalized lower bound                                  |
+| `computed_high` | `numeric(10,3)`   | Personalized upper bound                                  |
+| `applied_rules` | `jsonb`           | Array of rule IDs and adjustments that produced this norm |
+| `computed_at`   | `timestamptz`     | When the norm was last computed                           |
 
 > **RLS Policy:** User can only read their own norms.
 >
@@ -187,18 +191,18 @@
 
 > Stores nutritional information for various food items per 100g. 
 
-| Column              | Type                  | Constraints / Notes                                                       |
-|---------------------|-----------------------|---------------------------------------------------------------------------|
-| `id`                | `bigint identity`     | PK                                                                        |
-| `name`              | `text`                | Name of the food item (e.g., "Овсянка", "Яблоко")                         |
-| `calories`          | `numeric(6,2)`        | Calories per 100g                                                         |
-| `proteins`          | `numeric(6,2)`        | Proteins (g) per 100g                                                     |
-| `fats`              | `numeric(6,2)`        | Fats (g) per 100g                                                         |
-| `carbs`             | `numeric(6,2)`        | Carbohydrates (g) per 100g                                                |
-| `fiber`             | `numeric(6,2)`        | Fiber (g) per 100g                                                        |
-| `micros`            | `jsonb`               | Object containing vitamins/minerals per 100g (e.g., `{"iron": 1.2, "calc": 50}`) |
-| `is_verified`       | `boolean`             | Default `false` (until verified by admin/nutrition DB)                    |
-| `created_at`        | `timestamptz`         | Default `now()`                                                           |
+| Column        | Type              | Constraints / Notes                                                              |
+| ------------- | ----------------- | -------------------------------------------------------------------------------- |
+| `id`          | `bigint identity` | PK                                                                               |
+| `name`        | `text`            | Name of the food item (e.g., "Овсянка", "Яблоко")                                |
+| `calories`    | `numeric(6,2)`    | Calories per 100g                                                                |
+| `proteins`    | `numeric(6,2)`    | Proteins (g) per 100g                                                            |
+| `fats`        | `numeric(6,2)`    | Fats (g) per 100g                                                                |
+| `carbs`       | `numeric(6,2)`    | Carbohydrates (g) per 100g                                                       |
+| `fiber`       | `numeric(6,2)`    | Fiber (g) per 100g                                                               |
+| `micros`      | `jsonb`           | Object containing vitamins/minerals per 100g (e.g., `{"iron": 1.2, "calc": 50}`) |
+| `is_verified` | `boolean`         | Default `false` (until verified by admin/nutrition DB)                           |
+| `created_at`  | `timestamptz`     | Default `now()`                                                                  |
 
 > **Indexes:** Trigram index on `name` for fast text search.
 
@@ -208,18 +212,18 @@
 
 > Records individual meals/items logged by the user, linked to specific dates and times.
 
-| Column              | Type                  | Constraints / Notes                                                       |
-|---------------------|-----------------------|---------------------------------------------------------------------------|
-| `id`                | `bigint identity`     | PK                                                                        |
-| `user_id`           | `uuid`                | FK → `profiles(id)` on delete cascade. **Indexed.**                       |
-| `food_item_id`      | `bigint`              | FK → `food_items(id)`. Nullable (if custom text entry).                   |
-| `raw_text`          | `text`                | Original text/audio input (e.g., "съела 200г овсянки")                    |
-| `weight_g`          | `numeric(6,1)`        | Weight in grams                                                           |
-| `calories_computed` | `numeric(6,1)`        | Total calories calculated for this log                                    |
-| `macros_computed`   | `jsonb`               | Total macros calculated `{"p": 10, "f": 5, "c": 30}`                      |
-| `micros_computed`   | `jsonb`               | Total micros calculated based on weight                                   |
-| `logged_at`         | `timestamptz`         | When the food was eaten                                                   |
-| `created_at`        | `timestamptz`         | Default `now()`                                                           |
+| Column              | Type              | Constraints / Notes                                     |
+| ------------------- | ----------------- | ------------------------------------------------------- |
+| `id`                | `bigint identity` | PK                                                      |
+| `user_id`           | `uuid`            | FK → `profiles(id)` on delete cascade. **Indexed.**     |
+| `food_item_id`      | `bigint`          | FK → `food_items(id)`. Nullable (if custom text entry). |
+| `raw_text`          | `text`            | Original text/audio input (e.g., "съела 200г овсянки")  |
+| `weight_g`          | `numeric(6,1)`    | Weight in grams                                         |
+| `calories_computed` | `numeric(6,1)`    | Total calories calculated for this log                  |
+| `macros_computed`   | `jsonb`           | Total macros calculated `{"p": 10, "f": 5, "c": 30}`    |
+| `micros_computed`   | `jsonb`           | Total micros calculated based on weight                 |
+| `logged_at`         | `timestamptz`     | When the food was eaten                                 |
+| `created_at`        | `timestamptz`     | Default `now()`                                         |
 
 > **RLS Policy:** User can only CRUD their own food logs (`auth.uid() = user_id`).
 >
@@ -227,19 +231,30 @@
 
 ---
 
-### 2.4 Future Tables (Post-MVP)
+### 2.4 Implemented Tables (Phase 32-53f)
 
-| Table                    | Purpose                                                       |
-|--------------------------|---------------------------------------------------------------|
-| `biomarker_embeddings`   | pgvector `vector(1536)` column for semantic search over biomarker descriptions and aliases |
-| `ai_recommendations`    | AI-generated personalized supplement / food recommendations   |
-| `food_nutrient_map`     | Mapping foods to their vitamin/mineral content                |
-| `user_goals`            | User-defined health goals (e.g. "optimize energy")            |
-| `notifications`         | Alerts for re-testing, new recommendations, etc.              |
+| Table                              | Purpose                                                       |
+| ---------------------------------- | ------------------------------------------------------------- |
+| `meal_logs`                        | Food diary entries with `micronutrients` JSONB (Phase 33)     |
+| `meal_items`                       | Individual food items within a meal                           |
+| `supplement_logs`                  | BAD intake tracking with `taken_at`, `was_on_time` (Phase 34) |
+| `feedback`                         | User feedback with anti-spam (`created_at` cooldown)          |
+| `active_condition_knowledge_bases` | Medical condition knowledge for norm adjustments (Phase 53f)  |
+
+> `profiles` extended with: `lab_diagnostic_reports` (JSONB), `active_supplement_protocol` (JSONB), `active_nutrition_targets` (JSONB), `active_condition_knowledge_bases` FK
+
+### 2.5 Future Tables (Post-MVP)
+
+| Table                  | Purpose                                                                                    |
+| ---------------------- | ------------------------------------------------------------------------------------------ |
+| `biomarker_embeddings` | pgvector `vector(1536)` column for semantic search over biomarker descriptions and aliases |
+| `ai_recommendations`   | AI-generated personalized supplement / food recommendations                                |
+| `user_goals`           | User-defined health goals (e.g. "optimize energy")                                         |
+| `notifications`        | Alerts for re-testing, new recommendations, etc.                                           |
 
 ---
 
-### 2.4 Entity-Relationship Diagram (Conceptual)
+### 2.6 Entity-Relationship Diagram (Expanded)
 
 ```mermaid
 erDiagram
@@ -311,127 +326,107 @@ erDiagram
 
 ---
 
-## 3. Backend Structure (Hybrid)
+## 3. Backend Structure (Actual — Phase 53f)
 
 ### 3.1 Node.js AI API (`apps/api/src/ai`)
-- **Role:** AI Orchestration, Chat, Frontend-facing logic.
-- **Stack:** Express, Vercel AI SDK, Zod.
-- **Port:** 3001.
+- **Role:** AI Orchestration, Chat, Food Vision, Lab Diagnostics, Somatic Analysis, Nutrition Targets.
+- **Stack:** Express, LangGraph, Vercel AI SDK, Zod.
+- **Port:** `3001`.
+- **Entry:** `server.ts` → `ai.routes.ts`, `supplement.routes.ts`, `integration.ts`.
 
 ### 3.2 Python Core API (`apps/api`)
-- **Role:** Heavy computation, Dynamic Norms, PDF Parsing.
-- **Stack:** FastAPI, Pandas, PyPDF2.
-- **Port:** TBD (8000).
+- **Role:** Profile management, PDF/Image parsing, Dynamic Norms, Analytics, Feedback.
+- **Stack:** FastAPI, AsyncOpenAI, Pydantic V2, Supabase Python SDK.
+- **Port:** `8001`.
+- **Entry:** `main.py`.
 
-### 3.3 Python Design Principles (Core API)
-
-- **Async-first:** All endpoints and DB operations use `async/await` (asyncpg).
-- **Pydantic V2:** All request/response schemas use Pydantic V2 models.
-- **Repository pattern:** Database access abstracted into repository classes.
-- **Dependency Injection:** FastAPI's DI system for DB sessions, auth, etc.
-- **Environment config:** `pydantic-settings` for configuration management.
-- **Structured logging:** `structlog` or `loguru`.
-- **12-factor app:** Environment-based configuration, no hardcoded secrets.
-
-### 3.2 Proposed Directory Layout
+### 3.3 Actual Directory Layout
 
 ```
 apps/api/
-├── pyproject.toml                  # Project metadata, dependencies (uv/pip)
-├── alembic.ini                     # Alembic migration config
-├── .env.example                    # Environment variable template
-│
-├── alembic/                        # Database migrations
-│   ├── env.py
-│   └── versions/
-│
-├── app/
-│   ├── __init__.py
-│   ├── main.py                     # FastAPI app factory, lifespan events
-│   ├── config.py                   # Pydantic Settings (env vars)
-│   │
-│   ├── core/                       # Cross-cutting concerns
-│   │   ├── __init__.py
-│   │   ├── database.py             # Async engine, session factory
-│   │   ├── security.py             # Supabase JWT verification, auth deps
-│   │   ├── exceptions.py           # Custom exception classes
-│   │   └── logging.py              # Structured logging setup
-│   │
-│   ├── models/                     # SQLAlchemy 2.0 ORM models
-│   │   ├── __init__.py
-│   │   ├── base.py                 # Base model with common fields
-│   │   ├── profile.py              # Profile model
-│   │   ├── biomarker.py            # Biomarker model
-│   │   ├── test_result.py          # TestResult model
-│   │   ├── test_session.py         # TestSession model
-│   │   ├── dynamic_norm_rule.py    # DynamicNormRule model
-│   │   └── user_dynamic_norm.py    # UserDynamicNorm model
-│   │
-│   ├── schemas/                    # Pydantic V2 request/response schemas
-│   │   ├── __init__.py
-│   │   ├── profile.py
-│   │   ├── biomarker.py
-│   │   ├── test_result.py
-│   │   ├── test_session.py
-│   │   └── dynamic_norm.py
-│   │
-│   ├── repositories/               # Data access layer (Repository pattern)
-│   │   ├── __init__.py
-│   │   ├── base.py                 # Generic async CRUD repository
-│   │   ├── profile_repo.py
-│   │   ├── biomarker_repo.py
-│   │   ├── test_result_repo.py
-│   │   └── dynamic_norm_repo.py
-│   │
-│   ├── services/                   # Business logic layer
-│   │   ├── __init__.py
-│   │   ├── profile_service.py
-│   │   ├── test_upload_service.py  # OCR parsing, test result creation
-│   │   ├── norm_engine.py          # Dynamic Norm calculation engine
-│   │   └── ai_analysis_service.py  # LLM-based biomarker analysis
-│   │
-│   ├── api/                        # API routers (endpoints)
-│   │   ├── __init__.py
-│   │   ├── deps.py                 # Shared dependencies (get_db, get_user)
-│   │   └── v1/
-│   │       ├── __init__.py
-│   │       ├── router.py           # Aggregated v1 router
-│   │       ├── profiles.py         # /api/v1/profiles
-│   │       ├── biomarkers.py       # /api/v1/biomarkers
-│   │       ├── test_results.py     # /api/v1/test-results
-│   │       ├── test_sessions.py    # /api/v1/test-sessions
-│   │       └── dynamic_norms.py    # /api/v1/dynamic-norms
-│   │
-│   └── workers/                    # Background tasks / async jobs
-│       ├── __init__.py
-│       ├── ocr_worker.py           # Process uploaded blood test images
-│       └── norm_recalculator.py    # Recalculate norms on profile change
-│
-└── tests/
-    ├── conftest.py                 # Fixtures, test DB setup
-    ├── test_profiles.py
-    ├── test_biomarkers.py
-    ├── test_test_results.py
-    └── test_norm_engine.py
+├── main.py                     # FastAPI entry point (lifespan, CORS, routers)
+├── core/
+│   ├── config.py               # Pydantic Settings (env vars)
+│   ├── database.py             # Supabase AsyncClient manager
+│   └── exceptions.py           # Custom exceptions
+├── api/v1/endpoints/           # REST Routers
+│   ├── profiles.py             # GET/POST/PATCH /api/v1/profiles
+│   ├── norms.py                # POST /api/v1/norms/{user_id}/calculate
+│   ├── test_results.py         # POST /api/v1/test-results, upload-pdf
+│   ├── analysis.py             # GET /api/v1/analysis sessions
+│   ├── analytics.py            # GET micronutrient-trends, lab-schedule
+│   └── users.py                # POST /api/v1/users/me/feedback
+├── schemas/                    # Pydantic V2 schemas (8 files)
+├── repositories/               # Data access (profile, test_result repos)
+├── services/                   # Business logic
+│   ├── norm_engine.py          # Dynamic Norm calculation
+│   ├── dynamic_norm_service.py # Full norm recalculation engine
+│   ├── analysis_service.py     # Session vs. norms comparison
+│   ├── file_parser.py          # AI-powered biomarker extraction
+│   ├── pdf_parser.py           # PyPDF text extraction
+│   ├── pdf_service.py          # PDF → LLM → structured biomarkers
+│   └── lab_report_storage.py   # Report persistence
+└── src/ai/                     # Node.js AI Engine
+    └── src/
+        ├── server.ts            # Express server
+        ├── ai.controller.ts     # Main controller (1495 lines)
+        ├── ai-schemas.ts        # Zod output schemas (436 lines)
+        ├── llm-client.ts        # callLlmStructured wrapper
+        ├── request-schemas.ts   # Zod input validation
+        ├── graph/               # LangGraph ReAct Agent
+        │   ├── builder.ts       # Graph definition + dedup interceptor
+        │   ├── state.ts         # GraphAnnotation (messages + medicalContext)
+        │   ├── tools.ts         # calculate_norms, update_profile, log_meal
+        │   ├── food-vision-analyzer.ts
+        │   ├── lab-report-analyzer.ts
+        │   ├── nutrition-analyzer.ts
+        │   └── vision-analyzer.ts
+        ├── supplement/          # Supplement tracking
+        └── routes/              # Express routers
 ```
 
-### 3.3 Key API Endpoints (v1)
+### 3.4 Key API Endpoints (Actual)
 
-| Method   | Endpoint                              | Description                                                |
-|----------|---------------------------------------|------------------------------------------------------------|
-| `GET`    | `/api/v1/profiles/me`                 | Get current user's profile                                 |
-| `PUT`    | `/api/v1/profiles/me`                 | Update profile (triggers norm recalculation)               |
-| `GET`    | `/api/v1/biomarkers`                  | List all supported biomarkers (paginated, filterable)      |
-| `GET`    | `/api/v1/biomarkers/{code}`           | Get single biomarker details by code                       |
-| `POST`   | `/api/v1/test-sessions`              | Create a new test session (with optional file upload)      |
-| `GET`    | `/api/v1/test-sessions`              | List user's test sessions                                  |
-| `POST`   | `/api/v1/test-results`               | Add biomarker results to a session                         |
-| `GET`    | `/api/v1/test-results`               | Get user's test results (filterable by biomarker, date)    |
-| `GET`    | `/api/v1/test-results/timeline/{code}` | Get historical values for a specific biomarker            |
-| `GET`    | `/api/v1/dynamic-norms/me`           | Get all computed Dynamic Norms for current user            |
-| `GET`    | `/api/v1/dynamic-norms/me/{code}`    | Get Dynamic Norm for a specific biomarker                  |
-| `POST`   | `/api/v1/dynamic-norms/recalculate`  | Force recalculation of norms                               |
-| `GET`    | `/health`                             | Health check endpoint                                      |
+> For full reference with request/response schemas, see [API Reference](./api_reference.md).
+
+**Node.js AI Engine (port 3001):**
+
+| Method   | Endpoint                                    | Description                                     |
+| -------- | ------------------------------------------- | ----------------------------------------------- |
+| `POST`   | `/api/v1/ai/chat`                           | AI chat (LangGraph, diary/assistant modes)      |
+| `GET`    | `/api/v1/ai/chat/history`                   | Chat history                                    |
+| `POST`   | `/api/v1/ai/analyze`                        | Symptom-food correlation analysis               |
+| `POST`   | `/api/v1/ai/diagnose`                       | Diagnostic hypothesis generation                |
+| `POST`   | `/api/v1/ai/analyze-somatic`                | Nail/tongue/skin photo analysis (GPT-4o Vision) |
+| `POST`   | `/api/v1/ai/analyze-food`                   | Food photo recognition (GPT-4o Vision)          |
+| `POST`   | `/api/v1/ai/analyze-lab-report`             | Premium blood test diagnostics                  |
+| `GET`    | `/api/v1/ai/lab-reports/history`            | Lab report history                              |
+| `DELETE` | `/api/v1/ai/lab-reports/history/:timestamp` | Delete a lab report                             |
+| `GET`    | `/api/v1/ai/somatic-history`                | Somatic analysis history                        |
+| `GET`    | `/api/v1/ai/nutrition-targets`              | Deterministic nutrition norms (Phase 53f)       |
+| `GET`    | `/api/v1/supplements/today`                 | Today's supplement protocol + logs              |
+| `POST`   | `/api/v1/supplements/log`                   | Log supplement intake                           |
+| `POST`   | `/api/v1/integration/parse`                 | Parse PDF lab report + save to DB               |
+| `POST`   | `/api/v1/integration/parse-image`           | Parse lab report photo + save to DB             |
+| `POST`   | `/api/v1/integration/norms`                 | Calculate norms via Python Engine               |
+
+**Python Core API (port 8001):**
+
+| Method  | Endpoint                                           | Description                             |
+| ------- | -------------------------------------------------- | --------------------------------------- |
+| `POST`  | `/parse`                                           | Extract biomarkers from PDF/DOCX/TXT    |
+| `POST`  | `/parse-image`                                     | OCR lab report photo (GPT-4o Vision)    |
+| `POST`  | `/calculate`                                       | Dynamic Norm calculation (MVP)          |
+| `GET`   | `/api/v1/profiles/{user_id}`                       | Get user profile                        |
+| `POST`  | `/api/v1/profiles`                                 | Create profile (onboarding)             |
+| `PATCH` | `/api/v1/profiles/{user_id}`                       | Update profile (invalidates norm cache) |
+| `POST`  | `/api/v1/norms/{user_id}/calculate`                | Full dynamic norm recalculation         |
+| `POST`  | `/api/v1/test-results/{user_id}`                   | Upload blood test session               |
+| `POST`  | `/api/v1/test-results/{user_id}/upload-pdf`        | Upload PDF → LLM extraction → preview   |
+| `GET`   | `/api/v1/analysis/{user_id}/sessions/{id}`         | Compare session vs. dynamic norms       |
+| `GET`   | `/api/v1/analytics/{user_id}/micronutrient-trends` | Micronutrient trends (N days)           |
+| `GET`   | `/api/v1/analytics/{user_id}/lab-schedule`         | Predictive lab testing schedule         |
+| `POST`  | `/api/v1/users/me/feedback`                        | Submit feedback (60s rate limit)        |
 
 ---
 
@@ -499,14 +494,14 @@ Planned usage:
 
 ## 7. Key Design Decisions & Rationale
 
-| Decision                          | Rationale                                                                              |
-|-----------------------------------|----------------------------------------------------------------------------------------|
-| `profiles` separate from `auth.users` | Supabase Auth owns the users table; we extend it with a 1:1 `profiles` table        |
-| `bigint identity` for most PKs   | Postgres best practice: sequential, compact, no fragmentation (per skill rules)        |
-| `uuid` for `profiles.id`         | Must match `auth.users.id` which is UUID                                               |
-| `jsonb` for `chronic_conditions` | Flexible schema for variable-length lists; queryable with GIN indexes                  |
-| Cache table `user_dynamic_norms` | Avoid recomputing norms on every request; invalidate on profile or rule changes        |
-| `test_sessions` grouping         | Allows batch upload and associating all results from one blood draw                    |
-| Repository pattern in API        | Abstracts DB access for testability and clean architecture (SOLID)                     |
-| API versioning (`/v1/`)          | Future-proof: breaking changes go to `/v2/` without disrupting existing clients        |
-| `factor_type` + `factor_value`   | Generic key-value approach for rules: extensible without schema changes                |
+| Decision                              | Rationale                                                                       |
+| ------------------------------------- | ------------------------------------------------------------------------------- |
+| `profiles` separate from `auth.users` | Supabase Auth owns the users table; we extend it with a 1:1 `profiles` table    |
+| `bigint identity` for most PKs        | Postgres best practice: sequential, compact, no fragmentation (per skill rules) |
+| `uuid` for `profiles.id`              | Must match `auth.users.id` which is UUID                                        |
+| `jsonb` for `chronic_conditions`      | Flexible schema for variable-length lists; queryable with GIN indexes           |
+| Cache table `user_dynamic_norms`      | Avoid recomputing norms on every request; invalidate on profile or rule changes |
+| `test_sessions` grouping              | Allows batch upload and associating all results from one blood draw             |
+| Repository pattern in API             | Abstracts DB access for testability and clean architecture (SOLID)              |
+| API versioning (`/v1/`)               | Future-proof: breaking changes go to `/v2/` without disrupting existing clients |
+| `factor_type` + `factor_value`        | Generic key-value approach for rules: extensible without schema changes         |

@@ -321,13 +321,12 @@ class AiApiClient {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-<<<<<<< HEAD
-    // Fix: Backend routes are at /api/v1/integration, not /api/v1/ai/integration.
-    // effectiveUrl: http://localhost:3001/api/v1/integration/parse
-=======
-    // Route through Node.js integration endpoint (avoids Next.js proxy timeout)
->>>>>>> 2c15560 (Refactor nutrition targets architecture and move feedback button)
-    const integrationUrl = "/api/v1/integration/parse";
+    // On localhost, bypass Next.js proxy (which has ~30s timeout) and go directly to Node.js.
+    // On production, use relative URL so nginx handles the proxying.
+    const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
+    const integrationUrl = isLocal
+      ? "http://localhost:3001/api/v1/integration/parse"
+      : "/api/v1/integration/parse";
 
     const response = await fetch(integrationUrl, {
       method: "POST",
@@ -362,12 +361,12 @@ class AiApiClient {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-<<<<<<< HEAD
-    // Direct to backend, bypassing Next.js proxy (Vision OCR takes 30-60s)
-=======
-    // Route through Node.js integration endpoint (avoids Next.js proxy timeout for Vision OCR)
->>>>>>> 2c15560 (Refactor nutrition targets architecture and move feedback button)
-    const integrationUrl = "/api/v1/integration/parse-image";
+    // On localhost, bypass Next.js proxy (which has ~30s timeout) and go directly to Node.js.
+    // On production, use relative URL so nginx handles the proxying.
+    const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
+    const integrationUrl = isLocal
+      ? "http://localhost:3001/api/v1/integration/parse-image"
+      : "/api/v1/integration/parse-image";
 
     const response = await fetch(integrationUrl, {
       method: "POST",
