@@ -80,7 +80,7 @@ export function FeedbackButton() {
 
     return (
         <>
-            <div className="fixed top-6 right-6 z-40 group">
+            <div className="fixed top-24 right-8 z-40 group">
                 {/* Glowing pulse aura */}
                 <div className="absolute inset-0 rounded-full bg-indigo-500/60 blur-md animate-pulse pointer-events-none"></div>
 
