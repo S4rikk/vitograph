@@ -58,8 +58,39 @@ trigger: always_on
 - Code must be **complete and working** — no stubs, no pseudocode.
 - Immediately after completing the next task, generate a report in `C:\project\kOSI\next_report.md`
 
-## ЗАПРЕТЫ
+<self_correction_loop>
+## UNIVERSAL SELF-AUDIT PROTOCOL
+Whenever a task has specific conditions, constraints, or styles to follow, you MUST execute this protocol before generating your final output:
 
+1. **Constraint Extraction:** Mentally list all explicit requirements, rules, and aesthetic/technical styles requested by the user.
+2. **Drafting:** Silently generate your initial solution in the background.
+3. **Self-Audit (MANDATORY):** You must output a `<self_audit>` block where you compare your draft against the extracted constraints. 
+   - Ask: "Does this draft 100% meet condition X?"
+   - Ask: "Are there any hallucinated elements, missing links, or broken styles?"
+   - Check: If code is involved, verify it against the required linters.
+4. **Iteration:** If the audit reveals that ANY condition is not met (even partially), you must state "Audit failed: [Reason]". Then, rewrite the draft internally and repeat the audit.
+5. **Final Output:** Only output the final result AFTER a successful self-audit (stating "Audit passed"). The `<self_audit>` block must be visible to the user so they can verify your thought process.
+</self_correction_loop>
+
+<self_correction_loop>
+  <trigger>Execution encounters a syntax error or a failure during a step, particularly on the first occurrence.</trigger>
+  <action>
+    1. HALT current execution.
+    2. DO NOT attempt to guess the syntax or proceed with trial-and-error.
+    3. ACCESS documentation (e.g., Context7/context7-mcp) immediately to look up the correct syntax or resolve the specific error.
+    4. Validate the fix internally.
+  </action>
+  <output_format>
+    <self_audit>
+      [State the error encountered]
+      [Acknowledge documentation check]
+      [Apply fix and state "Audit passed"]
+    </self_audit>
+    [Provide the final, corrected result]
+  </output_format>
+</self_correction_loop>
+
+## ЗАПРЕТЫ
 1. Запрещено использовать команды `node -e`
 2. Запрещено использовать команды `python -c`
 3. СТРОГО ЗАПРЕЩЕНО запускать в терминале любые команды проверки типов и линтинга (`tsc`, `tsc --noEmit`), так как они тормозят работу проекта. Все проверки должны быть исключительно фоновыми.

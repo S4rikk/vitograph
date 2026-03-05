@@ -321,8 +321,12 @@ class AiApiClient {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
+<<<<<<< HEAD
     // Fix: Backend routes are at /api/v1/integration, not /api/v1/ai/integration.
     // effectiveUrl: http://localhost:3001/api/v1/integration/parse
+=======
+    // Route through Node.js integration endpoint (avoids Next.js proxy timeout)
+>>>>>>> 2c15560 (Refactor nutrition targets architecture and move feedback button)
     const integrationUrl = "/api/v1/integration/parse";
 
     const response = await fetch(integrationUrl, {
@@ -358,7 +362,11 @@ class AiApiClient {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
+<<<<<<< HEAD
     // Direct to backend, bypassing Next.js proxy (Vision OCR takes 30-60s)
+=======
+    // Route through Node.js integration endpoint (avoids Next.js proxy timeout for Vision OCR)
+>>>>>>> 2c15560 (Refactor nutrition targets architecture and move feedback button)
     const integrationUrl = "/api/v1/integration/parse-image";
 
     const response = await fetch(integrationUrl, {
