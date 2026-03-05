@@ -321,12 +321,8 @@ class AiApiClient {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    // On localhost, bypass Next.js proxy (which has ~30s timeout) and go directly to Node.js.
-    // On production, use relative URL so nginx handles the proxying.
-    const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
-    const integrationUrl = isLocal
-      ? "http://localhost:3001/api/v1/integration/parse"
-      : "/api/v1/integration/parse";
+    // Route through Node.js integration endpoint
+    const integrationUrl = "/api/v1/integration/parse";
 
     const response = await fetch(integrationUrl, {
       method: "POST",
@@ -361,12 +357,8 @@ class AiApiClient {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    // On localhost, bypass Next.js proxy (which has ~30s timeout) and go directly to Node.js.
-    // On production, use relative URL so nginx handles the proxying.
-    const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
-    const integrationUrl = isLocal
-      ? "http://localhost:3001/api/v1/integration/parse-image"
-      : "/api/v1/integration/parse-image";
+    // Route through our custom Next.js API route that has a higher maxDuration (120s)
+    const integrationUrl = "/api/parse-image";
 
     const response = await fetch(integrationUrl, {
       method: "POST",
