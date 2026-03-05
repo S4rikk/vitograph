@@ -229,13 +229,35 @@ class AiApiClient {
   ): Promise<{ response: string }> {
     // Generate a default session thread if one isn't provided
     const sessionThread = threadId || `session-${Math.random().toString(36).substring(7)}`;
-    return this.post<{ response: string }>("/chat", {
+
+    // Route through our custom Next.js API route that has a higher maxDuration (180s)
+    const directUrl = "/api/chat";
+    const token = await getAuthToken();
+    const headers: HeadersInit = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const body = {
       message,
       threadId: sessionThread,
       userProfile,
       chatMode,
       imageUrl,
+    };
+
+    const response = await fetch(directUrl, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(180_000), // 3-minute timeout
     });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `API Error: ${response.status}`);
+    }
+
+    const json = await response.json();
+    return (json.data || json) as { response: string };
   }
 
   /**
