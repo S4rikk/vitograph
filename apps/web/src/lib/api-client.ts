@@ -388,7 +388,8 @@ class AiApiClient {
    * Uses DIRECT backend URL to bypass Next.js proxy timeout (~30s).
    */
   async analyzeLabReport(biomarkers: BiomarkerResult[]): Promise<LabDiagnosticReport> {
-    const directUrl = `${this.baseUrl}/analyze-lab-report`;
+    // Route through our custom Next.js API route that has a higher maxDuration (300s)
+    const directUrl = "/api/analyze-lab-report";
     const token = await getAuthToken();
     const headers: HeadersInit = { "Content-Type": "application/json" };
     if (token) headers["Authorization"] = `Bearer ${token}`;
