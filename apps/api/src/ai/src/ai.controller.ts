@@ -416,6 +416,25 @@ function formatDietaryRestrictions(profile: any): string {
   return `\n--- ACTIVE DIETARY RESTRICTIONS (NON-NEGOTIABLE) ---\n${formatted}\n`;
 }
 
+// ── Chronic Conditions Formatter ────────────────────────────────────
+
+/**
+ * Extracts chronic conditions from user profile and strongly enforces them in the system prompt.
+ */
+function formatChronicConditions(profile: any): string {
+  if (!profile || !profile.chronic_conditions) return "";
+
+  const conditions: string[] = Array.isArray(profile.chronic_conditions)
+    ? profile.chronic_conditions
+    : [];
+
+  if (conditions.length === 0) return "";
+
+  const formatted = conditions.map((c: string) => `- ${c}`).join("\n");
+
+  return `\n--- ХРОНИЧЕСКИЕ ЗАБОЛЕВАНИЯ И ДИАГНОЗЫ (КРИТИЧЕСКИ ВАЖНО) ---\nПользователь имеет следующие подтвержденные диагнозы:\n${formatted}\n\nТЫ ОБЯЗАН УЧИТЫВАТЬ ЭТИ ДИАГНОЗЫ ВО ВСЕХ СВОИХ ОТВЕТАХ И СОВЕТАХ ПО ПИТАНИЮ.\n`;
+}
+
 // ── Active Knowledge Base Formatter ──────────────────────────────────
 
 /**
@@ -528,11 +547,11 @@ function formatLabDiagnosticReport(profile: any): string {
     .join("; ") || "Нет";
 
   return baseContext +
-    `\n--- ПОСЛЕДНИЙ ОТЧЁТ ПО АНАЛИЗАМ (от ${latest.timestamp}) ---\n` +
+    `\n--- ПОСЛЕДНИЙ ОТЧЁТ ПО АНАЛИЗАМ И ДИАГНОСТИКА (от ${latest.timestamp}) ---\n` +
     `Резюме: ${report.summary}\n` +
-    `Паттерны: ${patterns}\n` +
+    `ВЫЯВЛЕННЫЕ ДИАГНОЗЫ И ПАТТЕРНЫ: ${patterns}\n` +
     `Приоритеты: ${priorities}\n` +
-    `\nИспользуй эту информацию для персонализации диалога. Ты ЗНАЕШЬ результаты анализов пользователя.`;
+    `\nИспользуй эту информацию о заболеваниях и синдромах для строгой персонализации диалога! Ты ЗНАЕШЬ результаты анализов пользователя.`;
 }
 
 // ── Default user profile for requests without explicit profile ───────
@@ -615,6 +634,7 @@ USER CLINICAL CONTEXT:
 
 --- PROFILE OVERVIEW ---
 ${JSON.stringify(safeProfile)}
+${formatChronicConditions(dbContext.profile)}
 ${formatDietaryRestrictions(dbContext.profile)}
 --- RECENT BLOOD TESTS (Анализы Крови) ---
 ${formatTestResults(dbContext.recentTests)}
