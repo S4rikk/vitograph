@@ -6,7 +6,7 @@ import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 
 const router = Router();
-const upload = multer();
+const upload = multer({ limits: { fileSize: 50 * 1024 * 1024 } }); // 50MB limit
 
 // ── Schemas ─────────────────────────────────────────────────────────
 
@@ -284,6 +284,128 @@ router.post(
       console.log("[parse-image] ⑥  Response sent successfully");
     } catch (error: unknown) {
       console.error("[parse-image] ❌ CRASH:", error instanceof Error ? error.stack : error);
+      next(error);
+    }
+  }
+);
+
+/**
+ * POST /api/v1/integration/parse-image-batch
+ * Parse a BATCH of lab report PHOTOS (JPEG/PNG/HEIC) via Python Vision Engine
+ */
+router.post(
+  "/parse-image-batch",
+  upload.array("files", 10),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      console.log("[parse-image-batch] ①  Handler entered");
+      const files = req.files as Express.Multer.File[];
+
+      if (!files || files.length === 0) {
+        throw new AppError("No files uploaded", 400);
+      }
+
+      console.log(`[parse-image-batch] ②  Files received: ${files.length}`);
+
+      for (const file of files) {
+        const mimeType: string = file.mimetype || "";
+        if (!mimeType.startsWith("image/")) {
+          throw new AppError(`Expected an image file, got ${mimeType} for ${file.originalname}`, 400);
+        }
+      }
+
+      console.log("[parse-image-batch] ③  Calling Python parseImageBatch...");
+      const extraction = await pythonCore.parseImageBatch(files);
+      console.log(`[parse-image-batch] ④  Python returned: biomarkers=${extraction?.biomarkers?.length ?? 0}`);
+
+      // --- Database Persistence (best-effort) ---
+      if (extraction && Array.isArray(extraction.biomarkers) && extraction.biomarkers.length > 0 && req.user?.id) {
+        try {
+          const token = req.headers.authorization?.split(" ")[1];
+          const supabaseUrl = process.env.SUPABASE_URL;
+          const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
+
+          if (token && supabaseUrl && supabaseKey) {
+            const supabase = createClient(supabaseUrl, supabaseKey, {
+              global: {
+                headers: { Authorization: `Bearer ${token}` },
+              },
+            });
+
+            const { data: dbBiomarkers, error: bioError } = await supabase
+              .from("biomarkers")
+              .select("id, name_en, name_ru, code, aliases");
+
+            if (!bioError && dbBiomarkers) {
+              const insertPayloads: any[] = [];
+
+              for (const item of extraction.biomarkers) {
+                const cleanItemName = (item.original_name || "").toLowerCase().trim();
+                const match = dbBiomarkers.find(b => {
+                  const nameEn = (b.name_en || "").toLowerCase();
+                  const nameRu = (b.name_ru || "").toLowerCase();
+                  const aliases = Array.isArray(b.aliases) ? b.aliases.map((a: string) => a.toLowerCase()) : [];
+                  return nameEn === cleanItemName || nameRu === cleanItemName || aliases.includes(cleanItemName);
+                });
+
+                if (match) {
+                  insertPayloads.push({
+                    user_id: req.user!.id,
+                    biomarker_id: match.id,
+                    value: item.value_numeric !== null && item.value_numeric !== undefined ? item.value_numeric : item.value_string,
+                    unit: item.unit,
+                    test_date: extraction.report_date ? new Date(extraction.report_date).toISOString() : new Date().toISOString(),
+                    source: "manual",
+                  });
+                }
+              }
+
+              let currentSessionId: number | undefined;
+
+              if (insertPayloads.length > 0) {
+                const sourceFilePath = files.map(f => f.originalname).join(", ").substring(0, 255);
+                const { data: sessionData, error: sessionError } = await supabase
+                  .from("test_sessions")
+                  .insert({
+                    user_id: req.user!.id,
+                    test_date: extraction.report_date ? new Date(extraction.report_date).toISOString() : new Date().toISOString(),
+                    source_file_path: sourceFilePath,
+                    status: "completed"
+                  })
+                  .select("id")
+                  .single();
+
+                if (sessionError) {
+                  console.error("[POST /parse-image-batch] DB Session Insert Error:", sessionError);
+                } else if (sessionData) {
+                  currentSessionId = sessionData.id;
+                }
+
+                const finalPayloads = insertPayloads.map(p => ({
+                  ...p,
+                  session_id: currentSessionId
+                }));
+
+                const { error: insertError } = await supabase
+                  .from("test_results")
+                  .insert(finalPayloads);
+
+                if (insertError) {
+                  console.error("[POST /parse-image-batch] DB Insert Error:", insertError);
+                }
+              }
+            }
+          }
+        } catch (dbError) {
+          console.error("[POST /parse-image-batch] DB persistence failed (non-fatal):", dbError);
+        }
+      }
+
+      console.log("[parse-image-batch] ⑤  Sending response...");
+      res.json({ success: true, data: extraction });
+      console.log("[parse-image-batch] ⑥  Response sent successfully");
+    } catch (error: unknown) {
+      console.error("[parse-image-batch] ❌ CRASH:", error instanceof Error ? error.stack : error);
       next(error);
     }
   }

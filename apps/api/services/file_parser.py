@@ -7,7 +7,7 @@ of biomarkers, complete with zero-tolerance hallucination rules.
 
 import io
 import logging
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
@@ -237,3 +237,61 @@ async def extract_biomarkers_from_image(
 
     except Exception as exc:
         raise ValueError(f"Vision parsing error: {str(exc)}") from exc
+
+
+async def extract_biomarkers_from_image_batch(
+    images: List[Tuple[bytes, str]]
+) -> LabReportExtraction:
+    """Extract biomarkers from a batch of PHOTOS of a lab report using GPT-4o Vision.
+
+    To strictly prevent LLM laziness (skipping dense tables across multiple pages),
+    this extracts data from each page concurrently, then merges the distinct results.
+
+    Args:
+        images: Array of tuples (raw_bytes, content_type) for each image.
+
+    Returns:
+        Structured LabReportExtraction with merged biomarkers.
+
+    Raises:
+        ValueError: If the LLM parallel parsing fails.
+    """
+    import asyncio
+
+    if not images:
+        return LabReportExtraction()
+
+    tasks = [
+        extract_biomarkers_from_image(image_bytes, content_type)
+        for image_bytes, content_type in images
+    ]
+
+    try:
+        results = await asyncio.gather(*tasks, return_exceptions=False)
+    except Exception as exc:
+        raise ValueError(f"Vision batch parsing parallel error: {str(exc)}") from exc
+
+    merged_biomarkers = []
+    merged_recommendations = []
+    report_date = None
+    context_str = ""
+
+    for idx, res in enumerate(results):
+        if res.biomarkers:
+            merged_biomarkers.extend(res.biomarkers)
+        if res.general_recommendations:
+            merged_recommendations.extend(res.general_recommendations)
+        if res.report_date and not report_date:
+            report_date = res.report_date
+        if res.context:
+            page_ctx = f"[Page {idx+1}]: {res.context}"
+            context_str = f"{context_str} {page_ctx}".strip()
+
+    unique_recommendations = list(dict.fromkeys(merged_recommendations))
+
+    return LabReportExtraction(
+        report_date=report_date,
+        context=context_str if context_str else None,
+        biomarkers=merged_biomarkers,
+        general_recommendations=unique_recommendations
+    )

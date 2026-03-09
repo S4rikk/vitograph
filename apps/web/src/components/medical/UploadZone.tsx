@@ -5,8 +5,8 @@ import { useCallback, useState, useRef } from "react";
 type UploadState = "idle" | "hover" | "loading" | "done" | "error";
 
 type UploadZoneProps = {
-  /** Called with the selected File and its type after validation. */
-  onFileAccepted: (file: File, type: "document" | "image") => void;
+  /** Called with the selected Files and their type after validation. */
+  onFilesAccepted: (files: File[], type: "document" | "image") => void;
   /** Current upload state — parent controls the lifecycle. */
   state?: UploadState;
   /** Error message to display in the error state. */
@@ -29,7 +29,7 @@ const IMAGE_TYPES = ["image/jpeg", "image/png", "image/heic"];
  * accessible keyboard interaction.
  */
 export default function UploadZone({
-  onFileAccepted,
+  onFilesAccepted,
   state = "idle",
   errorMessage,
 }: UploadZoneProps) {
@@ -39,53 +39,65 @@ export default function UploadZone({
 
   const effectiveState = dragOver ? "hover" : state;
 
-  const handleFile = useCallback(
-    (file: File) => {
+  const handleFiles = useCallback(
+    (files: File[]) => {
+      if (files.length === 0) return;
+      const firstFile = files[0];
+
       // Document flow (existing)
-      const isDocument = DOCUMENT_TYPES.includes(file.type)
-        || file.name.endsWith(".txt")
-        || file.name.endsWith(".docx");
+      const isDocument = DOCUMENT_TYPES.includes(firstFile.type)
+        || firstFile.name.endsWith(".txt")
+        || firstFile.name.endsWith(".docx");
       if (isDocument) {
-        if (file.size > 10 * 1024 * 1024) {
+        if (files.length > 1) {
+          alert("Пожалуйста, загружайте только один документ (PDF/DOCX/TXT) за раз.");
+          return;
+        }
+        if (firstFile.size > 10 * 1024 * 1024) {
           alert("Файл слишком большой. Максимум — 10 МБ.");
           return;
         }
-        onFileAccepted(file, "document");
+        onFilesAccepted([firstFile], "document");
         return;
       }
 
       // Image flow (new)
-      const isImage = IMAGE_TYPES.includes(file.type) || file.type.startsWith("image/");
-      if (isImage) {
-        if (file.size > 10 * 1024 * 1024) {
-          alert("Изображение слишком большое. Максимум — 10 МБ.");
+      const imageFiles = files.filter(f => IMAGE_TYPES.includes(f.type) || f.type.startsWith("image/"));
+      if (imageFiles.length > 0) {
+        if (imageFiles.length > 10) {
+          alert("Максимум 10 фотографий за один раз.");
           return;
         }
-        onFileAccepted(file, "image");
+        const totalSize = imageFiles.reduce((acc, file) => acc + file.size, 0);
+        if (totalSize > 50 * 1024 * 1024) {
+          alert("Общий размер фотографий слишком большой. Максимум — 50 МБ.");
+          return;
+        }
+        onFilesAccepted(imageFiles, "image");
         return;
       }
 
       // Unsupported format — silently reject
     },
-    [onFileAccepted],
+    [onFilesAccepted],
   );
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
       setDragOver(false);
-      const file = e.dataTransfer.files[0];
-      if (file) handleFile(file);
+      const files = Array.from(e.dataTransfer.files);
+      if (files.length > 0) handleFiles(files);
     },
-    [handleFile],
+    [handleFiles],
   );
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) handleFile(file);
+      const files = Array.from(e.target.files || []);
+      if (files.length > 0) handleFiles(files);
     },
-    [handleFile],
+    [handleFiles],
   );
 
   /* ── Styles per state ──────────────────────────────────── */
@@ -124,6 +136,7 @@ export default function UploadZone({
       <input
         ref={inputRef}
         type="file"
+        multiple
         accept=".pdf,.txt,.docx,image/jpeg,image/png,image/heic,application/pdf,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         onChange={handleInputChange}
         className="hidden"
@@ -132,6 +145,7 @@ export default function UploadZone({
       <input
         ref={cameraInputRef}
         type="file"
+        multiple
         accept="image/*"
         capture="environment"
         onChange={handleInputChange}
@@ -171,7 +185,7 @@ export default function UploadZone({
             </p>
           </div>
           <span className="inline-block rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary-700">
-            PDF, DOCX, TXT, Фото · до 10 МБ
+            PDF, DOCX, TXT, Фото (до 10 шт)
           </span>
 
           <div className="mt-3 flex items-center gap-2 text-xs text-ink-muted">

@@ -67,7 +67,8 @@ class PythonCoreClient {
    */
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    timeoutMs: number = 90_000
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     console.log(`[PythonCore] Calling ${url}`);
@@ -75,7 +76,7 @@ class PythonCoreClient {
     try {
       const response = await fetch(url, {
         ...options,
-        signal: AbortSignal.timeout(90_000), // 90s timeout to stay under Next.js proxy limit
+        signal: AbortSignal.timeout(timeoutMs),
       });
 
       if (!response.ok) {
@@ -159,6 +160,28 @@ class PythonCoreClient {
       method: "POST",
       body: formData,
     });
+  }
+
+  /**
+   * Parse a BATCH of lab report PHOTOS (JPEG/PNG/HEIC) via Python Vision endpoint
+   */
+  async parseImageBatch(files: Express.Multer.File[]): Promise<LabReportExtraction> {
+    const formData = new FormData();
+
+    for (const file of files) {
+      const mimeType = file.mimetype || "application/octet-stream";
+      const blob = new Blob([file.buffer], { type: mimeType });
+      formData.append("files", blob, file.originalname || "lab_report_photo.jpg");
+    }
+
+    return this.request<LabReportExtraction>(
+      "/parse-image-batch",
+      {
+        method: "POST",
+        body: formData,
+      },
+      300_000 // 5 minute timeout for batch processing
+    );
   }
 }
 

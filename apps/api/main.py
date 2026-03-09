@@ -19,6 +19,7 @@ from services.file_parser import (
     LabReportExtraction,
     extract_biomarkers,
     extract_biomarkers_from_image,
+    extract_biomarkers_from_image_batch,
 )
 from services.norm_engine import NormResult, UserProfile, calculate_dynamic_norm
 
@@ -161,6 +162,55 @@ async def parse_lab_report_image(file: UploadFile = File(...)):
         raise
     except Exception as e:
         raise HTTPException(status_code=422, detail=f"Image parsing error: {str(e)}")
+
+
+@app.post("/parse-image-batch", response_model=LabReportExtraction, tags=["file-parser"])
+async def parse_lab_report_image_batch(files: List[UploadFile] = File(...)):
+    """Upload a batch of PHOTOS (up to 10) of a lab report -> OCR via GPT-4o Vision -> Extract Biomarkers."""
+    if len(files) > 10:
+        raise HTTPException(
+            status_code=400,
+            detail="Too many files. Maximum 10 images allowed.",
+        )
+
+    images_data = []
+    max_total_size = 50 * 1024 * 1024  # 50MB
+    total_size = 0
+
+    for file in files:
+        content_type = file.content_type or ""
+        if not content_type.startswith("image/"):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Expected an image file, got '{content_type}' for {file.filename}.",
+            )
+
+        content = await file.read()
+        total_size += len(content)
+        if total_size > max_total_size:
+            raise HTTPException(status_code=400, detail="Total size of images too large. Max 50MB.")
+            
+        images_data.append((content, content_type))
+
+    if not images_data:
+        raise HTTPException(status_code=400, detail="No valid images provided.")
+
+    try:
+        parsed_data = await extract_biomarkers_from_image_batch(images_data)
+
+        if not parsed_data.biomarkers:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Не удалось распознать показатели на фото. "
+                    "Убедитесь, что бланки хорошо освещены и текст читаем."
+                ),
+            )
+        return parsed_data
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"Batch image parsing error: {str(e)}")
 
 
 @app.post("/calculate", response_model=NormResult, tags=["norm-engine"])

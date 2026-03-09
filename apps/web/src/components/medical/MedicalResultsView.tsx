@@ -104,7 +104,7 @@ export default function MedicalResultsView() {
     }
   }, []);
 
-  const handleFileAccepted = useCallback(async (file: File, type: "document" | "image") => {
+  const handleFilesAccepted = useCallback(async (files: File[], type: "document" | "image") => {
     setUploadState("loading");
     setErrorMessage(undefined);
     setResults(null);
@@ -114,14 +114,20 @@ export default function MedicalResultsView() {
       let data: LabReportExtraction;
 
       if (type === "image") {
-        const compressedBlob = await compressImageToBlob(file, 1536);
-        data = await apiClient.uploadImageFile(compressedBlob);
+        const compressedBlobs = await Promise.all(
+          files.map(f => compressImageToBlob(f, 1536))
+        );
+        if (compressedBlobs.length > 1) {
+          data = await apiClient.uploadImageFiles(compressedBlobs);
+        } else {
+          data = await apiClient.uploadImageFile(compressedBlobs[0]);
+        }
       } else {
-        data = await apiClient.uploadFile(file);
+        data = await apiClient.uploadFile(files[0]);
       }
 
       if (!data.biomarkers || data.biomarkers.length === 0) {
-        setErrorMessage("Анализы не найдены. Пожалуйста, загрузите другой файл.");
+        setErrorMessage("Анализы не найдены. Пожалуйста, убедитесь, что тексты/фото читаемы.");
         setUploadState("error");
         return;
       }
@@ -134,7 +140,7 @@ export default function MedicalResultsView() {
 
     } catch (error) {
       console.error("Upload failed", error);
-      setErrorMessage((error as Error).message || "Failed to parse PDF");
+      setErrorMessage((error as Error).message || "Failed to parse files");
       setUploadState("error");
     }
   }, [runDiagnosticAnalysis]);
@@ -169,7 +175,7 @@ export default function MedicalResultsView() {
     <div className="space-y-6">
       {/* ── Upload Zone ─────────────────────────────────── */}
       <UploadZone
-        onFileAccepted={handleFileAccepted}
+        onFilesAccepted={handleFilesAccepted}
         state={uploadState}
         errorMessage={errorMessage}
       />

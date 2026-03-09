@@ -150,7 +150,8 @@ export const logMealTool = new DynamicStructuredTool({
       micronutrients: microsDb,
       meal_quality_score: meal_quality_score,
       meal_quality_reason: meal_quality_reason,
-      notes: `AI Logged`
+      notes: `AI Logged`,
+      source: "manual"
     }).select("id").single();
 
     if (logError || !log) return `Failed to create meal log: ${logError?.message}`;

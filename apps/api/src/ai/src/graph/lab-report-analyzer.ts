@@ -29,8 +29,8 @@ interface BiomarkerInput {
 
 // ── Constants ───────────────────────────────────────────────────────
 
-/** Timeout for GPT-5.2 analysis (2 minutes — large model, detailed output). */
-const LAB_ANALYSIS_TIMEOUT_MS = 120_000;
+/** Timeout for GPT-5.2 analysis (5 minutes — for batch uploads). */
+const LAB_ANALYSIS_TIMEOUT_MS = 300_000;
 
 /** Temperature for clinical precision. */
 const LAB_ANALYSIS_TEMPERATURE = 0.4;

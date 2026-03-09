@@ -398,6 +398,43 @@ class AiApiClient {
     const json = await response.json();
     return (json.data || json) as LabReportExtraction;
   }
+
+  /**
+   * Uploads a BATCH of lab report PHOTOS for Vision-based AI extraction.
+   * Uses custom proxy route with 5-minute timeout.
+   */
+  async uploadImageFiles(imageBlobs: Blob[]): Promise<LabReportExtraction> {
+    const formData = new FormData();
+    imageBlobs.forEach((blob, index) => {
+      formData.append("files", blob, `lab_report_photo_${index}.jpg`);
+    });
+
+    const token = await getAuthToken();
+    const headers: HeadersInit = {};
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    // Route through our custom Next.js API route that has a higher maxDuration (300s)
+    const integrationUrl = "/api/parse-image-batch";
+
+    const response = await fetch(integrationUrl, {
+      method: "POST",
+      headers,
+      body: formData,
+      signal: AbortSignal.timeout(300_000), // 5-minute timeout for batch Vision OCR
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.error || errorData.detail || errorData.message || `Batch Upload Error: ${response.status}`;
+      throw new Error(errorMessage);
+    }
+
+    const json = await response.json();
+    return (json.data || json) as LabReportExtraction;
+  }
   /**
    * Uploads a food photo for AI recognition and nutritional analysis.
    */

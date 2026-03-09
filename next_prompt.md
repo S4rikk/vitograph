@@ -1,51 +1,27 @@
-# Technical Task Definition (TTD): Архитектурный фикс норм питания в Дневнике
+# TASK: Fix Mobile "Add to Diary" 500 Error (PGRST204)
 
-## 🚨 Контекст проблемы
-Пользователь сообщил, что:
-1. Кнопка "пересчитать нормы" в Дневнике Питания ломает и рандомизирует БЖУ (они "прыгают").
-2. Нормы по микронутриентам "замерли" на стандартных значениях и не реагируют на профиль или диагнозы.
-3. Логика: "формирование норм проходит через модификатор на основе профиля, в чистом виде нам вообще не нужно их отправлять в дневник, только после модификации".
+**Required Skills:**
+- Read `C:\store\ag_skills\skills\senior-architect\SKILL.md` before coding.
+- Read `C:\store\ag_skills\skills\postgres-best-practices\SKILL.md` before coding.
+- Read `C:\store\ag_skills\skills\prisma-expert\SKILL.md` before coding.
+- Read `C:\store\ag_skills\skills\systematic-debugging\SKILL.md` before coding.
 
-**Анализ показал:**
-1. **Дублирование логики (Самая большая проблема):** В `DailyAllowancesPanel.tsx` скопировано 150+ строк кода из бэкенда (`computeDeterministicMicros`), и фронтенд пытается сам считать модификаторы.
-2. **API LLM:** Кнопка обновляет нормы через старый LLM эндпоинт (`POST /nutrition/recalculate`), который генерирует БЖУ рандомно, ломая детерминированность.
-3. **Рассинхрон ключей:** Фронтенд считает нормы для ключей на русском (например, `"Витамин C"`), но из дневника (`consumedMicros`) приходят английские ключи с единицами измерения (например, `"Vitamin C (mg)"`). В результате фронтенд не находит совпадений и выводит "Базовая норма".
+**Architecture Context:**
+When a user logs a meal via a photo on a mobile device, a 500 server error occurs. The logs indicate:
+`[FoodVision] Failed to save to meal_logs: { code: 'PGRST204', message: "Could not find the 'source' column of 'meal_logs' in the schema cache" }`
+However, logging a meal via text on a PC works perfectly. 
 
----
+This happens because the mobile upload route (`/api/v1/ai/analyze-food`) attempts to insert `source: "photo"` into the `meal_logs` table (see `ai.controller.ts:1143`). The problem is that the `source` column does not exist in the Supabase database nor in the Prisma schema (`schema.prisma`). The text logging route (`/api/v1/ai/chat`) uses the `log_meal` tool (`tools.ts`), which completely omits the `source` column, hence why it succeeds.
 
-## 🏗 Архитектурное Решение (Debate Protocol Synthesized)
-Фронтенд не должен сам вычислять нормы. Бэкенд должен отдавать готовые, просчитанные нормы.
+The database issue has already been resolved via a raw SQL `ALTER TABLE` executed by the user. Your job is to update the Prisma schema and the TypeScript codebase to properly handle the `source` field.
 
-### ШАГ 1: Бэкенд (Создание единого источника правды)
-1. В `apps/api/src/ai/src/ai.routes.ts` добавь новый эндпоинт: `GET /api/v1/ai/nutrition-targets`.
-2. В `ai.controller.ts` реализуй этот эндпоинт:
-   - Извлеки ID пользователя из токена.
-   - Запроси его `profile` и `active_condition_knowledge_bases` из Supabase.
-   - Вызови существующую функцию `computeDeterministicMicros(profile, activeDiagnoses)`.
-   - Сформируй и верни объект с готовыми макросами (БЖУ из профиля) и микронутриентами (из функции) + `rationale`.
-   - **Пример ответа:** 
-     `{ success: true, data: { macros: {...}, micros: {...}, rationale:="..." } }`
-
-### ШАГ 2: Интеграция API клиента
-1. В `apps/web/src/lib/api-client.ts` добавь метод `getNutritionTargets()` который делает GET запрос к `/api/v1/ai/nutrition-targets`.
-2. Удали старый метод `recalculateNutritionTargets()`, он больше не нужен.
-
-### ШАГ 3: Рефакторинг `DailyAllowancesPanel.tsx`
-1. **УДАЛИ ПОЛНОСТЬЮ** весь блок вычисления `dynamicMicros` (около 150 строк кода, Layer 0... Layer 9).
-2. Обнови интерфейс `Props`: пусть компонент принимает `dynamicTarget` (макросы), `dynamicMicros` (микронутриенты) и `rationale` извне (от родителя `FoodDiaryView`).
-3. **ФИКС МАППИНГА КЛЮЧЕЙ (Критично!):** Напиши функцию нормализации ключей. Ключи из `consumedMicros` (например, `"Vitamin C (mg)"` или `"Iron"`) нужно переводить в строгие русские названия (`"Витамин C"`, `"Железо"`), чтобы они совпадали с ключами `dynamicMicros`. Используй для этого словарь (вынеси его за пределы компонента).
-4. **Удали кнопку:** Выпили кнопку "Пересчитать нормы ИИ" и спиннер.
-
-### ШАГ 4: Рефакторинг `FoodDiaryView.tsx`
-1. В функции `fetchMacrosForDate`, ПОМИМО получения логов еды, вызови `apiClient.getNutritionTargets()`.
-2. Установи полученные `macros`, `micros` и `rationale` в стейт компонента.
-3. Прокинь их в `<DailyAllowancesPanel dynamicTarget={...} dynamicMicros={...} rationale={...} consumed={consumed} consumedMicros={consumedMicros} />`.
-4. Теперь Supabase запросы за `profiles` и `active_condition_knowledge_bases` в `FoodDiaryView.tsx` можно **удалить**, так как бэкенд делает это сам внутри нового эндпоинта!
-
-## 🧪 План тестирования для Кодера
-1. Открой Дневник питания, убедись, что кнопка пересчета исчезла.
-2. Проверь логи терминала `api`: при загрузке страницы должен дергаться GET `/api/v1/ai/nutrition-targets`.
-3. Зайди в настройки профиля, поменяй уровень стресса или поставь диагноз. Вернись в дневник — нормы микронутриентов должны измениться автоматически, и при наведении на значок "i" должно быть показано обоснование (Rationale) с бэкенда.
-4. Добавь еду с "Витамин C" и убедись, что прогресс бар витамина C корректно заполняется относительно *индивидуальной* (а не базовой) нормы.
-
-Действуй строго по этой инструкции. Никакого дублирования логики на клиенте быть не должно.
+**Implementation Steps:**
+1. **Update Prisma Schema**:
+   - Open `C:\project\VITOGRAPH\prisma\schema.prisma`.
+   - Add the `source` field to the `MealLog` model: `source String? @default("manual")`.
+   - Run `npx prisma generate` inside `C:\project\VITOGRAPH` (or wherever Prisma is typically run) to update the client. Do NOT push to DB, as the column was added manually via SQL.
+2. **Update TypeScript Tooling**:
+   - Open `C:\project\VITOGRAPH\apps\api\src\ai\src\graph\tools.ts`.
+   - Expand the `.insert()` function for the `log_meal` tool to include `source: "text"` or `source: "manual"` to reflect text-based logging.
+3. Verify the application compiles successfully after the Prisma generation.
+4. Execute `hotfix_to_server_vg.bat` or the deployment pipeline to push the code update to the server.

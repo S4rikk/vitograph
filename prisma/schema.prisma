@@ -778,6 +778,7 @@ model MealLog {
   mealQualityScore Int?     @map("meal_quality_score")
   /// AI-computed short explanation of the score
   mealQualityReason String? @map("meal_quality_reason")
+  source           String?  @default("manual")
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
 
