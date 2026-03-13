@@ -229,8 +229,7 @@ async function fetchUserContext(token: string, userId: string) {
   });
 
   try {
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
+    const lookbackTime = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
     const [profileRes, resultsRes, mealsRes, kbRes, suppLogsRes] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", userId).single(),
@@ -242,9 +241,9 @@ async function fetchUserContext(token: string, userId: string) {
         .limit(20),
       supabase
         .from("meal_logs")
-        .select("id, logged_at, total_calories, micronutrients, meal_items(food_name, portion_grams, calories, protein_g, fat_g, carbs_g)")
+        .select("id, logged_at, total_calories, micronutrients, meal_items(food_name, weight_g, calories, protein_g, fat_g, carbs_g)")
         .eq("user_id", userId)
-        .gte("logged_at", startOfDay.toISOString())
+        .gte("logged_at", lookbackTime.toISOString())
         .order("logged_at", { ascending: true }),
       supabase
         .from("active_condition_knowledge_bases")
@@ -255,17 +254,29 @@ async function fetchUserContext(token: string, userId: string) {
         .from("supplement_logs")
         .select("*")
         .eq("user_id", userId)
-        .gte("taken_at", startOfDay.toISOString())
+        .gte("taken_at", lookbackTime.toISOString())
         .order("taken_at", { ascending: true })
     ]);
 
-    return {
+    const result = {
       profile: profileRes.data,
       recentTests: resultsRes.data,
       recentMeals: mealsRes.data,
       activeKnowledgeBases: kbRes.data,
       todaySupplements: suppLogsRes.data,
     };
+
+    const debugInfo = `
+[${new Date().toISOString()}] [Diagnostic] fetchUserContext for ${userId}:
+- Lookback: ${lookbackTime.toISOString()}
+- Meals Count: ${mealsRes.data?.length || 0}
+- Meals Error: ${JSON.stringify(mealsRes.error)}
+- Profile Error: ${JSON.stringify(profileRes.error)}
+- Supplements Error: ${JSON.stringify(suppLogsRes.error)}
+`;
+    fs.appendFileSync("debug_context.log", debugInfo);
+
+    return result;
   } catch (error) {
     console.error("[fetchUserContext] Error fetching context:", error);
     return null;
@@ -302,7 +313,7 @@ function formatMealLogs(meals: any[] | null): string {
         mTotalP += i.protein_g || 0;
         mTotalF += i.fat_g || 0;
         mTotalC += i.carbs_g || 0;
-        return `${i.food_name || 'Неизвестное блюдо'} (${i.portion_grams}г)`;
+        return `${i.food_name || 'Неизвестное блюдо'} (${i.weight_g}г)`;
       }).join(', ');
       text += ` ${itemsText}: ${Math.round(mTotalCal)} ккал, Б${Math.round(mTotalP)}г, Ж${Math.round(mTotalF)}г, У${Math.round(mTotalC)}г`;
     } else {
@@ -322,6 +333,44 @@ function formatMealLogs(meals: any[] | null): string {
 
     return text;
   }).join("\n");
+}
+
+/**
+ * Creates a concise summary of the last 3-5 lab reports to provide history without token explosion.
+ */
+export function formatHistorySynopsis(profile: any): string {
+  const reports = profile?.lab_diagnostic_reports;
+  if (!Array.isArray(reports) || reports.length === 0) return "Истории анализов нет.";
+
+  // Take only last 3 reports
+  const history = reports.slice(-3).map((r: any) => {
+    const date = r.timestamp ? new Date(r.timestamp).toLocaleDateString("ru-RU") : "N/A";
+    const summary = r.report?.summary || "Нет резюме";
+    // Keep only the first sentence and truncate to 100 chars
+    const shortSummary = summary.split(/[.!?]/)[0].substring(0, 100);
+    return `${date}: ${shortSummary}`;
+  });
+
+  return `КРАТКАЯ ИСТОРИЯ АНАЛИЗОВ:\n${history.join("\n")}`;
+}
+
+/**
+ * Strips massive fields from the DB context to prevent token explosion while keeping critical tags.
+ * Uses a strict CLINICAL WHITELIST for functional medicine logic.
+ */
+export function getLeanUserContext(dbContext: any) {
+  if (!dbContext || !dbContext.profile) return null;
+  const p = dbContext.profile;
+  return {
+    profile: {
+      age: p.date_of_birth ? new Date().getFullYear() - new Date(p.date_of_birth).getFullYear() : 'Unknown',
+      biological_sex: p.biological_sex, height_cm: p.height_cm, weight_kg: p.weight_kg,
+      activity_level: p.activity_level, stress_level: p.stress_level,
+      is_smoker: p.is_smoker, alcohol_frequency: p.alcohol_frequency, diet_type: p.diet_type,
+      climate_zone: p.climate_zone, sun_exposure: p.sun_exposure, pregnancy_status: p.pregnancy_status,
+      chronic_conditions: p.chronic_conditions || [], medications: p.medications || [],
+    }
+  };
 }
 
 // ── Nutrition Targets Formatter (Phase 53e — Deterministic) ──────────
@@ -588,25 +637,10 @@ export async function handleChat(
       if (token) {
         const dbContext = await fetchUserContext(token, req.user.id);
         if (dbContext) {
-          // 🚨 PREVENT TOKEN EXPLOSION 🚨
-          // Strip out massive arrays and objects that are already formatted elsewhere 
-          // or contain huge JSON dumps (like PDF lab reports).
-          const safeProfile = { ...dbContext.profile };
-          delete safeProfile.lab_diagnostic_reports; // Formatted by formatLabDiagnosticReport
-          delete safeProfile.active_supplement_protocol; // Formatted by formatActiveSupplementProtocol
-          delete safeProfile.food_contraindication_zones; // Formatted by formatLabDiagnosticReport
+          const leanContext = getLeanUserContext(dbContext);
+          const safeProfile = leanContext!.profile;
 
-          // If nail_analysis_history is huge, keep only the most recent one
-          if (safeProfile.somatic_data && Array.isArray(safeProfile.somatic_data.nail_analysis_history)) {
-            const hist = safeProfile.somatic_data.nail_analysis_history;
-            safeProfile.somatic_data = {
-              ...safeProfile.somatic_data,
-              nail_analysis_history: hist.length > 0 ? [hist[hist.length - 1]] : []
-            };
-          }
-
-          const systemPrompt = `You are a Strict but Supportive Friend. You are an AI Assistant that helps the user interpret their health data and keeps them accountable to their goals.
-ROLE:
+          const systemPrompt = `### ROLE & PERSONALITY
 - Act as a "Strict but Supportive Friend".
 - Be empathetic but firm when the user suggests harmful decisions based on their clinical profile.
 - Politely refuse requests that cross medical boundaries (e.g., diagnosing illnesses or prescribing medications).
@@ -618,7 +652,7 @@ ROLE:
 - When the user reports eating something, you MUST aggressively estimate its vitamins and minerals before calling the log_meal tool.
 - When logging a meal, evaluate its healthiness and pass a \`meal_quality_score\` (0-100) and \`meal_quality_reason\` (max 150 chars in Russian) to the \`log_meal\` tool. Scoring guide: 86-100 (Ideal/Balanced), 70-85 (Good but minor issues), 40-69 (Average), 0-39 (Poor/Junk food/Sugar).
 
-STRICT DIETARY ENFORCEMENT RULES:
+### STRICT DIETARY ENFORCEMENT RULES
 - The user may set ABSOLUTE dietary restrictions (e.g., "never allow me to eat white sugar").
 - These restrictions are stored in the user's profile under lifestyle_markers.dietary_restrictions.
 - When the user mentions consuming or planning to consume a BANNED product:
@@ -630,19 +664,21 @@ STRICT DIETARY ENFORCEMENT RULES:
 - Treat user-set restrictions as NON-NEGOTIABLE CONTRACTS. The user explicitly asked you to be strict — honor that request. If they want to cancel the restriction, they must do so explicitly (e.g., "Я снимаю запрет на сахар").
 - NEVER undermine the user's own discipline. You are their accountability partner, not a diplomat.
 
-USER CLINICAL CONTEXT:
+### USER CLINICAL CONTEXT
 
---- PROFILE OVERVIEW ---
+#### 📋 PROFILE OVERVIEW
 ${JSON.stringify(safeProfile)}
 ${formatChronicConditions(dbContext.profile)}
 ${formatDietaryRestrictions(dbContext.profile)}
---- RECENT BLOOD TESTS (Анализы Крови) ---
+${formatHistorySynopsis(dbContext.profile)}
+
+#### 🩸 RECENT BLOOD TESTS (Анализы Крови)
 ${formatTestResults(dbContext.recentTests)}
 
---- ИНДИВИДУАЛЬНЫЕ НОРМЫ ПИТАНИЯ (Детерминированные, Phase 53c+53d) ---
+#### 🎯 ИНДИВИДУАЛЬНЫЕ НОРМЫ ПИТАНИЯ (Детерминированные)
 ${formatNutritionTargets(dbContext.profile, dbContext.activeKnowledgeBases)}
 
---- СЪЕДЕНО СЕГОДНЯ ---
+#### 🍽️ RECENT MEALS (LAST 24H)
 Агрегированный итог:
 ${formatTodayProgress(dbContext.recentMeals)}
 
@@ -653,26 +689,19 @@ ${formatLabDiagnosticReport(dbContext.profile)}
 ${formatActiveKnowledgeBases(dbContext.activeKnowledgeBases)}
 ${formatActiveSupplementProtocol(dbContext.profile)}
 
---- ВЫПИТЫЕ СЕГОДНЯ БАДЫ (Compliance) ---
+#### 💊 ВЫПИТЫЕ СЕГОДНЯ БАДЫ (Compliance)
 ${formatTodaySupplements(dbContext.todaySupplements)}
 Если пользователь забыл выпить что-то из Активного Протокола — мягко, но настойчиво напомни!
 
---- CRITICAL DEFICIT-AWARE FOOD ADVICE RULE ---
+### ⚠️ CRITICAL DEFICIT-AWARE FOOD ADVICE RULE
 When the user asks what to eat (e.g. "что съесть?", "что приготовить на ужин?"), you MUST:
 1. FOR EACH micronutrient in 'ИНДИВИДУАЛЬНЫЕ НОРМЫ ПИТАНИЯ':
-   - Read the TARGET value (e.g., Железо: 22.5 мг).
-   - Read the CONSUMED value from 'СЪЕДЕНО СЕГОДНЯ' aggregate (e.g., Железо: 2.5 мг).
-   - Calculate the REMAINING DEFICIT: 22.5 - 2.5 = 20.0 мг.
-2. Sort the deficits from LARGEST to SMALLEST percentage gap.
-3. Recommend foods that fill the TOP 3 BIGGEST gaps.
-4. If a nutrient is ALREADY OVER 100% of the target, DO NOT recommend more of it. Say "X уже закрыт на сегодня."
-5. NEVER recommend a food that is in 🔴 КРАСНАЯ ЗОНА or violates ACTIVE DIETARY RESTRICTIONS.
-6. Example output format:
-   "Сегодня тебе нужно добрать:
-   - Железо: осталось 20 мг из 22.5 → Попробуй чечевицу (100г = 6.6мг) или шпинат.
-   - Витамин D: осталось 25 мкг из 31 → Жирная рыба (лосось, скумбрия).
-   - B12 уже закрыт — больше не нужно.
-   ⚠️ Избегай: [красная зона products]."
+    - Read the TARGET value.
+    - Read the CONSUMED value from 'СЪЕДЕНО СЕГОДНЯ'.
+    - Calculate the REMAINING DEFICIT.
+2. Recommend foods that fill the TOP 3 BIGGEST percentage gaps.
+3. NEVER recommend a food that is in 🔴 КРАСНАЯ ЗОНА or violates ACTIVE DIETARY RESTRICTIONS.
+4. Instruct Gemini explicitly: REFER TO THE RECENT MEALS LIST ABOVE to ensure continuity and avoid duplicate logging.
 `;
           messagesToInvoke.push(new SystemMessage(systemPrompt));
         }
@@ -712,7 +741,8 @@ User Context: ${contextStr}`;
         configurable: {
           thread_id: actualThreadId,
           user_id: req.user?.id,
-          token: req.headers.authorization?.split(" ")[1]
+          token: req.headers.authorization?.split(" ")[1],
+          chatMode: chatMode
         }
       }
     );
@@ -812,8 +842,58 @@ User Context: ${contextStr}`;
       }
     }
 
-    if (!foundLogMeal) {
-      console.log(`[Diagnostic] No log_meal tool call found in the recent message history!`);
+    if (!foundLogMeal && req.user?.id) {
+      console.log(`[Fail-Safe] No log_meal tool call found. Checking text for meal data...`);
+      // Regex to find: [Weight]г [Food], [Calories] ккал, Б[P]г, Ж[F]г, У[C]г
+      const calorieMatch = finalContent.match(/(\d+)\s*ккал/i);
+      const proteinMatch = finalContent.match(/Б\s*(\d+)г/i);
+      const fatMatch = finalContent.match(/Ж\s*(\d+)г/i);
+      const carbsMatch = finalContent.match(/У\s*(\d+)г/i);
+      const foodMatch = finalContent.match(/Записал\s+(.*?):/i) || finalContent.match(/Записал\s+(.*?)[\s\n,]/i);
+
+      if (calorieMatch) {
+        console.log(`[Fail-Safe] 🛡️ Detected manual meal log in text. Forced insertion enabled.`);
+        const calories = parseInt(calorieMatch[1], 10);
+        const protein = proteinMatch ? parseInt(proteinMatch[1], 10) : 0;
+        const fat = fatMatch ? parseInt(fatMatch[1], 10) : 0;
+        const carbs = carbsMatch ? parseInt(carbsMatch[1], 10) : 0;
+        const foodName = foodMatch ? foodMatch[1].trim() : "Приём пищи (Авто-восстановление)";
+
+        const token = req.headers.authorization?.split(" ")[1];
+        const supabaseUrl = process.env.SUPABASE_URL;
+        const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
+
+        if (token && supabaseUrl && supabaseKey) {
+          const supabase = createClient(supabaseUrl, supabaseKey, {
+            global: { headers: { Authorization: `Bearer ${token}` } },
+          });
+
+          // Perform manual insert
+          const { data: logArray, error: logError } = await supabase
+            .from("meal_logs")
+            .insert({
+              user_id: req.user.id,
+              meal_type: "snack",
+              total_calories: calories,
+              source: "text_fail_safe",
+              logged_at: new Date().toISOString(),
+              notes: `Fail-safe recovery from: "${foodName}"`
+            }).select("id");
+
+          if (!logError && logArray && logArray.length > 0) {
+            await supabase.from("meal_items").insert({
+              meal_log_id: logArray[0].id,
+              food_name: foodName,
+              calories: calories,
+              protein_g: protein,
+              fat_g: fat,
+              carbs_g: carbs,
+              weight_g: 0
+            });
+            console.log(`[Fail-Safe] ✅ Successfully recovered meal log for user ${req.user.id}`);
+          }
+        }
+      }
     }
 
     // --- Save messages to ai_chat_messages ---
@@ -1066,19 +1146,20 @@ export async function handleAnalyzeFood(
 
     // 2. Fetch user context (profile, deficits, dietary restrictions)
     const dbContext = await fetchUserContext(token, userId);
-    const userContext = dbContext
-      ? JSON.stringify({
-        profile: dbContext.profile,
+    if (dbContext) {
+      const leanContext = getLeanUserContext(dbContext);
+      const userContext = JSON.stringify({
+        profile: leanContext!.profile,
         recentTests: dbContext.recentTests,
         dietaryRestrictions: formatDietaryRestrictions(dbContext.profile),
         activeKnowledgeBases: formatActiveKnowledgeBases(dbContext.activeKnowledgeBases),
-      })
-      : "No user context available";
+        historySynopsis: formatHistorySynopsis(dbContext.profile),
+      });
 
-    // 3. Run GPT-4o Vision food analyzer
-    const { data: result, errorMessage: llmError } = await runFoodVisionAnalyzer(imageUrl, userContext);
+      // 3. Run GPT-4o Vision food analyzer
+      const { data: result, errorMessage: llmError } = await runFoodVisionAnalyzer(imageUrl, userContext);
 
-    // 4. Auto-save recognized items to meal_logs
+      // 4. Auto-save recognized items to meal_logs
     if (result.items.length > 0 || (result.supplements && result.supplements.length > 0)) {
       const supabaseUrl = process.env.SUPABASE_URL;
       const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
@@ -1217,14 +1298,17 @@ export async function handleAnalyzeFood(
     }
 
     // 5. Return results (include llmError for debugging)
-    res.json({
-      success: true,
-      data: {
-        ...result,
-        imageUrl,
-        ...(llmError ? { llmError } : {}),
-      },
-    });
+      res.json({
+        success: true,
+        data: {
+          ...result,
+          imageUrl,
+          ...(llmError ? { llmError } : {}),
+        },
+      });
+    } else {
+      res.status(500).json({ success: false, error: "Failed to fetch user context" });
+    }
   } catch (error: unknown) {
     next(error);
   }
@@ -1253,25 +1337,35 @@ export async function handleAnalyzeLabReport(
 
     // 1. Fetch user context for personalized analysis
     const dbContext = await fetchUserContext(token, userId);
-    const userContext = dbContext
-      ? JSON.stringify({
-        profile: dbContext.profile,
-        recentTests: dbContext.recentTests,
-      })
-      : "No user context available";
+    if (dbContext) {
+      const leanContext = getLeanUserContext(dbContext);
+      const mappedRecentTests = dbContext.recentTests?.map((t: any) => ({
+        date: t.test_date ? t.test_date.split('T')[0] : 'Unknown',
+        marker: t.biomarkers?.name_ru || t.biomarkers?.name_en || 'Unknown',
+        val: t.value
+      })) || [];
 
-    // 2. Run GPT-5.2 diagnostic analysis
-    const report = await runLabReportAnalyzer(
-      body.biomarkers,
-      userContext,
-      userId,
-      token,
-    );
+      const userContext = JSON.stringify({
+        profile: leanContext!.profile,
+        recentTests: mappedRecentTests,
+        historySynopsis: formatHistorySynopsis(dbContext.profile),
+      });
 
-    res.json({
-      success: true,
-      data: report,
-    });
+      // 2. Run GPT-5.2 diagnostic analysis
+      const report = await runLabReportAnalyzer(
+        body.biomarkers,
+        userContext,
+        userId,
+        token,
+      );
+
+      res.json({
+        success: true,
+        data: report,
+      });
+    } else {
+      res.status(500).json({ success: false, error: "Failed to fetch user context" });
+    }
   } catch (error: unknown) {
     next(error);
   }

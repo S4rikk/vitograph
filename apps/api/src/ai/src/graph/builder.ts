@@ -4,11 +4,29 @@ import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { GraphAnnotation } from "./state.js";
 import { agentTools } from "./tools.js";
 import { checkpointer } from "./checkpointer.js";
-const model = new ChatOpenAI({
-  model: "gpt-4o-mini",
+const primaryModel = new ChatOpenAI({
+  modelName: "gemini-3.1-pro-preview-thinking",
+  configuration: {
+    baseURL: "https://api.ourzhishi.top/v1",
+    apiKey: process.env.GEMINI_API,
+  },
   temperature: 0.2,
 }).bindTools(agentTools);
-async function callModel(state: typeof GraphAnnotation.State) {
+
+const diaryModel = new ChatOpenAI({
+  modelName: "gpt-4o",
+  apiKey: process.env.OPENAI_API_KEY,
+  temperature: 0,
+}).bindTools(agentTools);
+
+const backupModel = new ChatOpenAI({
+  modelName: "gpt-4o-mini",
+  temperature: 0.2,
+}).bindTools(agentTools);
+
+async function callModel(state: typeof GraphAnnotation.State, config?: any) {
+  const modelToUse = config?.configurable?.chatMode === "diary" ? diaryModel : primaryModel.withFallbacks([backupModel]);
+  
   // Prevent token explosion: 
   // 1. Keep only the LATEST SystemMessage (LangGraph appends a new one on every request)
   // 2. Keep only the last 20 conversation messages
@@ -20,7 +38,12 @@ async function callModel(state: typeof GraphAnnotation.State) {
     convoMessages = convoMessages.slice(convoMessages.length - 20);
   }
   const finalMessages = latestSystemMessage ? [latestSystemMessage, ...convoMessages] : convoMessages;
-  const response = await model.invoke(finalMessages);
+  
+  console.log(`[AGENT] 🧠 Thinking... Mode: ${config?.configurable?.chatMode || 'default'}`);
+  
+  const response = await modelToUse.invoke(finalMessages);
+  
+  console.log(`[AGENT] ✅ Response received | model=${response.response_metadata?.model_name || 'unknown'}`);
   if (response.tool_calls && response.tool_calls.length > 1) {
     const seenMeals = new Set<string>();
     const filteredCalls: any[] = [];

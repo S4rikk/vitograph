@@ -36,7 +36,7 @@ const LAB_ANALYSIS_TIMEOUT_MS = 300_000;
 const LAB_ANALYSIS_TEMPERATURE = 0.4;
 
 /** Model for premium diagnostics. */
-const LAB_ANALYSIS_MODEL = "gpt-5.2";
+const LAB_ANALYSIS_MODEL = "gpt-4o";
 
 // ── System Prompt ───────────────────────────────────────────────────
 
@@ -199,24 +199,12 @@ function formatBiomarkersForLLM(results: BiomarkerInput[]): string {
 
 // ── Core Function ───────────────────────────────────────────────────
 
-/**
- * Runs GPT-5.2 diagnostic analysis on parsed biomarker results.
- *
- * 1. Calls GPT-5.2 with structured output (LabDiagnosticReportSchema)
- * 2. Saves the report to profiles.lab_diagnostic_reports (JSONB append)
- * 3. Returns the full LLM result with metadata
- */
 export async function runLabReportAnalyzer(
     biomarkerResults: BiomarkerInput[],
     userContext: string,
     userId: string,
     token: string,
 ): Promise<LabDiagnosticReport> {
-    const systemPrompt = LAB_DIAGNOSTIC_SYSTEM_PROMPT.replace(
-        "{userContext}",
-        userContext,
-    );
-
     const currentHash = generateBiomarkersHash(biomarkerResults);
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_ANON_KEY;
@@ -232,20 +220,39 @@ export async function runLabReportAnalyzer(
 
         const { data: profile } = await supabase
             .from("profiles")
-            .select("lab_diagnostic_reports")
+            .select("lab_diagnostic_reports, food_contraindication_zones, active_supplement_protocol")
             .eq("id", userId)
             .single();
 
-        existingReports = Array.isArray((profile as any)?.lab_diagnostic_reports)
-            ? (profile as any).lab_diagnostic_reports
-            : [];
+        if (profile) {
+            existingReports = Array.isArray((profile as any).lab_diagnostic_reports)
+                ? (profile as any).lab_diagnostic_reports
+                : [];
 
-        // Find existing report with the same hash
-        const existingMatch = existingReports.find((r: any) => r.data_hash === currentHash);
+            // Find existing report with the same hash
+            const existingMatch = existingReports.find((r: any) => r.data_hash === currentHash);
 
-        if (existingMatch && existingMatch.report) {
-            console.log(`[LabAnalyzer] 🔄 Duplicate found (hash: ${currentHash}). Returning existing report.`);
-            return existingMatch.report;
+            if (existingMatch && existingMatch.report) {
+                console.log(`[LabAnalyzer] 🔄 Duplicate found (hash: ${currentHash}). Returning existing report.`);
+                return existingMatch.report;
+            }
+
+            // --- Fetch current state for merging ---
+            const zones = (profile as any).food_contraindication_zones || { red: [], yellow: [], green: [] };
+            const leanZones = {
+                red: zones.red?.map((z: any) => z.substance) || [],
+                yellow: zones.yellow?.map((z: any) => z.substance) || [],
+                green: zones.green?.map((z: any) => z.substance) || [],
+            };
+
+            const supps = (profile as any).active_supplement_protocol?.items;
+
+            const stateContext = `
+--- CURRENT_CONSTRAINTS (Existing state to MERGE with) ---
+FOOD ZONES: ${JSON.stringify(leanZones)}
+SUPPLEMENTS: ${JSON.stringify(supps ? supps : [])}
+`;
+            userContext += stateContext;
         }
     }
 
@@ -253,7 +260,7 @@ export async function runLabReportAnalyzer(
     const result = await callLlmStructured({
         schema: LabDiagnosticReportSchema,
         schemaName: "lab_diagnostic_report",
-        systemPrompt,
+        systemPrompt: LAB_DIAGNOSTIC_SYSTEM_PROMPT.replace("{userContext}", userContext),
         userMessage: formatBiomarkersForLLM(biomarkerResults),
         model: LAB_ANALYSIS_MODEL,
         temperature: LAB_ANALYSIS_TEMPERATURE,
@@ -261,6 +268,8 @@ export async function runLabReportAnalyzer(
         maxRetries: LLM_RETRIES.async,
         fallback: LAB_DIAGNOSTIC_FALLBACK,
     });
+
+    console.log(`[LabAnalyzer] Tokens used: ${result.usage?.totalTokens ?? "n/a"}`);
 
     if (result.source === "fallback") {
         console.warn("[AI:LabAnalyzer] Using fallback — LLM unavailable");

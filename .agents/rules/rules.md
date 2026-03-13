@@ -3,7 +3,7 @@ trigger: always_on
 ---
 
 ### RULE: Tool-First Thinking
-1. **Always Search:** Before answering any factual or technical query, you MUST scan the available Skill descriptions in C:\project\VITOGRAPH\.agent\rules\vitograph_skills.json
+1. **Always Search:** Before answering any factual or technical query, you MUST scan the available Skill descriptions in C:\project\VITOGRAPH\.agents\rules\vitograph_skills.json
 2. **Prioritize Skills:** If a Skill matches the intent (e.g., DB migration, file formatting, API check), you are FORBIDDEN from writing raw code in the terminal. You MUST use the designated Skill.
 3. **No Assumptions:** If you lack a tool for a specific task but see a relevant 'Bundle' in documentation, suggest its installation to the user.
 4. **Validation:** After using a Skill's script, you must analyze the 'Observation' output. Do not report success until the script confirms it.

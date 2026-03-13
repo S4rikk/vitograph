@@ -142,6 +142,8 @@ export const logMealTool = new DynamicStructuredTool({
       if (micronutrients.sodium_mg) microsDb["Натрий (мг)"] = micronutrients.sodium_mg;
     }
 
+    const isoNow = new Date().toISOString();
+    
     // 1. Create Meal Log
     const { data: log, error: logError } = await supabase.from("meal_logs").insert({
       user_id: userId,
@@ -150,6 +152,7 @@ export const logMealTool = new DynamicStructuredTool({
       micronutrients: microsDb,
       meal_quality_score: meal_quality_score,
       meal_quality_reason: meal_quality_reason,
+      logged_at: isoNow,
       notes: `AI Logged`,
       source: "manual"
     }).select("id").single();
@@ -160,11 +163,8 @@ export const logMealTool = new DynamicStructuredTool({
     const { error: itemError } = await supabase.from("meal_items").insert({
       meal_log_id: log.id,
       food_name: food_name,
-      weight_g: weight_g,
+      portion_grams: weight_g,
       calories: calories,
-      protein_g: protein_g,
-      fat_g: fat_g,
-      carbs_g: carbs_g
     });
 
     if (itemError) return `Failed to add meal item: ${itemError.message}`;
