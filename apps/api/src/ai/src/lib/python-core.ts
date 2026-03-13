@@ -65,7 +65,7 @@ class PythonCoreClient {
   /**
    * Generic fetch wrapper with error handling
    */
-  private async request<T>(
+  public async request<T>(
     endpoint: string,
     options: RequestInit = {},
     timeoutMs: number = 90_000

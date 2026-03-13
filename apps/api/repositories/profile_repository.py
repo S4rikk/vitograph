@@ -63,6 +63,7 @@ class ProfileRepository:
             response = (
                 await client.table(_TABLE)
                 .insert(data.model_dump(mode="json"))
+                .select("*")
                 .execute()
             )
         except Exception as exc:
@@ -160,6 +161,7 @@ class ProfileRepository:
             response = (
                 await client.table(_TABLE)
                 .upsert(upsert_payload, on_conflict="id")
+                .select("*")
                 .execute()
             )
         except Exception as exc:
