@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["vg.sanderok.uk", "localhost:3000"],
+  allowedDevOrigins: ["vg.sanderok.uk", "vitograph.com", "www.vitograph.com", "localhost:3000"],
   reactCompiler: true,
   async rewrites() {
     return [

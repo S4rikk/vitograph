@@ -1,35 +1,56 @@
-# TASK: Автоматический деплой и верификация (Phase 53f)
+# TASK: Domain Migration to vitograph.com
 
 **Required Skills:**
-1. `systematic-debugging` — Read `C:\store\ag_skills\skills\systematic-debugging\SKILL.md`.
-2. `fastapi-pro` — Read `C:\store\ag_skills\skills\fastapi-pro\SKILL.md`.
-3. `python-pro` — Read `C:\store\ag_skills\skills\python-pro\SKILL.md`.
+- Read `C:\store\ag_skills\skills\senior-architect\SKILL.md` before coding.
+- Read `C:\store\ag_skills\skills\nodejs-backend-patterns\SKILL.md` before coding.
+- Read `C:\store\ag_skills\skills\nextjs-app-router-patterns\SKILL.md` before coding.
 
 **Architecture Context:**
-Мы подтвердили локально (через `verify_fixes.py`), что:
-- Исправлен синтаксис Supabase в `profile_repository.py` (удален `.select("*")`).
-- Добавлены маршруты `GET /me` и `PATCH /me` в `profiles.py`.
-- Обновлен список `influential_fields` для сброса кэша норм.
-- Исправлено логирование и обработка 500 ошибок в `main.py`.
+We are migrating the production domain from `vg.sanderok.uk` to `vitograph.com`. 
+DNS records are already set up in Cloudflare (A records for `@` and `www` pointing to `69.12.79.201`).
+Cloudflare SSL is set to "Full (strict)".
+Server uses Caddy as a reverse proxy.
+
+Reference: `C:\project\kOSI\docs\infrastructure\domain_migration.md`
 
 **Implementation Steps:**
-Следуй воркфлоу `C:\project\kOSI\.agents\workflows\auto_deploy_vg.md`:
 
-1. **Push & Restart:** Запусти скрипт деплоя с комментарием:
-   ```powershell
-   .\deploy_to_server_vg.bat "Fix: Profile save syntax, logging, and /me routes (Phase 53f)"
-   ```
-   *Ожидай завершения (git push + скрипт на VPS).*
+1. **Update Frontend Config**:
+   - Modify `C:\project\VITOGRAPH\apps\web\next.config.ts`.
+   - Update `allowedDevOrigins` to include `vitograph.com` and `www.vitograph.com`.
 
-2. **Log Verification:** Проверь состояние сервисов после рестарта:
-   ```powershell
-   .\fetch_logs_vg.bat
-   ```
-   Внимательно проанализируй вывод:
-   - Нет ли синтаксических ошибок в `vitograph-api` (FastAPI).
-   - Поднялись ли сервисы `vitograph` и `vitograph-ai`.
-   - Если видишь ошибки — используй `systematic-debugging`, исправь и повтори шаг 1.
+2. **Update Server Proxy (Caddy)**:
+   - Connect to the server via SSH (if your tools allow, or provide the exact content for the user to update).
+   - Update `/etc/caddy/Caddyfile` on the VPS.
+   - The new configuration must handle `vitograph.com` and `www.vitograph.com`.
+   - **CRITICAL**: Maintain the direct route for `/api/v1/*` to port `3001` with `response_header_timeout 300s` to avoid 30s timeouts on long AI requests.
+   - Add a redirect from `vg.sanderok.uk` to `https://vitograph.com`.
 
-3. **Отчет:** После успешного деплоя (чистые логи) обнови `C:\project\kOSI\next_report.md`.
+Proposed Caddyfile structure:
+```caddy
+vitograph.com, www.vitograph.com {
+    handle_path /api/v1/* {
+        reverse_proxy localhost:3001 {
+            transport http {
+                response_header_timeout 300s
+            }
+        }
+    }
+    reverse_proxy localhost:3000
+}
 
-Использованные скиллы: systematic-debugging, fastapi-pro, python-pro
+vg.sanderok.uk {
+    redir https://vitograph.com{uri}
+}
+```
+
+3. **Reload Services**:
+   - Reload Caddy: `systemctl reload caddy`.
+   - Restart PM2 apps to ensure they pick up any environment changes if applicable: `pm2 restart all`.
+
+4. **Verification**:
+   - Verify that `https://vitograph.com` is accessible and has a valid SSL certificate.
+   - Verify that `https://vg.sanderok.uk` redirects to the new domain.
+   - Verify that a long-running AI API call (like lab analysis) doesn't time out after 30s.
+
+**Workflow Reminder**: Use `@[/auto_deploy_vg]` after code changes to push and restart.
