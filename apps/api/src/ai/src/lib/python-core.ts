@@ -81,9 +81,9 @@ class PythonCoreClient {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(
-          `Python Core Error (${response.status}): ${errorText}`
-        );
+        const error = new Error(`Python Core Error (${response.status}): ${errorText}`);
+        (error as any).statusCode = response.status;
+        throw error;
       }
 
       return (await response.json()) as T;

@@ -11,6 +11,9 @@ profilesRouter.get("/:userId", async (req, res, next) => {
   try {
     const response = await pythonCore.request(`/api/v1/profiles/${req.params.userId}`, {
       method: "GET",
+      headers: {
+        ...(req.headers.authorization ? { Authorization: req.headers.authorization } : {}),
+      },
     });
     res.json(response);
   } catch (error) {
@@ -23,6 +26,10 @@ profilesRouter.patch("/:userId", async (req, res, next) => {
   try {
     const response = await pythonCore.request(`/api/v1/profiles/${req.params.userId}`, {
       method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        ...(req.headers.authorization ? { Authorization: req.headers.authorization } : {}),
+      },
       body: JSON.stringify(req.body),
     });
     res.json(response);
@@ -36,6 +43,10 @@ profilesRouter.post("/", async (req, res, next) => {
   try {
     const response = await pythonCore.request("/api/v1/profiles", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(req.headers.authorization ? { Authorization: req.headers.authorization } : {}),
+      },
       body: JSON.stringify(req.body),
     });
     res.status(201).json(response);

@@ -10,8 +10,13 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, List
 
-from fastapi import FastAPI, File, HTTPException, UploadFile, status
+from fastapi import FastAPI, File, HTTPException, UploadFile, status, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+import logging
+import traceback
+
+logger = logging.getLogger(__name__)
 
 from api.v1.endpoints import analysis, analytics, norms, profiles, test_results, users
 from core.database import supabase_manager
@@ -65,6 +70,37 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Pass through HTTPExceptions so they aren't caught by the global handler."""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Catch all unhandled exceptions and log full traceback."""
+    error_traceback = traceback.format_exc()
+    logger.error(f"Global Exception Handler caught: {exc}\n{error_traceback}")
+    
+    # In a real app, we might check an env var like DEBUG or ENV
+    # For now, following the TZ to return detailed info if possible
+    content = {
+        "detail": "Internal Server Error",
+        "error": str(exc)
+    }
+    
+    # Add traceback ONLY if we are NOT in production (or keep it for now as per TZ)
+    content["traceback"] = error_traceback
+    
+    return JSONResponse(
+        status_code=500,
+        content=content,
+    )
+
 
 # ── Routers ──────────────────────────────────────────────────────────
 

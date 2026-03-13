@@ -50,8 +50,8 @@ class ProfileBase(BaseModel):
     alcohol_frequency: AlcoholFrequency | None = None
     pregnancy_status: PregnancyStatus | None = None
 
-    chronic_conditions: list[str] = Field(default_factory=list)
-    medications: list[str] = Field(default_factory=list)
+    chronic_conditions: list[str] | None = Field(default_factory=list)
+    medications: list[str] | None = Field(default_factory=list)
 
     city: str | None = None
     timezone: str | None = None
@@ -114,5 +114,5 @@ class ProfileRead(ProfileBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
-    created_at: datetime.datetime
-    updated_at: datetime.datetime
+    created_at: datetime.datetime | None = None
+    updated_at: datetime.datetime | None = None

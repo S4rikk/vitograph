@@ -30,7 +30,7 @@ export function errorHandler(
 ): void {
   /* ── Known operational errors ──────────────────────────────── */
   if (err instanceof AppError || ('statusCode' in err && typeof (err as any).statusCode === 'number')) {
-    const statusCode = err instanceof AppError ? err.statusCode : (err as any).statusCode;
+    const statusCode = (err as any).statusCode;
     const message = err.message;
 
     const payload: Record<string, unknown> = {

@@ -63,7 +63,6 @@ class ProfileRepository:
             response = (
                 await client.table(_TABLE)
                 .insert(data.model_dump(mode="json"))
-                .select("*")
                 .execute()
             )
         except Exception as exc:
@@ -76,7 +75,9 @@ class ProfileRepository:
             logger.exception("Failed to create profile %s", data.id)
             raise DatabaseError(f"Failed to create profile: {exc}") from exc
 
-        if not response.data:
+        if not response.data or len(response.data) == 0:
+            if hasattr(response, "error") and response.error:
+                logger.error(f"PostgREST Error during create: {response.error}")
             raise DatabaseError("Insert returned no data")
 
         logger.info("Created profile %s", data.id)
@@ -116,6 +117,13 @@ class ProfileRepository:
 
         if response is None or not getattr(response, "data", None):
             raise RecordNotFoundError(
+                table=_TABLE,
+                identifier=str(profile_id),
+            )
+
+        # Safety check: if maybe_single returned data but it's empty
+        if not response.data:
+             raise RecordNotFoundError(
                 table=_TABLE,
                 identifier=str(profile_id),
             )
@@ -161,21 +169,21 @@ class ProfileRepository:
             response = (
                 await client.table(_TABLE)
                 .upsert(upsert_payload, on_conflict="id")
-                .select("*")
                 .execute()
             )
         except Exception as exc:
             logger.exception("Failed to upsert profile %s", profile_id)
             raise DatabaseError(f"Failed to upsert profile: {exc}") from exc
 
-        if response is None or not getattr(response, "data", None):
+        if not response.data or len(response.data) == 0:
+            if hasattr(response, "error") and response.error:
+                logger.error(f"PostgREST Error during upsert: {response.error}")
             # If for some reason upsert returns empty
             raise RecordNotFoundError(
                 table=_TABLE,
                 identifier=str(profile_id),
             )
 
-        logger.info("Upserted profile %s", profile_id)
         return ProfileRead.model_validate(response.data[0])
 
     # ── DELETE ───────────────────────────────────────────────────
