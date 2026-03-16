@@ -20,7 +20,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -779,6 +781,10 @@ model MealLog {
   /// AI-computed short explanation of the score
   mealQualityReason String? @map("meal_quality_reason")
   source           String?  @default("manual")
+  micronutrients   Json     @default("{}") @map("micronutrients") @db.JsonB
+  totalProtein     Decimal? @map("total_protein") @db.Decimal(8, 2)
+  totalFat         Decimal? @map("total_fat") @db.Decimal(8, 2)
+  totalCarbs       Decimal? @map("total_carbs") @db.Decimal(8, 2)
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
 
@@ -800,6 +806,9 @@ model MealItem {
   foodName     String   @map("food_name")
   portionGrams Decimal  @map("portion_grams") @db.Decimal(8, 1)
   calories     Decimal? @db.Decimal(8, 1)
+  proteinG     Decimal? @map("protein_g") @db.Decimal(7, 2)
+  fatG         Decimal? @map("fat_g") @db.Decimal(7, 2)
+  carbsG       Decimal? @map("carbs_g") @db.Decimal(7, 2)
 
   mealLog  MealLog  @relation(fields: [mealLogId], references: [id], onDelete: Cascade)
   foodItem FoodItem @relation(fields: [foodItemId], references: [id])

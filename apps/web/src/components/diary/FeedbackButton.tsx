@@ -6,7 +6,7 @@ import { apiClient } from "@/lib/api-client";
 import { Bug, Send, Image as ImageIcon, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
-export function FeedbackButton() {
+export function FeedbackButton({ className }: { className?: string }) {
     const [open, setOpen] = useState(false);
     const [category, setCategory] = useState<"bug" | "suggestion">("bug");
     const [message, setMessage] = useState("");
@@ -80,7 +80,7 @@ export function FeedbackButton() {
 
     return (
         <>
-            <div className="fixed top-24 right-8 z-40 group">
+            <div className={`fixed top-24 right-4 sm:right-8 z-40 group ${className || ""}`}>
                 {/* Glowing pulse aura */}
                 <div className="absolute inset-0 rounded-full bg-indigo-500/60 blur-md animate-pulse pointer-events-none"></div>
 

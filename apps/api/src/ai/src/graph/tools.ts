@@ -149,22 +149,29 @@ export const logMealTool = new DynamicStructuredTool({
       user_id: userId,
       meal_type: meal_type,
       total_calories: calories,
+      total_protein: protein_g,
+      total_fat: fat_g,
+      total_carbs: carbs_g,
       micronutrients: microsDb,
       meal_quality_score: meal_quality_score,
       meal_quality_reason: meal_quality_reason,
       logged_at: isoNow,
       notes: `AI Logged`,
       source: "manual"
-    }).select("id").single();
+    }).select("id");
 
-    if (logError || !log) return `Failed to create meal log: ${logError?.message}`;
+    if (logError || !log || log.length === 0) return `Failed to create meal log: ${logError?.message}`;
+    const logId = log[0].id;
 
     // 2. Add Meal Item
     const { error: itemError } = await supabase.from("meal_items").insert({
-      meal_log_id: log.id,
+      meal_log_id: logId,
       food_name: food_name,
       portion_grams: weight_g,
       calories: calories,
+      protein_g: protein_g,
+      fat_g: fat_g,
+      carbs_g: carbs_g,
     });
 
     if (itemError) return `Failed to add meal item: ${itemError.message}`;

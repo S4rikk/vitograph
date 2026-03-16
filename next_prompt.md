@@ -1,56 +1,44 @@
-# TASK: Domain Migration to vitograph.com
+# ТЗ: Исправление записи еды и макронутриентов (Phase 53g)
 
-**Required Skills:**
-- Read `C:\store\ag_skills\skills\senior-architect\SKILL.md` before coding.
-- Read `C:\store\ag_skills\skills\nodejs-backend-patterns\SKILL.md` before coding.
-- Read `C:\store\ag_skills\skills\nextjs-app-router-patterns\SKILL.md` before coding.
+## 🎯 Цель
+Исправить ошибку записи еды в базу данных, возникшую из-за рассинхрона кода с новой схемой БД (миграция 034), и устранить предупреждения о CORS в логах.
 
-**Architecture Context:**
-We are migrating the production domain from `vg.sanderok.uk` to `vitograph.com`. 
-DNS records are already set up in Cloudflare (A records for `@` and `www` pointing to `69.12.79.201`).
-Cloudflare SSL is set to "Full (strict)".
-Server uses Caddy as a reverse proxy.
+## 🛠️ Скиллы для использования (в этом порядке)
+1. `nodejs-backend-patterns`
+2. `postgres-best-practices`
+3. `nextjs-app-router-patterns`
+4. `systematic-debugging`
 
-Reference: `C:\project\kOSI\docs\infrastructure\domain_migration.md`
+---
 
-**Implementation Steps:**
+## 📋 План действий
 
-1. **Update Frontend Config**:
-   - Modify `C:\project\VITOGRAPH\apps\web\next.config.ts`.
-   - Update `allowedDevOrigins` to include `vitograph.com` and `www.vitograph.com`.
+### 1. Обновление инструмента `log_meal` (AI Backend)
+**Файл:** `C:\project\VITOGRAPH\apps\api\src\ai\src\graph\tools.ts`
+- В функции `logMealTool`:
+    - При вставке в `meal_logs`: добавить колонки `total_protein: protein_g`, `total_fat: fat_g`, `total_carbs: carbs_g`.
+    - При вставке в `meal_items`: добавить колонки `protein_g`, `fat_g`, `carbs_g`.
+    - **ВАЖНО:** Заменить `.select("id").single()` на `.select("id")`. Если результат — массив, брать `[0].id`. Это предотвратит исключения, если RLS политика не дает мгновенно прочитать строку.
 
-2. **Update Server Proxy (Caddy)**:
-   - Connect to the server via SSH (if your tools allow, or provide the exact content for the user to update).
-   - Update `/etc/caddy/Caddyfile` on the VPS.
-   - The new configuration must handle `vitograph.com` and `www.vitograph.com`.
-   - **CRITICAL**: Maintain the direct route for `/api/v1/*` to port `3001` with `response_header_timeout 300s` to avoid 30s timeouts on long AI requests.
-   - Add a redirect from `vg.sanderok.uk` to `https://vitograph.com`.
+### 2. Обновление обработчика `AnalyzeFood` (Food Vision)
+**Файл:** `C:\project\VITOGRAPH\apps\api\src\ai\src\ai.controller.ts`
+- В функции `handleAnalyzeFood`:
+    - Рассчитать агрегированные макросы для всех найденных продуктов.
+    - При вставке в `meal_logs`: добавить `total_protein`, `total_fat`, `total_carbs` (общая сумма).
+    - При вставке в `meal_items`: убедиться, что `protein_g`, `fat_g`, `carbs_g` для каждого продукта записываются.
+    - Также использовать `.select("id")` без `.single()`.
 
-Proposed Caddyfile structure:
-```caddy
-vitograph.com, www.vitograph.com {
-    handle_path /api/v1/* {
-        reverse_proxy localhost:3001 {
-            transport http {
-                response_header_timeout 300s
-            }
-        }
-    }
-    reverse_proxy localhost:3000
-}
+### 3. Исправление CORS в Next.js (Frontend)
+**Файл:** `C:\project\VITOGRAPH\apps\web\next.config.ts` (или `.js`)
+- По логам видно `Blocked cross-origin request from 192.168.1.9`.
+- Добавь `allowedDevOrigins: ['192.168.1.9:3000']` в секцию `experimental` (согласно документации Next.js), чтобы разрешить разработку по локальной сети.
 
-vg.sanderok.uk {
-    redir https://vitograph.com{uri}
-}
-```
+### 4. Верификация
+- Запусти `fetch_logs_vg.bat` и убедись, что PM2 логи чистые при отправке еды текстом и через фото.
 
-3. **Reload Services**:
-   - Reload Caddy: `systemctl reload caddy`.
-   - Restart PM2 apps to ensure they pick up any environment changes if applicable: `pm2 restart all`.
+---
 
-4. **Verification**:
-   - Verify that `https://vitograph.com` is accessible and has a valid SSL certificate.
-   - Verify that `https://vg.sanderok.uk` redirects to the new domain.
-   - Verify that a long-running AI API call (like lab analysis) doesn't time out after 30s.
+## 🚀 Деплой
+После исправлений выполни `deploy_to_server_vg.bat`.
 
-**Workflow Reminder**: Use `@[/auto_deploy_vg]` after code changes to push and restart.
+Использованные скиллы: nodejs-backend-patterns, postgres-best-practices, nextjs-app-router-patterns

@@ -210,8 +210,8 @@ export default function FoodDiaryView() {
 
   return (
     <>
-      <FeedbackButton />
-      <div className="flex h-[750px] flex-col rounded-2xl border border-border bg-white shadow-sm overflow-hidden">
+      <FeedbackButton className="z-30" />
+      <div className="flex flex-col h-[100dvh] sm:h-[750px] sm:rounded-2xl border-x sm:border border-border bg-white overflow-hidden shadow-sm">
         {/* ── Header & Time Machine ──────────────────────── */}
         <div className="flex flex-col border-b border-border bg-surface-muted px-5 pt-3 pb-2">
           <div className="flex items-center gap-3 mb-3">
@@ -264,7 +264,7 @@ export default function FoodDiaryView() {
         </div>
 
         {/* ── Input ─────────────────────────────────────────── */}
-        <div className="border-t border-border p-3 bg-white">
+        <div className="sticky bottom-0 z-20 border-t border-border p-3 bg-white/80 backdrop-blur-md pb-[safe-area-inset-bottom]">
           <FoodInputForm onSubmit={handleSubmit} />
         </div>
       </div>

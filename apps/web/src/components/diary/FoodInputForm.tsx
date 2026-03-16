@@ -154,15 +154,15 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
       {/* ── Form ────────────────────────────────────────────────── */}
       <form
         onSubmit={handleSubmit}
-        className="flex items-end gap-3 rounded-2xl border border-border bg-white p-3 shadow-sm"
+        className="flex items-end gap-2 sm:gap-3 rounded-2xl border border-border bg-white p-2 sm:p-3 shadow-sm"
       >
         {/* Dish name and Camera */}
         <div className="flex-1 min-w-0">
           <label
             htmlFor="food-name"
-            className="block text-xs font-medium text-ink-muted mb-2 flex items-center justify-between gap-3"
+            className="block text-[10px] sm:text-xs font-medium text-ink-muted mb-1 sm:mb-2 flex items-center justify-between gap-2"
           >
-            <span>Название блюда</span>
+            <span>Блюдо</span>
             <button
               type="button"
               onClick={handleCameraClick}
@@ -214,7 +214,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
         <div className="w-24 flex-shrink-0">
           <label
             htmlFor="food-weight"
-            className="block text-xs font-medium text-ink-muted mb-1"
+            className="block text-[10px] sm:text-xs font-medium text-ink-muted mb-1"
           >
             Вес (г)
           </label>
@@ -234,7 +234,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
           type="submit"
           disabled={!isValid}
           aria-label="Отправить"
-          className={`cursor-pointer flex-shrink-0 rounded-xl p-2.5 transition-all duration-200 ${isValid ? "bg-primary-600 text-white shadow-sm hover:bg-primary-700 hover:shadow-md active:scale-95" : "bg-surface-hover text-ink-faint cursor-not-allowed"}`}
+          className={`cursor-pointer flex-shrink-0 rounded-xl p-3 sm:p-2.5 transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center ${isValid ? "bg-primary-600 text-white shadow-sm hover:bg-primary-700 hover:shadow-md active:scale-95" : "bg-surface-hover text-ink-faint cursor-not-allowed"}`}
         >
           <svg
             className="h-5 w-5"

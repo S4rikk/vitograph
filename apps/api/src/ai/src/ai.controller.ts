@@ -875,6 +875,9 @@ User Context: ${contextStr}`;
               user_id: req.user.id,
               meal_type: "snack",
               total_calories: calories,
+              total_protein: protein,
+              total_fat: fat,
+              total_carbs: carbs,
               source: "text_fail_safe",
               logged_at: new Date().toISOString(),
               notes: `Fail-safe recovery from: "${foodName}"`
@@ -1175,9 +1178,15 @@ export async function handleAnalyzeFood(
         const totalMicros: Record<string, number> = {};
         const isoNow = new Date().toISOString();
         let totalCals = 0;
+        let totalProtein = 0;
+        let totalFat = 0;
+        let totalCarbs = 0;
 
         result.items.forEach((item) => {
           totalCals += item.estimated_total.calories_kcal || 0;
+          totalProtein += item.estimated_total.protein_g || 0;
+          totalFat += item.estimated_total.fat_g || 0;
+          totalCarbs += item.estimated_total.carbs_g || 0;
           const calcMicro = (valuePer100g: number | null | undefined) => {
             if (typeof valuePer100g !== 'number') return 0;
             return Number(((valuePer100g * item.estimated_weight_g) / 100).toFixed(2));
@@ -1220,6 +1229,9 @@ export async function handleAnalyzeFood(
             user_id: userId,
             meal_type: "snack", // default for vision
             total_calories: totalCals,
+            total_protein: totalProtein,
+            total_fat: totalFat,
+            total_carbs: totalCarbs,
             micronutrients: totalMicros,
             source: "photo",
             logged_at: isoNow,
