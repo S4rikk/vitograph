@@ -804,7 +804,7 @@ model MealItem {
   mealLogId    Int      @map("meal_log_id")
   foodItemId   Int      @map("food_item_id")
   foodName     String   @map("food_name")
-  portionGrams Decimal  @map("portion_grams") @db.Decimal(8, 1)
+  weightG       Decimal  @map("weight_g") @db.Decimal(8, 1)
   calories     Decimal? @db.Decimal(8, 1)
   proteinG     Decimal? @map("protein_g") @db.Decimal(7, 2)
   fatG         Decimal? @map("fat_g") @db.Decimal(7, 2)

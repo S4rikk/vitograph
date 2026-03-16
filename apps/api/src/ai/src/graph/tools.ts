@@ -148,10 +148,10 @@ export const logMealTool = new DynamicStructuredTool({
     const { data: log, error: logError } = await supabase.from("meal_logs").insert({
       user_id: userId,
       meal_type: meal_type,
-      total_calories: calories,
-      total_protein: protein_g,
-      total_fat: fat_g,
-      total_carbs: carbs_g,
+      total_calories: Number(calories),
+      total_protein: Number(protein_g),
+      total_fat: Number(fat_g),
+      total_carbs: Number(carbs_g),
       micronutrients: microsDb,
       meal_quality_score: meal_quality_score,
       meal_quality_reason: meal_quality_reason,
@@ -167,11 +167,11 @@ export const logMealTool = new DynamicStructuredTool({
     const { error: itemError } = await supabase.from("meal_items").insert({
       meal_log_id: logId,
       food_name: food_name,
-      portion_grams: weight_g,
-      calories: calories,
-      protein_g: protein_g,
-      fat_g: fat_g,
-      carbs_g: carbs_g,
+      weight_g: weight_g,
+      calories: Number(calories),
+      protein_g: Number(protein_g),
+      fat_g: Number(fat_g),
+      carbs_g: Number(carbs_g),
     });
 
     if (itemError) return `Failed to add meal item: ${itemError.message}`;
