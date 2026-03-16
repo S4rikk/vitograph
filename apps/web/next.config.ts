@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["vg.sanderok.uk", "vitograph.com", "www.vitograph.com", "localhost:3000", "192.168.1.9:3000"],
   reactCompiler: true,
   async rewrites() {
     return [
@@ -16,12 +17,9 @@ const nextConfig: NextConfig = {
     ];
   },
   serverExternalPackages: ["@prisma/client", "bcrypt"],
-  experimental: {
-    allowedDevOrigins: ["vg.sanderok.uk", "vitograph.com", "www.vitograph.com", "localhost:3000", "192.168.1.9:3000"],
-    turbopack: {
-      // Force Turbopack to follow the app's own directory as root to find local node_modules
-      root: "./",
-    },
+  turbopack: {
+    // Force Turbopack to follow the app's own directory as root to find local node_modules
+    root: "./",
   },
 };
 export default nextConfig;
