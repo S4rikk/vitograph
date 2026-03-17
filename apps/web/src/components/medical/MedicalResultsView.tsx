@@ -427,7 +427,7 @@ export default function MedicalResultsView() {
           </div>
 
           {/* ── Общие Рекомендации ───────────────────────────────────── */}
-          {results.general_recommendations && results.general_recommendations.length > 0 && (
+          {results?.general_recommendations && results.general_recommendations.length > 0 && (
             <div className="mt-10 overflow-hidden rounded-2xl border border-cyan-200 bg-gradient-to-br from-cyan-50 to-white shadow-sm">
               <div className="p-6 md:p-8">
                 <div className="flex items-center gap-3 mb-6">
@@ -454,7 +454,7 @@ export default function MedicalResultsView() {
       )}
 
       {/* ── Empty State ───────────────────────────────────── */}
-      {(!results || results.biomarkers.length === 0) && uploadState === "done" && (
+      {(!results || (results.biomarkers?.length ?? 0) === 0) && uploadState === "done" && (
         <p className="text-center text-ink-muted">Анализы не найдены.</p>
       )}
 
