@@ -213,28 +213,7 @@ export default function FoodDiaryView() {
       <FeedbackButton className="z-30" />
       <div className="flex flex-col h-[100dvh] sm:h-[750px] sm:rounded-2xl border-x sm:border border-border bg-white overflow-hidden shadow-sm">
         {/* ── Header & Time Machine ──────────────────────── */}
-        <div className="flex flex-col border-b border-border bg-surface-muted px-5 pt-3 pb-2">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100">
-              <svg
-                className="h-5 w-5 text-primary-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"
-                />
-              </svg>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-ink">Дневник питания</h3>
-            </div>
-          </div>
-
+        <div className="flex flex-col bg-surface-muted px-5 pt-5 pb-2">
           <DatePaginator selectedDate={selectedDate} onChange={setSelectedDate} />
         </div>
 

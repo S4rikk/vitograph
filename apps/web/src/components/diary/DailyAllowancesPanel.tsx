@@ -106,99 +106,122 @@ export default function DailyAllowancesPanel({
 
   const microsEntries = Object.entries(normalizedConsumed);
 
-  const calcPercent = (val: number, max: number) => Math.min(100, Math.max(0, (val / max) * 100));
+  const calcPercentSafe = (val: number, max: number) => Math.min(100, Math.max(0, (val / Math.max(max, 1)) * 100));
 
-  const getColor = (percent: number) => {
-    if (percent < 90) return 'bg-green-500'; // Or primary-500
-    if (percent <= 105) return 'bg-yellow-500';
-    return 'bg-red-500';
-  };
-
-  const getStrokeColor = (percent: number) => {
-    if (percent < 90) return 'text-primary-500';
-    if (percent <= 105) return 'text-yellow-500';
-    return 'text-red-500';
-  };
-
-  const cCalPercent = calcPercent(consumed.calories, dynamicTarget.calories);
+  const cCalPercent = calcPercentSafe(consumed.calories, dynamicTarget.calories);
   // Circular calc
-  const radius = 30;
+  const radius = 32;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (cCalPercent / 100) * circumference;
 
   const hasRulesApplied = rationale && rationale !== "Базовая норма (профиль не заполнен)." && rationale !== "Базовая норма";
 
+  const MACROS_CONFIG = [
+    {
+      label: "БЕЛКИ",
+      emoji: "💪",
+      value: consumed.protein,
+      target: dynamicTarget.protein,
+      bg: "bg-[#EFF6FF]",
+      text: "text-[#2563EB]",
+      gradient: "from-[#60A5FA] to-[#2563EB]",
+    },
+    {
+      label: "ЖИРЫ",
+      emoji: "🫒",
+      value: consumed.fat,
+      target: dynamicTarget.fat,
+      bg: "bg-[#FFFBEB]",
+      text: "text-[#D97706]",
+      gradient: "from-[#FBBF24] to-[#D97706]",
+    },
+    {
+      label: "УГЛЕВОДЫ",
+      emoji: "🌾",
+      value: consumed.carbs,
+      target: dynamicTarget.carbs,
+      bg: "bg-[#ECFDF5]",
+      text: "text-[#059669]",
+      gradient: "from-[#34D399] to-[#059669]",
+    }
+  ];
+
   return (
     <div className="bg-surface-muted border-b border-border p-4">
-      {/* Top Flex for Calories & Macros */}
-      <div className="flex gap-6 items-center flex-wrap sm:flex-nowrap relative">
-        {/* Calories - Circular Progress */}
-        <div className="relative flex flex-col items-center justify-center min-w-[80px]">
-          <svg className="transform -rotate-90 w-20 h-20">
-            <circle
-              cx="40"
-              cy="40"
-              r={radius}
-              stroke="currentColor"
-              strokeWidth="6"
-              fill="transparent"
-              className="text-cloud-dark"
-            />
-            <circle
-              cx="40"
-              cy="40"
-              r={radius}
-              stroke="currentColor"
-              strokeWidth="6"
-              fill="transparent"
-              strokeDasharray={circumference}
-              strokeDashoffset={strokeDashoffset}
-              strokeLinecap="round"
-              className={`${getStrokeColor(cCalPercent)} transition-all duration-500 ease-out`}
-            />
-          </svg>
-          <div className="absolute flex flex-col items-center justify-center">
-            <span className="text-sm font-bold text-ink leading-none">{Math.round(consumed.calories)}</span>
-            <span className="text-[10px] text-ink-faint">/ {dynamicTarget.calories}</span>
+      {/* ── New Modular BJU Block ────────────────────────── */}
+      <div className="bg-white rounded-[20px] shadow-sm border border-border overflow-hidden animate-fade-in-up mb-4 mx-1 mt-1">
+        {/* Calorie Header */}
+        <div className="flex items-center gap-4 px-5 pt-5 pb-1">
+          {/* Ring */}
+          <div className="relative w-20 h-20 shrink-0 flex items-center justify-center">
+            <svg viewBox="0 0 80 80" className="w-full h-full transform -rotate-90">
+              <circle
+                cx="40"
+                cy="40"
+                r={radius}
+                stroke="currentColor"
+                strokeWidth="6"
+                fill="transparent"
+                className="text-[#FFEDD5]"
+              />
+              <circle
+                cx="40"
+                cy="40"
+                r={radius}
+                stroke="currentColor"
+                strokeWidth="6"
+                fill="transparent"
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                strokeLinecap="round"
+                className="text-[#F97316] transition-all duration-500 ease-out"
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+              <div className="flex items-center gap-0.5 leading-none mb-0.5">
+                <span className="text-[22px] font-[800] text-ink">{Math.round(consumed.calories)}</span>
+                <span className="text-[11px]">🔥</span>
+              </div>
+              <span className="text-[9px] text-ink-muted leading-none">/ {dynamicTarget.calories}</span>
+            </div>
           </div>
-          <span className="text-[10px] uppercase font-semibold text-ink-muted mt-1 tracking-wider">Ккал</span>
+
+          {/* Text Info */}
+          <div className="flex flex-col gap-0.5">
+            <h4 className="text-sm font-bold text-ink">Калории за день</h4>
+            <div className="text-xs text-ink-muted">
+              Осталось <span className="font-bold text-[#F97316]">{Math.max(0, dynamicTarget.calories - Math.round(consumed.calories))}</span> <span className="font-bold text-[#F97316]">ккал</span>
+            </div>
+            <div className="text-[11px] text-ink-faint">≈ обед + перекус до нормы</div>
+          </div>
         </div>
 
-        {/* Macros - Linear Progress */}
-        <div className="flex-1 space-y-3 min-w-[200px] mt-4 sm:mt-0">
-
-          {/* Protein */}
-          <div className="flex flex-col">
-            <div className="flex justify-between items-end mb-1">
-              <span className="text-xs font-semibold text-ink-muted">Белки</span>
-              <span className="text-xs font-semibold text-ink">{Math.round(consumed.protein)} <span className="text-[10px] font-normal text-ink-faint">/ {dynamicTarget.protein}г</span></span>
-            </div>
-            <div className="h-2 w-full bg-cloud-dark rounded-full overflow-hidden">
-              <div className={`h-full rounded-full transition-all duration-500 ${getColor(calcPercent(consumed.protein, dynamicTarget.protein))}`} style={{ width: `${calcPercent(consumed.protein, dynamicTarget.protein)}%` }} />
-            </div>
-          </div>
-
-          {/* Fats */}
-          <div className="flex flex-col">
-            <div className="flex justify-between items-end mb-1">
-              <span className="text-xs font-semibold text-ink-muted">Жиры</span>
-              <span className="text-xs font-semibold text-ink">{Math.round(consumed.fat)} <span className="text-[10px] font-normal text-ink-faint">/ {dynamicTarget.fat}г</span></span>
-            </div>
-            <div className="h-2 w-full bg-cloud-dark rounded-full overflow-hidden">
-              <div className={`h-full rounded-full transition-all duration-500 ${getColor(calcPercent(consumed.fat, dynamicTarget.fat))}`} style={{ width: `${calcPercent(consumed.fat, dynamicTarget.fat)}%` }} />
-            </div>
-          </div>
-
-          {/* Carbs */}
-          <div className="flex flex-col">
-            <div className="flex justify-between items-end mb-1">
-              <span className="text-xs font-semibold text-ink-muted">Углеводы</span>
-              <span className="text-xs font-semibold text-ink">{Math.round(consumed.carbs)} <span className="text-[10px] font-normal text-ink-faint">/ {dynamicTarget.carbs}г</span></span>
-            </div>
-            <div className="h-2 w-full bg-cloud-dark rounded-full overflow-hidden">
-              <div className={`h-full rounded-full transition-all duration-500 ${getColor(calcPercent(consumed.carbs, dynamicTarget.carbs))}`} style={{ width: `${calcPercent(consumed.carbs, dynamicTarget.carbs)}%` }} />
-            </div>
-          </div>
+        {/* Macros Grid */}
+        <div className="flex gap-2.5 px-4 pb-4 pt-2">
+          {MACROS_CONFIG.map((macro) => {
+            const percent = calcPercentSafe(macro.value, macro.target);
+            return (
+              <div 
+                key={macro.label}
+                className={`${macro.bg} flex-1 rounded-[14px] p-2.5 text-center transition-transform hover:-translate-y-0.5 hover:shadow-md cursor-default flex flex-col items-center`}
+              >
+                <span className="text-lg mb-0.5">{macro.emoji}</span>
+                <span className={`text-[9px] font-semibold uppercase tracking-wide ${macro.text}`}>{macro.label}</span>
+                <span className="text-[18px] font-[800] text-ink leading-none mt-1">{Math.round(macro.value)}</span>
+                <span className="text-[9px] text-ink-muted mb-2"> / {macro.target} г</span>
+                
+                {/* Progress track */}
+                <div className="w-full h-1.5 bg-black/5 rounded-full overflow-hidden">
+                  {/* Progress fill */}
+                  <div 
+                    className={`h-full rounded-full transition-all duration-500 bg-gradient-to-r ${macro.gradient}`}
+                    style={{ width: `${percent}%` }}
+                  />
+                </div>
+                <span className={`text-[10px] font-bold mt-1.5 ${macro.text}`}>{Math.round(percent)}%</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 

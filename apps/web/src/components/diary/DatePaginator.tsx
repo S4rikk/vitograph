@@ -52,18 +52,16 @@ export default function DatePaginator({ selectedDate, onChange }: DatePaginatorP
   };
 
   return (
-    <div className="flex items-center justify-between bg-surface-muted rounded-xl p-1 mb-4 border border-border">
+    <div className="flex items-center justify-between bg-white rounded-2xl p-1 mb-4 shadow-sm">
       <button 
         onClick={handlePrev}
-        className="p-2 hover:bg-white rounded-lg transition-colors text-ink-muted hover:text-ink"
+        className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-500"
       >
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
+        <span className="text-xs">◀</span>
       </button>
 
       <div className="flex-1 text-center flex flex-col items-center justify-center cursor-pointer" onClick={handleToday}>
-        <span className="text-sm font-semibold text-ink">{label}</span>
+        <span className="text-[15px] font-bold text-ink">{label}</span>
         {!isToday && (
           <span className="text-[10px] text-primary-600 hover:text-primary-700 font-medium tracking-wide uppercase mt-0.5">
             Вернуться в сегодня
@@ -74,11 +72,9 @@ export default function DatePaginator({ selectedDate, onChange }: DatePaginatorP
       <button 
         onClick={handleNext}
         disabled={isToday}
-        className={`p-2 rounded-lg transition-colors ${isToday ? 'opacity-30 cursor-not-allowed text-ink-faint' : 'hover:bg-white text-ink-muted hover:text-ink'}`}
+        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isToday ? 'opacity-30 cursor-not-allowed bg-gray-50 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-500'}`}
       >
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
+        <span className="text-xs">▶</span>
       </button>
     </div>
   );

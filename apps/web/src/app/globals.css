@@ -36,6 +36,16 @@
   /* Border */
   --color-border: #e2e8f0;
   --color-border-strong: #cbd5e1;
+
+  /* Macro Colors Stage 1 */
+  --color-cal-ring-track: #FFEDD5;
+  --color-cal-ring-fill: #F97316;
+  --color-protein-bg: #EFF6FF;
+  --color-protein-text: #2563EB;
+  --color-fat-bg: #FFFBEB;
+  --color-fat-text: #D97706;
+  --color-carb-bg: #ECFDF5;
+  --color-carb-text: #059669;
 }
 
 /* ── Base styles ──────────────────────────────────────────── */
@@ -87,3 +97,9 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up { animation: fadeInUp 0.5s ease-out both; }
