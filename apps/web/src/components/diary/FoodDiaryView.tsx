@@ -162,7 +162,7 @@ export default function FoodDiaryView() {
     }
   }, [messages]);
 
-  const handleSubmit = useCallback((name: string, weight: number) => {
+  const handleSubmit = useCallback((name: string, weight: number, nutritionalContext?: any) => {
     const now = new Date();
     const time = `${now.getHours().toString().padStart(2, "0")}:${now
       .getMinutes()
@@ -183,7 +183,7 @@ export default function FoodDiaryView() {
 
     // Call AI API via LangGraph integration
     apiClient
-      .chat(textPayload, threadId)
+      .chat(textPayload, threadId, undefined, "diary", undefined, nutritionalContext)
       .then((payload) => {
         const aiMsg: Message = {
           id: nextId.current++,

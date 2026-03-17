@@ -107,6 +107,8 @@ export interface LlmCallOptions<T extends AnyZodObject> {
   readonly model?: string;
   /** Optional temperature override (defaults to 0.7). */
   readonly temperature?: number;
+  /** Optional max output tokens override. */
+  readonly maxOutputTokens?: number;
   /** Optional: Force routing to custom router (defaults to true for non-excluded tasks). */
   readonly useRouter?: boolean;
 }
@@ -164,6 +166,7 @@ export async function callLlmStructured<T extends AnyZodObject>(
   const providerName = shouldTryRouter ? "router" : "openai";
 
   try {
+    // @ts-ignore - maxOutputTokens is supported in AI SDK 6.x but types might be outdated
     const result = await generateObject({
       model: initialProvider(initialModel),
       output: "object" as const,
@@ -175,6 +178,7 @@ export async function callLlmStructured<T extends AnyZodObject>(
       maxRetries: shouldTryRouter ? 0 : options.maxRetries,
       abortSignal: AbortSignal.timeout(shouldTryRouter ? Math.min(options.timeoutMs, LLM_TIMEOUTS.router) : options.timeoutMs),
       temperature: options.temperature ?? 0.7,
+      maxOutputTokens: options.maxOutputTokens,
     });
 
     return finalizeResult(result, startTime, options.schemaName, providerName, initialModel);
@@ -188,6 +192,7 @@ export async function callLlmStructured<T extends AnyZodObject>(
       console.log(`[LLM:FAILOVER] 🔄 Retrying via ${failoverModel}...`);
       
       try {
+        // @ts-ignore - maxOutputTokens is supported in AI SDK 6.x but types might be outdated
         const failoverResult = await generateObject({
           model: openai(failoverModel),
           output: "object" as const,
@@ -198,6 +203,7 @@ export async function callLlmStructured<T extends AnyZodObject>(
           maxRetries: options.maxRetries,
           abortSignal: AbortSignal.timeout(options.timeoutMs),
           temperature: options.temperature ?? 0.7,
+          maxOutputTokens: options.maxOutputTokens,
         });
 
         return finalizeResult(failoverResult, startTime, options.schemaName, "openai", failoverModel);

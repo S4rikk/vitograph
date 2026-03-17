@@ -39,6 +39,9 @@ export const ChatRequestSchema = z.object({
       is_pregnant: z.boolean().optional(),
     })
     .optional(),
+  
+  /** Optional nutritional context from Vision analysis (Phase 54) */
+  nutritionalContext: z.any().optional(),
 });
 
 export type ChatRequest = z.infer<typeof ChatRequestSchema>;

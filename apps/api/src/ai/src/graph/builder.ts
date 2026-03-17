@@ -37,6 +37,20 @@ async function callModel(state: typeof GraphAnnotation.State, config?: any) {
   if (convoMessages.length > 20) {
     convoMessages = convoMessages.slice(convoMessages.length - 20);
   }
+
+  // Phase 54: Nutritional Context scaling preservation
+  const nutritionalContext = config?.configurable?.nutritionalContext;
+  if (nutritionalContext) {
+    const { SystemMessage } = await import("@langchain/core/messages");
+    const visionSystemMessage = new SystemMessage(
+      `CRITICAL VISION ENFORCEMENT: The user has previously analyzed this meal via Vision. 
+       You MUST use EXACTLY these nutritional values for the \`log_meal\` tool:
+       ${JSON.stringify(nutritionalContext)}
+       Do not estimate them yourself. If the user changed the weight, these values have already been scaled correctly.`
+    );
+    convoMessages = [visionSystemMessage, ...convoMessages];
+  }
+
   const finalMessages = latestSystemMessage ? [latestSystemMessage, ...convoMessages] : convoMessages;
   
   console.log(`[AGENT] 🧠 Thinking... Mode: ${config?.configurable?.chatMode || 'default'}`);

@@ -1,6 +1,6 @@
 # VITOGRAPH — Architecture: Database Schema & API Structure
 
-> **Последнее обновление:** 5 марта 2026 (Phase 53f)
+> **Последнее обновление:** 16 марта 2026
 >
 > Смотрите также: [API Reference](./api_reference.md) | [Frontend Components](./frontend_components.md) | [AI Pipeline](./ai_pipeline.md)
 
@@ -408,6 +408,7 @@ apps/api/
 | `POST`   | `/api/v1/supplements/log`                   | Log supplement intake                           |
 | `POST`   | `/api/v1/integration/parse`                 | Parse PDF lab report + save to DB               |
 | `POST`   | `/api/v1/integration/parse-image`           | Parse lab report photo + save to DB             |
+| `POST`   | `/api/v1/integration/parse-image-batch`     | Parse batch of lab report photos (up to 10)     |
 | `POST`   | `/api/v1/integration/norms`                 | Calculate norms via Python Engine               |
 
 **Python Core API (port 8001):**

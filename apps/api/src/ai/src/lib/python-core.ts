@@ -183,6 +183,17 @@ class PythonCoreClient {
       300_000 // 5 minute timeout for batch processing
     );
   }
+
+  /**
+   * Recalculate biomarker notes and flags via Python Engine
+   */
+  async refreshBiomarkerNotesAction(biomarkers: BiomarkerResult[]): Promise<{ index: number; ai_clinical_note: string; flag: string }[]> {
+    return this.request<{ markers: { index: number; ai_clinical_note: string; flag: string }[] }>("/refresh-notes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ biomarkers })
+    }).then(res => res.markers);
+  }
 }
 
 export const pythonCore = new PythonCoreClient(PYTHON_CORE_URL);

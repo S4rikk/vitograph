@@ -93,6 +93,7 @@ export const logMealTool = new DynamicStructuredTool({
     carbs_g: z.number().describe("Estimated total carbohydrates in grams"),
     meal_quality_score: z.number().optional().describe("REQUIRED. A score from 0-100 indicating the nutritional quality/healthiness of the meal."),
     meal_quality_reason: z.string().optional().describe("REQUIRED. A short explanation of the meal quality score in Russian."),
+    source: z.string().optional().describe("Source of the log (e.g., 'photo', 'manual')"),
     micronutrients: z.object({
       vitamin_a_mcg: z.number().optional().describe("Vitamin A (mcg). DO NOT translate key."),
       vitamin_c_mg: z.number().optional().describe("Vitamin C (mg). DO NOT translate key."),
@@ -109,9 +110,10 @@ export const logMealTool = new DynamicStructuredTool({
       sodium_mg: z.number().optional().describe("Sodium (mg). DO NOT translate key.")
     }).optional().describe("Estimated vitamins and minerals based on weight. Provide absolute values. NEVER leave empty if food contains them. DO NOT TRANSLATE JSON KEYS INTO RUSSIAN.")
   }),
-  func: async ({ meal_type, food_name, weight_g, calories, protein_g, fat_g, carbs_g, micronutrients, meal_quality_score, meal_quality_reason }, runManager, config) => {
+  func: async ({ meal_type, food_name, weight_g, calories, protein_g, fat_g, carbs_g, micronutrients, meal_quality_score, meal_quality_reason, source }, runManager, config) => {
     const userId = config?.configurable?.user_id;
     const token = config?.configurable?.token;
+    const ctx = config?.configurable?.nutritionalContext;
 
     if (!userId || !token) {
       return "Error: User context not available. Cannot log meal without user auth.";
@@ -125,21 +127,87 @@ export const logMealTool = new DynamicStructuredTool({
       global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
-    const microsDb: Record<string, number> = {};
-    if (micronutrients) {
-      if (micronutrients.vitamin_a_mcg) microsDb["Витамин A (мкг)"] = micronutrients.vitamin_a_mcg;
-      if (micronutrients.vitamin_c_mg) microsDb["Витамин C (мг)"] = micronutrients.vitamin_c_mg;
-      if (micronutrients.vitamin_d_mcg) microsDb["Витамин D (мкг)"] = micronutrients.vitamin_d_mcg;
-      if (micronutrients.vitamin_e_mg) microsDb["Витамин E (мг)"] = micronutrients.vitamin_e_mg;
-      if (micronutrients.vitamin_b12_mcg) microsDb["Витамин B12 (мкг)"] = micronutrients.vitamin_b12_mcg;
-      if (micronutrients.folate_mcg) microsDb["Фолиевая кислота (мкг)"] = micronutrients.folate_mcg;
-      if (micronutrients.iron_mg) microsDb["Железо (мг)"] = micronutrients.iron_mg;
-      if (micronutrients.calcium_mg) microsDb["Кальций (мг)"] = micronutrients.calcium_mg;
-      if (micronutrients.magnesium_mg) microsDb["Магний (мг)"] = micronutrients.magnesium_mg;
-      if (micronutrients.zinc_mg) microsDb["Цинк (мг)"] = micronutrients.zinc_mg;
-      if (micronutrients.selenium_mcg) microsDb["Селен (мкг)"] = micronutrients.selenium_mcg;
-      if (micronutrients.potassium_mg) microsDb["Калий (мг)"] = micronutrients.potassium_mg;
-      if (micronutrients.sodium_mg) microsDb["Натрий (мг)"] = micronutrients.sodium_mg;
+    // --- SMART MERGE LOGIC ---
+    let finalCalories = Number(calories);
+    let finalProtein = Number(protein_g);
+    let finalFat = Number(fat_g);
+    let finalCarbs = Number(carbs_g);
+    let finalMicros: Record<string, number> = {};
+    let finalScore = meal_quality_score;
+    let finalReason = meal_quality_reason;
+    let finalSource = source || "manual";
+
+    if (ctx?.fullVisionResult) {
+      const res = ctx.fullVisionResult;
+      const totalEstimatedWeight = res.items.reduce((sum: number, i: any) => sum + (i.estimated_weight_g || 0), 0);
+      const scaleRatio = totalEstimatedWeight > 0 ? (ctx.userEnteredWeight / totalEstimatedWeight) : 1;
+      
+      console.log(`[SmartMerge] Vision result found. Scaling by ${scaleRatio.toFixed(2)} (User: ${ctx.userEnteredWeight} / GPT: ${totalEstimatedWeight})`);
+      
+      const mapping: Record<string, string> = {
+        vitamin_a_mcg: "Витамин A (мкг)",
+        vitamin_c_mg: "Витамин C (мг)",
+        vitamin_d_mcg: "Витамин D (мкг)",
+        vitamin_e_mg: "Витамин E (мг)",
+        vitamin_b12_mcg: "Витамин B12 (мкг)",
+        folate_mcg: "Фолиевая кислота (мкг)",
+        iron_mg: "Железо (мг)",
+        calcium_mg: "Кальций (мг)",
+        magnesium_mg: "Магний (мг)",
+        zinc_mg: "Цинк (мг)",
+        selenium_mcg: "Селен (мкг)",
+        potassium_mg: "Калий (мг)",
+        sodium_mg: "Натрий (мг)"
+      };
+
+      // 1. Use context macros (more accurate for vision)
+      if (res.meal_summary) {
+        finalCalories = res.meal_summary.total_calories_kcal * scaleRatio;
+        finalProtein = res.meal_summary.total_protein_g * scaleRatio;
+        finalFat = res.meal_summary.total_fat_g * scaleRatio;
+        finalCarbs = res.meal_summary.total_carbs_g * scaleRatio;
+      }
+
+      // 2. Aggregate Micronutrients from all items (SCALED)
+      res.items.forEach((item: any) => {
+        const itemWeightFactor = (item.estimated_weight_g || 0) / 100;
+        Object.entries(item.per_100g).forEach(([key, val]) => {
+          if (typeof val === 'number' && mapping[key]) {
+             finalMicros[mapping[key]] = (finalMicros[mapping[key]] || 0) + (val * itemWeightFactor * scaleRatio);
+          }
+        });
+      });
+
+      // 3. Aggregate Active Ingredients from all supplements (UNSCALED)
+      if (res.supplements) {
+        res.supplements.forEach((s: any) => {
+          s.active_ingredients?.forEach((ing: any) => {
+            const key = `${ing.ingredient_name} (${ing.unit})`;
+            finalMicros[key] = (finalMicros[key] || 0) + ing.amount;
+          });
+        });
+      }
+      
+      finalScore = res.meal_quality_score;
+      finalReason = res.meal_quality_reason;
+      finalSource = "photo";
+    }
+
+    // 3. Fallback/Augment with AI provided micros if context missing or for specific items
+    if (micronutrients && Object.keys(finalMicros).length === 0) {
+      if (micronutrients.vitamin_a_mcg) finalMicros["Витамин A (мкг)"] = micronutrients.vitamin_a_mcg;
+      if (micronutrients.vitamin_c_mg) finalMicros["Витамин C (мг)"] = micronutrients.vitamin_c_mg;
+      if (micronutrients.vitamin_d_mcg) finalMicros["Витамин D (мкг)"] = micronutrients.vitamin_d_mcg;
+      if (micronutrients.vitamin_e_mg) finalMicros["Витамин E (мг)"] = micronutrients.vitamin_e_mg;
+      if (micronutrients.vitamin_b12_mcg) finalMicros["Витамин B12 (мкг)"] = micronutrients.vitamin_b12_mcg;
+      if (micronutrients.folate_mcg) finalMicros["Фолиевая кислота (мкг)"] = micronutrients.folate_mcg;
+      if (micronutrients.iron_mg) finalMicros["Железо (мг)"] = micronutrients.iron_mg;
+      if (micronutrients.calcium_mg) finalMicros["Кальций (мг)"] = micronutrients.calcium_mg;
+      if (micronutrients.magnesium_mg) finalMicros["Магний (мг)"] = micronutrients.magnesium_mg;
+      if (micronutrients.zinc_mg) finalMicros["Цинк (мг)"] = micronutrients.zinc_mg;
+      if (micronutrients.selenium_mcg) finalMicros["Селен (мкг)"] = micronutrients.selenium_mcg;
+      if (micronutrients.potassium_mg) finalMicros["Калий (мг)"] = micronutrients.potassium_mg;
+      if (micronutrients.sodium_mg) finalMicros["Натрий (мг)"] = micronutrients.sodium_mg;
     }
 
     const isoNow = new Date().toISOString();
@@ -148,16 +216,16 @@ export const logMealTool = new DynamicStructuredTool({
     const { data: log, error: logError } = await supabase.from("meal_logs").insert({
       user_id: userId,
       meal_type: meal_type,
-      total_calories: Number(calories),
-      total_protein: Number(protein_g),
-      total_fat: Number(fat_g),
-      total_carbs: Number(carbs_g),
-      micronutrients: microsDb,
-      meal_quality_score: meal_quality_score,
-      meal_quality_reason: meal_quality_reason,
+      total_calories: Number(finalCalories.toFixed(1)),
+      total_protein: Number(finalProtein.toFixed(1)),
+      total_fat: Number(finalFat.toFixed(1)),
+      total_carbs: Number(finalCarbs.toFixed(1)),
+      micronutrients: finalMicros,
+      meal_quality_score: finalScore,
+      meal_quality_reason: finalReason,
       logged_at: isoNow,
-      notes: `AI Logged`,
-      source: "manual"
+      notes: ctx ? `Vision Smart Log` : `AI Logged`,
+      source: finalSource
     }).select("id");
 
     if (logError || !log || log.length === 0) return `Failed to create meal log: ${logError?.message}`;
@@ -168,17 +236,17 @@ export const logMealTool = new DynamicStructuredTool({
       meal_log_id: logId,
       food_name: food_name,
       weight_g: weight_g,
-      calories: Number(calories),
-      protein_g: Number(protein_g),
-      fat_g: Number(fat_g),
-      carbs_g: Number(carbs_g),
+      calories: Number(finalCalories.toFixed(1)),
+      protein_g: Number(finalProtein.toFixed(1)),
+      fat_g: Number(finalFat.toFixed(1)),
+      carbs_g: Number(finalCarbs.toFixed(1)),
     });
 
     if (itemError) return `Failed to add meal item: ${itemError.message}`;
 
-    const microsList = Object.entries(microsDb).map(([k, v]) => `${k} (${v})`).join(', ');
+    const microsList = Object.entries(finalMicros).map(([k, v]) => `${k} (${v.toFixed(1)})`).join(', ');
 
-    let baseResponse = `Successfully logged ${weight_g}g of ${food_name} (${calories} kcal) for ${meal_type}.`;
+    let baseResponse = `Successfully logged ${weight_g}g of ${food_name} (${finalCalories.toFixed(0)} kcal) for ${meal_type}.`;
 
     if (microsList.length > 0) {
       baseResponse += ` Micronutrients found: ${microsList}. AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them, you MUST wrap each micronutrient name and value in a strict XML tag format: <nutr type="[type]">[Name] ([Value])</nutr>. Valid types are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, default. Example: <nutr type="iron">Железо (2мг)</nutr>. Note: Always use proper Types, e.g. use "calcium" for Кальций, "vitamin_b" for Фолиевая кислота, etc.`;
@@ -186,8 +254,8 @@ export const logMealTool = new DynamicStructuredTool({
       baseResponse += ` Confirm this back to the user.`;
     }
 
-    if (meal_quality_score !== undefined && meal_quality_score !== null) {
-      baseResponse += ` AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="${meal_quality_score}" reason="${meal_quality_reason || ''}" />`;
+    if (finalScore !== undefined && finalScore !== null) {
+      baseResponse += ` AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="${finalScore}" reason="${finalReason || ''}" />`;
     }
 
     return baseResponse;

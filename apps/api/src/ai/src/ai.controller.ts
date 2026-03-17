@@ -742,7 +742,9 @@ User Context: ${contextStr}`;
           thread_id: actualThreadId,
           user_id: req.user?.id,
           token: req.headers.authorization?.split(" ")[1],
-          chatMode: chatMode
+          chatMode: chatMode,
+          nutritionalContext: body.nutritionalContext,
+          imageUrl: body.imageUrl
         }
       }
     );
@@ -842,62 +844,7 @@ User Context: ${contextStr}`;
       }
     }
 
-    if (!foundLogMeal && req.user?.id) {
-      console.log(`[Fail-Safe] No log_meal tool call found. Checking text for meal data...`);
-      // Regex to find: [Weight]г [Food], [Calories] ккал, Б[P]г, Ж[F]г, У[C]г
-      const calorieMatch = finalContent.match(/(\d+)\s*ккал/i);
-      const proteinMatch = finalContent.match(/Б\s*(\d+)г/i);
-      const fatMatch = finalContent.match(/Ж\s*(\d+)г/i);
-      const carbsMatch = finalContent.match(/У\s*(\d+)г/i);
-      const foodMatch = finalContent.match(/Записал\s+(.*?):/i) || finalContent.match(/Записал\s+(.*?)[\s\n,]/i);
 
-      if (calorieMatch) {
-        console.log(`[Fail-Safe] 🛡️ Detected manual meal log in text. Forced insertion enabled.`);
-        const calories = parseInt(calorieMatch[1], 10);
-        const protein = proteinMatch ? parseInt(proteinMatch[1], 10) : 0;
-        const fat = fatMatch ? parseInt(fatMatch[1], 10) : 0;
-        const carbs = carbsMatch ? parseInt(carbsMatch[1], 10) : 0;
-        const foodName = foodMatch ? foodMatch[1].trim() : "Приём пищи (Авто-восстановление)";
-
-        const token = req.headers.authorization?.split(" ")[1];
-        const supabaseUrl = process.env.SUPABASE_URL;
-        const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
-
-        if (token && supabaseUrl && supabaseKey) {
-          const supabase = createClient(supabaseUrl, supabaseKey, {
-            global: { headers: { Authorization: `Bearer ${token}` } },
-          });
-
-          // Perform manual insert
-          const { data: logArray, error: logError } = await supabase
-            .from("meal_logs")
-            .insert({
-              user_id: req.user.id,
-              meal_type: "snack",
-              total_calories: calories,
-              total_protein: protein,
-              total_fat: fat,
-              total_carbs: carbs,
-              source: "text_fail_safe",
-              logged_at: new Date().toISOString(),
-              notes: `Fail-safe recovery from: "${foodName}"`
-            }).select("id");
-
-          if (!logError && logArray && logArray.length > 0) {
-            await supabase.from("meal_items").insert({
-              meal_log_id: logArray[0].id,
-              food_name: foodName,
-              calories: calories,
-              protein_g: protein,
-              fat_g: fat,
-              carbs_g: carbs,
-              weight_g: 0
-            });
-            console.log(`[Fail-Safe] ✅ Successfully recovered meal log for user ${req.user.id}`);
-          }
-        }
-      }
-    }
 
     // --- Save messages to ai_chat_messages ---
     if (req.user?.id) {
@@ -1162,124 +1109,14 @@ export async function handleAnalyzeFood(
       // 3. Run GPT-4o Vision food analyzer
       const { data: result, errorMessage: llmError } = await runFoodVisionAnalyzer(imageUrl, userContext);
 
-      // 4. Auto-save recognized items to meal_logs
-    if (result.items.length > 0 || (result.supplements && result.supplements.length > 0)) {
       const supabaseUrl = process.env.SUPABASE_URL;
       const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
-      if (supabaseUrl && supabaseKey) {
-        const supabase = createClient(supabaseUrl, supabaseKey, {
-          global: { headers: { Authorization: `Bearer ${token}` } },
-        });
-
-        const mealLogsToInsert: any[] = [];
-        const mealItemsToInsert: any[] = [];
-
-        // 1. Group recognized items into a single meal_log per user request
-        const totalMicros: Record<string, number> = {};
-        const isoNow = new Date().toISOString();
-        let totalCals = 0;
-        let totalProtein = 0;
-        let totalFat = 0;
-        let totalCarbs = 0;
-
-        result.items.forEach((item) => {
-          totalCals += item.estimated_total.calories_kcal || 0;
-          totalProtein += item.estimated_total.protein_g || 0;
-          totalFat += item.estimated_total.fat_g || 0;
-          totalCarbs += item.estimated_total.carbs_g || 0;
-          const calcMicro = (valuePer100g: number | null | undefined) => {
-            if (typeof valuePer100g !== 'number') return 0;
-            return Number(((valuePer100g * item.estimated_weight_g) / 100).toFixed(2));
-          };
-          const p100 = item.per_100g;
-          const microsRaw = {
-            "Витамин A (мкг)": calcMicro(p100.vitamin_a_mcg),
-            "Витамин C (мг)": calcMicro(p100.vitamin_c_mg),
-            "Витамин D (мкг)": calcMicro(p100.vitamin_d_mcg),
-            "Витамин E (мг)": calcMicro(p100.vitamin_e_mg),
-            "Витамин B12 (мкг)": calcMicro(p100.vitamin_b12_mcg),
-            "Фолиевая кислота (мкг)": calcMicro(p100.folate_mcg),
-            "Железо (мг)": calcMicro(p100.iron_mg),
-            "Кальций (мг)": calcMicro(p100.calcium_mg),
-            "Магний (мг)": calcMicro(p100.magnesium_mg),
-            "Цинк (мг)": calcMicro(p100.zinc_mg),
-            "Селен (мкг)": calcMicro(p100.selenium_mcg),
-            "Калий (мг)": calcMicro(p100.potassium_mg),
-            "Натрий (мг)": calcMicro(p100.sodium_mg),
-          };
-          Object.entries(microsRaw).forEach(([k, v]) => {
-            if (v > 0) totalMicros[k] = (totalMicros[k] || 0) + v;
-          });
-        });
-
-        if (result.supplements) {
-          for (const suppl of result.supplements) {
-            if (suppl.active_ingredients && Array.isArray(suppl.active_ingredients)) {
-              for (const ing of suppl.active_ingredients) {
-                const key = `${ing.ingredient_name} (${ing.unit})`;
-                totalMicros[key] = (totalMicros[key] || 0) + ing.amount;
-              }
-            }
-          }
-        }
-
-        const { data: logArray, error: logError } = await supabase
-          .from("meal_logs")
-          .insert({
-            user_id: userId,
-            meal_type: "snack", // default for vision
-            total_calories: totalCals,
-            total_protein: totalProtein,
-            total_fat: totalFat,
-            total_carbs: totalCarbs,
-            micronutrients: totalMicros,
-            source: "photo",
-            logged_at: isoNow,
-            meal_quality_score: result.meal_quality_score,
-            meal_quality_reason: result.meal_quality_reason,
-            notes: "Vision AI Logged"
-          }).select("id");
-
-        if (logError || !logArray || logArray.length === 0) {
-          console.error("[FoodVision] Failed to save to meal_logs:", logError);
-        } else {
-          const logId = logArray[0].id;
-
-          result.items.forEach((item) => {
-            mealItemsToInsert.push({
-              meal_log_id: logId,
-              food_name: item.name_ru,
-              weight_g: item.estimated_weight_g,
-              calories: item.estimated_total.calories_kcal,
-              protein_g: item.estimated_total.protein_g,
-              fat_g: item.estimated_total.fat_g,
-              carbs_g: item.estimated_total.carbs_g,
-            });
-          });
-
-          if (result.supplements) {
-            for (const suppl of result.supplements) {
-              mealItemsToInsert.push({
-                meal_log_id: logId,
-                food_name: suppl.name_ru + (suppl.serving_size_taken > 1 ? ` (${suppl.serving_size_taken} порц.)` : ""),
-                weight_g: 0,
-                calories: 0,
-                protein_g: 0,
-                fat_g: 0,
-                carbs_g: 0,
-              });
-            }
-          }
-
-          if (mealItemsToInsert.length > 0) {
-            const { error: itemsError } = await supabase.from("meal_items").insert(mealItemsToInsert);
-            if (itemsError) {
-              console.error("[FoodVision] Failed to save to meal_items:", itemsError);
-            } else {
-              console.log(`[FoodVision] Saved ${mealItemsToInsert.length} items to meal_items for user ${userId}`);
-            }
-          }
-        }
+      if (!supabaseUrl || !supabaseKey) {
+        throw new Error("Supabase credentials missing");
+      }
+      const supabase = createClient(supabaseUrl, supabaseKey, {
+        global: { headers: { Authorization: `Bearer ${token}` } },
+      });
 
         // --- Save to ai_chat_messages ---
         const actualThreadId = `${userId}-diary`;
@@ -1306,18 +1143,16 @@ export async function handleAnalyzeFood(
 
         const { error: err2 } = await supabase.from("ai_chat_messages").insert([aiMsgPayload]);
         if (err2) console.error("[FoodVision] Error inserting AI msg:", err2);
-      }
-    }
 
-    // 5. Return results (include llmError for debugging)
-      res.json({
-        success: true,
-        data: {
-          ...result,
-          imageUrl,
-          ...(llmError ? { llmError } : {}),
-        },
-      });
+        // 5. Return results (include llmError for debugging)
+        res.json({
+          success: true,
+          data: {
+            ...result,
+            imageUrl,
+            ...(llmError ? { llmError } : {}),
+          },
+        });
     } else {
       res.status(500).json({ success: false, error: "Failed to fetch user context" });
     }

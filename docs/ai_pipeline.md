@@ -1,6 +1,6 @@
 # VITOGRAPH — AI Pipeline Documentation
 
-> **Дата актуальности:** 5 марта 2026 (Phase 53f)
+> **Дата актуальности:** 16 марта 2026
 >
 > Документация AI/LLM пайплайна: LangGraph, GPT-4o, structured outputs, детерминированные нормы.
 
@@ -63,7 +63,7 @@ graph LR
     TOOLS --> AGENT
 ```
 
-**Модель:** `gpt-4o-mini` (temperature: 0.2)
+**Модель:** `gpt-4o-mini` (temperature: 0.2) — для чата. Для анализа крови и Vision используется `gpt-4o`.
 
 ### 2.2 Оптимизации в `callModel`
 
@@ -152,15 +152,22 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    PDF["PDF анализов"] --> PYTHON["Python: OCR/PyMuPDF<br/>→ biomarkers[]"]
-    PYTHON --> CTRL["ai.controller.ts<br/>fetchUserContext()"]
-    CTRL --> LRA["lab-report-analyzer<br/>+ LAB_DIAGNOSTIC_SYSTEM_PROMPT"]
-    LRA --> GPT["GPT-4o<br/>+ LabDiagnosticReportSchema"]
+    INPUT["PDF / Фото анализов"] --> PYTHON["Python: OCR / GPT-4o Vision<br/>→ biomarkers[]"]
+    PYTHON --> UI["MedicalResultsView<br/>Pause & Review"]
+    UI --> CTRL["ai.controller.ts<br/>fetchUserContext()"]
+    CTRL --> LRA["lab-report-analyzer<br/>+ Smart Coverage Prompt"]
+    LRA --> GPT["GPT-4o<br/>maxOutputTokens: 16384"]
     GPT --> REPORT["Диагностический отчёт<br/>(паттерны, диета, добавки)"]
     REPORT --> DB["profiles.lab_diagnostic_reports<br/>(JSONB, SHA-256 дедупликация)"]
 ```
 
-**Токенизация:** ~24,000 токенов за анализ (18-20k системный промпт + 1-2k контекст + входные биомаркеры).
+**Ключевые параметры:**
+- **Модель:** `gpt-4o` (temperature: 0.2)
+- **maxOutputTokens:** 16384 (предотвращает обрезку больших отчётов)
+- **timeoutMs:** 120000
+- **Smart Coverage:** Аномальные маркеры получают детальный анализ, нормальные — краткий. Все маркеры обязательны.
+- **Pause & Review:** Пользователь может отредактировать распознанные значения перед генерацией отчёта.
+- **UI Feedback:** Пустые значения и нормы подсвечиваются красным (`border-rose-400`).
 
 ---
 

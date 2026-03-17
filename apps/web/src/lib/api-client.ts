@@ -225,7 +225,8 @@ class AiApiClient {
       chronicConditions?: string[];
     },
     chatMode: "diary" | "assistant" = "diary",
-    imageUrl?: string
+    imageUrl?: string,
+    nutritionalContext?: any
   ): Promise<{ response: string }> {
     // Generate a default session thread if one isn't provided
     const sessionThread = threadId || `session-${Math.random().toString(36).substring(7)}`;
@@ -242,6 +243,7 @@ class AiApiClient {
       userProfile,
       chatMode,
       imageUrl,
+      nutritionalContext,
     };
 
     const response = await fetch(directUrl, {
@@ -624,6 +626,31 @@ class AiApiClient {
       throw error;
     }
   }
+
+  /**
+   * Recalculates biomarker notes and flags for a set of biomarkers.
+   */
+  async refreshBiomarkerNotes(biomarkers: BiomarkerResult[]): Promise<{ index: number; ai_clinical_note: string; flag: string }[]> {
+    // Route through Next.js proxy to avoid 404s and handle timeouts
+    const proxyUrl = "/api/refresh-notes";
+    const token = await getAuthToken();
+    const headers: HeadersInit = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const response = await fetch(proxyUrl, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ biomarkers }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to refresh biomarker notes");
+    }
+
+    const { data } = await response.json();
+    return data;
+  }
 }
 
 export type FoodRecognitionResult = {
@@ -702,4 +729,5 @@ export interface StoredDiagnosticReport {
   biomarkers_count: number;
   data_hash?: string;
   report: LabDiagnosticReport;
+  biomarkers?: BiomarkerResult[];
 }

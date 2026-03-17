@@ -1,6 +1,6 @@
 # VITOGRAPH — Frontend Component Map
 
-> **Дата актуальности:** 5 марта 2026 (Phase 53f)
+> **Дата актуальности:** 16 марта 2026
 >
 > Карта UI-компонентов Next.js 14+ (App Router) с описанием ответственности и зависимостей.
 
@@ -52,7 +52,7 @@ layout.tsx (RootLayout)
 
 | Компонент                | Назначение                                                                            | API-зависимости                                                                                                                                                |
 | :----------------------- | :------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **MedicalResultsView**   | Оркестратор: загрузка PDF/фото, карточки биомаркеров, диагностический отчёт, соматика | `apiClient.parseLabReport()`, `apiClient.parseLabImage()`, `apiClient.analyzeLabReport()`, `apiClient.getLabReportsHistory()`, `apiClient.getSomaticHistory()` |
+| **MedicalResultsView**   | Оркестратор: загрузка PDF/фото, редактируемые карточки биомаркеров (Pause & Review), красная подсветка пустых полей, диагностический отчёт, соматика | `apiClient.uploadFile()`, `apiClient.uploadImageFile()`, `apiClient.uploadImageFiles()`, `apiClient.analyzeLabReport()`, `apiClient.getLabReportsHistory()`, `apiClient.getSomaticHistory()` |
 | **UploadZone**           | Drag-n-drop зона для PDF/DOCX                                                         | `onFileSelect(file)`                                                                                                                                           |
 | **PhotoUploader**        | Кнопка камеры для фото анализов                                                       | `onCapture(base64)`                                                                                                                                            |
 | **ResultCard**           | Одиночная карточка биомаркера                                                         | `name`, `value`, `unit`, `flag`, `referenceRange`                                                                                                              |
@@ -147,6 +147,6 @@ graph LR
 | Файл                                                                               | Назначение                                                       |
 | :--------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
 | [`api-client.ts`](file:///c:/project/VITOGRAPH/apps/web/src/lib/api-client.ts)     | Единый HTTP-клиент для всех API-вызовов (20KB, ~40 методов)      |
-| [`image-utils.ts`](file:///c:/project/VITOGRAPH/apps/web/src/lib/image-utils.ts)   | Сжатие изображений (canvas → blob, max 1024px)                   |
+| [`image-utils.ts`](file:///c:/project/VITOGRAPH/apps/web/src/lib/image-utils.ts)   | Сжатие изображений (canvas → blob, max 2048px для анализов, 1024px для еды)  |
 | [`health-core.ts`](file:///c:/project/VITOGRAPH/apps/web/src/types/health-core.ts) | Основные TypeScript-типы (Profile, Biomarker, MealLog, etc.)     |
 | [`middleware.ts`](file:///c:/project/VITOGRAPH/apps/web/src/middleware.ts)         | Next.js middleware для Supabase Auth (redirect неавторизованных) |

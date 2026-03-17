@@ -94,6 +94,7 @@ router.post(
           if (!bioError && dbBiomarkers) {
             // 2. Map parsed string results to actual IDs
             const insertPayloads: any[] = [];
+            const unmatchedMarkers: string[] = [];
 
             for (const item of extraction.biomarkers) {
               // Try to find a match (the python backend passes the name it found)
@@ -118,7 +119,13 @@ router.post(
                   test_date: extraction.report_date ? new Date(extraction.report_date).toISOString() : new Date().toISOString(),
                   source: "manual", // or clinical_lab
                 });
+              } else {
+                unmatchedMarkers.push(item.original_name);
               }
+            }
+
+            if (unmatchedMarkers.length > 0) {
+              console.warn(`[VisionMatch] Dropped unmatched biomarkers: [${unmatchedMarkers.join(", ")}]`);
             }
 
             // 3. Create a Test Session to group these results
@@ -216,6 +223,7 @@ router.post(
 
             if (!bioError && dbBiomarkers) {
               const insertPayloads: any[] = [];
+              const unmatchedMarkers: string[] = [];
 
               for (const item of extraction.biomarkers) {
                 const cleanItemName = (item.original_name || "").toLowerCase().trim();
@@ -235,7 +243,13 @@ router.post(
                     test_date: extraction.report_date ? new Date(extraction.report_date).toISOString() : new Date().toISOString(),
                     source: "manual",
                   });
+                } else {
+                  unmatchedMarkers.push(item.original_name);
                 }
+              }
+
+              if (unmatchedMarkers.length > 0) {
+                console.warn(`[VisionMatch] Dropped unmatched biomarkers: [${unmatchedMarkers.join(", ")}]`);
               }
 
               let currentSessionId: number | undefined;
@@ -338,6 +352,7 @@ router.post(
 
             if (!bioError && dbBiomarkers) {
               const insertPayloads: any[] = [];
+              const unmatchedMarkers: string[] = [];
 
               for (const item of extraction.biomarkers) {
                 const cleanItemName = (item.original_name || "").toLowerCase().trim();
@@ -357,7 +372,13 @@ router.post(
                     test_date: extraction.report_date ? new Date(extraction.report_date).toISOString() : new Date().toISOString(),
                     source: "manual",
                   });
+                } else {
+                  unmatchedMarkers.push(item.original_name);
                 }
+              }
+
+              if (unmatchedMarkers.length > 0) {
+                console.warn(`[VisionMatch] Dropped unmatched biomarkers: [${unmatchedMarkers.join(", ")}]`);
               }
 
               let currentSessionId: number | undefined;
@@ -406,6 +427,22 @@ router.post(
       console.log("[parse-image-batch] ⑥  Response sent successfully");
     } catch (error: unknown) {
       console.error("[parse-image-batch] ❌ CRASH:", error instanceof Error ? error.stack : error);
+      next(error);
+    }
+  }
+);
+
+/**
+ * POST /api/v1/integration/refresh-notes
+ * Recalculate biomarker notes and flags via Python Engine
+ */
+router.post(
+  "/refresh-notes",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await pythonCore.refreshBiomarkerNotesAction(req.body.biomarkers);
+      res.json({ success: true, data: result });
+    } catch (error) {
       next(error);
     }
   }

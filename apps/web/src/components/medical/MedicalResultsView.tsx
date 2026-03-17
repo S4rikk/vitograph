@@ -21,6 +21,10 @@ export default function MedicalResultsView() {
   >("idle");
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [results, setResults] = useState<LabReportExtraction | null>(null);
+  const [editableBiomarkers, setEditableBiomarkers] = useState<BiomarkerResult[] | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
+  const [dirtyIndexes, setDirtyIndexes] = useState<Set<number>>(new Set());
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // ── Somatic Analysis State ───────────────────────────────────
   const [somaticHistory, setSomaticHistory] = useState<SomaticHistoryResponse>({});
@@ -63,6 +67,14 @@ export default function MedicalResultsView() {
         setReportHistory(history || []);
         if (history && history.length > 0) {
           setSelectedTimestamp(history[0].timestamp);
+          
+          // Restore biomarker cards from the latest report (if saved)
+          const latest = history[0];
+          if (latest.biomarkers && latest.biomarkers.length > 0) {
+            setEditableBiomarkers(latest.biomarkers);
+            setResults({ biomarkers: latest.biomarkers, general_recommendations: [] });
+            setUploadState("done");
+          }
         } else {
           setSelectedTimestamp(null);
         }
@@ -115,7 +127,7 @@ export default function MedicalResultsView() {
 
       if (type === "image") {
         const compressedBlobs = await Promise.all(
-          files.map(f => compressImageToBlob(f, 1536))
+          files.map(f => compressImageToBlob(f, 2048))
         );
         if (compressedBlobs.length > 1) {
           data = await apiClient.uploadImageFiles(compressedBlobs);
@@ -133,10 +145,11 @@ export default function MedicalResultsView() {
       }
 
       setResults(data);
+      setEditableBiomarkers(data.biomarkers);
       setUploadState("done");
 
-      // Auto-trigger GPT-5.2 diagnostic analysis (≥3 biomarkers)
-      runDiagnosticAnalysis(data.biomarkers);
+      // Auto-trigger disabled: users now review first
+      // runDiagnosticAnalysis(data.biomarkers);
 
     } catch (error) {
       console.error("Upload failed", error);
@@ -144,6 +157,65 @@ export default function MedicalResultsView() {
       setUploadState("error");
     }
   }, [runDiagnosticAnalysis]);
+
+  const handleMarkerChange = (index: number, field: keyof BiomarkerResult | 'ref_text', value: any) => {
+    if (!editableBiomarkers) return;
+    const next = [...editableBiomarkers];
+    const item = { ...next[index] };
+
+    if (field === 'ref_text') {
+      item.reference_range = { ...item.reference_range, text: value };
+    } else if (field === 'value_numeric') {
+      item.value_numeric = value === '' ? null : parseFloat(value);
+    } else {
+      (item as any)[field] = value;
+    }
+
+    next[index] = item;
+    setEditableBiomarkers(next);
+    setIsDirty(true);
+    setDirtyIndexes(prev => new Set(prev).add(index));
+  };
+
+  const handleRefreshNotes = async () => {
+    if (!editableBiomarkers || dirtyIndexes.size === 0) return;
+    
+    setIsRefreshing(true);
+    try {
+      // Build array of only changed markers, remembering their original positions
+      const dirtyEntries = Array.from(dirtyIndexes)
+        .sort((a, b) => a - b)
+        .map(idx => ({ originalIndex: idx, marker: editableBiomarkers[idx] }))
+        .filter(entry => entry.marker != null);
+      
+      // Send only the dirty markers to the API
+      const refreshed = await apiClient.refreshBiomarkerNotes(
+        dirtyEntries.map(e => e.marker)
+      );
+      
+      // Merge results back using original indexes
+      const next = [...editableBiomarkers];
+      refreshed.forEach((result, i) => {
+        const origIdx = dirtyEntries[i]?.originalIndex;
+        if (origIdx != null && next[origIdx]) {
+          next[origIdx] = {
+            ...next[origIdx],
+            ai_clinical_note: result.ai_clinical_note,
+            flag: result.flag
+          };
+        }
+      });
+      
+      setEditableBiomarkers(next);
+      setIsDirty(false);
+      setDirtyIndexes(new Set());
+    } catch (error) {
+      console.error("Refresh notes failed", error);
+      alert("Не удалось обновить показатели. Попробуйте еще раз.");
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const handleDeleteReport = async () => {
     if (!selectedTimestamp) return;
@@ -219,22 +291,22 @@ export default function MedicalResultsView() {
       )}
 
       {/* ── Results grid ──────────────────────────────────── */}
-      {results && results.biomarkers.length > 0 && uploadState === "done" && (
+      {editableBiomarkers && editableBiomarkers.length > 0 && uploadState === "done" && (
         <>
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-ink">
-              Результаты анализа {results.report_date ? `(От ${results.report_date})` : ""}
+              Результаты анализа {results?.report_date ? `(От ${results.report_date})` : ""}
             </h2>
             <span className="text-sm text-ink-muted">
-              {results.biomarkers.length} показателей
+              {editableBiomarkers.length} показателей
             </span>
           </div>
-          {results.context && (
+          {results?.context && (
             <p className="text-sm text-ink-faint italic mb-2">Контекст: {results.context}</p>
           )}
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {results.biomarkers.map((marker, index) => (
+            {editableBiomarkers.map((marker, index) => (
               <div
                 key={`${marker.standardized_slug}_${index}`}
                 className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-300 hover:shadow-md flex flex-col justify-between"
@@ -264,19 +336,45 @@ export default function MedicalResultsView() {
 
                   {/* Значение (число или строка) */}
                   <div className="mt-4 flex items-baseline gap-1.5">
-                    <span className="text-3xl font-bold tracking-tight text-slate-900">
-                      {marker.value_numeric !== null ? marker.value_numeric : marker.value_string}
-                    </span>
+                    {(() => {
+                      const isValueMissing = marker.value_numeric === null && marker.value_string === null;
+                      return (
+                        <input
+                          type={marker.value_numeric !== null ? "number" : "text"}
+                          value={marker.value_numeric !== null ? (marker.value_numeric ?? "") : (marker.value_string ?? "")}
+                          onChange={(e) => handleMarkerChange(index, marker.value_numeric !== null ? 'value_numeric' : 'value_string', e.target.value)}
+                          step="any"
+                          className={`w-full max-w-[120px] rounded-lg px-2 py-1 text-2xl font-bold tracking-tight focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all ${
+                            isValueMissing 
+                              ? "bg-rose-50 border-2 border-rose-400 text-rose-900 animate-pulse shadow-[0_0_10px_rgba(251,113,133,0.3)]" 
+                              : "bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white"
+                          }`}
+                        />
+                      );
+                    })()}
                     {marker.unit && <span className="text-sm font-medium text-slate-500">{marker.unit}</span>}
                   </div>
 
                   {/* Референс */}
-                  {marker.reference_range?.text && (
-                    <div className="mt-2 text-sm text-slate-500 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-                      Норма: {marker.reference_range.text}
-                    </div>
-                  )}
+                  <div className="mt-3 flex items-center gap-2">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Норма:</span>
+                    {(() => {
+                      const isNormMissing = !marker.reference_range?.text || marker.reference_range?.text === "нет данных";
+                      return (
+                        <input
+                          type="text"
+                          value={marker.reference_range?.text ?? ""}
+                          onChange={(e) => handleMarkerChange(index, 'ref_text', e.target.value)}
+                          placeholder="нет данных"
+                          className={`flex-1 border-b px-1 py-0.5 text-sm transition-all focus:outline-none ${
+                            isNormMissing
+                              ? "bg-rose-50/50 border-rose-300 text-rose-700 animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite] placeholder:text-rose-300"
+                              : "bg-transparent border-slate-100 hover:border-slate-200 focus:border-cyan-400 text-slate-600"
+                          }`}
+                        />
+                      );
+                    })()}
+                  </div>
                 </div>
 
                 {/* Пояснение от ИИ */}
@@ -290,6 +388,42 @@ export default function MedicalResultsView() {
                 )}
               </div>
             ))}
+          </div>
+
+          {/* ── Control Buttons ────────────────────────────────── */}
+          <div className="mt-8 flex flex-wrap items-center gap-4 p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <button
+              onClick={handleRefreshNotes}
+              disabled={!isDirty || isRefreshing}
+              className={`flex-1 sm:flex-none px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
+                isDirty && !isRefreshing
+                  ? "bg-cyan-500 text-white shadow-lg shadow-cyan-200 hover:bg-cyan-600 hover:-translate-y-0.5 active:translate-y-0" 
+                  : "bg-slate-100 text-slate-400 cursor-default"
+              }`}
+            >
+              {isRefreshing ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-white" />
+                  Обновляем...
+                </>
+              ) : "Обновить показатели"}
+            </button>
+            <button
+              onClick={() => editableBiomarkers && runDiagnosticAnalysis(editableBiomarkers)}
+              disabled={isDirty || isDiagnosing || isRefreshing}
+              className={`flex-1 sm:flex-none px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                !isDirty && !isDiagnosing && !isRefreshing
+                  ? "bg-purple-600 text-white shadow-lg shadow-purple-200 hover:bg-purple-700 hover:-translate-y-0.5 active:translate-y-0"
+                  : "bg-slate-100 text-slate-400 cursor-not-allowed opacity-70"
+              }`}
+            >
+              {isDiagnosing ? "Анализируем..." : "Сформировать отчёт"}
+            </button>
+            {isDirty && (
+              <p className="w-full sm:w-auto text-sm text-amber-600 font-medium flex items-center gap-2">
+                <span className="text-lg">⚠️</span> Сохраните изменения перед формированием отчёта
+              </p>
+            )}
           </div>
 
           {/* ── Общие Рекомендации ───────────────────────────────────── */}

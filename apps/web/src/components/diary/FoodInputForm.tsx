@@ -8,7 +8,7 @@ import { MealScoreBadge } from "./MealScoreBadge";
 
 type FoodInputFormProps = {
   /** Called when the form is submitted with valid data. */
-  onSubmit: (name: string, weight: number) => void;
+  onSubmit: (name: string, weight: number, nutritionalContext?: any) => void;
   /** Called after successful food photo recognition to refresh meal list. */
   onPhotoResult?: (result: FoodRecognitionResult) => void;
 };
@@ -53,13 +53,22 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
         return;
       }
 
-      onSubmit(trimmedName, parsedWeight);
+      let nutritionalContext: any = null;
+      if (photoResult) {
+        nutritionalContext = {
+          fullVisionResult: photoResult, // Pass the ENTIRE object
+          userEnteredWeight: parsedWeight,
+          source: "photo"
+        };
+      }
+
+      onSubmit(trimmedName, parsedWeight, nutritionalContext);
       setName("");
       setWeight("");
       setPhotoResult(null);
       nameRef.current?.focus();
     },
-    [name, weight, onSubmit],
+    [name, weight, onSubmit, photoResult],
   );
 
   const handlePhotoCapture = useCallback(
@@ -84,11 +93,11 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
         // 3. Store result for notification display
         setPhotoResult(result);
 
-        // 4. Auto-fill form with first recognized item
+        // 4. Auto-fill form with total recognized weight and items names
         if (result.items.length > 0) {
-          const firstItem = result.items[0];
-          setName(firstItem.name_ru);
-          setWeight(String(firstItem.estimated_weight_g));
+          const totalWeight = result.items.reduce((sum, i) => sum + (i.estimated_weight_g || 0), 0);
+          setName(result.items.map(i => i.name_ru).join(", "));
+          setWeight(String(totalWeight));
         }
 
         // 5. Notify parent to refresh meal list

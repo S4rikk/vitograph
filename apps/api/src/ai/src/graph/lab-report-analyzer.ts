@@ -29,11 +29,11 @@ interface BiomarkerInput {
 
 // ── Constants ───────────────────────────────────────────────────────
 
-/** Timeout for GPT-5.2 analysis (5 minutes — for batch uploads). */
-const LAB_ANALYSIS_TIMEOUT_MS = 300_000;
+/** Timeout for GPT-5.2 analysis (2 minutes — for stable medical analysis). */
+const LAB_ANALYSIS_TIMEOUT_MS = 120_000;
 
 /** Temperature for clinical precision. */
-const LAB_ANALYSIS_TEMPERATURE = 0.4;
+const LAB_ANALYSIS_TEMPERATURE = 0.2;
 
 /** Model for premium diagnostics. */
 const LAB_ANALYSIS_MODEL = "gpt-4o";
@@ -48,10 +48,10 @@ const LAB_DIAGNOSTIC_SYSTEM_PROMPT = `Ты — клинический анали
 ## МЕТОД АНАЛИЗА (Chain-of-Thought)
 
 ### Этап 1: Оценка каждого показателя
-Для КАЖДОГО показателя (не пропускай ни одного):
-- Сравни значение с референсным диапазоном.
-- Определи степень отклонения (незначительное, умеренное, значительное, критическое).
-- Опиши клиническое значение: что означает это отклонение для здоровья, на какие органы/системы влияет.
+ВНИМАНИЕ (ПРИОРИТИЗАЦИЯ): Ты обязан включить в отчет ВСЕ предоставленные показатели. 
+1. Если показатель ВНЕ нормы (Flag Low/High) -> расписывай клиническое значение максимально глубоко.
+2. Если показатель В норме, но функционально связан с отклонениями (например, MCV при анемии) -> расписывай глубоко.
+3. Если показатель В норме и не связан с проблемами -> обязательно укажи его в списке, но в поле clinical_significance пиши кратко: 'Показатель в норме'.
 
 ### Этап 2: Паттерн-анализ (САМЫЙ ВАЖНЫЙ)
 Ищи СВЯЗКИ между показателями.
@@ -270,6 +270,7 @@ SUPPLEMENTS: ${JSON.stringify(supps ? supps : [])}
         model: LAB_ANALYSIS_MODEL,
         temperature: LAB_ANALYSIS_TEMPERATURE,
         timeoutMs: LAB_ANALYSIS_TIMEOUT_MS,
+        maxOutputTokens: 10000,
         maxRetries: LLM_RETRIES.async,
         fallback: LAB_DIAGNOSTIC_FALLBACK,
     });
@@ -288,6 +289,7 @@ SUPPLEMENTS: ${JSON.stringify(supps ? supps : [])}
             biomarkers_count: biomarkerResults.length,
             data_hash: currentHash,
             report: result.data,
+            biomarkers: biomarkerResults,
         });
 
         const { error: updateError } = await supabase
