@@ -19,22 +19,28 @@ interface PhotoUploaderProps {
 
 const UPLOADER_CONFIG = {
   nails: {
-    icon: "📸",
-    title: "Сфотографируй ногти на ногах (или руках)",
-    description: "Узнай скрытые дефициты витаминов и минералов. Предпочтительно сделать фото ногтей на ногах. Убедись, что на них нет лака, а фото сделано при хорошем освещении.",
-    buttonLabel: "Сделать фото ногтей",
+    icon: "✋",
+    title: "Ногти на ногах или руках",
+    description: "Узнай скрытые дефициты витаминов и минералов. Делайте фото без лака, при хорошем освещении.",
+    buttonLabel: "Сделать фото",
+    bgColor: "bg-[#f5eefc]",
+    iconColor: "text-[#a855f7]",
   },
   tongue: {
     icon: "👅",
-    title: "Сфотографируй язык",
-    description: "Налет, трещины и отпечатки зубов могут говорить о проблемах с ЖКТ, дефиците B-витаминов или анемии.",
-    buttonLabel: "Сделать фото языка",
+    title: "Фотография языка",
+    description: "Налет, трещины и отпечатки зубов могут говорить о проблемах с ЖКТ и дефиците B-витаминов.",
+    buttonLabel: "Сделать фото",
+    bgColor: "bg-[#fef2f2]",
+    iconColor: "text-[#ef4444]",
   },
   skin: {
-    icon: "👤",
-    title: "Сфотографируй лицо (или проблемный участок кожи)",
+    icon: "🎭",
+    title: "Лицо или проблемная кожа",
     description: "Сухость, акне или бледность могут быть признаками дефицита Омега-3, железа или гормонального дисбаланса.",
-    buttonLabel: "Сделать фото кожи",
+    buttonLabel: "Сделать фото",
+    bgColor: "bg-[#f0fdf4]",
+    iconColor: "text-[#22c55e]",
   },
 };
 
@@ -88,24 +94,21 @@ export default function PhotoUploader({ type, onSuccess, onAnalysisComplete }: P
   };
 
   return (
-    <div className="group flex flex-col p-6 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-200 transition-all duration-300 h-full relative overflow-hidden">
-      {/* Decorative gradient blur */}
-      <div className="absolute -top-10 -right-10 w-32 h-32 bg-cyan-100 rounded-full blur-3xl opacity-50 transition-opacity group-hover:opacity-100 pointer-events-none"></div>
-      
+    <div className="flex flex-col p-6 bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
       {/* Header section (Icon & Title) */}
-      <div className="flex items-start gap-4 mb-4 relative z-10">
-        <div className="w-[52px] h-[52px] shrink-0 bg-gradient-to-br from-cyan-50 to-white text-cyan-600 rounded-[14px] flex items-center justify-center text-2xl border border-cyan-100/60 shadow-[0_2px_8px_-2px_rgba(6,182,212,0.15)]">
+      <div className="flex items-center gap-4 mb-5">
+        <div className={`w-[52px] h-[52px] shrink-0 ${config.bgColor} ${config.iconColor} rounded-2xl flex items-center justify-center text-2xl shadow-sm`}>
           {config.icon}
         </div>
-        <div className="flex-1 pt-1">
-          <h3 className="text-[17px] font-bold text-slate-800 leading-tight">
+        <div className="flex-1">
+          <h3 className="text-[17px] font-extrabold text-[#001d3d] leading-tight">
             {config.title}
           </h3>
         </div>
       </div>
       
       {/* Description */}
-      <div className="relative z-10 flex-1 mb-6">
+      <div className="flex-1 mb-8">
         <p className="text-[14px] text-slate-500 leading-relaxed font-medium">
           {config.description}
         </p>
@@ -122,7 +125,7 @@ export default function PhotoUploader({ type, onSuccess, onAnalysisComplete }: P
       />
 
       {error && (
-        <div className="text-red-600 text-[13px] font-medium mb-4 p-3 bg-red-50/80 border border-red-100 rounded-xl relative z-10 leading-tight">
+        <div className="text-red-500 text-[13px] font-medium mb-4 p-3 bg-red-50 border border-red-100 rounded-xl leading-tight text-center">
           {error}
         </div>
       )}
@@ -131,19 +134,25 @@ export default function PhotoUploader({ type, onSuccess, onAnalysisComplete }: P
       <label
         htmlFor={`somatic-photo-upload-${type}`}
         className={isUploading
-          ? "cursor-wait opacity-80 flex min-h-[46px] h-auto py-2.5 w-full items-center justify-center rounded-xl bg-slate-100 border border-slate-200 px-5 font-semibold text-slate-500 shadow-sm transition-all text-center mt-auto relative z-10"
-          : "cursor-pointer flex min-h-[46px] h-auto py-2.5 w-full items-center justify-center rounded-xl bg-cyan-500 hover:bg-cyan-600 active:bg-cyan-700 px-5 font-semibold text-white shadow-[0_4px_12px_-4px_rgba(6,182,212,0.4)] transition-all hover:-translate-y-[1px] text-center mt-auto relative z-10"}
+          ? "cursor-wait opacity-80 flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-slate-50 border border-slate-100 px-5 font-bold text-slate-400 transition-all text-center mt-auto"
+          : "cursor-pointer flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-[#ecf9f8] hover:bg-[#dff5f3] active:scale-[0.98] px-5 font-bold text-[#009489] transition-all text-center mt-auto group"}
       >
         {isUploading ? (
           <span className="flex items-center gap-2 justify-center">
-            <svg className="animate-spin h-5 w-5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24">
+            <svg className="animate-spin h-5 w-5 text-[#009489]" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            Анализирую фото...
+            Анализ...
           </span>
         ) : (
-          <span>{config.buttonLabel}</span>
+          <span className="flex items-center gap-2">
+            <svg className="w-5 h-5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            {config.buttonLabel}
+          </span>
         )}
       </label>
     </div>
