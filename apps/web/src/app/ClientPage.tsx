@@ -50,8 +50,8 @@ function AssistantIcon() {
 
 const TABS = [
   { id: "medical", label: "Анализы", icon: <MedicalIcon /> },
-  { id: "diary", label: "Дневник питания", icon: <DiaryIcon /> },
-  { id: "assistant", label: "Мой ИИ-друг", icon: <AssistantIcon /> },
+  { id: "diary", label: "Дневник", icon: <DiaryIcon /> },
+  { id: "assistant", label: "Ассистент", icon: <AssistantIcon /> },
 ];
 
 function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; userId: string }) {
@@ -65,7 +65,7 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
   }
 
   return (
-    <div className="mx-auto max-w-3xl sm:px-6 lg:px-8 sm:py-8 h-full flex flex-col">
+    <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 lg:px-8 sm:py-8 h-full flex flex-col">
       {/* ── Header ────────────────────────────────────────── */}
       <header className="mb-8 text-center">
         <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">

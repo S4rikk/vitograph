@@ -225,23 +225,35 @@ export default function UploadZone({
 
       {/* ── Done ──────────────────────────────────────────── */}
       {effectiveState === "done" && (
-        <div className="flex flex-col items-center gap-3">
-          <div className="rounded-xl bg-green-100 p-3">
+        <div className="flex flex-col items-center gap-4 relative z-10">
+          <div className="flex items-center gap-3 bg-white/60 px-5 py-2.5 rounded-full border border-success/30 shadow-sm mb-2">
             <svg
-              className="h-8 w-8 text-success"
+              className="h-5 w-5 text-success"
               fill="none"
               viewBox="0 0 24 24"
-              strokeWidth={1.5}
+              strokeWidth={2}
               stroke="currentColor"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
+            <span className="text-sm font-bold text-success">Отчет сформирован</span>
           </div>
-          <p className="text-sm font-semibold text-success">Готово!</p>
+          
+          <div className="text-center">
+            <p className="text-base font-bold text-slate-800">
+              Загрузить новые результаты
+            </p>
+            <p className="mt-1 text-[13px] text-slate-500 max-w-xs mx-auto">
+              Нажмите сюда или перетащите новые фото/PDF бланка для следующего анализа
+            </p>
+          </div>
+
+          <div className="mt-2 inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-6 py-3 text-[14px] font-bold text-slate-700 shadow-sm transition-all hover:border-cyan-300 hover:text-cyan-700 hover:shadow-md group">
+            <svg className="h-5 w-5 text-slate-400 group-hover:text-cyan-500 transition-colors" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Добавить новый анализ
+          </div>
         </div>
       )}
 

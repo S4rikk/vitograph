@@ -88,16 +88,28 @@ export default function PhotoUploader({ type, onSuccess, onAnalysisComplete }: P
   };
 
   return (
-    <div className="flex flex-col items-center p-6 bg-surface rounded-2xl border border-divider h-full">
-      <div className="w-16 h-16 shrink-0 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center mb-4 text-2xl">
-        {config.icon}
+    <div className="group flex flex-col p-6 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-200 transition-all duration-300 h-full relative overflow-hidden">
+      {/* Decorative gradient blur */}
+      <div className="absolute -top-10 -right-10 w-32 h-32 bg-cyan-100 rounded-full blur-3xl opacity-50 transition-opacity group-hover:opacity-100 pointer-events-none"></div>
+      
+      {/* Header section (Icon & Title) */}
+      <div className="flex items-start gap-4 mb-4 relative z-10">
+        <div className="w-[52px] h-[52px] shrink-0 bg-gradient-to-br from-cyan-50 to-white text-cyan-600 rounded-[14px] flex items-center justify-center text-2xl border border-cyan-100/60 shadow-[0_2px_8px_-2px_rgba(6,182,212,0.15)]">
+          {config.icon}
+        </div>
+        <div className="flex-1 pt-1">
+          <h3 className="text-[17px] font-bold text-slate-800 leading-tight">
+            {config.title}
+          </h3>
+        </div>
       </div>
-      <h3 className="text-lg font-semibold text-ink mb-2 text-center">
-        {config.title}
-      </h3>
-      <p className="text-sm text-ink-muted text-center mb-6 max-w-sm mb-auto">
-        {config.description}
-      </p>
+      
+      {/* Description */}
+      <div className="relative z-10 flex-1 mb-6">
+        <p className="text-[14px] text-slate-500 leading-relaxed font-medium">
+          {config.description}
+        </p>
+      </div>
 
       <input
         type="file"
@@ -110,20 +122,21 @@ export default function PhotoUploader({ type, onSuccess, onAnalysisComplete }: P
       />
 
       {error && (
-        <div className="text-red-500 text-sm mb-4 text-center px-4 py-2 bg-red-50 rounded-lg">
+        <div className="text-red-600 text-[13px] font-medium mb-4 p-3 bg-red-50/80 border border-red-100 rounded-xl relative z-10 leading-tight">
           {error}
         </div>
       )}
 
+      {/* Button */}
       <label
         htmlFor={`somatic-photo-upload-${type}`}
         className={isUploading
-          ? "cursor-not-allowed opacity-50 flex min-h-[48px] h-auto py-2 w-full max-w-[280px] items-center justify-center rounded-xl bg-primary-500 px-6 font-medium text-white shadow-sm transition-all text-center leading-tight mt-auto"
-          : "cursor-pointer flex min-h-[48px] h-auto py-2 w-full max-w-[280px] items-center justify-center rounded-xl bg-primary-500 px-6 font-medium text-white shadow-sm transition-all hover:bg-primary-600 active:scale-95 text-center leading-tight mt-auto"}
+          ? "cursor-wait opacity-80 flex min-h-[46px] h-auto py-2.5 w-full items-center justify-center rounded-xl bg-slate-100 border border-slate-200 px-5 font-semibold text-slate-500 shadow-sm transition-all text-center mt-auto relative z-10"
+          : "cursor-pointer flex min-h-[46px] h-auto py-2.5 w-full items-center justify-center rounded-xl bg-cyan-500 hover:bg-cyan-600 active:bg-cyan-700 px-5 font-semibold text-white shadow-[0_4px_12px_-4px_rgba(6,182,212,0.4)] transition-all hover:-translate-y-[1px] text-center mt-auto relative z-10"}
       >
         {isUploading ? (
           <span className="flex items-center gap-2 justify-center">
-            <svg className="animate-spin h-5 w-5 text-white shrink-0" fill="none" viewBox="0 0 24 24">
+            <svg className="animate-spin h-5 w-5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>

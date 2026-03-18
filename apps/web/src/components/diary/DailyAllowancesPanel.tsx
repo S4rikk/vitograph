@@ -78,11 +78,11 @@ interface Props {
 }
 
 const getMicroLevel = (pct: number) => {
-  if (pct < 25) return { color: 'bg-gradient-to-r from-[#FCA5A5] to-[#EF4444]', badgeBg: 'bg-[#FEE2E2]', badgeText: 'text-[#DC2626]', label: '< 25%' };
-  if (pct < 50) return { color: 'bg-gradient-to-r from-[#FCD34D] to-[#F59E0B]', badgeBg: 'bg-[#FEF3C7]', badgeText: 'text-[#B45309]', label: 'Low' };
-  if (pct < 75) return { color: 'bg-gradient-to-r from-[#93C5FD] to-[#3B82F6]', badgeBg: 'bg-[#DBEAFE]', badgeText: 'text-[#1D4ED8]', label: 'Mid' };
-  if (pct < 100) return { color: 'bg-gradient-to-r from-[#6EE7B7] to-[#10B981]', badgeBg: 'bg-[#D1FAE5]', badgeText: 'text-[#047857]', label: 'Good' };
-  return { color: 'bg-gradient-to-r from-[#A78BFA] to-[#7C3AED]', badgeBg: 'bg-[#EDE9FE]', badgeText: 'text-[#6D28D9]', label: 'Over' };
+  if (pct < 25) return { color: 'bg-gradient-to-r from-[#FCA5A5] to-[#EF4444]', badgeBg: 'bg-[#FEE2E2]', badgeText: 'text-[#DC2626]', label: '< 25%', isOverdose: false };
+  if (pct < 50) return { color: 'bg-gradient-to-r from-[#FCD34D] to-[#F59E0B]', badgeBg: 'bg-[#FEF3C7]', badgeText: 'text-[#B45309]', label: 'Low', isOverdose: false };
+  if (pct < 75) return { color: 'bg-gradient-to-r from-[#93C5FD] to-[#3B82F6]', badgeBg: 'bg-[#DBEAFE]', badgeText: 'text-[#1D4ED8]', label: 'Mid', isOverdose: false };
+  if (pct < 100) return { color: 'bg-gradient-to-r from-[#6EE7B7] to-[#10B981]', badgeBg: 'bg-[#D1FAE5]', badgeText: 'text-[#047857]', label: 'Good', isOverdose: false };
+  return { color: 'bg-gradient-to-r from-[#A78BFA] to-[#7C3AED]', badgeBg: 'bg-[#EDE9FE] animate-pulse-border ring-1 ring-red-500/50', badgeText: 'text-[#6D28D9]', label: 'Over', isOverdose: true };
 };
 
 const NUTRIENT_EMOJI: Record<string, string> = {
@@ -90,6 +90,25 @@ const NUTRIENT_EMOJI: Record<string, string> = {
   'Витамин B12': '💊', 'Витамин E': '🌻', 'Фолиевая кислота': '🥦', 
   'Железо': '🔩', 'Кальций': '🦴', 'Калий': '⚡', 'Магний': '🧲', 
   'Цинк': '🔬', 'Селен': '🌰', 'Фосфор': '🧪', 'Натрий': '🧂', 'Омега-3': '🐟'
+};
+
+const OVERDOSE_INFO: Record<string, string> = {
+  'Витамин A': 'Разовая передозировка может вызвать тошноту и головную боль. Систематический избыток токсичен для печени.',
+  'Витамин D': 'Кратковременный избыток обычно безопасен. Хроническая передозировка ведет к слабости, кальцификации сосудов и камням в почках.',
+  'Витамин E': 'Разово: легкое расстройство желудка. Систематически: риск кровотечений и снижение усвоения других витаминов.',
+  'Витамин C': 'Разово: возможна изжога или диарея. Излишки водорастворимого витамина выводятся. Систематически: риск образования камней в почках.',
+  'Витамин B6': 'Разово безопасно в небольших дозах. Систематический сильный избыток может привести к онемению (нейропатии).',
+  'Фолиевая кислота': 'Безопасно разово. Долгий избыток может маскировать дефицит витамина B12, что опасно для нервной системы.',
+  'Железо': 'Разово: тошнота, дискомфорт в желудке. Систематически: накапливается в органах, вызывая поражение печени и сердца.',
+  'Кальций': 'Разово: возможны запоры. Систематически: риск камней в почках и отложения кальция на стенках сосудов.',
+  'Магний': 'Разово: послабляющий эффект (диарея), снижение давления. Организм обычно справляется с разовым избытком.',
+  'Цинк': 'Разово: появление легкой тошноты. Систематически: подавляет иммунитет и приводит к дефициту меди.',
+  'Селен': 'Разово безопасно. Хронический избыток ведет к ломкости ногтей, выпадению волос и чесночному запаху кожи.',
+  'Натрий': 'Разово: задержка жидкости, легкие отеки. Систематически: развитие гипертонии и перегрузка сердца.',
+  'Калий': 'У здоровых людей излишки выводятся. Систематический избыток опасен нарушением ритма сердца (аритмией).',
+  'Фосфор': 'Разово безопасно. Хроническая передозировка ускоренно вымывает кальций из костей.',
+  'Омега-3': 'Разово: легкое расстройство желудка. Систематический сильный избыток (в добавках) снижает свертываемость крови.',
+  'Йод': 'Разово безопасно. Хронический излишек может спровоцировать гипертиреоз (ускоренную работу щитовидной железы).'
 };
 
 const isVitamin = (name: string) => name.startsWith('Витамин') || name === 'Фолиевая кислота';
@@ -134,7 +153,7 @@ export default function DailyAllowancesPanel({
 
   const microsEntries = Object.entries(normalizedConsumed);
 
-  const calcPercentSafe = (val: number, max: number) => Math.min(100, Math.max(0, (val / Math.max(max, 1)) * 100));
+  const calcPercentSafe = (val: number, max: number) => Math.max(0, (val / Math.max(max, 1)) * 100);
 
   const trackedMicros = microsEntries.filter(([name]) => dynamicMicros[name] && dynamicMicros[name] > 0);
   const avgCoverage = trackedMicros.length > 0 
@@ -248,7 +267,7 @@ export default function DailyAllowancesPanel({
                   {/* Progress fill */}
                   <div 
                     className={`h-full rounded-full transition-all duration-500 bg-gradient-to-r ${macro.gradient}`}
-                    style={{ width: `${percent}%` }}
+                    style={{ width: `${Math.min(100, percent)}%` }}
                   />
                 </div>
                 <span className={`text-[10px] font-bold mt-1.5 ${macro.text}`}>{Math.round(percent)}%</span>
@@ -338,14 +357,24 @@ export default function DailyAllowancesPanel({
                             <div className="w-full h-[6px] bg-black/5 rounded-full overflow-hidden">
                               <div 
                                 className={`h-full rounded-full transition-all duration-1000 animate-shimmer ${level.color}`} 
-                                style={{ width: `${pct}%` }} 
+                                style={{ width: `${Math.min(100, pct)}%` }} 
                               />
                             </div>
                           </div>
 
                           {/* 3. Badge (Right) */}
-                          <div className={`shrink-0 min-w-[42px] text-center px-1.5 py-1 rounded-md text-[11px] font-[800] ${level.badgeBg} ${level.badgeText}`}>
-                            {Math.round(pct)}%
+                          <div className={`shrink-0 flex items-center gap-1.5`}>
+                             {level.isOverdose && (
+                                <div 
+                                    className="w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-[12px] font-bold shadow-sm animate-pulse cursor-help"
+                                    title={OVERDOSE_INFO[name] || 'Превышение нормы может быть токсичным для организма'}
+                                >
+                                  !
+                                </div>
+                             )}
+                             <div className={`min-w-[42px] text-center px-1.5 py-1 rounded-md text-[11px] font-[800] ${level.badgeBg} ${level.badgeText}`}>
+                                {Math.round(pct)}%
+                             </div>
                           </div>
                         </div>
                       );

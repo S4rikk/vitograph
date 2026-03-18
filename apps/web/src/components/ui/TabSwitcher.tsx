@@ -29,7 +29,7 @@ export default function TabSwitcher({
     <nav
       role="tablist"
       aria-label="Main navigation"
-      className="inline-flex items-center gap-1 rounded-xl bg-white p-1 shadow-sm border border-border"
+      className="flex w-full overflow-x-auto hide-scrollbar sm:inline-flex sm:w-auto items-center gap-1 sm:gap-2 rounded-xl bg-white p-1 shadow-sm border border-border"
     >
       {tabs.map((tab) => {
         const isActive = tab.id === activeTab;
@@ -41,8 +41,8 @@ export default function TabSwitcher({
             aria-controls={`panel-${tab.id}`}
             onClick={() => onTabChange(tab.id)}
             className={`
-              cursor-pointer relative flex items-center gap-2 rounded-lg px-5 py-2.5
-              text-sm font-medium transition-all duration-200 select-none
+              cursor-pointer relative flex flex-1 sm:flex-none justify-center items-center gap-2 rounded-lg px-3 sm:px-5 py-2.5
+              text-[13px] sm:text-sm font-medium transition-all duration-200 select-none whitespace-nowrap
               ${
                 isActive
                   ? "bg-primary-600 text-white shadow-md"
@@ -50,7 +50,7 @@ export default function TabSwitcher({
               }
             `}
           >
-            <span className="w-5 h-5 flex-shrink-0">{tab.icon}</span>
+            <span className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0">{tab.icon}</span>
             <span>{tab.label}</span>
           </button>
         );

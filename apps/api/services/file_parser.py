@@ -36,16 +36,16 @@ class BiomarkerResult(BaseModel):
     unit: Optional[str] = Field(None, description="Measurement unit exactly as stated")
     reference_range: Optional[ReferenceRange] = Field(None, description="Reference range data")
     flag: Optional[str] = Field(None, description="Normal, Low, High, Abnormal. Calculated strictly from text!")
-    ai_clinical_note: Optional[str] = Field(None, description="Brief explanation (1 sentence) of what this marker represents.")
+    ai_clinical_note: Optional[str] = Field(None, description="Brief explanation (1 sentence) IN RUSSIAN of what this marker represents.")
 
 
 class LabReportExtraction(BaseModel):
     """The root structure expected from the LLM."""
     report_date: Optional[str] = Field(None, description="Extracted date of the report")
-    context: Optional[str] = Field(None, description="E.g., morning, fasting, cycle phase, etc.")
+    context: Optional[str] = Field(None, description="E.g., morning, fasting, cycle phase, etc. IN RUSSIAN")
     total_found_count: int = Field(0, description="The exact number of biomarker rows detected in the document.")
     biomarkers: List[BiomarkerResult] = Field(default_factory=list, description="Array of all found markers")
-    general_recommendations: List[str] = Field(default_factory=list, description="General advice based on all deviations")
+    general_recommendations: List[str] = Field(default_factory=list, description="General advice based on all deviations IN RUSSIAN")
 
 
 SUPPORTED_EXTENSIONS = (".pdf", ".docx", ".txt")
@@ -129,7 +129,7 @@ async def extract_biomarkers(file_bytes: bytes, filename: str) -> LabReportExtra
     
     system_prompt = (
         "You are an expert medical lab report parser for VITOGRAPH.\n\n"
-        "Your goal is to extract clinical data and return it using the strict JSON schema provided.\n\n"
+        "Your goal is to extract clinical data and return it using the strict JSON schema provided. ALL TEXT OUTPUTS (notes, recommendations, context) MUST BE IN RUSSIAN.\n\n"
         "STEPS:\n"
         "1. MENTAL OCR: First, carefully read the entire provided text and count EVERY unique biomarker row.\n"
         "2. POPULATE `total_found_count`: This number MUST exactly match the total number of items in the `biomarkers` array.\n\n"
@@ -195,7 +195,7 @@ async def extract_biomarkers_from_image(
     client = AsyncOpenAI(api_key=api_key, timeout=120.0)
 
     system_prompt = (
-        "You are an expert medical lab report parser for VITOGRAPH.\n\n"
+        "You are an expert medical lab report parser for VITOGRAPH. ALL TEXT EXPLANATIONS (notes, recommendations, context) MUST BE IN RUSSIAN.\n\n"
         "You are receiving a PHOTO of a printed lab report form.\n"
         "STEPS:\n"
         "1. VISUAL ANCHORS: Treat the page as a structured grid. Identify columns for 'Name', 'Result', 'Unit', and 'Reference Range'.\n"
