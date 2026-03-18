@@ -1,108 +1,66 @@
-# Task: Redesign Food Diary UI - Stage 1 (Calories, Macros, Date)
+# ТЗ: Этап 3 — Внедрение FoodCard в чат (Frontend + Backend Awareness)
 
-## Context
-We are implementing a new mobile-first, high-quality design for the VITOGRAPH Food Diary page. This is Stage 1 of 3.
-The backend API is already returning all correct nutritional values (`consumed`, `dynamicTarget`, etc.). You only need to change the frontend visualization.
+**Контекст:**
+Ты — опытный Frontend-разработчик. Наша архитектура требует внедрения красивой карточки приема пищи (`FoodCard`) в чат-интерфейс.
+Важно: бэкенд (граф в `ai.controller.ts` и `tools.ts`) УЖЕ отдает нужные данные в виде XML-тегов внутри текста.
+Пример сырой строки от бэкенда:
+`Записал 20г мёда: 61 ккал, 0.1г белка, 0г жира, 17г уг. <nutr type="vitamin_c">Витамин C (10мг)</nutr> <meal_score score="40" reason="Оценка" />`
 
-**IMPORTANT RULES:**
-- **Environment**: You are a fresh agent starting a new task. Do not assume any previous chat context. Follow this document precisely.
-- **Workflow**: Auto-deploy and check logs using `@[/auto_deploy_vg]` workflow after completing the code. DO NOT leave broken code.
-- **Tools**: Use React and Tailwind CSS for all styling. Use exact colors provided.
+**Твоя задача (Frontend Only):**
+Реализовать компонент `FoodCard` и логику парсинга в `ChatMessage.tsx`. Бэкенд трогать СТРОГО ЗАПРЕЩЕНО. Вся необходимая информация уже "зашита" в текстовом ответе бота.
 
-## Mandatory Skills to Use
-You MUST strictly evaluate and apply guidelines from these skills:
-- `frontend-developer`
-- `react-ui-patterns`
-- `tailwind-design-system`
+### Шаг 1: Создание `FoodCard.tsx`
+Создай компонент `apps/web/src/components/diary/FoodCard.tsx` в точном соответствии с HTML-прототипом.
+Интерфейс пропсов:
+```typescript
+interface FoodCardProps {
+  name: string;        // "мёда" (или "Мёд", как вытащишь)
+  emoji: string;       // "🍽️" (хардкод или простая генерация, бэкенд не присылает эмодзи)
+  weight: number;      // 20
+  calories: number;    // 61
+  protein: number;     // 0.1
+  fat: number;         // 0
+  carbs: number;       // 17
+  score: number;       // 40
+  scoreReason?: string; // "Оценка" (опционально, для тултипа или логов)
+  micros?: { name: string; value: string; type: string }[]; // Парсится из <nutr>
+  time: string;        // "14:54"
+}
+```
+**Требования к верстке:**
+- Используй макро-пилюли с рамками, цветами (оранжевый для ккал, синий для белков, желтый для жиров, зеленый для уг).
+- Бейдж Health Score должен иметь градиентный фон (low < 40, mid < 70, high >= 70).
+- Микронутриенты — это чипы с цветной точкой (dot) в зависимости от `type`.
+
+### Шаг 2: Обновление `ChatMessage.tsx` (Надежный Regex)
+В файле `apps/web/src/components/diary/ChatMessage.tsx` напиши новую функцию парсера `detectAndParseFoodLog(text: string)`, которая:
+1. **Ищет основной паттерн лога:** `Записал\s+(\d+(?:[.,]\d+)?)\s?[гg]\s+([^:]+):\s+(\d+(?:[.,]\d+)?)\s+ккал,\s+(\d+(?:[.,]\d+)?)\s?[гg]\s+белка,\s+(\d+(?:[.,]\d+)?)\s?[гg]\s+жира,\s+(\d+(?:[.,]\d+)?)\s?[гg]\s+уг`.
+   🚨 **ВАЖНО (Critic Warning):** Сделай regex устойчивым к пробелам, запятым/точкам в десятичных числах и возможным опечаткам (например, "угл" вместо "уг").
+2. **Извлекает теги `<nutr>`:** Собери все совпадения `<nutr type="([^"]+)">([^<]+?)\s+\(([^)]+)\)<\/nutr>` или подобного формата, чтобы извлечь `type`, имя (Витамин С) и значение (10мг).
+3. **Извлекает `<meal_score>`:** Собери `score` и `reason`.
+4. **Очищает текст:** Если нужно отрендерить остаток текста как комментарий бота, сохрани его. Но если вся строка является логом — возвращай `FoodCardProps`. 
+5. **Фоллбек:** Если основной regex лога (макросы) не совпал, функция должна вернуть `null`.
+
+В самом компоненте `ChatMessage`:
+- Если `variant === "system"` и `detectAndParseFoodLog` вернул объект: рендерим `<FoodCard {...parsedData} time={time} />`.
+- Во всех остальных случаях (или если вернулся `null`): рендерим классический текстовый бабл через модифицированный `parseNutrientTags` (чтобы теги `nutr` и `meal_score` по-прежнему парсились для старых сообщений).
+
+### Шаг 3: Тестирование граничных случаев (Optimizer)
+- Убедись, что если массив `micros` пустой, секция микронутриентов в карточке не рендерится вообще (чтобы не сломать UI).
+- Убедись, что длинное название продукта корректно обрезается (ellipsis) в шапке карточки.
+
+### Строгие правила:
+- НИКАКИХ изменений вне `apps/web/src/components/diary/`.
+- Модификация бэкенд файлов СТРОГО ЗАПРЕЩЕНА.
+- Используй TypeScript строго.
+
+### ВАЖНО: Дополнительные Рекомендации (Архитектурный Аудит)
+Прежде чем писать код, ты **ОБЯЗАН** прочитать файл `C:\project\kOSI\docs\stage3_coder_recommendations.md`. 
+Там описаны критически важные решения по обработке текста (более гибкие Regex), маппингу эмодзи и точным градиентам для Health Score.
+Применяй их неукоснительно.
 
 ---
-
-## 🏗️ Execution Steps
-
-### Step 1: Add New Design Tokens
-**File:** `apps/web/src/app/globals.css`
-Add these missing colors inside the `@theme inline { ... }` block, without deleting existing ones:
-```css
-  /* Macro Colors Stage 1 */
-  --color-cal-ring-track: #FFEDD5;
-  --color-cal-ring-fill: #F97316;
-  --color-protein-bg: #EFF6FF;
-  --color-protein-text: #2563EB;
-  --color-fat-bg: #FFFBEB;
-  --color-fat-text: #D97706;
-  --color-carb-bg: #ECFDF5;
-  --color-carb-text: #059669;
-```
-Add this animation outside the theme block (at the bottom of the file):
-```css
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in-up { animation: fadeInUp 0.5s ease-out both; }
-```
-
-### Step 2: Update Date Paginator
-**File:** `apps/web/src/components/diary/DatePaginator.tsx`
-Redesign the cosmetic layout to match a pristine card style:
-1. Outer `div` (`<div className="flex items-center...`): Change `rounded-xl` to `rounded-2xl`, remove `border border-border`, add `shadow-sm bg-white`.
-2. Center label (`<span className="text-sm...`): Change `text-sm font-semibold` to `text-[15px] font-bold`.
-3. Left/Right Buttons: Change their className to minimal square buttons: `w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-500`. Remove the complex SVG chevron, use simple text symbols "◀" and "▶".
-
-### Step 3: Redesign DailyAllowancesPanel (Top Half Only)
-**File:** `apps/web/src/components/diary/DailyAllowancesPanel.tsx`
-
-**DO NOT CHANGE:**
-- Props definitions (`consumed`, `dynamicTarget`, etc.)
-- Normalization mapping and functions at the top of the file
-- Aggregation logic before the `return` statement
-- The Micronutrients Toggle button and list (everything below `{/* Micronutrients Toggle */}`)
-
-**CHANGE:**
-Replace the entire top section (the `div` containing the old Teal Calorie circle and linear bars) with a new modular layout.
-
-**New Layout Structure (JSX):**
-Inside the main `<div className="bg-surface-muted...` container, create a new card container for the BJU block:
-`<div className="bg-white rounded-[20px] shadow-sm border border-border overflow-hidden animate-fade-in-up mb-4 mx-1 mt-1">`
-
-Inside this new card:
-
-**A. Calorie Header (Top row inside the card):**
-Use `flex` layout (`flex items-center gap-4 px-5 pt-5 pb-1`).
-- **Ring:** SVG `viewBox="0 0 80 80"`, size `w-20 h-20 shrink-0`. `circle` cx=40 cy=40 r=32. Track stroke: `text-[#FFEDD5]`, Fill stroke: `text-[#F97316]` with `stroke-linecap="round"`. The circumference is `2 * Math.PI * 32 ≈ 201`. 
-- **Logic:** Calculate offset dynamically: `const cCalPercent = calcPercent(consumed.calories, Math.max(dynamicTarget.calories, 1)); const ringOffset = 201 - (cCalPercent / 100) * 201;`. **IMPORTANT:** Always use `Math.max(norm, 1)` to avoid division by zero.
-- **Ring Inside:** Absolute center (using a `relative` wrapper on the SVG): `{Math.round(consumed.calories)}` (text-[22px] font-[800] leading-none), `/{dynamicTarget.calories}` (text-[9px] text-ink-muted), and an emoji `"🔥"` (text-[11px]).
-- **Text right of Ring:** Column layout (`flex flex-col gap-0.5`).
-  - "Калории за день" (text-sm font-bold text-ink)
-  - "Осталось {dynamicTarget.calories - consumed.calories} ккал" (text-xs text-ink-muted), with the number and "ккал" bold and colored orange `#F97316`.
-  - "≈ обед + перекус до нормы" (text-[11px] text-ink-faint)
-
-**B. Macros Grid (Bottom row inside the card):**
-`<div className="flex gap-2.5 px-4 pb-4 pt-2">`
-**TIP:** To keep code clean (DRY), define a configuration array for the 3 macros and map over it.
-1. **Белки (Protein):** bg: `bg-[#EFF6FF]`, text: `text-[#2563EB]`, Emoji: `💪`, Gradient: `bg-gradient-to-r from-[#60A5FA] to-[#2563EB]`, value: `consumed.protein`, target: `dynamicTarget.protein`.
-2. **Жиры (Fats):** bg: `bg-[#FFFBEB]`, text: `text-[#D97706]`, Emoji: `🫒`, Gradient: `bg-gradient-to-r from-[#FBBF24] to-[#D97706]`, value: `consumed.fat`, target: `dynamicTarget.fat`.
-3. **Углеводы (Carbs):** bg: `bg-[#ECFDF5]`, text: `text-[#059669]`, Emoji: `🌾`, Gradient: `bg-gradient-to-r from-[#34D399] to-[#059669]`, value: `consumed.carbs`, target: `dynamicTarget.carbs`.
-
-**Card Inner Structure:**
-`<div className="[bg-color] flex-1 rounded-[14px] p-2.5 text-center transition-transform hover:-translate-y-0.5 hover:shadow-md cursor-default flex flex-col items-center">`
-- Emoji (text-lg mb-0.5)
-- Label "БЕЛКИ" etc. (text-[9px] font-semibold uppercase tracking-wide `[text-color]`)
-- Value `{Math.round(val)}` (text-[18px] font-[800] text-ink leading-none mt-1)
-- " / {target}г" (text-[9px] text-ink-muted mb-2)
-- Progress track (w-full h-1.5 bg-black/5 rounded-full overflow-hidden)
-- Progress fill (h-full rounded-full transition-all `[gradient-color]` width based on `calcPercent(val, Math.max(target, 1))`)
-- Percent `{Math.round(pct)}%` (text-[10px] font-bold mt-1.5 `[text-color]`)
-
-### Step 4: Adjust FoodDiaryView Layout
-**File:** `apps/web/src/components/diary/FoodDiaryView.tsx`
-- Remove the top header with the book icon and "Дневник питания" `<h3>` text (lines ~217-236). We don't need this duplicate title.
-- Make sure `DatePaginator` and `DailyAllowancesPanel` flow nicely.
-- Remove `border-b` from the `DatePaginator` container if it looks cluttered.
-
-## Verification
-1. Review the code to ensure NO micronutrient rendering logic or backend data mapping was deleted.
-2. Ensure you didn't break React hooks by removing or renaming variables.
-3. Run the deployment `@[/auto_deploy_vg]`. Wait for it to finish and check the final PM2 log snippet for "started".
-
-**You may begin. Create the UI magic.**
+**Используй следующие скиллы строго в этом порядке:**
+1. `frontend-developer`
+2. `react-ui-patterns`
+3. `tailwind-design-system`

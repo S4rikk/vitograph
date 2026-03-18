@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 type MacrosConfig = { calories: number; protein: number; fat: number; carbs: number };
 
@@ -77,6 +77,23 @@ interface Props {
   rationale?: string;
 }
 
+const getMicroLevel = (pct: number) => {
+  if (pct < 25) return { color: 'bg-gradient-to-r from-[#FCA5A5] to-[#EF4444]', badgeBg: 'bg-[#FEE2E2]', badgeText: 'text-[#DC2626]', label: '< 25%' };
+  if (pct < 50) return { color: 'bg-gradient-to-r from-[#FCD34D] to-[#F59E0B]', badgeBg: 'bg-[#FEF3C7]', badgeText: 'text-[#B45309]', label: 'Low' };
+  if (pct < 75) return { color: 'bg-gradient-to-r from-[#93C5FD] to-[#3B82F6]', badgeBg: 'bg-[#DBEAFE]', badgeText: 'text-[#1D4ED8]', label: 'Mid' };
+  if (pct < 100) return { color: 'bg-gradient-to-r from-[#6EE7B7] to-[#10B981]', badgeBg: 'bg-[#D1FAE5]', badgeText: 'text-[#047857]', label: 'Good' };
+  return { color: 'bg-gradient-to-r from-[#A78BFA] to-[#7C3AED]', badgeBg: 'bg-[#EDE9FE]', badgeText: 'text-[#6D28D9]', label: 'Over' };
+};
+
+const NUTRIENT_EMOJI: Record<string, string> = {
+  'Витамин C': '🍊', 'Витамин D': '☀️', 'Витамин B6': '🥬', 'Витамин A': '🫐', 
+  'Витамин B12': '💊', 'Витамин E': '🌻', 'Фолиевая кислота': '🥦', 
+  'Железо': '🔩', 'Кальций': '🦴', 'Калий': '⚡', 'Магний': '🧲', 
+  'Цинк': '🔬', 'Селен': '🌰', 'Фосфор': '🧪', 'Натрий': '🧂', 'Омега-3': '🐟'
+};
+
+const isVitamin = (name: string) => name.startsWith('Витамин') || name === 'Фолиевая кислота';
+
 export default function DailyAllowancesPanel({
   consumed = { calories: 0, protein: 0, fat: 0, carbs: 0 } as MacrosConfig,
   dynamicTarget = { calories: 2000, protein: 120, fat: 60, carbs: 250 } as MacrosConfig,
@@ -86,6 +103,17 @@ export default function DailyAllowancesPanel({
 }: Props) {
   const [isMicrosExpanded, setIsMicrosExpanded] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (tooltipRef.current && !tooltipRef.current.contains(event.target as Node)) {
+        setShowTooltip(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Normalize and group consumed micros to match dynamicMicros keys
   const normalizedConsumed: Record<string, { value: number; unit: string }> = {};
@@ -107,6 +135,11 @@ export default function DailyAllowancesPanel({
   const microsEntries = Object.entries(normalizedConsumed);
 
   const calcPercentSafe = (val: number, max: number) => Math.min(100, Math.max(0, (val / Math.max(max, 1)) * 100));
+
+  const trackedMicros = microsEntries.filter(([name]) => dynamicMicros[name] && dynamicMicros[name] > 0);
+  const avgCoverage = trackedMicros.length > 0 
+    ? Math.round(trackedMicros.reduce((acc, [name, {value}]) => acc + calcPercentSafe(value, dynamicMicros[name]!), 0) / trackedMicros.length)
+    : 0;
 
   const cCalPercent = calcPercentSafe(consumed.calories, dynamicTarget.calories);
   // Circular calc
@@ -179,8 +212,8 @@ export default function DailyAllowancesPanel({
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
               <div className="flex items-center gap-0.5 leading-none mb-0.5">
-                <span className="text-[22px] font-[800] text-ink">{Math.round(consumed.calories)}</span>
-                <span className="text-[11px]">🔥</span>
+                <span className="text-[18px] font-[800] text-ink tracking-tight">{Math.round(consumed.calories)}</span>
+                <span className="text-[10px]">🔥</span>
               </div>
               <span className="text-[9px] text-ink-muted leading-none">/ {dynamicTarget.calories}</span>
             </div>
@@ -225,115 +258,162 @@ export default function DailyAllowancesPanel({
         </div>
       </div>
 
-      {/* Micronutrients Toggle */}
-      <div className="mt-4 border-t border-border pt-1">
-        <button
+      {/* ── Stage 2: Micronutrients Expansion Panel ────────── */}
+      <div className="bg-white rounded-[20px] shadow-sm border border-border mt-3.5 mx-1">
+        {/* Header */}
+        <button 
           onClick={() => setIsMicrosExpanded(!isMicrosExpanded)}
-          className="flex w-full items-center justify-between py-2 px-3 -mx-3 rounded-2xl hover:bg-surface transition-colors group focus:outline-none"
+          className="flex w-full items-center justify-between p-4 focus:outline-none hover:bg-surface-muted transition-colors text-left"
         >
           <div className="flex items-center gap-2.5">
-            <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary-500/10 text-primary-500 group-hover:scale-110 transition-transform">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-              </svg>
+            <span className="text-lg">✨</span>
+            <div>
+              <h4 className="text-[13px] font-bold text-ink leading-tight">Микронутриенты</h4>
+              <p className="text-[10px] text-ink-faint">{trackedMicros.length} из 16 отслеживаются</p>
             </div>
-            <span className="text-[13px] font-semibold text-ink group-hover:text-primary-600 transition-colors">Микронутриенты (Витамины и Минералы)</span>
           </div>
-          <div className={`p-1 rounded-full bg-cloud-dark/30 text-ink-muted group-hover:bg-primary-500/10 group-hover:text-primary-500 transform transition-all duration-300 ${isMicrosExpanded ? "rotate-180" : ""}`}>
-            <svg
-              className="w-3.5 h-3.5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2.5}
-            >
+          <div className={`p-1 transform transition-transform duration-300 ${isMicrosExpanded ? "rotate-180" : ""}`}>
+            <svg className="w-4 h-4 text-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </div>
         </button>
 
-        {/* Micronutrients List */}
         {isMicrosExpanded && (
-          <div className="mt-2 animate-slide-up pb-2 px-1">
-            {microsEntries.length > 0 ? (
-              <div className="flex flex-col gap-2.5 mt-2">
-                {microsEntries.map(([name, { value: val, unit }]) => {
-                  const targetMicro = dynamicMicros[name];
-                  const maxVal = targetMicro || Math.max(val, 100);
-                  const percent = Math.min(100, (val / maxVal) * 100);
-                  const isOverload = targetMicro && val > targetMicro;
+          <div className="px-4 pb-0 pt-1 animate-fade-in">
+            <div className="pb-5">
+              {/* Overall Score Ring Section */}
+            <div className="flex items-center gap-4 py-4 px-3 bg-surface-muted rounded-2xl mb-5">
+              <div className="relative w-14 h-14 shrink-0 flex items-center justify-center">
+                <svg viewBox="0 0 60 60" className="w-full h-full transform -rotate-90">
+                  <circle cx="30" cy="30" r="25" stroke="#E2E8F0" strokeWidth="5" fill="none" />
+                  <circle 
+                    cx="30" cy="30" r="25" stroke="#10B981" strokeWidth="5" fill="none" 
+                    strokeDasharray="157" strokeDashoffset={157 - (avgCoverage / 100) * 157} 
+                    strokeLinecap="round" className="transition-all duration-700"
+                  />
+                </svg>
+                <span className="absolute text-[13px] font-bold">{avgCoverage}%</span>
+              </div>
+              <div>
+                <p className="text-[12px] font-bold text-ink">Покрытие дневной нормы</p>
+                <p className="text-[10px] text-ink-faint">Среднее значение по всем витаминам и минералам</p>
+              </div>
+            </div>
 
-                  return (
-                    <div key={name} className="flex items-center gap-3 text-[11px] w-full">
-                      <span className="w-1/3 text-ink-muted truncate" title={name}>{name}</span>
+            {/* Render 2 categories: ВИТАМИНЫ / МИНЕРАЛЫ */}
+            {(['Витамины', 'Минералы'] as const).map(cat => {
+              const list = microsEntries.filter(([name]) => (cat === 'Витамины' ? isVitamin(name) : !isVitamin(name)));
+              if (list.length === 0) return null;
+              
+              return (
+                <div key={cat} className="mb-6 last:mb-0">
+                  <div className="flex items-center gap-2 mb-3 px-1">
+                    <div className={`w-1.5 h-1.5 rounded-full ${cat === 'Витамины' ? 'bg-[#F59E0B]' : 'bg-[#6366F1]'}`} />
+                    <h5 className="text-[10px] font-bold uppercase tracking-wider text-ink-muted">{cat}</h5>
+                  </div>
+                  
+                  <div className="flex flex-col gap-0.5">
+                    {list.map(([name, {value, unit}]) => {
+                      const target = dynamicMicros[name];
+                      // IMPORTANT: Fallback to Math.max(value, 100) if no target, avoid division by zero
+                      const safeTarget = target || Math.max(value, 100); 
+                      const pct = calcPercentSafe(value, safeTarget);
+                      const level = getMicroLevel(pct);
+                      return (
+                        <div key={name} className="flex items-center justify-between gap-3 py-1.5 px-0.5">
+                          {/* 1. Icon (Left) */}
+                          <div className={`w-9 h-9 shrink-0 rounded-[12px] flex items-center justify-center text-[18px] shadow-sm bg-white border border-border/50 ${isVitamin(name) ? 'bg-[#FFFBF2]' : 'bg-[#F8FAFC]'}`}>
+                            {NUTRIENT_EMOJI[name] || '💊'}
+                          </div>
 
-                      <div className="flex-1 h-1.5 bg-cloud-dark rounded-full overflow-hidden">
-                        {targetMicro ? (
-                          <div
-                            className={`h-full transition-all duration-1000 ease-out rounded-full ${isOverload ? 'bg-orange-400' : 'bg-primary-500'}`}
-                            style={{ width: `${percent}%` }}
-                          />
-                        ) : (
-                          <div className="h-full bg-cloud-darker w-full opacity-50" title="Норма неизвестна" />
-                        )}
-                      </div>
-
-                      <span className="w-1/3 text-right text-ink font-medium">
-                        {Math.round(val * 10) / 10} {targetMicro ? <span className="text-ink-faint font-normal">/ {targetMicro} {unit}</span> : <span className="text-ink-faint font-normal">{unit}</span>}
-                      </span>
-                    </div>
-                  );
-                })}
-                <div className="flex items-center gap-3 w-full mt-1">
-                  <span className="w-1/3"></span>
-                  <div className="flex-1"></div>
-                  <div className="w-1/2 text-right flex justify-end items-center">
-                    {hasRulesApplied ? (
-                      <div className="inline-flex items-center gap-1.5 py-0.5 px-2 bg-primary-100 text-primary-700 rounded-full text-[10px] font-semibold group relative">
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        Индивидуальная норма
-                        <div
-                          className="relative flex items-center justify-center w-3.5 h-3.5 rounded-full bg-primary-200 text-primary-800 font-bold ml-0.5 cursor-help"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setShowTooltip(!showTooltip);
-                          }}
-                          onMouseEnter={() => setShowTooltip(true)}
-                          onMouseLeave={() => setShowTooltip(false)}
-                        >
-                          i
-                          {showTooltip && (
-                            <div className="absolute right-0 bottom-full mb-2 w-48 sm:w-64 p-3 rounded-xl bg-ink text-surface text-[11px] font-normal leading-relaxed text-left shadow-xl pointer-events-none animate-fade-in z-50">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="flex h-2 w-2 rounded-full bg-primary-400"></span>
-                                <span className="font-semibold text-white">AI-расчет</span>
-                              </div>
-                              {rationale}
-                              <svg className="absolute text-ink h-2 w-auto right-1 top-full" viewBox="0 0 255 255"><polygon className="fill-current" points="0,0 127.5,127.5 255,0" /></svg>
+                          {/* 2. Middle Info (Name + Values + Bar) */}
+                          <div className="flex-1 flex flex-col justify-center min-w-0 pr-1">
+                            <div className="flex items-end justify-between leading-none mb-1.5 mt-0.5">
+                              <span className="text-[14px] font-[700] text-ink truncate mr-2">{name}</span>
+                              <span className="text-[13px] font-bold text-ink shrink-0">
+                                {Number(value.toFixed(1))} <span className="text-ink-muted font-medium text-[12px]">/ {target || '—'} {unit}</span>
+                              </span>
                             </div>
-                          )}
+                            <div className="w-full h-[6px] bg-black/5 rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full rounded-full transition-all duration-1000 animate-shimmer ${level.color}`} 
+                                style={{ width: `${pct}%` }} 
+                              />
+                            </div>
+                          </div>
+
+                          {/* 3. Badge (Right) */}
+                          <div className={`shrink-0 min-w-[42px] text-center px-1.5 py-1 rounded-md text-[11px] font-[800] ${level.badgeBg} ${level.badgeText}`}>
+                            {Math.round(pct)}%
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <span className="text-[10px] text-ink-faint">
-                        * Базовая норма
-                      </span>
-                    )}
+                      );
+                    })}
                   </div>
                 </div>
+              );
+            })}
+
+            {/* Footer Legend & Rationale */}
+            <div className="mt-8 pt-4 border-t border-border flex items-center justify-between">
+              <div className="flex gap-1">
+                {['#EF4444', '#F59E0B', '#3B82F6', '#10B981', '#8B5CF6'].map(c => (
+                  <div key={c} className="w-1.5 h-1.5 rounded-full" style={{ background: c }} />
+                ))}
               </div>
-            ) : (
-              <div className="text-xs text-ink-faint text-center py-4 rounded-xl bg-surface-muted/50 border border-dashed border-border mt-3">
-                <div className="mb-1 text-base">🍽️</div>
-                Нет данных о микронутриентах за сегодня.<br />Добавьте приемы пищи, чтобы ИИ мог их рассчитать.
+              <div ref={tooltipRef} className="relative flex items-center">
+                <button 
+                  onClick={() => setShowTooltip(!showTooltip)}
+                  className="text-[10px] font-bold text-primary-600 flex items-center gap-1 hover:underline"
+                >
+                  ✧ Моя норма
+                </button>
+                {showTooltip && (
+                  <div className="absolute right-0 bottom-full mb-3 w-[260px] p-3.5 rounded-xl bg-ink/95 backdrop-blur-md text-white shadow-xl pointer-events-auto z-50 transform origin-bottom-right transition-all">
+                    <div className="text-[11px] font-bold text-white/90 mb-2 border-b border-white/10 pb-2">
+                        Индивидуальные корректировки:
+                    </div>
+                    {rationale ? (
+                      <ul className="flex flex-col gap-2">
+                         {/* Parse the rationale string, splitting primarily by '),' to capture full medical reasoning without breaking internal parentheses */}
+                        {rationale.split('),').map((item, i, arr) => {
+                          const cleanItem = item.trim() + (i !== arr.length - 1 ? ')' : '');
+                          if (!cleanItem || cleanItem.includes('Базовая норма')) return null;
+                          
+                          // Optional: Extract the medical condition vs the vitamin mapping
+                          // Format: Condition [severity] (+Vitamins)
+                          const parts = cleanItem.split(' (+');
+                          const condition = parts[0].replace('⚕️', '').trim();
+                          const vitamins = parts[1] ? parts[1].replace(')', '').trim() : '';
+
+                          return (
+                            <li key={i} className="flex items-start gap-2 text-[11px] leading-tight">
+                              <span className="text-primary-400 mt-0.5 shrink-0 text-[10px]">⚕️</span>
+                              <div>
+                                <span className="text-white/90 block">{condition}</span>
+                                {vitamins && <span className="text-primary-300 font-bold block mt-0.5 text-[10px]">+{vitamins}</span>}
+                              </div>
+                            </li>
+                          );
+                        })}
+                        {rationale.includes('Базовая норма') && (
+                           <li className="text-white/70 text-[10px]">Базовая норма (отклонений из анализов не найдено).</li>
+                        )}
+                      </ul>
+                    ) : (
+                      <div className="text-[10px] text-white/70 leading-relaxed">
+                        Ваша норма рассчитана ИИ на основе базового профиля.
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+    </div>
 
     </div>
   );

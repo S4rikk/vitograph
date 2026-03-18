@@ -1,5 +1,6 @@
 import React from "react";
 import { MealScoreBadge } from "./MealScoreBadge";
+import FoodCard from "./FoodCard";
 
 type ChatMessageProps = {
   /** "user" for right-aligned, "system" for left-aligned. */
@@ -9,6 +10,70 @@ type ChatMessageProps = {
   /** Formatted timestamp string. */
   time: string;
 };
+
+function detectAndParseFoodLog(text: string, time: string) {
+  try {
+    const macroRegex = /Записал\s+([\d.,]+)\s*[гg]\s+([^:]+):\s*([\d.,]+)\s*ккал(?:,\s*|\s+)([\d.,]+)\s*[гg]\s*белк[а-я]*(?:,\s*|\s+)([\d.,]+)\s*[гg]\s*жир[а-я]*(?:,\s*|\s+)([\d.,]+)\s*[гg]\s*уг[а-я]*/i;
+    
+    const macroMatch = text.match(macroRegex);
+    if (!macroMatch) return null;
+
+    const [, weightStr, rawName, calStr, protStr, fatStr, carbStr] = macroMatch;
+    
+    const weight = parseFloat(weightStr.replace(',', '.'));
+    const name = rawName.trim();
+    const calories = parseFloat(calStr.replace(',', '.'));
+    const protein = parseFloat(protStr.replace(',', '.'));
+    const fat = parseFloat(fatStr.replace(',', '.'));
+    const carbs = parseFloat(carbStr.replace(',', '.'));
+
+    let score = 0;
+    let scoreReason = undefined;
+    const scoreMatch = /<meal_score\s+score="([^"]+)"(?:\s+reason="([^"]*)")?\s*\/>/i.exec(text);
+    if (scoreMatch) {
+       score = parseInt(scoreMatch[1], 10) || 0;
+       scoreReason = scoreMatch[2];
+    }
+
+    const micros: {name: string, value: string, type: string}[] = [];
+    const nutrRegex = /<nutr\s+type="([^"]+)">([^<]+)<\/nutr>/gi;
+    let match;
+    while ((match = nutrRegex.exec(text)) !== null) {
+      const type = match[1];
+      const content = match[2]; 
+      
+      const valueMatch = content.match(/([\d.,]+[A-Za-zА-Яа-я]+)[\s)]*$/);
+      let microName = content;
+      let microValue = "";
+      
+      if (valueMatch) {
+         microValue = valueMatch[1];
+         microName = content.replace(valueMatch[0], '').replace(/[():]/g, '').trim();
+      } else {
+         microName = content.replace(/[():]/g, '').trim();
+      }
+
+      micros.push({ name: microName, value: microValue, type });
+    }
+
+    let comment = text
+      .replace(macroRegex, '')
+      .replace(/<meal_score[^>]*\/>/gi, '')
+      .replace(/<nutr[^>]*>.*?<\/nutr>/gi, '')
+      .trim();
+    
+    comment = comment.replace(/^[\s,.]+/, '').replace(/[\s,.]+$/, '').trim();
+
+    return {
+      cardProps: { name, emoji: "", weight, calories, protein, fat, carbs, score, scoreReason, micros, time },
+      comment
+    };
+
+  } catch (e) {
+    console.error("Failed to parse food log:", e);
+    return null;
+  }
+}
 
 function parseNutrientTags(text: string) {
   if (!text) return text;
@@ -75,6 +140,27 @@ export default function ChatMessage({
   time,
 }: ChatMessageProps) {
   const isUser = variant === "user";
+
+  if (!isUser) {
+    const parsed = detectAndParseFoodLog(text, time);
+    if (parsed) {
+      return (
+        <div className="flex flex-col gap-2 w-full">
+           {parsed.comment && (
+               <div className="flex justify-start">
+                 <div className="max-w-[80%] rounded-2xl px-4 py-2.5 rounded-bl-md bg-white text-ink border border-border">
+                    <div className="text-sm leading-relaxed whitespace-pre-wrap">{parseNutrientTags(parsed.comment)}</div>
+                    <p className="mt-1 text-[10px] text-right text-ink-faint">{time}</p>
+                 </div>
+               </div>
+           )}
+           <div className="flex justify-start">
+             <FoodCard {...parsed.cardProps} />
+           </div>
+        </div>
+      );
+    }
+  }
 
   return (
     <div

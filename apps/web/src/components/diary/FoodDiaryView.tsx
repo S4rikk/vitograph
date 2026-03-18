@@ -211,21 +211,25 @@ export default function FoodDiaryView() {
   return (
     <>
       <FeedbackButton className="z-30" />
-      <div className="flex flex-col h-[100dvh] sm:h-[750px] sm:rounded-2xl border-x sm:border border-border bg-white overflow-hidden shadow-sm">
+      <div className="flex flex-col h-[100dvh] sm:h-[85vh] sm:max-h-[1000px] sm:min-h-[750px] sm:rounded-2xl border-x sm:border border-border bg-white overflow-hidden shadow-sm">
         {/* ── Header & Time Machine ──────────────────────── */}
-        <div className="flex flex-col bg-surface-muted px-5 pt-5 pb-2">
+        <div className="flex flex-col bg-surface-muted px-5 pt-5 pb-2 shrink-0 z-10 border-b border-border/50">
           <DatePaginator selectedDate={selectedDate} onChange={setSelectedDate} />
         </div>
 
-        <DailyAllowancesPanel consumed={consumed} consumedMicros={consumedMicros} dynamicTarget={dynamicTarget} dynamicMicros={dynamicMicros} rationale={rationale} />
-        <WaterTracker selectedDate={selectedDate} />
-
-        {/* ── Messages ──────────────────────────────────────── */}
+        {/* ── Scrollable Content (Panels + Chat) ──────────────────────── */}
         <div
           ref={scrollRef}
-          className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-surface-subtle"
+          className="flex-1 overflow-y-auto bg-surface-subtle flex flex-col"
         >
-          {messages.map((msg) => (
+          <div className="shrink-0 bg-white flex flex-col pt-1">
+            <DailyAllowancesPanel consumed={consumed} consumedMicros={consumedMicros} dynamicTarget={dynamicTarget} dynamicMicros={dynamicMicros} rationale={rationale} />
+            <WaterTracker selectedDate={selectedDate} />
+          </div>
+
+          {/* ── Messages ──────────────────────────────────────── */}
+          <div className="px-4 py-4 space-y-3 flex-1">
+            {messages.map((msg) => (
             <ChatMessage
               key={msg.id}
               variant={msg.variant}
@@ -240,6 +244,7 @@ export default function FoodDiaryView() {
               </div>
             </div>
           )}
+        </div>
         </div>
 
         {/* ── Input ─────────────────────────────────────────── */}
