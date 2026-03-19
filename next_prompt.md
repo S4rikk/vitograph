@@ -1,66 +1,40 @@
-# ТЗ: Этап 3 — Внедрение FoodCard в чат (Frontend + Backend Awareness)
+# Task: AI Assistant Chat Aesthetics & Premium Rendering
 
-**Контекст:**
-Ты — опытный Frontend-разработчик. Наша архитектура требует внедрения красивой карточки приема пищи (`FoodCard`) в чат-интерфейс.
-Важно: бэкенд (граф в `ai.controller.ts` и `tools.ts`) УЖЕ отдает нужные данные в виде XML-тегов внутри текста.
-Пример сырой строки от бэкенда:
-`Записал 20г мёда: 61 ккал, 0.1г белка, 0г жира, 17г уг. <nutr type="vitamin_c">Витамин C (10мг)</nutr> <meal_score score="40" reason="Оценка" />`
+## Context & Problem
+The AI Assistant chat currently leaks technical reasoning (`<think>` tags), raw JSON tool call summaries, and displays Markdown as plain text. This provides a poor user experience.
 
-**Твоя задача (Frontend Only):**
-Реализовать компонент `FoodCard` и логику парсинга в `ChatMessage.tsx`. Бэкенд трогать СТРОГО ЗАПРЕЩЕНО. Вся необходимая информация уже "зашита" в текстовом ответе бота.
+## Required Skills
+- `frontend-developer`
+- `ui-ux-pro-max`
+- `nodejs-backend-patterns`
+- `react-ui-patterns`
 
-### Шаг 1: Создание `FoodCard.tsx`
-Создай компонент `apps/web/src/components/diary/FoodCard.tsx` в точном соответствии с HTML-прототипом.
-Интерфейс пропсов:
-```typescript
-interface FoodCardProps {
-  name: string;        // "мёда" (или "Мёд", как вытащишь)
-  emoji: string;       // "🍽️" (хардкод или простая генерация, бэкенд не присылает эмодзи)
-  weight: number;      // 20
-  calories: number;    // 61
-  protein: number;     // 0.1
-  fat: number;         // 0
-  carbs: number;       // 17
-  score: number;       // 40
-  scoreReason?: string; // "Оценка" (опционально, для тултипа или логов)
-  micros?: { name: string; value: string; type: string }[]; // Парсится из <nutr>
-  time: string;        // "14:54"
-}
-```
-**Требования к верстке:**
-- Используй макро-пилюли с рамками, цветами (оранжевый для ккал, синий для белков, желтый для жиров, зеленый для уг).
-- Бейдж Health Score должен иметь градиентный фон (low < 40, mid < 70, high >= 70).
-- Микронутриенты — это чипы с цветной точкой (dot) в зависимости от `type`.
+## Instructions
 
-### Шаг 2: Обновление `ChatMessage.tsx` (Надежный Regex)
-В файле `apps/web/src/components/diary/ChatMessage.tsx` напиши новую функцию парсера `detectAndParseFoodLog(text: string)`, которая:
-1. **Ищет основной паттерн лога:** `Записал\s+(\d+(?:[.,]\d+)?)\s?[гg]\s+([^:]+):\s+(\d+(?:[.,]\d+)?)\s+ккал,\s+(\d+(?:[.,]\d+)?)\s?[гg]\s+белка,\s+(\d+(?:[.,]\d+)?)\s?[гg]\s+жира,\s+(\d+(?:[.,]\d+)?)\s?[гg]\s+уг`.
-   🚨 **ВАЖНО (Critic Warning):** Сделай regex устойчивым к пробелам, запятым/точкам в десятичных числах и возможным опечаткам (например, "угл" вместо "уг").
-2. **Извлекает теги `<nutr>`:** Собери все совпадения `<nutr type="([^"]+)">([^<]+?)\s+\(([^)]+)\)<\/nutr>` или подобного формата, чтобы извлечь `type`, имя (Витамин С) и значение (10мг).
-3. **Извлекает `<meal_score>`:** Собери `score` и `reason`.
-4. **Очищает текст:** Если нужно отрендерить остаток текста как комментарий бота, сохрани его. Но если вся строка является логом — возвращай `FoodCardProps`. 
-5. **Фоллбек:** Если основной regex лога (макросы) не совпал, функция должна вернуть `null`.
+### 1. Backend: Clean Response Output
+**File:** `apps/api/src/ai/src/ai.controller.ts`
 
-В самом компоненте `ChatMessage`:
-- Если `variant === "system"` и `detectAndParseFoodLog` вернул объект: рендерим `<FoodCard {...parsedData} time={time} />`.
-- Во всех остальных случаях (или если вернулся `null`): рендерим классический текстовый бабл через модифицированный `parseNutrientTags` (чтобы теги `nutr` и `meal_score` по-прежнему парсились для старых сообщений).
+- **Filter Reasoning**: In `handleChat`, before sending the `finalContent` back to the user (and before saving it to the DB), use a regex to strip all `<think>...</think>` blocks (including the tags).
+- **System Prompt**: Update the `systemPrompt` for the assistant mode to explicitly command the AI: "DO NOT include raw JSON or technical tool call summaries in your final conversational response. Always provide a natural human-like answer."
 
-### Шаг 3: Тестирование граничных случаев (Optimizer)
-- Убедись, что если массив `micros` пустой, секция микронутриентов в карточке не рендерится вообще (чтобы не сломать UI).
-- Убедись, что длинное название продукта корректно обрезается (ellipsis) в шапке карточки.
+### 2. Frontend: Premium Markdown Rendering
+**File:** `apps/web/src/components/assistant/AiAssistantView.tsx`
 
-### Строгие правила:
-- НИКАКИХ изменений вне `apps/web/src/components/diary/`.
-- Модификация бэкенд файлов СТРОГО ЗАПРЕЩЕНА.
-- Используй TypeScript строго.
+- **Markdown Support**: Implement a Markdown renderer (e.g., `react-markdown`). If adding a new dependency is problematic, ensure you handle at least `**bold**`, `### headers`, and `* lists` correctly using a robust regex-to-HTML approach or a lightweight library.
+- **Custom Badge Components**: Create custom renderers for our specialized XML tags:
+    - **`<meal_score score="X" reason="Y" />`**: Render as a colorful card/badge. 
+        - 86-100: Green (Ideal)
+        - 70-85: Yellow (Good)
+        - 40-69: Orange (Average)
+        - 0-39: Red (Poor)
+    - **`<nutr type="T">Name (Val)</nutr>`**: Render as a small, colored pill/badge (e.g., vitamins are light purple, minerals are light blue).
+- **Typography**: Apply Tailwind's `prose` classes (or custom equivalents) to ensure headers, lists, and bold text have appropriate spacing, font weights, and premium aesthetics.
+- **Thoughtfulness**: Ensure any internal tags not handled (like unclosed `<think>`) are sanitized and hidden.
 
-### ВАЖНО: Дополнительные Рекомендации (Архитектурный Аудит)
-Прежде чем писать код, ты **ОБЯЗАН** прочитать файл `C:\project\kOSI\docs\stage3_coder_recommendations.md`. 
-Там описаны критически важные решения по обработке текста (более гибкие Regex), маппингу эмодзи и точным градиентам для Health Score.
-Применяй их неукоснительно.
+### 3. Verification
+- Verify that `#`, `**`, and `-` are rendered as actual headers, bold text, and lists.
+- Verify that `<think>` blocks are completely invisible in the chat.
+- Verify that sending a message like "Log 2 eggs" results in a clean text reply + a visual "Health Score" badge.
 
 ---
-**Используй следующие скиллы строго в этом порядке:**
-1. `frontend-developer`
-2. `react-ui-patterns`
-3. `tailwind-design-system`
+**Использованные скиллы: frontend-developer, ui-ux-pro-max, nodejs-backend-patterns, react-ui-patterns**

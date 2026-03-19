@@ -4,6 +4,178 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
 import Image from "next/image";
+import React from "react";
+
+// ── CUSTOM PREMIUM RENDERERS ──
+
+const ScoreBadge = ({ score, reason }: { score: number; reason: string }) => {
+  let colorClass = "bg-red-50 text-red-700 border-red-200";
+  let dotColor = "bg-red-500";
+  let label = "Низкий"; // Poor
+  
+  if (score >= 86) {
+    colorClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+    dotColor = "bg-emerald-500";
+    label = "Идеально"; // Ideal
+  } else if (score >= 70) {
+    colorClass = "bg-amber-50 text-amber-700 border-amber-200";
+    dotColor = "bg-amber-500";
+    label = "Хорошо"; // Good
+  } else if (score >= 40) {
+    colorClass = "bg-orange-50 text-orange-700 border-orange-200";
+    dotColor = "bg-orange-500";
+    label = "Средне"; // Average
+  }
+
+  return (
+    <div className={`my-6 p-5 rounded-2xl border ${colorClass} shadow-sm overflow-hidden relative`}>
+      <div className="flex items-center space-x-4">
+        <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white font-bold text-xl shadow-sm border border-inherit`}>
+          {score}
+        </div>
+        <div>
+          <div className="flex items-center space-x-2">
+            <span className={`h-2 w-2 rounded-full ${dotColor} animate-pulse`}></span>
+            <p className="font-bold uppercase tracking-wider text-[11px] opacity-80">{label} Health Score</p>
+          </div>
+          <p className="text-sm italic mt-1 leading-snug font-medium text-ink-muted">{reason}</p>
+        </div>
+      </div>
+      {/* Subtle background decoration */}
+      <div className="absolute -right-4 -bottom-4 opacity-5 rotate-12">
+        <svg className="w-24 h-24" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+        </svg>
+      </div>
+    </div>
+  );
+};
+
+const NutrPill = ({ type, children }: { type: string; children: React.ReactNode }) => {
+  const t = type?.toLowerCase() || "";
+  const isVitamin = t.includes('vit') || t.includes('вит');
+  const isMineral = t.includes('min') || t.includes('мин') || t.includes('жел') || t.includes('цинк') || t.includes('магн');
+  
+  let colorClass = "bg-slate-100 text-slate-700 border-slate-200";
+  if (isVitamin) colorClass = "bg-purple-50 text-purple-700 border-purple-200";
+  else if (isMineral) colorClass = "bg-blue-50 text-blue-700 border-blue-200";
+  
+  return (
+    <span className={`inline-flex items-center rounded-lg px-2 py-0.5 text-[13px] font-semibold border ${colorClass} mx-0.5 my-0.5 transition-all hover:scale-105 cursor-default shadow-sm`}>
+      {children}
+    </span>
+  );
+};
+
+const AssistantMessageContent = ({ content }: { content: string }) => {
+  // 1. Filter out <think> blocks (backend does this, but safety first)
+  let processed = content.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
+  
+  // Also hide technical 200/404 messages if they leak
+  if (processed.includes("SUCCESS") && processed.length < 50) return null;
+
+  const fragments: React.ReactNode[] = [];
+  
+  // Custom Tag Regexes
+  const mealScoreRegex = /<meal_score\s+score="(\d+)"\s+reason="([^"]+)"\s*\/>/g;
+  const nutrRegex = /<nutr\s+type="([^"]+)">([^<]+)<\/nutr>/g;
+
+  // Use a more generic splitting strategy to handle interleaved text and tags
+  let lastIndex = 0;
+  const allMatches: { index: number; length: number; component: React.ReactNode }[] = [];
+
+  let match;
+  // Reset regex indices
+  mealScoreRegex.lastIndex = 0;
+  while ((match = mealScoreRegex.exec(processed)) !== null) {
+    allMatches.push({ index: match.index, length: match[0].length, component: <ScoreBadge key={`score-${match.index}`} score={parseInt(match[1])} reason={match[2]} /> });
+  }
+
+  nutrRegex.lastIndex = 0;
+  while ((match = nutrRegex.exec(processed)) !== null) {
+    allMatches.push({ index: match.index, length: match[0].length, component: <NutrPill key={`nutr-${match.index}`} type={match[1]}>{match[2]}</NutrPill> });
+  }
+
+  allMatches.sort((a, b) => a.index - b.index);
+
+  let currentPos = 0;
+  allMatches.forEach((m, i) => {
+    if (m.index > currentPos) {
+      fragments.push(<MarkdownRenderer key={`text-${currentPos}`} text={processed.substring(currentPos, m.index)} />);
+    }
+    fragments.push(m.component);
+    currentPos = m.index + m.length;
+  });
+
+  if (currentPos < processed.length) {
+    fragments.push(<MarkdownRenderer key={`text-${currentPos}`} text={processed.substring(currentPos)} />);
+  }
+
+  return <div className="assistant-content">{fragments}</div>;
+};
+
+const MarkdownRenderer = ({ text }: { text: string }) => {
+  const lines = text.split('\n');
+  const elements: React.ReactNode[] = [];
+  let currentList: React.ReactNode[] = [];
+  let inList = false;
+
+  const flushList = (key: string) => {
+    if (inList && currentList.length > 0) {
+      elements.push(<ul key={key} className="list-disc space-y-1.5 mb-4 mt-1 pl-4 text-ink-muted">{[...currentList]}</ul>);
+      currentList = [];
+      inList = false;
+    }
+  };
+
+  lines.forEach((line, idx) => {
+    const trimmed = line.trim();
+    
+    // 1. Headers
+    if (trimmed.startsWith('### ')) {
+      flushList(`list-before-h3-${idx}`);
+      elements.push(<h3 key={idx} className="text-base font-bold text-ink mt-5 mb-2 first:mt-0">{line.substring(4)}</h3>);
+    } 
+    // 2. Bold sections (as full paragraphs/headers sometimes)
+    else if (trimmed.startsWith('**') && trimmed.endsWith('**') && trimmed.length < 50) {
+       flushList(`list-before-bold-${idx}`);
+       elements.push(<p key={idx} className="text-[15px] font-bold text-ink-dark mt-4 mb-1">{line.replace(/\*\*/g, '')}</p>);
+    }
+    // 3. Lists
+    else if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
+      inList = true;
+      currentList.push(<li key={idx} className="leading-relaxed">{parseInline(trimmed.substring(2))}</li>);
+    }
+    // 4. Empty space
+    else if (trimmed === '') {
+      flushList(`list-before-empty-${idx}`);
+      // Only push a spacer if not at the very end
+      if (idx !== lines.length - 1) {
+        elements.push(<div key={idx} className="h-2"></div>);
+      }
+    }
+    // 5. Normal paragraph
+    else {
+      flushList(`list-before-p-${idx}`);
+      elements.push(<p key={idx} className="leading-relaxed mb-3 last:mb-0">{parseInline(line)}</p>);
+    }
+  });
+
+  flushList(`list-final`);
+
+  return <>{elements}</>;
+};
+
+function parseInline(text: string) {
+  // Simple bold parser
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} className="font-bold text-ink-dark">{part.substring(2, part.length - 2)}</strong>;
+    }
+    return part;
+  });
+}
 
 type Message = {
   id: string;
@@ -126,11 +298,51 @@ export default function AiAssistantView() {
     setInput("");
     await sendChatMessage(content, threadId);
   };
+  
+  const handleClearChat = async () => {
+    if (!threadId || isLoading) return;
+    
+    const confirmed = window.confirm("Вы уверены? Это полностью сотрет вашу историю общения с ИИ.");
+    if (!confirmed) return;
+    
+    setIsLoading(true);
+    try {
+      await apiClient.deleteChatHistory("assistant");
+      // Reset local state to initial welcome message
+      setMessages([
+        {
+          id: "welcome",
+          role: "assistant",
+          content: "Привет! Я твой ИИ-друг. Буду рад помочь тебе с интерпретацией твоих данных и достижением твоих целей по здоровью. О чем поговорим?",
+        }
+      ]);
+    } catch (error) {
+      console.error("[AiAssistant] Clear Error:", error);
+      alert("Не удалось очистить историю чата. Пожалуйста, попробуйте позже.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="flex h-[600px] flex-col overflow-hidden rounded-xl border border-cloud-dark bg-white shadow-sm">
+    <div className="flex h-[500px] sm:h-[600px] flex-col overflow-hidden rounded-xl border border-cloud-dark bg-white shadow-sm">
+      {/* Header with Clear Button */}
+      <div className="flex items-center justify-between border-b border-cloud px-4 py-3 bg-white">
+        <h3 className="text-sm font-semibold text-ink-muted uppercase tracking-wider">ИИ-Помощник</h3>
+        <button
+          onClick={handleClearChat}
+          disabled={isLoading || messages.length <= 1}
+          className="p-2 text-ink-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          title="Очистить чат"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        </button>
+      </div>
+
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4">
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -143,28 +355,32 @@ export default function AiAssistantView() {
                   : "bg-cloud-light text-ink rounded-bl-none"
               }`}
             >
-              <div className="flex flex-col space-y-2">
-                {msg.imageUrl && (
-                  <div 
-                    className="relative w-32 h-32 rounded-lg overflow-hidden border border-cloud cursor-zoom-in group"
-                    onClick={() => setZoomedImageId(msg.id)}
-                  >
-                    <Image 
-                      src={msg.imageUrl} 
-                      alt="Uploaded photo" 
-                      fill 
-                      className="object-cover transition-transform group-hover:scale-105"
-                      unoptimized 
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                      </svg>
+                <div className="flex flex-col space-y-2">
+                  {msg.imageUrl && (
+                    <div 
+                      className="relative w-32 h-32 rounded-lg overflow-hidden border border-cloud cursor-zoom-in group"
+                      onClick={() => setZoomedImageId(msg.id)}
+                    >
+                      <Image 
+                        src={msg.imageUrl} 
+                        alt="Uploaded photo" 
+                        fill 
+                        className="object-cover transition-transform group-hover:scale-105"
+                        unoptimized 
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                        <svg className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                        </svg>
+                      </div>
                     </div>
-                  </div>
-                )}
-                <p className="whitespace-pre-wrap text-[15px]">{msg.content}</p>
-              </div>
+                  )}
+                  {msg.role === "assistant" ? (
+                    <AssistantMessageContent content={msg.content} />
+                  ) : (
+                    <p className="whitespace-pre-wrap text-[15px]">{msg.content}</p>
+                  )}
+                </div>
             </div>
           </div>
         ))}
@@ -183,7 +399,7 @@ export default function AiAssistantView() {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-cloud p-4 sm:p-6 bg-cloud-light/30">
+      <div className="border-t border-cloud p-3 sm:p-6 bg-cloud-light/30">
         <form onSubmit={handleSubmit} className="flex space-x-3">
           <input
             type="text"
@@ -196,9 +412,12 @@ export default function AiAssistantView() {
           <button
             type="submit"
             disabled={isLoading || !input.trim()}
-            className="inline-flex items-center justify-center rounded-xl bg-primary-600 px-5 py-3 text-[15px] font-semibold text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-cloud-dark disabled:text-ink-muted disabled:shadow-none"
+            className="inline-flex items-center justify-center rounded-xl bg-primary-600 px-3 sm:px-5 py-3 text-[15px] font-semibold text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-cloud-dark disabled:text-ink-muted disabled:shadow-none"
           >
-            Отправить
+            <span className="hidden sm:inline">Отправить</span>
+            <svg className="w-5 h-5 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
           </button>
         </form>
       </div>

@@ -357,18 +357,56 @@ export function formatHistorySynopsis(profile: any): string {
 /**
  * Strips massive fields from the DB context to prevent token explosion while keeping critical tags.
  * Uses a strict CLINICAL WHITELIST for functional medicine logic.
+ *
+ * Robust Context Resolver: If top-level columns are NULL, falls back to lifestyle_markers JSONB
+ * and normalizes Russian labels to English constants for the AI.
  */
 export function getLeanUserContext(dbContext: any) {
   if (!dbContext || !dbContext.profile) return null;
   const p = dbContext.profile;
+  const m = p.lifestyle_markers || {};
+
+  // Helper to normalize Russian/Old values from JSONB if top-level is missing
+  const normalize = (val: any, map: Record<string, string>) => {
+    if (!val) return null;
+    return map[val] || val;
+  };
+
+  const activityMap = { "Сидячий": "sedentary", "Легкий": "light", "Средний": "moderate", "Высокий": "active" };
+  const dietMap = { "Всеядное": "omnivore", "Вегетарианство": "vegetarian", "Кето": "keto", "Палео": "other" };
+  const climateMap = { "Умеренная": "temperate", "Тропики": "tropical", "Холодная": "polar" };
+  const sexMap = { "Мужской": "male", "Женский": "female" };
+
+  // Stress fallback normalization (1-10 -> EN enum)
+  let stressFallback = p.stress_level;
+  if (!stressFallback && m.stress_level) {
+    const s = parseInt(m.stress_level, 10);
+    if (s <= 3) stressFallback = "low";
+    else if (s <= 6) stressFallback = "moderate";
+    else if (s <= 8) stressFallback = "high";
+    else stressFallback = "very_high";
+  }
+
+  // Age fallback
+  let age = p.date_of_birth ? new Date().getFullYear() - new Date(p.date_of_birth).getFullYear() : null;
+  if (age === null && m.age) age = parseInt(m.age, 10);
+
   return {
     profile: {
-      age: p.date_of_birth ? new Date().getFullYear() - new Date(p.date_of_birth).getFullYear() : 'Unknown',
-      biological_sex: p.biological_sex, height_cm: p.height_cm, weight_kg: p.weight_kg,
-      activity_level: p.activity_level, stress_level: p.stress_level,
-      is_smoker: p.is_smoker, alcohol_frequency: p.alcohol_frequency, diet_type: p.diet_type,
-      climate_zone: p.climate_zone, sun_exposure: p.sun_exposure, pregnancy_status: p.pregnancy_status,
-      chronic_conditions: p.chronic_conditions || [], medications: p.medications || [],
+      age: age || 'Unknown',
+      biological_sex: p.biological_sex || normalize(m.sex, sexMap),
+      height_cm: p.height_cm || m.height,
+      weight_kg: p.weight_kg || m.weight,
+      activity_level: p.activity_level || normalize(m.activity, activityMap),
+      stress_level: stressFallback,
+      is_smoker: p.is_smoker || (m.is_smoker === "Да" || m.is_smoker === true),
+      alcohol_frequency: p.alcohol_frequency,
+      diet_type: p.diet_type || normalize(m.diet_type, dietMap),
+      climate_zone: p.climate_zone || normalize(m.climate, climateMap),
+      sun_exposure: p.sun_exposure,
+      pregnancy_status: p.pregnancy_status,
+      chronic_conditions: p.chronic_conditions?.length > 0 ? p.chronic_conditions : (m.chronic_conditions ? [m.chronic_conditions] : []),
+      medications: p.medications?.length > 0 ? p.medications : (m.supplements ? [m.supplements] : []),
     }
   };
 }
@@ -646,6 +684,7 @@ export async function handleChat(
 - Politely refuse requests that cross medical boundaries (e.g., diagnosing illnesses or prescribing medications).
 - Always use the provided user clinical context to personalize your responses.
 - ALWAYS respond in Russian language.
+- DO NOT include raw JSON or technical tool call summaries in your final conversational response. Always provide a natural human-like answer.
 - CRITICAL: When the user mentions a lifestyle change (e.g. sleep, diet, stress), USE THE \`update_user_profile\` TOOL to save it to their profile.
 - CRITICAL VISION AWARENESS: If the user asks about an uploaded photo or their nails, DO NOT say you cannot see photos. Instead, look at the \`somatic_data.nail_analysis_history\` in their PROFILE JSON below. Read the latest analysis results from that history and provide recommendations based on those extracted markers.
 - CRITICAL CONTEXT AWARENESS: You have explicit access to the user's latest Blood Tests ("Анализы Крови") and Diet History ("Рацион Питания"). Use this to answer any questions about what they ate or what their biomarkers are.
@@ -754,6 +793,9 @@ User Context: ${contextStr}`;
     const aiResponse = finalMessages[finalMessages.length - 1];
 
     let finalContent = typeof aiResponse.content === "string" ? aiResponse.content : "";
+
+    // Phase 54: Strip <think> blocks from finalContent to hide internal reasoning.
+    finalContent = finalContent.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
 
     // Search backwards for log_meal tool calls to forcefully inject the score tag
     // if the LLM forgot to include it in the final markdown.
@@ -1447,6 +1489,88 @@ export async function handleGetNutritionTargets(
         micros,
         rationale
       }
+    });
+  } catch (error: unknown) {
+    next(error);
+  }
+}
+
+/**
+ * Endpoint to clear the global chat history for the user from Supabase 
+ * and reset the memory state in LangGraph.
+ */
+export async function handleClearChatHistory(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const userId = req.user?.id;
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!userId || !token) {
+      res.status(401).json({ success: false, error: "Unauthorized" });
+      return;
+    }
+
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error("Supabase credentials missing");
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    });
+
+    const mode = req.query.mode || "assistant";
+    const actualThreadId = `${userId}-${mode}`;
+
+    console.log(`[handleClearChatHistory] Clearing history for user ${userId}, thread ${actualThreadId}`);
+
+    // 1. Delete from Supabase
+    const { error: dbError } = await supabase
+      .from("ai_chat_messages")
+      .delete()
+      .eq("user_id", userId)
+      .eq("thread_id", actualThreadId);
+
+    if (dbError) {
+      console.error("[handleClearChatHistory] DB Error:", dbError);
+      throw dbError;
+    }
+
+    // 2. Reset LangGraph Memory State explicitly
+    // Since MemorySaver is used, we use updateState with RemoveMessage for all messages
+    // or simply overwrite the state if the reducer allows.
+    // However, a many reducers allow removing by sending specialized objects.
+    // For now, we utilize LangGraph's updateState to clear the messages array.
+    try {
+      const { RemoveMessage } = await import("@langchain/core/messages");
+      
+      // Get current state to find message IDs to remove
+      const currentState = await appGraph.getState({ configurable: { thread_id: actualThreadId } });
+      
+      if (currentState.values.messages && currentState.values.messages.length > 0) {
+        const removeMessages = currentState.values.messages.map((m: any) => new RemoveMessage({ id: m.id }));
+        await appGraph.updateState(
+          { configurable: { thread_id: actualThreadId } },
+          { messages: removeMessages }
+        );
+        console.log(`[handleClearChatHistory] LangGraph state cleared for thread ${actualThreadId}`);
+      }
+    } catch (lgError) {
+      console.warn("[handleClearChatHistory] Failed to clear LangGraph state (non-critical):", lgError);
+      // We continue since DB is cleared, so new messages won't see history if UI resets too.
+    }
+
+    res.json({
+      success: true,
+      message: "Chat history cleared successfully",
     });
   } catch (error: unknown) {
     next(error);

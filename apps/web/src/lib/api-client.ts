@@ -291,6 +291,35 @@ class AiApiClient {
   }
 
   /**
+   * Clears the chat history for the user.
+   * Routes through the Next.js /api/chat proxy which handles DELETE.
+   */
+  async deleteChatHistory(mode: "diary" | "assistant" = "assistant"): Promise<void> {
+    try {
+      const url = `/api/chat?mode=${mode}`; // Using the Next.js proxy route
+      const token = await getAuthToken();
+      
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const response = await fetch(url, {
+        method: "DELETE",
+        headers,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `API Error: ${response.status}`);
+      }
+    } catch (error) {
+      console.error("[AiApiClient] deleteChatHistory error:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Fetches deterministic personalized nutrition targets based on profile and active diagnoses.
    */
   async getNutritionTargets(): Promise<any> {

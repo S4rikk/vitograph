@@ -37,9 +37,65 @@ export default function OnboardingWizard({ userId }: { userId: string }) {
   const submitProfile = async () => {
     setIsSubmitting(true);
     try {
+      // Map UI values to DB schema constants (English literals)
+      const mappedData: Record<string, any> = {
+        id: userId,
+        lifestyle_markers: formData, // Keep the original JSONB for legacy/detail
+      };
+
+      // Biological Sex
+      if (formData.sex === "Мужской") mappedData.biological_sex = "male";
+      else if (formData.sex === "Женский") mappedData.biological_sex = "female";
+
+      // Age to Date of Birth (approximate)
+      if (formData.age) {
+        const currentYear = new Date().getFullYear();
+        const birthYear = currentYear - parseInt(formData.age, 10);
+        mappedData.date_of_birth = `${birthYear}-01-01`;
+      }
+
+      // Physics
+      if (formData.height) mappedData.height_cm = parseFloat(formData.height);
+      if (formData.weight) mappedData.weight_kg = parseFloat(formData.weight);
+
+      // Activity Level
+      const activityMap: Record<string, string> = {
+        "Сидячий": "sedentary",
+        "Легкий": "light",
+        "Средний": "moderate",
+        "Высокий": "active"
+      };
+      if (formData.activity) mappedData.activity_level = activityMap[formData.activity];
+
+      // Diet Type
+      const dietMap: Record<string, string> = {
+        "Всеядное": "omnivore",
+        "Вегетарианство": "vegetarian",
+        "Кето": "keto",
+        "Палео": "other"
+      };
+      if (formData.diet_type) mappedData.diet_type = dietMap[formData.diet_type];
+
+      // Climate Zone
+      const climateMap: Record<string, string> = {
+        "Умеренная": "temperate",
+        "Тропики": "tropical",
+        "Холодная": "polar"
+      };
+      if (formData.climate) mappedData.climate_zone = climateMap[formData.climate];
+
+      // Stress Level (Mapping 1-10 to low/moderate/high/very_high)
+      if (formData.stress_level) {
+        const stress = parseInt(formData.stress_level, 10);
+        if (stress <= 3) mappedData.stress_level = "low";
+        else if (stress <= 6) mappedData.stress_level = "moderate";
+        else if (stress <= 8) mappedData.stress_level = "high";
+        else mappedData.stress_level = "very_high";
+      }
+
       const { error } = await supabase
         .from("profiles")
-        .upsert({ id: userId, lifestyle_markers: formData })
+        .upsert(mappedData);
 
       if (error) throw error;
       

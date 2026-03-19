@@ -25,6 +25,7 @@ import {
   handleAnalyzeSomatic,
   handleAnalyzeFood,
   handleGetChatHistory,
+  handleClearChatHistory,
   handleAnalyzeLabReport,
   handleGetLabReportsHistory,
   handleDeleteLabReport,
@@ -37,6 +38,7 @@ export const aiRouter = Router();
 
 aiRouter.post("/chat", validate(ChatRequestSchema), handleChat);
 aiRouter.get("/chat/history", handleGetChatHistory);
+aiRouter.delete("/chat/history", handleClearChatHistory);
 
 aiRouter.post("/analyze", validate(AnalyzeRequestSchema), handleAnalyze);
 aiRouter.post("/diagnose", validate(DiagnoseRequestSchema), handleDiagnose);

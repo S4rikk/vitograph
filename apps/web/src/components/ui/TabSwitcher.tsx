@@ -41,8 +41,8 @@ export default function TabSwitcher({
             aria-controls={`panel-${tab.id}`}
             onClick={() => onTabChange(tab.id)}
             className={`
-              cursor-pointer relative flex flex-1 sm:flex-none justify-center items-center gap-2 rounded-lg px-3 sm:px-5 py-2.5
-              text-[13px] sm:text-sm font-medium transition-all duration-200 select-none whitespace-nowrap
+              cursor-pointer relative flex flex-1 sm:flex-none justify-center items-center gap-1 sm:gap-2 rounded-lg px-2 sm:px-5 py-2.5
+              text-[13px] sm:text-sm font-medium transition-all duration-200 select-none whitespace-nowrap flex-shrink-0
               ${
                 isActive
                   ? "bg-primary-600 text-white shadow-md"

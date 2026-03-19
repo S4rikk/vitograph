@@ -47,3 +47,43 @@ export async function POST(req: NextRequest) {
         );
     }
 }
+
+export async function DELETE(req: NextRequest) {
+    try {
+        const { searchParams } = new URL(req.url);
+        const mode = searchParams.get("mode") || "assistant";
+
+        const baseUrl = process.env.NEXT_PUBLIC_AI_DIRECT_URL || "http://localhost:3001/api/v1/ai";
+        const backendUrl = `${baseUrl}/chat/history?mode=${mode}`;
+
+        const authorization = req.headers.get("Authorization");
+        const headers: HeadersInit = {
+            "Content-Type": "application/json",
+        };
+        if (authorization) {
+            headers["Authorization"] = authorization;
+        }
+
+        const response = await fetch(backendUrl, {
+            method: "DELETE",
+            headers,
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            return NextResponse.json(
+                { error: true, message: `Backend error: ${response.status}`, detail: errorText },
+                { status: response.status }
+            );
+        }
+
+        const data = await response.json();
+        return NextResponse.json(data);
+    } catch (error: any) {
+        console.error("[Next.js Proxy API] Error in DELETE chat history:", error);
+        return NextResponse.json(
+            { error: true, message: "Internal Proxy Error", detail: error.message },
+            { status: 500 }
+        );
+    }
+}
