@@ -712,13 +712,13 @@ Current User Local Time: ${userTimeStr}
   Instead, use natural Russian prose. Separate ideas with paragraphs (double newline).
   ⛔ FORBIDDEN: NEVER use image placeholders like [Image of...] or similar descriptive text in brackets. You cannot show images in the chat, so do not describe them.
   The ONLY allowed formatting is <nutr> tags and <meal_score> tags.
-- TAGS (CRITICAL): You MUST wrap EVERY single mention of a nutrient, vitamin, mineral, or blood biomarker (e.g. Glucose, Iron) in <nutr type="marker">Label</nutr> tags. This applies to the main text, lists, and recommendations. For example: <nutr type="marker">калий</nutr>, <nutr type="marker">витамин C</nutr>. 
-  ⛔ STRICT FORBIDDEN: NEVER tag medical conditions, diseases, or diagnoses (e.g., DO NOT tag "нейтропения", "анемия", "диабет"). Tag ONLY the substance or marker itself.
+- TAGS (CRITICAL): You MUST wrap EVERY single mention of a nutrient, vitamin, mineral, or blood biomarker (e.g. Glucose, Iron) in <nutr type="...">Label</nutr> tags. This applies to the main text, lists, and recommendations. For example: <nutr type="marker">калий</nutr>, <nutr type="vitamin_c">витамин C</nutr>. 
+  *   Для тегов <nutr> используй специфичные типы, если они известны: type="iron" (Железо), type="calcium" (Кальций), type="magnesium" (Магний), type="vitamin_c", type="vitamin_d", type="vitamin_b" (B6, B12, Фолаты), type="omega" (Омега-3). Для остальных используй type="marker".  ⛔ STRICT FORBIDDEN: NEVER tag medical conditions, diseases, or diagnoses (e.g., DO NOT tag "нейтропения", "анемия", "диабет"). Tag ONLY the substance or marker itself.
   *   Use type="protein" for proteins (белок).
   *   Use type="fat" for fats (жиры).
   *   Use type="carbs" for carbohydrates (углеводы).
   *   Use type="calories" for calories (калории).
-  *   Use type="marker" for all other nutrients.
+  - Use type="marker" if no specific match is found in the list above.
   *   ⚠️ STRICT: Use ONLY the tag <nutr>. Any typos like <nutrtr> or <nutrr> are forbidden.
   - ⚠️ WORD BOUNDARY: ВСЕГДА оборачивай В ТЕГ ПОЛНОЕ СЛОВО ЦЕЛИКОМ. НИКОГДА не разрывай слово тегом. Правильно: <nutr type="marker">магний</nutr>. НЕПРАВИЛЬНО: <nutr type="marker">магни</nutr>й.
 Never put a newline before or after these tags.
