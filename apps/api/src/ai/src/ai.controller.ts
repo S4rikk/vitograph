@@ -639,7 +639,8 @@ function formatLabDiagnosticReport(profile: any): string {
     `Резюме: ${report.summary}\n` +
     `ВЫЯВЛЕННЫЕ ДИАГНОЗЫ И ПАТТЕРНЫ: ${patterns}\n` +
     `Приоритеты: ${priorities}\n` +
-    `\nИспользуй эту информацию о заболеваниях и синдромах для строгой персонализации диалога! Ты ЗНАЕШЬ результаты анализов пользователя.`;
+    `\nИспользуй эту информацию о заболеваниях и синдромах для строгой персонализации диалога! Ты ЗНАЕШЬ результаты анализов пользователя.\n\n` +
+    `⚠️ CLEAN SLATE RULE: If the PROFILE OVERVIEW and BLOOD TESTS sections are EMPTY, you MUST NOT reference any past medical diagnoses (e.g., neutropenia) from memory. Assume the user is starting fresh and healthy unless data is currently present.`;
 }
 
 // ── Default user profile for requests without explicit profile ───────
@@ -1333,6 +1334,31 @@ export async function handleDeleteLabReport(
       throw updateError;
     }
 
+    // Phase 55: Targeted Cleanup if last report deleted
+    if (reports.length === 0) {
+      console.log(`[DeleteLabReport] Last report deleted for user ${userId}. Performing targeted cleanup.`);
+      
+      // 1. Clear Active Knowledge Bases
+      const { error: kbError } = await supabase
+        .from("active_condition_knowledge_bases")
+        .delete()
+        .eq("profile_id", userId);
+        
+      if (kbError) console.error("[DeleteLabReport] KB Cleanup Error:", kbError);
+
+      // 2. Reset Profile Diagnostic Fields (Keep basic stats like weight/age)
+      const { error: profError } = await supabase
+        .from("profiles")
+        .update({
+          food_contraindication_zones: {},
+          active_supplement_protocol: {},
+          chronic_conditions: []
+        })
+        .eq("id", userId);
+        
+      if (profError) console.error("[DeleteLabReport] Profile Cleanup Error:", profError);
+    }
+
     res.json({ success: true, message: "Report deleted successfully" });
   } catch (error: unknown) {
     next(error);
@@ -1512,6 +1538,96 @@ export async function handleClearChatHistory(
     res.json({
       success: true,
       message: "Chat history cleared successfully",
+    });
+  } catch (error: unknown) {
+    next(error);
+  }
+}
+
+/**
+ * Deletes the current user's account and all associated data.
+ * 1. Storage buckets (nail_photos, food_photos, lab_reports)
+ * 2. Database records (via cascading delete on Profile)
+ * 3. Supabase Auth user (Admin API)
+ */
+export async function handleDeleteAccount(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ success: false, error: "Unauthorized" });
+      return;
+    }
+
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error("Missing Supabase Service Role configuration");
+    }
+
+    // Initialize Admin Client
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    console.log(`[handleDeleteAccount] Beginning deletion for user: ${userId}`);
+
+    // 1. Storage Cleanup
+    const buckets = ["lab_reports", "nail_photos", "food_photos"];
+    for (const bucket of buckets) {
+      try {
+        const { data: files, error: listError } = await supabaseAdmin.storage
+          .from(bucket)
+          .list(`${userId}/`);
+
+        if (listError) {
+          console.error(`[handleDeleteAccount] Error listing files in ${bucket}:`, listError);
+          continue;
+        }
+
+        if (files && files.length > 0) {
+          const filesToDelete = files.map((f) => `${userId}/${f.name}`);
+          const { error: deleteError } = await supabaseAdmin.storage
+            .from(bucket)
+            .remove(filesToDelete);
+
+          if (deleteError) {
+            console.error(`[handleDeleteAccount] Error deleting files from ${bucket}:`, deleteError);
+          } else {
+            console.log(`[handleDeleteAccount] Deleted ${filesToDelete.length} files from ${bucket}`);
+          }
+        }
+      } catch (err) {
+        console.error(`[handleDeleteAccount] Critical error in storage cleanup for ${bucket}:`, err);
+      }
+    }
+
+    // 2. Database Cleanup (Cascading delete on profiles table)
+    // Note: Assuming PostgreSQL native constraint 'ON DELETE CASCADE' is set up.
+    const { error: dbError } = await supabaseAdmin
+      .from("profiles")
+      .delete()
+      .eq("id", userId);
+
+    if (dbError) {
+      console.error(`[handleDeleteAccount] Database cleanup error:`, dbError);
+      throw new Error(`Failed to delete user profile: ${dbError.message}`);
+    }
+    console.log(`[handleDeleteAccount] Deleted profile and cascaded records for ${userId}`);
+
+    // 3. Supabase Auth Deletion
+    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    if (authError) {
+      console.error(`[handleDeleteAccount] Auth deletion error:`, authError);
+      throw new Error(`Failed to delete auth user: ${authError.message}`);
+    }
+    console.log(`[handleDeleteAccount] Successfully deleted auth user ${userId}`);
+
+    res.json({
+      success: true,
+      message: "Account and all data deleted successfully",
     });
   } catch (error: unknown) {
     next(error);

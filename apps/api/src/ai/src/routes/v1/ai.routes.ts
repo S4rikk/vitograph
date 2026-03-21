@@ -31,11 +31,13 @@ import {
   handleDeleteLabReport,
   handleGetSomaticHistory,
   handleGetNutritionTargets,
+  handleDeleteAccount,
 } from "../../ai.controller.js";
 
 /** AI engine router — mount at /api/v1/ai */
 export const aiRouter = Router();
 
+aiRouter.delete("/users/me", handleDeleteAccount);
 aiRouter.post("/chat", validate(ChatRequestSchema), handleChat);
 aiRouter.get("/chat/history", handleGetChatHistory);
 aiRouter.delete("/chat/history", handleClearChatHistory);

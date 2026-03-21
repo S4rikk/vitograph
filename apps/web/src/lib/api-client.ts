@@ -680,6 +680,27 @@ class AiApiClient {
     const { data } = await response.json();
     return data;
   }
+
+  /**
+   * Deletes the current user's account and all associated data.
+   */
+  async deleteAccount(): Promise<void> {
+    const url = `${this.baseUrl}/users/me`;
+    const token = await getAuthToken();
+    const headers: HeadersInit = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const response = await fetch(url, {
+      method: "DELETE",
+      headers,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const message = errorData.error || errorData.message || `API Error: ${response.status}`;
+      throw new Error(message);
+    }
+  }
 }
 
 export type FoodRecognitionResult = {

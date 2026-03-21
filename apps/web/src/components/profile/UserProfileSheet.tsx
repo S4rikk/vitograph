@@ -13,6 +13,8 @@ import {
     Scale,
     Droplets,
     Brain,
+    AlertTriangle,
+    Trash2,
 } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -126,6 +128,30 @@ export default function UserProfileSheet({
         useState<WearableMetrics>(DEFAULT_WEARABLE_METRICS);
     const [activeManualEntry, setActiveManualEntry] =
         useState<WearableCardCategory>(null);
+
+    // ── Account Deletion ──
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    const handleDeleteAccount = async () => {
+        try {
+            setIsDeleting(true);
+            await apiClient.deleteAccount();
+
+            // Clear all local data
+            localStorage.clear();
+            sessionStorage.clear();
+
+            // Force redirect to landing page
+            window.location.href = "/";
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Deletion failed";
+            console.error("[DeleteAccount] Critical error:", err);
+            setError(message);
+            setIsDeleting(false);
+            setShowDeleteConfirm(false);
+        }
+    };
 
     // ── Form state ──
     const [formData, setFormData] = useState<Record<string, unknown>>({
@@ -716,6 +742,24 @@ export default function UserProfileSheet({
                                                 </div>
                                             </div>
                                         </div>
+
+                                        {/* Danger Zone */}
+                                        <div className="mt-8 pt-8 border-t-2 border-red-100 space-y-4">
+                                            <h3 className="text-sm font-bold text-red-600 flex items-center gap-2 uppercase tracking-tight">
+                                                <AlertTriangle size={16} /> Опасная зона
+                                            </h3>
+                                            <div className="bg-red-50 p-5 rounded-2xl border border-red-100 shadow-sm">
+                                                <p className="text-[13px] text-red-700 leading-relaxed font-medium mb-4">
+                                                    Удаление аккаунта приведет к безвозвратной потере всех ваших данных, включая анализы, историю чатов и настройки профиля.
+                                                </p>
+                                                <button
+                                                    onClick={() => setShowDeleteConfirm(true)}
+                                                    className="w-full sm:w-auto px-5 py-2.5 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                                                >
+                                                    <Trash2 size={16} /> Удалить мой аккаунт и данные
+                                                </button>
+                                            </div>
+                                        </div>
                                     </TabsContent>
 
                                     {/* ═══ TAB 2: LIFESTYLE ═══ */}
@@ -1193,6 +1237,49 @@ export default function UserProfileSheet({
                     fields={dialogConfig[activeManualEntry].fields}
                     onSave={(values) => handleWearableSave(activeManualEntry, values)}
                 />
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
+                    <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-red-100 animate-in fade-in zoom-in duration-300">
+                        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <AlertTriangle size={32} />
+                        </div>
+                        <h2 className="text-2xl font-bold text-ink-main text-center mb-3">
+                            Вы абсолютно уверены?
+                        </h2>
+                        <p className="text-ink-muted text-center leading-relaxed mb-8">
+                            Это действие необратимо. Все ваши анализы, история чата и фотографии будут удалены навсегда.
+                        </p>
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={handleDeleteAccount}
+                                disabled={isDeleting}
+                                className="w-full py-4 bg-red-600 text-white font-bold rounded-2xl hover:bg-red-700 disabled:opacity-50 transition-all shadow-lg shadow-red-200 active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
+                            >
+                                {isDeleting ? (
+                                    <>
+                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                        </svg>
+                                        Удаление...
+                                    </>
+                                ) : (
+                                    "Да, удалить аккаунт навсегда"
+                                )}
+                            </button>
+                            <button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                disabled={isDeleting}
+                                className="w-full py-4 bg-surface-muted text-ink-main font-bold rounded-2xl hover:bg-surface-hover disabled:opacity-50 transition-all border border-divider cursor-pointer"
+                            >
+                                Отмена
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </>
     );
