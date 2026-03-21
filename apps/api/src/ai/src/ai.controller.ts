@@ -698,8 +698,10 @@ Current User Local Time: ${userTimeStr}
     - NO bullet points (-, *)
     - NO bold markers (**text**)
   Instead, use natural Russian prose. Separate ideas with paragraphs (double newline).
+  ⛔ FORBIDDEN: NEVER use image placeholders like [Image of...] or similar descriptive text in brackets. You cannot show images in the chat, so do not describe them.
   The ONLY allowed formatting is <nutr> tags and <meal_score> tags.
-- TAGS (CRITICAL): You MUST wrap EVERY single mention of a nutrient, vitamin, or mineral in <nutr type="marker">Label</nutr> tags. This applies to the main text, lists, and recommendations. For example: <nutr type="marker">калий</nutr>, <nutr type="marker">витамин C</nutr>. 
+- TAGS (CRITICAL): You MUST wrap EVERY single mention of a nutrient, vitamin, mineral, or blood biomarker (e.g. Glucose, Iron) in <nutr type="marker">Label</nutr> tags. This applies to the main text, lists, and recommendations. For example: <nutr type="marker">калий</nutr>, <nutr type="marker">витамин C</nutr>. 
+  ⛔ STRICT FORBIDDEN: NEVER tag medical conditions, diseases, or diagnoses (e.g., DO NOT tag "нейтропения", "анемия", "диабет"). Tag ONLY the substance or marker itself.
   *   Use type="protein" for proteins (белок).
   *   Use type="fat" for fats (жиры).
   *   Use type="carbs" for carbohydrates (углеводы).

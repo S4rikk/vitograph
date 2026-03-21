@@ -55,7 +55,7 @@ const ScoreBadge = ({ score, reason }: { score: number; reason: string }) => {
 const NutrPill = ({ type, children }: { type: string; children: React.ReactNode }) => {
   const t = type?.toLowerCase() || "";
   const isVitamin = t.includes('vit') || t.includes('вит');
-  const isMineral = t.includes('min') || t.includes('мин') || t.includes('жел') || t.includes('цинк') || t.includes('магн');
+  const isMineral = t.includes('min') || t.includes('мин') || t.includes('жел') || t.includes('цинк') || t.includes('магн') || t.includes('кальц') || t.includes('калий') || t.includes('селен') || t.includes('фосф');
   
   let colorClass = "bg-slate-100 text-slate-700 border-slate-200";
   if (isVitamin) colorClass = "bg-purple-50 text-purple-700 border-purple-200";
@@ -84,6 +84,9 @@ const AssistantMessageContent = ({ content }: { content: string }) => {
   // Strip micro-nutrient tags (Diary-only data for FoodCard)
   processed = processed.replace(/<nut[a-z]*\s+[^>]*type=["']micro["'][^>]*>[\s\S]*?<\/nut[a-z]*>/gi, '');
 
+  // Strip image placeholders [Image of ...]
+  processed = processed.replace(/\[(?:Image|Graphic|Photo|Illustration)\s+of\s+[^\]]+\]/gi, '');
+
   // 5. Normalize Newlines: Single \n -> Space, Double \n -> \n\n (Paragraphs)
   processed = processed.replace(/\n+/g, (match) => match.length > 1 ? "\n\n" : " ");
   processed = processed.replace(/ {2,}/g, " ").trim();
@@ -99,7 +102,7 @@ const AssistantMessageContent = ({ content }: { content: string }) => {
   if (processed.includes("SUCCESS") && processed.length < 50) return null;
 
   const fragments: React.ReactNode[] = [];
-  const nutrRegex = /<nut[a-z]*\s+[^>]*?type=["']([^"']+)["'][^>]*?>([\s\S]*?)<\/nut[a-z]*>/gi;
+  const nutrRegex = /<nut[a-z]*\s+[^>]*?type=['"]*([^'"]+?)['"]*[^>]*?>([\s\S]*?)<\/nut[a-z]*>/gi;
 
   const allMatches: { index: number; length: number; component: React.ReactNode }[] = [];
   let match;

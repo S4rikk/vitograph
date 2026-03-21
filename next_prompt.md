@@ -1,66 +1,36 @@
-# TASK: Хотфикс — Убрать FoodCard из Ассистента
+# TASK: Гипер-устойчивый Regex и запрет овер-теггинга
 
-> ⚠️ ВАЖНО: Трогаем ТОЛЬКО `AiAssistantView.tsx`. Дневник НЕ трогаем.
+> ⚠️ ВАЖНО: Текущий баг вызван опечаткой ИИ в кавычках (`type=""marker"`). Наш regex сломался на двойных кавычках. Нужно сделать его «неубиваемым».
 
-## Проблема
-Несмотря на проверку `hasMealScore`, ИИ генерирует `<meal_score>` теги даже в аналитических ответах (не при логировании еды). Это приводит к появлению фантомных FoodCard с нулями и названием «Анализ».
+---
 
-## Решение: Полное удаление FoodCard из Ассистента
-
+## Фикс 1: Гипер-устойчивый Regex (Frontend)
 **Файл**: `apps/web/src/components/assistant/AiAssistantView.tsx`
+**Линия ~105**: Замени существующий `nutrRegex` на этот вариант.
 
-1.  **Удали импорт** `FoodCard` и `detectAndParseFoodLog` (строки ~8-9):
-    ```diff
-    - import FoodCard from "../diary/FoodCard";
-    - import { detectAndParseFoodLog } from "../diary/food-log-parser";
-    ```
+**Новый Regex**:
+Он игнорирует любое количество кавычек (0, 1, 2) вокруг типа и ловит только само значение.
 
-2.  **Удали всю логику парсинга FoodLog** из `AssistantMessageContent` (строки ~79-88):
-    ```diff
-    - // 3. Extract Food Log if present
-    - const hasMealScore = /<meal_score\s/.test(processed);
-    - const foodLog = hasMealScore ? detectAndParseFoodLog(...) : null;
-    - 
-    - // 4. Strip technical food log string if detected
-    - if (foodLog) {
-    -   processed = foodLog.comment;
-    - }
-    ```
+```typescript
+const nutrRegex = /<nut[a-z]*\s+[^>]*?type=['"]*([^'"]+?)['"]*[^>]*?>([\s\S]*?)<\/nut[a-z]*>/gi;
+```
 
-3.  **Удали рендер FoodCard** из JSX (строки ~139-142):
-    ```diff
-    - {foodLog && (
-    -   <div className="my-2">
-    -     <FoodCard {...foodLog.cardProps} />
-    -   </div>
-    - )}
-    ```
+---
 
-4.  **Добавь очистку строки «Записал»** вместо удалённого кода (чтобы техническая строка не показывалась как текст):
-    ```typescript
-    // 3. Strip the technical "Записал..." line if present (it's for the Diary, not the Assistant)
-    processed = processed.replace(/Записал\s+[\d.,]+\s*[гg]\s+[^:]+:\s*[\d.,]+\s*ккал[^\n]*/gi, '');
-    ```
+## Фикс 2: Запрет овер-теггинга (Backend)
+**Файл**: `apps/api/src/ai/src/ai.controller.ts`
+**Линия ~702**: В секции `TAGS (CRITICAL)` уточни правила.
 
-5.  **Удали `<meal_score>` теги из текста** (они тоже для Дневника). Добавь рядом:
-    ```typescript
-    // Strip <meal_score> tags entirely (Diary-only feature)
-    processed = processed.replace(/<meal_score[^>]*\/>/gi, '');
-    ```
+**Обнови инструкцию**:
+```text
+- TAGS (CRITICAL): You MUST wrap EVERY single mention of a nutrient, vitamin, mineral, or blood biomarker (e.g. Glucose, Iron) in <nutr type="marker">Label</nutr> tags.
+  ⛔ STRICT FORBIDDEN: NEVER tag medical conditions, diseases, or diagnoses (e.g., ДО НЕ ТЕГАЙ "нейтропения", "анемия", "диабет"). Tag ONLY the substance or marker itself.
+```
 
-6. **Удали `<nutr type="micro">` теги** (они тоже для Дневника). Добавь рядом:
-    ```typescript
-    // Strip micro-nutrient tags (Diary-only data for FoodCard)
-    processed = processed.replace(/<nut[a-z]*\s+[^>]*type=["']micro["'][^>]*>[\s\S]*?<\/nut[a-z]*>/gi, '');
-    ```
-
-## Результат
-- Ассистент показывает ТОЛЬКО текст с красивыми NutrPill-баджиками.
-- `<meal_score>` и `<nutr type="micro">` теги полностью вычищаются.
-- FoodCard остаётся эксклюзивным компонентом Дневника.
+---
 
 ## Верификация
-1. Спросить "пройдись по потреблённым микронутриентам" → НИКАКОЙ карточки.
-2. Залогировать еду в Дневнике → FoodCard отображается как раньше.
+1. Передать строку `<nutr type=""marker">тест</nutr>` — она ДОЛЖНА отрендериться как баджик, а не как текст.
+2. Проверить ответ ИИ: он не должен оборачивать "нейтропению" в теги.
 
-**Использованные скиллы: @frontend-developer, @systematic-debugging**
+**Использованные скиллы: @frontend-developer, @regex-expert, @prompt-engineering-patterns**
