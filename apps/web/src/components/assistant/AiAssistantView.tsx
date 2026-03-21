@@ -5,8 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
 import Image from "next/image";
 import React from "react";
-import FoodCard from "../diary/FoodCard";
-import { detectAndParseFoodLog } from "../diary/food-log-parser";
+
 
 // ── CUSTOM PREMIUM RENDERERS ──
 
@@ -76,16 +75,14 @@ const AssistantMessageContent = ({ content }: { content: string }) => {
   // 2. Remove backslashes before formatting characters
   processed = processed.replace(/\\([<>\*\_!#\(\)\[\]\-\.\+])/g, "$1");
 
-  // 3. Extract Food Log if present (only if <meal_score> tag exists — prevents phantom cards from recommendations)
-  const hasMealScore = /<meal_score\s/.test(processed);
-  const foodLog = hasMealScore ? detectAndParseFoodLog(processed, new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })) : null;
-  
-  // 4. Strip technical food log string if detected
-  if (foodLog) {
-    // We already have the parsed data, now we just need to remove the "Записал..." part from the display text
-    // The detectAndParseFoodLog utility returns the comment which has the log stripped.
-    processed = foodLog.comment;
-  }
+  // 3. Strip the technical "Записал..." line if present (it's for the Diary, not the Assistant)
+  processed = processed.replace(/Записал\s+[\d.,]+\s*[гg]\s+[^:]+:\s*[\d.,]+\s*ккал[^\n]*/gi, '');
+
+  // Strip <meal_score> tags entirely (Diary-only feature)
+  processed = processed.replace(/<meal_score[^>]*\/>/gi, '');
+
+  // Strip micro-nutrient tags (Diary-only data for FoodCard)
+  processed = processed.replace(/<nut[a-z]*\s+[^>]*type=["']micro["'][^>]*>[\s\S]*?<\/nut[a-z]*>/gi, '');
 
   // 5. Normalize Newlines: Single \n -> Space, Double \n -> \n\n (Paragraphs)
   processed = processed.replace(/\n+/g, (match) => match.length > 1 ? "\n\n" : " ");
@@ -102,16 +99,10 @@ const AssistantMessageContent = ({ content }: { content: string }) => {
   if (processed.includes("SUCCESS") && processed.length < 50) return null;
 
   const fragments: React.ReactNode[] = [];
-  const mealScoreRegex = /<meal_score\s+score="(\d+)"\s+reason="([^"]+)"\s*\/>/g;
   const nutrRegex = /<nut[a-z]*\s+[^>]*?type=["']([^"']+)["'][^>]*?>([\s\S]*?)<\/nut[a-z]*>/gi;
 
   const allMatches: { index: number; length: number; component: React.ReactNode }[] = [];
   let match;
-
-  mealScoreRegex.lastIndex = 0;
-  while ((match = mealScoreRegex.exec(processed)) !== null) {
-    allMatches.push({ index: match.index, length: match[0].length, component: <ScoreBadge key={`score-${match.index}`} score={parseInt(match[1])} reason={match[2]} /> });
-  }
 
   nutrRegex.lastIndex = 0;
   while ((match = nutrRegex.exec(processed)) !== null) {
@@ -136,11 +127,7 @@ const AssistantMessageContent = ({ content }: { content: string }) => {
   // Render in a container with pre-wrap to respect the preserved double-newlines as paragraph breaks
   return (
     <div className="assistant-content flex flex-col gap-3">
-      {foodLog && (
-        <div className="my-2">
-          <FoodCard {...foodLog.cardProps} />
-        </div>
-      )}
+
       <div className="whitespace-pre-wrap leading-relaxed text-[15px] text-ink-muted/90">
         {fragments}
       </div>
