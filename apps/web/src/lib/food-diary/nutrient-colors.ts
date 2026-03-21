@@ -4,7 +4,7 @@
  */
 
 export const nutrientColors = {
-  // Macros
+  // Macros (keeping bg classes as they work well for boxes)
   calories: {
     text: "text-orange-600",
     bg: "bg-orange-50",
@@ -30,44 +30,53 @@ export const nutrientColors = {
     label: "text-green-700"
   },
 
-  // Micros & Markers
+  // Micros & Markers (Added HEX for dots)
   iron: { 
     text: "text-red-600 font-semibold", 
-    dot: "bg-red-500" 
+    dot: "bg-red-500",
+    hex: "#EF4444" 
   },
   calcium: { 
     text: "text-yellow-600 font-semibold", 
-    dot: "bg-yellow-500" 
+    dot: "bg-yellow-500",
+    hex: "#EAB308"
   },
   magnesium: { 
     text: "text-emerald-600 font-semibold", 
-    dot: "bg-emerald-500" 
+    dot: "bg-emerald-500",
+    hex: "#10B981"
   },
   greens: { 
     text: "text-emerald-600 font-semibold", 
-    dot: "bg-emerald-500" 
+    dot: "bg-emerald-500",
+    hex: "#10B981"
   },
   omega: { 
     text: "text-cyan-600 font-semibold", 
-    dot: "bg-cyan-500" 
+    dot: "bg-cyan-500",
+    hex: "#06B6D4"
   },
   vitamin_b: { 
     text: "text-purple-600 font-semibold", 
-    dot: "bg-purple-600" 
+    dot: "bg-purple-600",
+    hex: "#9333EA"
   },
   vitamin_c: { 
     text: "text-rose-600 font-semibold", 
-    dot: "bg-rose-500" 
+    dot: "bg-rose-500",
+    hex: "#F43F5E"
   },
   vitamin_d: { 
     text: "text-yellow-600 font-semibold", 
-    dot: "bg-yellow-500" 
+    dot: "bg-yellow-500",
+    hex: "#EAB308"
   },
   
   // Default fallback
   default: { 
     text: "text-teal-600 font-semibold", 
-    dot: "bg-teal-500" 
+    dot: "bg-teal-500",
+    hex: "#14B8A6"
   }
 } as const;
 

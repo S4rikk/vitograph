@@ -92,9 +92,33 @@ function getHealthScoreStyle(score: number) {
     return "bg-[linear-gradient(135deg,#D1FAE5,#A7F3D0)] text-[#27AE60]";
 }
 
-function getMicroColorClass(type: string): string {
-  const colors = (nutrientColors as any)[type] || nutrientColors.default;
-  return colors.dot;
+function getMicroColorClass(type: string, name?: string): string {
+  // 1. Сначала пробуем прямое попадание по типу
+  if (type && (nutrientColors as any)[type] && type !== 'micro' && type !== 'marker') {
+    return (nutrientColors as any)[type].dot;
+  }
+  
+  // 2. Если тип общий (micro/marker/default), маппим по названию (ищем вхождения)
+  if (name) {
+    const n = name.toLowerCase();
+    
+    // Кальций
+    if (n.includes('кальц') || n.includes('calc')) return nutrientColors.calcium.dot;
+    // Железо
+    if (n.includes('желез') || n.includes('iron')) return nutrientColors.iron.dot;
+    // Магний
+    if (n.includes('магн') || n.includes('magne')) return nutrientColors.magnesium.dot;
+    // Витамины D / C / B / Омега
+    if (n.includes('витамин d') || n.includes('vitamin d') || n.includes('витамином d')) return nutrientColors.vitamin_d.dot;
+    if (n.includes('витамин c') || n.includes('vitamin c') || n.includes('витамином c')) return nutrientColors.vitamin_c.dot;
+    // Витамин B (Проверяем латинскую B и кириллическую В)
+    if (n.includes('витамин b') || n.includes('vitamin b') || n.includes('витамин в') || n.includes('фолат')) return nutrientColors.vitamin_b.dot;
+    if (n.includes('омега') || n.includes('omega')) return nutrientColors.omega.dot;
+    if (n.includes('зелень') || n.includes('овощ') || n.includes('greens')) return nutrientColors.greens.dot;
+  }
+
+  // 3. Дефолт
+  return nutrientColors.default.dot;
 }
 
 export default function FoodCard({
@@ -157,7 +181,7 @@ export default function FoodCard({
              <div className="flex flex-wrap gap-1.5">
                  {micros.map((micro, idx) => (
                      <div key={idx} className="flex items-center gap-1.5 px-2 py-1 bg-surface-subtle border border-border rounded-full text-xs text-ink-muted">
-                         <div className={`w-1.5 h-1.5 rounded-full ${getMicroColorClass(micro.type)}`}></div>
+                         <div className={`w-1.5 h-1.5 rounded-full ${getMicroColorClass(micro.type, micro.name)}`}></div>
                          <span className="font-medium">{micro.name} <span className="opacity-60">{micro.value}</span></span>
                      </div>
                  ))}
