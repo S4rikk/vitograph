@@ -341,6 +341,7 @@ model Profile {
   // Phase 53 additions (AI-Driven Nutrition Targets)
   activeNutritionTargets        Json              @default("{}") @map("active_nutrition_targets") @db.JsonB
 
+  aiName                        String?           @map("ai_name")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 

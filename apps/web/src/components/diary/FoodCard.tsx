@@ -1,4 +1,5 @@
 import React from "react";
+import { nutrientColors } from "@/lib/food-diary/nutrient-colors";
 
 interface FoodCardProps {
   name: string;        // "мёда" (или "Мёд", как вытащишь)
@@ -92,14 +93,8 @@ function getHealthScoreStyle(score: number) {
 }
 
 function getMicroColorClass(type: string): string {
-  // Return the color for the dot
-  if (type === "iron") return "bg-red-500";
-  if (type === "magnesium" || type === "greens") return "bg-green-500";
-  if (type === "vitamin_c") return "bg-orange-500";
-  if (type === "calcium" || type === "vitamin_d") return "bg-amber-500";
-  if (type === "omega") return "bg-blue-500";
-  if (type === "vitamin_b") return "bg-purple-500";
-  return "bg-teal-500";
+  const colors = (nutrientColors as any)[type] || nutrientColors.default;
+  return colors.dot;
 }
 
 export default function FoodCard({
@@ -137,21 +132,21 @@ export default function FoodCard({
 
       {/* Macros */}
       <div className="flex gap-2 mb-4 justify-between">
-        <div className="flex-1 flex flex-col items-center bg-orange-50 border border-orange-100 rounded-xl py-1.5 px-1">
-            <span className="text-[10px] font-semibold text-orange-600 uppercase tracking-wider mb-0.5">ККАЛ</span>
-            <span className="font-bold text-orange-700 leading-none">{calories}</span>
+        <div className={`flex-1 flex flex-col items-center ${nutrientColors.calories.bg} border ${nutrientColors.calories.border} rounded-xl py-1.5 px-1`}>
+            <span className={`text-[10px] font-semibold ${nutrientColors.calories.text} uppercase tracking-wider mb-0.5`}>ККАЛ</span>
+            <span className={`font-bold ${nutrientColors.calories.label} leading-none`}>{calories}</span>
         </div>
-        <div className="flex-1 flex flex-col items-center bg-blue-50 border border-blue-100 rounded-xl py-1.5 px-1">
-            <span className="text-[10px] font-semibold text-blue-600 uppercase tracking-wider mb-0.5">БЕЛКИ</span>
-            <span className="font-bold text-blue-700 leading-none">{protein}г</span>
+        <div className={`flex-1 flex flex-col items-center ${nutrientColors.protein.bg} border ${nutrientColors.protein.border} rounded-xl py-1.5 px-1`}>
+            <span className={`text-[10px] font-semibold ${nutrientColors.protein.text} uppercase tracking-wider mb-0.5`}>БЕЛКИ</span>
+            <span className={`font-bold ${nutrientColors.protein.label} leading-none`}>{protein}г</span>
         </div>
-        <div className="flex-1 flex flex-col items-center bg-amber-50 border border-amber-100 rounded-xl py-1.5 px-1">
-            <span className="text-[10px] font-semibold text-amber-600 uppercase tracking-wider mb-0.5">ЖИРЫ</span>
-            <span className="font-bold text-amber-700 leading-none">{fat}г</span>
+        <div className={`flex-1 flex flex-col items-center ${nutrientColors.fat.bg} border ${nutrientColors.fat.border} rounded-xl py-1.5 px-1`}>
+            <span className={`text-[10px] font-semibold ${nutrientColors.fat.text} uppercase tracking-wider mb-0.5`}>ЖИРЫ</span>
+            <span className={`font-bold ${nutrientColors.fat.label} leading-none`}>{fat}г</span>
         </div>
-        <div className="flex-1 flex flex-col items-center bg-green-50 border border-green-100 rounded-xl py-1.5 px-1">
-            <span className="text-[10px] font-semibold text-green-600 uppercase tracking-wider mb-0.5">УГЛЕВОДЫ</span>
-            <span className="font-bold text-green-700 leading-none">{carbs}г</span>
+        <div className={`flex-1 flex flex-col items-center ${nutrientColors.carbs.bg} border ${nutrientColors.carbs.border} rounded-xl py-1.5 px-1`}>
+            <span className={`text-[10px] font-semibold ${nutrientColors.carbs.text} uppercase tracking-wider mb-0.5`}>УГЛЕВОДЫ</span>
+            <span className={`font-bold ${nutrientColors.carbs.label} leading-none`}>{carbs}г</span>
         </div>
       </div>
 

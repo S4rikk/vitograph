@@ -58,36 +58,6 @@ async function callModel(state: typeof GraphAnnotation.State, config?: any) {
   const response = await modelToUse.invoke(finalMessages);
   
   console.log(`[AGENT] ✅ Response received | model=${response.response_metadata?.model_name || 'unknown'}`);
-  if (response.tool_calls && response.tool_calls.length > 1) {
-    const seenMeals = new Set<string>();
-    const filteredCalls: any[] = [];
-    for (const call of response.tool_calls) {
-      if (call.name === "log_meal" && call.args) {
-        const sig = `${call.args.food_name}-${call.args.weight_g}`;
-        if (seenMeals.has(sig)) {
-          continue;
-        }
-        seenMeals.add(sig);
-      }
-      filteredCalls.push(call);
-    }
-    const newAdditionalKwargs = { ...response.additional_kwargs };
-    if (Array.isArray(newAdditionalKwargs.tool_calls)) {
-      newAdditionalKwargs.tool_calls = newAdditionalKwargs.tool_calls.filter(
-        (tc: any) => filteredCalls.some((fc) => fc.id === tc.id)
-      );
-    }
-    const { AIMessage } = await import("@langchain/core/messages");
-    const deduplicatedMessage = new AIMessage({
-      content: response.content,
-      tool_calls: filteredCalls,
-      additional_kwargs: newAdditionalKwargs,
-      response_metadata: response.response_metadata,
-      id: response.id,
-      name: response.name,
-    });
-    return { messages: [deduplicatedMessage] };
-  }
   return { messages: [response] };
 }
 const toolNode = new ToolNode(agentTools);

@@ -115,7 +115,7 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
           aria-labelledby="tab-assistant"
           hidden={activeTab !== "assistant"}
         >
-          {activeTab === "assistant" && <AiAssistantView />}
+          {activeTab === "assistant" && <AiAssistantView userId={userId} />}
         </div>
       </main>
     </div>

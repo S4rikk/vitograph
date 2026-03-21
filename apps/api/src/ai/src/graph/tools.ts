@@ -262,6 +262,46 @@ export const logMealTool = new DynamicStructuredTool({
   }
 });
 
+export const log_supplement_intake_tool = new DynamicStructuredTool({
+  name: "log_supplement_intake",
+  description: "Logs the intake of a supplement from the user's protocol.",
+  schema: z.object({
+    supplement_name: z.string().describe("The name of the supplement (e.g., 'Omega-3', 'Zinc')"),
+    dosage: z.string().describe("The dosage taken (e.g., '1000mg', '1 pill')"),
+    was_on_time: z.boolean().describe("Whether the intake was according to the schedule")
+  }),
+  func: async ({ supplement_name, dosage, was_on_time }, runManager, config) => {
+    const userId = config?.configurable?.user_id;
+    const token = config?.configurable?.token;
+
+    if (!userId || !token) {
+      return "Error: User context not available. Cannot log supplement intake.";
+    }
+
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_ANON_KEY;
+    if (!supabaseUrl || !supabaseKey) return "Server Database Error.";
+
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
+
+    const { error } = await supabase.from("supplement_logs").insert({
+      user_id: userId,
+      supplement_name,
+      dosage_taken: dosage,
+      was_on_time,
+      taken_at: new Date().toISOString(),
+      source: "assistant"
+    });
+
+    if (error) return `Failed to log supplement intake: ${error.message}`;
+
+    return `Successfully logged intake of ${supplement_name} (${dosage}).`;
+  }
+});
+
 // We can export an array of all available tools for easy binding
-export const agentTools = [calculateNormsTool, updateProfileTool, logMealTool];
+export const agentTools = [calculateNormsTool, updateProfileTool, logMealTool, log_supplement_intake_tool];
+
 

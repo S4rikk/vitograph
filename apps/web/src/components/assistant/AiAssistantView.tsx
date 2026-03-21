@@ -5,6 +5,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
 import Image from "next/image";
 import React from "react";
+import FoodCard from "../diary/FoodCard";
+import { detectAndParseFoodLog } from "../diary/food-log-parser";
 
 // ── CUSTOM PREMIUM RENDERERS ──
 
@@ -61,31 +63,51 @@ const NutrPill = ({ type, children }: { type: string; children: React.ReactNode 
   else if (isMineral) colorClass = "bg-blue-50 text-blue-700 border-blue-200";
   
   return (
-    <span className={`inline-flex items-center rounded-lg px-2 py-0.5 text-[13px] font-semibold border ${colorClass} mx-0.5 my-0.5 transition-all hover:scale-105 cursor-default shadow-sm`}>
+    <span className={`inline-flex items-center rounded-lg px-2 py-0.5 text-[13px] font-semibold border ${colorClass} mx-0.5 my-0 transition-all hover:scale-105 cursor-default shadow-sm`}>
       {children}
     </span>
   );
 };
 
 const AssistantMessageContent = ({ content }: { content: string }) => {
-  // 1. Filter out <think> blocks (backend does this, but safety first)
+  // 1. Filter out <think> blocks
   let processed = content.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
   
-  // Also hide technical 200/404 messages if they leak
+  // 2. Remove backslashes before formatting characters
+  processed = processed.replace(/\\([<>\*\_!#\(\)\[\]\-\.\+])/g, "$1");
+
+  // 3. Extract Food Log if present (only if <meal_score> tag exists — prevents phantom cards from recommendations)
+  const hasMealScore = /<meal_score\s/.test(processed);
+  const foodLog = hasMealScore ? detectAndParseFoodLog(processed, new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })) : null;
+  
+  // 4. Strip technical food log string if detected
+  if (foodLog) {
+    // We already have the parsed data, now we just need to remove the "Записал..." part from the display text
+    // The detectAndParseFoodLog utility returns the comment which has the log stripped.
+    processed = foodLog.comment;
+  }
+
+  // 5. Normalize Newlines: Single \n -> Space, Double \n -> \n\n (Paragraphs)
+  processed = processed.replace(/\n+/g, (match) => match.length > 1 ? "\n\n" : " ");
+  processed = processed.replace(/ {2,}/g, " ").trim();
+
+  // Strip markdown artifacts that AI sometimes generates
+  processed = processed
+    .replace(/^#{1,4}\s+/gm, '')           // Remove ### headers
+    .replace(/^\d+\.\s+/gm, '')            // Remove numbered list markers
+    .replace(/^[-*]\s+/gm, '• ')           // Convert bullets to unicode
+    .replace(/\*\*\s*\*\*/g, '');           // Remove empty **  **
+
+  // Hide technical messages
   if (processed.includes("SUCCESS") && processed.length < 50) return null;
 
   const fragments: React.ReactNode[] = [];
-  
-  // Custom Tag Regexes
   const mealScoreRegex = /<meal_score\s+score="(\d+)"\s+reason="([^"]+)"\s*\/>/g;
-  const nutrRegex = /<nutr\s+type="([^"]+)">([^<]+)<\/nutr>/g;
+  const nutrRegex = /<nut[a-z]*\s+[^>]*?type=["']([^"']+)["'][^>]*?>([\s\S]*?)<\/nut[a-z]*>/gi;
 
-  // Use a more generic splitting strategy to handle interleaved text and tags
-  let lastIndex = 0;
   const allMatches: { index: number; length: number; component: React.ReactNode }[] = [];
-
   let match;
-  // Reset regex indices
+
   mealScoreRegex.lastIndex = 0;
   while ((match = mealScoreRegex.exec(processed)) !== null) {
     allMatches.push({ index: match.index, length: match[0].length, component: <ScoreBadge key={`score-${match.index}`} score={parseInt(match[1])} reason={match[2]} /> });
@@ -99,83 +121,43 @@ const AssistantMessageContent = ({ content }: { content: string }) => {
   allMatches.sort((a, b) => a.index - b.index);
 
   let currentPos = 0;
-  allMatches.forEach((m, i) => {
+  allMatches.forEach((m) => {
     if (m.index > currentPos) {
-      fragments.push(<MarkdownRenderer key={`text-${currentPos}`} text={processed.substring(currentPos, m.index)} />);
+      fragments.push(<span key={`text-${currentPos}`}>{parseInline(processed.substring(currentPos, m.index))}</span>);
     }
     fragments.push(m.component);
     currentPos = m.index + m.length;
   });
 
   if (currentPos < processed.length) {
-    fragments.push(<MarkdownRenderer key={`text-${currentPos}`} text={processed.substring(currentPos)} />);
+    fragments.push(<span key={`text-${currentPos}`}>{parseInline(processed.substring(currentPos))}</span>);
   }
 
-  return <div className="assistant-content">{fragments}</div>;
+  // Render in a container with pre-wrap to respect the preserved double-newlines as paragraph breaks
+  return (
+    <div className="assistant-content flex flex-col gap-3">
+      {foodLog && (
+        <div className="my-2">
+          <FoodCard {...foodLog.cardProps} />
+        </div>
+      )}
+      <div className="whitespace-pre-wrap leading-relaxed text-[15px] text-ink-muted/90">
+        {fragments}
+      </div>
+    </div>
+  );
 };
 
-const MarkdownRenderer = ({ text }: { text: string }) => {
-  const lines = text.split('\n');
-  const elements: React.ReactNode[] = [];
-  let currentList: React.ReactNode[] = [];
-  let inList = false;
-
-  const flushList = (key: string) => {
-    if (inList && currentList.length > 0) {
-      elements.push(<ul key={key} className="list-disc space-y-1.5 mb-4 mt-1 pl-4 text-ink-muted">{[...currentList]}</ul>);
-      currentList = [];
-      inList = false;
-    }
-  };
-
-  lines.forEach((line, idx) => {
-    const trimmed = line.trim();
-    
-    // 1. Headers
-    if (trimmed.startsWith('### ')) {
-      flushList(`list-before-h3-${idx}`);
-      elements.push(<h3 key={idx} className="text-base font-bold text-ink mt-5 mb-2 first:mt-0">{line.substring(4)}</h3>);
-    } 
-    // 2. Bold sections (as full paragraphs/headers sometimes)
-    else if (trimmed.startsWith('**') && trimmed.endsWith('**') && trimmed.length < 50) {
-       flushList(`list-before-bold-${idx}`);
-       elements.push(<p key={idx} className="text-[15px] font-bold text-ink-dark mt-4 mb-1">{line.replace(/\*\*/g, '')}</p>);
-    }
-    // 3. Lists
-    else if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
-      inList = true;
-      currentList.push(<li key={idx} className="leading-relaxed">{parseInline(trimmed.substring(2))}</li>);
-    }
-    // 4. Empty space
-    else if (trimmed === '') {
-      flushList(`list-before-empty-${idx}`);
-      // Only push a spacer if not at the very end
-      if (idx !== lines.length - 1) {
-        elements.push(<div key={idx} className="h-2"></div>);
-      }
-    }
-    // 5. Normal paragraph
-    else {
-      flushList(`list-before-p-${idx}`);
-      elements.push(<p key={idx} className="leading-relaxed mb-3 last:mb-0">{parseInline(line)}</p>);
-    }
-  });
-
-  flushList(`list-final`);
-
-  return <>{elements}</>;
-};
-
-function parseInline(text: string) {
-  // Simple bold parser
+const parseInline = (text: string) => {
+  if (!text) return "";
   const parts = text.split(/(\*\*.*?\*\*)/g);
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i} className="font-bold text-ink-dark">{part.substring(2, part.length - 2)}</strong>;
+      return <strong key={i} className="font-bold text-ink-dark">{part.slice(2, -2)}</strong>;
     }
     return part;
   });
-}
+};
 
 type Message = {
   id: string;
@@ -184,13 +166,14 @@ type Message = {
   imageUrl?: string;
 };
 
-export default function AiAssistantView() {
+export default function AiAssistantView({ userId }: { userId: string }) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
   // Initialization flags
   const [isMounted, setIsMounted] = useState(false);
   const [zoomedImageId, setZoomedImageId] = useState<string | null>(null);
+  const [profile, setProfile] = useState<any>(null);
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -228,6 +211,44 @@ export default function AiAssistantView() {
     loadHistory();
     setThreadId("assistant"); // Backend uses deterministic ID based on user ID and mode
   }, []);
+
+  const loadProfile = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const data = await apiClient.getProfile(userId);
+      setProfile(data);
+    } catch (err) {
+      console.error("Failed to load profile for assistant name", err);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      loadProfile();
+    };
+    window.addEventListener("profile-updated", handleUpdate);
+    return () => window.removeEventListener("profile-updated", handleUpdate);
+  }, [loadProfile]);
+
+  // Update welcome message when profile name is available
+  useEffect(() => {
+    if (profile?.ai_name && messages.length > 0 && messages[0].id === "welcome") {
+      const currentContent = messages[0].content;
+      const expectedContent = `Привет! Я ${profile.ai_name}. Буду рад помочь тебе с интерпретацией твоих данных и достижением твоих целей по здоровью. О чем поговорим?`;
+      
+      if (currentContent !== expectedContent) {
+        setMessages(prev => {
+          const newMessages = [...prev];
+          newMessages[0] = { ...newMessages[0], content: expectedContent };
+          return newMessages;
+        });
+      }
+    }
+  }, [profile?.ai_name, messages.length]);
 
   // 2. [DEPRECATED] Sync to Database whenever messages change
   // We no longer do this manually. The backend saves messages directly into ai_chat_messages
@@ -328,7 +349,9 @@ export default function AiAssistantView() {
     <div className="flex h-[500px] sm:h-[600px] flex-col overflow-hidden rounded-xl border border-cloud-dark bg-white shadow-sm">
       {/* Header with Clear Button */}
       <div className="flex items-center justify-between border-b border-cloud px-4 py-3 bg-white">
-        <h3 className="text-sm font-semibold text-ink-muted uppercase tracking-wider">ИИ-Помощник</h3>
+        <h3 className="text-sm font-semibold text-ink-muted uppercase tracking-wider">
+          {profile?.ai_name || "ИИ-Помощник"}
+        </h3>
         <button
           onClick={handleClearChat}
           disabled={isLoading || messages.length <= 1}

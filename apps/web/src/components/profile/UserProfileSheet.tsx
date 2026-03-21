@@ -130,6 +130,7 @@ export default function UserProfileSheet({
     // ── Form state ──
     const [formData, setFormData] = useState<Record<string, unknown>>({
         display_name: "",
+        ai_name: "",
         date_of_birth: "",
         biological_sex: "",
         weight_kg: "",
@@ -168,6 +169,7 @@ export default function UserProfileSheet({
             setProfile(data);
             setFormData({
                 display_name: data.display_name ?? "",
+                ai_name: data.ai_name ?? "",
                 date_of_birth: data.date_of_birth
                     ? new Date(data.date_of_birth as string).toISOString().split("T")[0]
                     : "",
@@ -218,6 +220,7 @@ export default function UserProfileSheet({
         try {
             const payload = {
                 ...formData,
+                ai_name: formData.ai_name || null,
                 weight_kg: formData.weight_kg
                     ? parseFloat(String(formData.weight_kg))
                     : null,
@@ -243,6 +246,7 @@ export default function UserProfileSheet({
             setFormData(prev => ({
                 ...prev,
                 ...updatedData,
+                ai_name: updatedData.ai_name ?? "",
                 date_of_birth: updatedData.date_of_birth
                     ? new Date(updatedData.date_of_birth as string).toISOString().split("T")[0]
                     : "",
@@ -552,6 +556,25 @@ export default function UserProfileSheet({
                                                         }
                                                         className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
                                                         placeholder="Не указано"
+                                                    />
+                                                </div>
+
+                                                <div>
+                                                    <label
+                                                        htmlFor="ai_name"
+                                                        className="block text-[13px] font-semibold text-ink-main mb-1.5"
+                                                    >
+                                                        Имя ИИ ассистента
+                                                    </label>
+                                                    <input
+                                                        id="ai_name"
+                                                        type="text"
+                                                        value={String(formData.ai_name ?? "")}
+                                                        onChange={(e) =>
+                                                            setFormData({ ...formData, ai_name: e.target.value })
+                                                        }
+                                                        className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                        placeholder="Например: Maya Pro"
                                                     />
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-5">
