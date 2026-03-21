@@ -15,8 +15,19 @@ import {
     Brain,
     AlertTriangle,
     Trash2,
+    MapPin,
 } from "lucide-react";
+
+const COMMON_TIMEZONES = [
+    "UTC",
+    "Europe/London", "Europe/Paris", "Europe/Berlin", "Europe/Moscow", "Europe/Kyiv", "Europe/Istanbul",
+    "America/New_York", "America/Chicago", "America/Denver", "America/Los_Angeles", "America/Sao_Paulo",
+    "Asia/Dubai", "Asia/Almaty", "Asia/Tashkent", "Asia/Hong_Kong", "Asia/Shanghai", "Asia/Tokyo", "Asia/Singapore",
+    "Australia/Sydney", "Australia/Perth", "Pacific/Auckland"
+];
+
 import { apiClient } from "@/lib/api-client";
+import { createClient } from "@/lib/supabase/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import DeviceWidgetCard from "./DeviceWidgetCard";
 import ManualEntryDialog from "./ManualEntryDialog";
@@ -129,7 +140,7 @@ export default function UserProfileSheet({
     const [activeManualEntry, setActiveManualEntry] =
         useState<WearableCardCategory>(null);
 
-    // ── Account Deletion ──
+    const [showDropdown, setShowDropdown] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -137,6 +148,10 @@ export default function UserProfileSheet({
         try {
             setIsDeleting(true);
             await apiClient.deleteAccount();
+
+            // Explicitly sign out from Supabase to clear cookies/session
+            const supabase = createClient();
+            await supabase.auth.signOut();
 
             // Clear all local data
             localStorage.clear();
@@ -729,16 +744,60 @@ export default function UserProfileSheet({
                                                     >
                                                         Часовой пояс
                                                     </label>
-                                                    <input
-                                                        id="timezone"
-                                                        type="text"
-                                                        value={String(formData.timezone ?? "")}
-                                                        onChange={(e) =>
-                                                            setFormData({ ...formData, timezone: e.target.value })
-                                                        }
-                                                        className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
-                                                        placeholder="Не указано"
-                                                    />
+                                                    <div className="relative">
+                                                        <input
+                                                            id="timezone"
+                                                            type="text"
+                                                            value={String(formData.timezone ?? "")}
+                                                            onChange={(e) =>
+                                                                setFormData({ ...formData, timezone: e.target.value })
+                                                            }
+                                                            onFocus={() => setShowDropdown(true)}
+                                                            onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                                                            className="w-full pl-3 pr-10 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                            placeholder="Поиск часового пояса..."
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                                                                setFormData({ ...formData, timezone: tz });
+                                                            }}
+                                                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-ink-muted hover:text-primary-600 hover:bg-primary-50 rounded-md transition-colors"
+                                                            title="Определить автоматически"
+                                                        >
+                                                            <MapPin size={16} />
+                                                        </button>
+
+                                                        {showDropdown && (
+                                                            <div className="absolute left-0 right-0 top-full mt-1.5 z-[100] max-h-60 overflow-y-auto rounded-xl border border-divider shadow-xl bg-surface-base/95 backdrop-blur-md py-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                                                                {COMMON_TIMEZONES.filter(tz => 
+                                                                    !formData.timezone || 
+                                                                    tz.toLowerCase().includes(String(formData.timezone).toLowerCase())
+                                                                ).length > 0 ? (
+                                                                    COMMON_TIMEZONES.filter(tz => 
+                                                                        !formData.timezone || 
+                                                                        tz.toLowerCase().includes(String(formData.timezone).toLowerCase())
+                                                                    ).map((tz) => (
+                                                                        <button
+                                                                            key={tz}
+                                                                            type="button"
+                                                                            onClick={() => {
+                                                                                setFormData({ ...formData, timezone: tz });
+                                                                                setShowDropdown(false);
+                                                                            }}
+                                                                            className="w-full text-left px-3 py-2 text-sm hover:bg-primary-50 hover:text-primary-700 transition-colors cursor-pointer flex items-center gap-2 group"
+                                                                        >
+                                                                            <span className="w-1 h-1 rounded-full bg-ink-muted group-hover:bg-primary-400" />
+                                                                            {tz}
+                                                                        </button>
+                                                                    ))
+                                                                ) : (
+                                                                    <div className="px-3 py-2 text-xs text-ink-muted italic"> Ничего не найдено </div>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

@@ -1,26 +1,28 @@
 "use client";
 
 import { useMemo } from "react";
+import { getTzToday } from "@/lib/date-utils";
 
 type DatePaginatorProps = {
   selectedDate: Date;
   onChange: (d: Date) => void;
+  userTimezone: string;
 };
 
-export default function DatePaginator({ selectedDate, onChange }: DatePaginatorProps) {
+export default function DatePaginator({ selectedDate, onChange, userTimezone }: DatePaginatorProps) {
   const isToday = useMemo(() => {
-    const today = new Date();
+    const today = getTzToday(userTimezone);
     return (
       selectedDate.getDate() === today.getDate() &&
       selectedDate.getMonth() === today.getMonth() &&
       selectedDate.getFullYear() === today.getFullYear()
     );
-  }, [selectedDate]);
+  }, [selectedDate, userTimezone]);
 
   const label = useMemo(() => {
     if (isToday) return "Сегодня";
     
-    const yesterday = new Date();
+    const yesterday = getTzToday(userTimezone);
     yesterday.setDate(yesterday.getDate() - 1);
     if (
       selectedDate.getDate() === yesterday.getDate() &&
@@ -31,7 +33,7 @@ export default function DatePaginator({ selectedDate, onChange }: DatePaginatorP
     }
 
     return selectedDate.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
-  }, [selectedDate, isToday]);
+  }, [selectedDate, isToday, userTimezone]);
 
   const handlePrev = () => {
     const prev = new Date(selectedDate);

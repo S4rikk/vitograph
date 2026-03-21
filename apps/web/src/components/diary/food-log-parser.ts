@@ -46,7 +46,7 @@ export function detectAndParseFoodLog(text: string, time: string): ParsedFoodLog
       const type = match[1];
       const content = match[2]; 
       
-      const valueMatch = content.match(/([\d.,]+[A-Za-zА-Яа-я]+)[\s)]*$/);
+      const valueMatch = content.match(/([\d.,]+\s*[%A-Za-zА-Яа-я]+)[\s)]*$/);
       let microName = content;
       let microValue = "";
       
@@ -63,11 +63,8 @@ export function detectAndParseFoodLog(text: string, time: string): ParsedFoodLog
     let comment = text
       .replace(macroRegex, '')
       .replace(/<meal_score[^>]*\/>/gi, '')
-      // 1. Remove ALL micro tags (technical data for the card)
+      // Remove ONLY technical micro tags (for card) but preserve marker tags for highlights
       .replace(/<nut[a-z]*\s+[^>]*type=["']micro["'][^>]*>.*?<\/nut[a-z]*>/gi, '')
-      // 2. Remove other tags ONLY if they contain Digit + Unit (e.g., "5мг", "10г"). 
-      // This preserves "Омега-3" because "3" is not followed by a unit.
-      .replace(/<nut[a-z]*[^>]*>[^<]*\d+\s*(?:г|g|ккал|мг|mg|мкг|mcg|ед|u)[^<]*<\/nut[a-z]*>/gi, '')
       .trim();
     
     comment = comment.replace(/^[\s,.]+/, '').replace(/[\s,.]+$/, '').trim();

@@ -1,13 +1,13 @@
-"use client";
-
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { getTzDayBoundaries } from "@/lib/date-utils";
 
 type WaterTrackerProps = {
   selectedDate: Date;
+  userTimezone?: string;
 };
 
-export default function WaterTracker({ selectedDate }: WaterTrackerProps) {
+export default function WaterTracker({ selectedDate, userTimezone }: WaterTrackerProps) {
   const [glasses, setGlasses] = useState(0);
   const [logId, setLogId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -20,19 +20,14 @@ export default function WaterTracker({ selectedDate }: WaterTrackerProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const dateStr = selectedDate.toISOString().split("T")[0];
-      const startOfDay = new Date(dateStr);
-      startOfDay.setHours(0, 0, 0, 0);
-
-      const endOfDay = new Date(dateStr);
-      endOfDay.setHours(23, 59, 59, 999);
+      const { startIso, endIso } = getTzDayBoundaries(selectedDate, userTimezone || 'UTC');
 
       const { data, error } = await supabase
         .from("water_logs")
         .select("id, amount_glasses")
         .eq("user_id", user.id)
-        .gte("logged_at", startOfDay.toISOString())
-        .lte("logged_at", endOfDay.toISOString())
+        .gte("logged_at", startIso)
+        .lte("logged_at", endIso)
         .order("logged_at", { ascending: false })
         .limit(1);
 
@@ -50,7 +45,7 @@ export default function WaterTracker({ selectedDate }: WaterTrackerProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedDate, supabase]);
+  }, [selectedDate, supabase, userTimezone]);
 
   useEffect(() => {
     loadWater();
@@ -70,16 +65,12 @@ export default function WaterTracker({ selectedDate }: WaterTrackerProps) {
           .update({ amount_glasses: newAmount })
           .eq("id", logId);
       } else {
-        // Use noon of the selected date so it doesn't accidentally shift timezones
-        const logTime = new Date(selectedDate);
-        logTime.setHours(12, 0, 0, 0);
-
         const { data, error } = await supabase
           .from("water_logs")
           .insert({
             user_id: user.id,
             amount_glasses: newAmount,
-            logged_at: logTime.toISOString(),
+            logged_at: new Date().toISOString(),
           })
           .select("id")
           .single();

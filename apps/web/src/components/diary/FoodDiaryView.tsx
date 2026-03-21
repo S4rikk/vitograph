@@ -9,6 +9,7 @@ import DatePaginator from "./DatePaginator";
 import WaterTracker from "./WaterTracker";
 import { apiClient } from "@/lib/api-client";
 import { createClient } from "@/lib/supabase/client";
+import { getTzDayBoundaries, getTzToday } from "@/lib/date-utils";
 
 type Message = {
   id: number;
@@ -33,20 +34,59 @@ export default function FoodDiaryView() {
   const nextId = useRef(1000); // Start high to avoid collision with mapped history IDs
 
   // Date State for Time Machine feature
+  const [isMounted, setIsMounted] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [userTimezone, setUserTimezone] = useState<string | null>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // 1. Load Profile & Timezone
+  useEffect(() => {
+    async function loadProfile() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const profile = await apiClient.getProfile(user.id);
+      const tz = profile?.timezone || "UTC";
+      setUserTimezone(tz);
+      // Initialize selectedDate with Tz-aware "Today"
+      setSelectedDate(getTzToday(tz));
+    }
+    loadProfile();
+  }, [supabase]);
 
   const [threadId] = useState("diary"); // Backend ignores this for DB but uses mode
+
+  // Load user profile to get timezone
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const profile = await apiClient.getProfile(user.id);
+        if (profile?.timezone) {
+          setUserTimezone(profile.timezone);
+        }
+      } catch (err) {
+        console.error("Failed to load user profile for timezone:", err);
+      }
+    }
+    loadProfile();
+  }, [supabase]);
 
   // Load chat history when date changes
   useEffect(() => {
     async function loadHistory() {
+      if (!isMounted || !userTimezone) return;
+
       try {
-        // Create an exact start and end of the local day to send to the server
-        const startOfDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 0, 0, 0, 0);
-        const endOfDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 23, 59, 59, 999);
+        const { startIso, endIso } = getTzDayBoundaries(selectedDate, userTimezone);
+        console.info('[Diary] Querying history boundaries:', { startIso, endIso });
 
         // Pass accurate boundaries to the backend
-        const data = await apiClient.getChatHistory("diary", startOfDay.toISOString(), endOfDay.toISOString());
+        const data = await apiClient.getChatHistory("diary", startIso, endIso);
 
         if (data.history && data.history.length > 0) {
           const mapped: Message[] = data.history.map((m: any, idx: number) => {
@@ -68,14 +108,13 @@ export default function FoodDiaryView() {
       }
     }
     loadHistory();
-  }, [selectedDate]);
+  }, [selectedDate, userTimezone]);
 
   const [consumed, setConsumed] = useState({ calories: 0, protein: 0, fat: 0, carbs: 0 });
   const [consumedMicros, setConsumedMicros] = useState<Record<string, number>>({});
   const [dynamicTarget, setDynamicTarget] = useState({ calories: 2000, protein: 120, fat: 60, carbs: 250 });
   const [dynamicMicros, setDynamicMicros] = useState<Record<string, number>>({});
   const [rationale, setRationale] = useState<string>("Базовая норма");
-  const supabase = createClient();
 
   // Fetch macros based on the selected date
   const fetchMacrosForDate = useCallback(async (date: Date) => {
@@ -93,16 +132,15 @@ export default function FoodDiaryView() {
         console.error("Failed to load nutrition targets:", err);
       }
 
-      // Create a local midnight start without parsing as UTC
-      const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
-      const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+      const { startIso, endIso } = getTzDayBoundaries(date, userTimezone);
+      console.info('[Diary] Querying macro boundaries:', { startIso, endIso });
 
       const { data: mealLogs } = await supabase
         .from('meal_logs')
-        .select('id, total_calories, micronutrients, items:meal_items(protein_g, fat_g, carbs_g)')
+        .select('id, total_calories, total_protein, total_fat, total_carbs, micronutrients')
         .eq('user_id', user.id)
-        .gte('logged_at', startOfDay.toISOString())
-        .lte('logged_at', endOfDay.toISOString());
+        .gte('logged_at', startIso)
+        .lte('logged_at', endIso);
 
       if (mealLogs) {
         let calories = 0, protein = 0, fat = 0, carbs = 0;
@@ -110,6 +148,9 @@ export default function FoodDiaryView() {
 
         mealLogs.forEach((log: any) => {
           calories += Number(log.total_calories || 0);
+          protein += Number(log.total_protein || 0);
+          fat += Number(log.total_fat || 0);
+          carbs += Number(log.total_carbs || 0);
 
           // Aggregate micronutrients
           if (log.micronutrients && typeof log.micronutrients === 'object') {
@@ -119,12 +160,6 @@ export default function FoodDiaryView() {
               }
             }
           }
-
-          log.items?.forEach((item: any) => {
-            protein += Number(item.protein_g || 0);
-            fat += Number(item.fat_g || 0);
-            carbs += Number(item.carbs_g || 0);
-          });
         });
 
         // Round all micros to 2 decimal places max
@@ -141,18 +176,30 @@ export default function FoodDiaryView() {
     } catch (e) {
       console.error("Failed to fetch macros", e);
     }
-  }, [supabase]);
+  }, [supabase, userTimezone]);
 
   useEffect(() => {
+    if (!isMounted || !userTimezone) return;
     fetchMacrosForDate(selectedDate);
-  }, [fetchMacrosForDate, selectedDate]);
+  }, [selectedDate, userTimezone, isMounted]);
 
   // Re-fetch norms when profile is saved from UserProfileSheet
   useEffect(() => {
-    const handler = () => fetchMacrosForDate(selectedDate);
+    const handler = () => {
+      fetchMacrosForDate(selectedDate);
+      // Also refresh timezone
+      async function refreshTz() {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const profile = await apiClient.getProfile(user.id);
+          if (profile?.timezone) setUserTimezone(profile.timezone);
+        }
+      }
+      refreshTz();
+    };
     window.addEventListener("profile-updated", handler);
     return () => window.removeEventListener("profile-updated", handler);
-  }, [fetchMacrosForDate, selectedDate]);
+  }, [fetchMacrosForDate, selectedDate, supabase]);
 
   /* Auto scroll to bottom when new messages arrive */
   useEffect(() => {
@@ -208,13 +255,17 @@ export default function FoodDiaryView() {
       });
   }, [threadId, fetchMacrosForDate, selectedDate]);
 
+  if (!isMounted || !userTimezone) {
+    return null; // Prevent hydration mismatch and race conditions
+  }
+
   return (
     <>
       <FeedbackButton className="z-30" />
       <div className="flex flex-col h-[100dvh] sm:h-[85vh] sm:max-h-[1000px] sm:min-h-[750px] sm:rounded-2xl border-x sm:border border-border bg-white overflow-hidden shadow-sm">
         {/* ── Header & Time Machine ──────────────────────── */}
         <div className="flex flex-col bg-surface-muted px-5 pt-5 pb-2 shrink-0 z-10 border-b border-border/50">
-          <DatePaginator selectedDate={selectedDate} onChange={setSelectedDate} />
+          <DatePaginator selectedDate={selectedDate} onChange={setSelectedDate} userTimezone={userTimezone} />
         </div>
 
         {/* ── Scrollable Content (Panels + Chat) ──────────────────────── */}
@@ -224,7 +275,7 @@ export default function FoodDiaryView() {
         >
           <div className="shrink-0 bg-white flex flex-col pt-1">
             <DailyAllowancesPanel consumed={consumed} consumedMicros={consumedMicros} dynamicTarget={dynamicTarget} dynamicMicros={dynamicMicros} rationale={rationale} />
-            <WaterTracker selectedDate={selectedDate} />
+            <WaterTracker selectedDate={selectedDate} userTimezone={userTimezone} />
           </div>
 
           {/* ── Messages ──────────────────────────────────────── */}

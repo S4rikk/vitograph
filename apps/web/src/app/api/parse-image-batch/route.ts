@@ -55,14 +55,18 @@ export async function POST(req: NextRequest) {
 
         const data = await response.json();
         return NextResponse.json(data);
-    } catch (error: any) {
-        if (error.name === "AbortError" || error.name === "TimeoutError") {
+    } catch (err: any) {
+        if (err.name === "AbortError" || err.name === "TimeoutError") {
             return NextResponse.json(
                 { success: false, error: true, message: "Request timed out after 5 minutes. The processing takes too long." },
                 { status: 504 }
             );
         }
-        console.error("[Next.js Proxy API] Error in parse-image-batch:", error);
-        return NextResponse.json({ success: false, error: true, message: "Internal Proxy Error", detail: error.message }, { status: 500 });
+        const errorDetail = err instanceof Error ? err.message : String(err);
+        console.error("[Proxy:parse-image-batch] ❌ Unexpected Error:", errorDetail);
+        return NextResponse.json(
+            { success: false, error: errorDetail, message: "Unexpected proxy failure" },
+            { status: 500 }
+        );
     }
 }

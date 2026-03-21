@@ -212,6 +212,12 @@ export const logMealTool = new DynamicStructuredTool({
 
     const isoNow = new Date().toISOString();
     
+    if (finalCalories === 0 && (weight_g > 0 || ctx?.userEnteredWeight > 0)) {
+      console.warn('[Tool:log_meal] POSSIBLE MAPPING FAILURE: 0 calories calculated for positive weight.', { food_name, weight_g, ctxWeight: ctx?.userEnteredWeight });
+    }
+
+    console.log('[Tool:log_meal] Attempting insert:', { userId, meal_type, food_name, finalCalories, isoNow });
+    
     // 1. Create Meal Log
     const { data: log, error: logError } = await supabase.from("meal_logs").insert({
       user_id: userId,
@@ -222,13 +228,12 @@ export const logMealTool = new DynamicStructuredTool({
       total_carbs: Number(finalCarbs.toFixed(1)),
       micronutrients: finalMicros,
       meal_quality_score: finalScore,
-      meal_quality_reason: finalReason,
-      logged_at: isoNow,
-      notes: ctx ? `Vision Smart Log` : `AI Logged`,
-      source: finalSource
     }).select("id");
-
-    if (logError || !log || log.length === 0) return `Failed to create meal log: ${logError?.message}`;
+    
+    if (logError || !log || log.length === 0) {
+      console.error('[Tool:log_meal] INSERT FAILED:', logError || 'Empty result');
+      return `Failed to create meal log: ${logError?.message || 'Empty result'}`;
+    }
     const logId = log[0].id;
 
     // 2. Add Meal Item
@@ -244,12 +249,22 @@ export const logMealTool = new DynamicStructuredTool({
 
     if (itemError) return `Failed to add meal item: ${itemError.message}`;
 
-    const microsList = Object.entries(finalMicros).map(([k, v]) => `${k} (${v.toFixed(1)})`).join(', ');
+    const mappingUnits: Record<string, string> = {
+      "Витамин A (мкг)": "мкг", "Витамин C (мг)": "мг", "Витамин D (мкг)": "мкг",
+      "Витамин E (мг)": "мг", "Витамин B12 (мкг)": "мкг", "Фолиевая кислота (мкг)": "мкг",
+      "Железо (мг)": "мг", "Кальций (мг)": "мг", "Магний (мг)": "мг", "Цинк (мг)": "мг",
+      "Селен (мкг)": "мкг", "Калий (мг)": "мг", "Натрий (мг)": "мг"
+    };
+
+    const microsList = Object.entries(finalMicros).map(([k, v]) => {
+      const unit = mappingUnits[k] || "";
+      return `${k} (${v.toFixed(1)}${unit})`;
+    }).join(', ');
 
     let baseResponse = `Successfully logged ${weight_g}g of ${food_name} (${finalCalories.toFixed(0)} kcal) for ${meal_type}.`;
 
     if (microsList.length > 0) {
-      baseResponse += ` Micronutrients found: ${microsList}. AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them, you MUST wrap each micronutrient name and value in a strict XML tag format: <nutr type="[type]">[Name] ([Value])</nutr>. Valid types are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, default. Example: <nutr type="iron">Железо (2мг)</nutr>. Note: Always use proper Types, e.g. use "calcium" for Кальций, "vitamin_b" for Фолиевая кислота, etc.`;
+      baseResponse += ` Micronutrients found: ${microsList}. AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker.`;
     } else {
       baseResponse += ` Confirm this back to the user.`;
     }
