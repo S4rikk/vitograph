@@ -132,6 +132,8 @@ export default function FoodDiaryView() {
         console.error("Failed to load nutrition targets:", err);
       }
 
+      if (!userTimezone) return;
+
       const { startIso, endIso } = getTzDayBoundaries(date, userTimezone);
       console.info('[Diary] Querying macro boundaries:', { startIso, endIso });
 
