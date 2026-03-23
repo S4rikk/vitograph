@@ -225,6 +225,55 @@ function computeDeterministicMicros(
   return { micros, rationale };
 }
 
+function computeDeterministicMacros(profile: any): { calories: number; protein: number; fat: number; carbs: number; } {
+  // 1. Fallback base
+  const base = { calories: 2000, protein: 120, fat: 60, carbs: 250 };
+  if (!profile || !profile.weight_kg || !profile.height_cm || !profile.date_of_birth) return base;
+
+  // 2. Parse basic metrics
+  const weight = profile.weight_kg;
+  const height = profile.height_cm;
+  const age = new Date().getFullYear() - new Date(profile.date_of_birth).getFullYear();
+  const isFemale = profile.biological_sex === 'female';
+
+  // 3. Mifflin-St Jeor BMR
+  let bmr = (10 * weight) + (6.25 * height) - (5 * age);
+  bmr = isFemale ? (bmr - 161) : (bmr + 5);
+
+  // 4. Activity Multiplier (TDEE)
+  const activityMap: Record<string, number> = {
+    'sedentary': 1.2,
+    'light_active': 1.375,
+    'moderate': 1.55,
+    'active': 1.725,
+    'very_active': 1.9
+  };
+  const multiplier = activityMap[profile.activity_level] || 1.2;
+  
+  let tdee = Math.round(bmr * multiplier);
+
+  // 5. Diet Goal / Type modifier (Optional basic modifiers, default is maintenance)
+  // Example: if profile has a goal, we could add/subtract. For now, maintenance:
+  
+  // 6. Macro Split
+  // Protein: ~1.8g per kg
+  const protein = Math.round(weight * 1.8);
+  // Fat: ~1.0g per kg
+  const fat = Math.round(weight * 1.0);
+  
+  // Carbs: The rest of the calories
+  // (Protein=4kcal/g, Fat=9kcal/g, Carbs=4kcal/g)
+  const remainingCalories = tdee - (protein * 4) - (fat * 9);
+  const carbs = Math.max(0, Math.round(remainingCalories / 4));
+
+  return {
+    calories: tdee,
+    protein,
+    fat,
+    carbs
+  };
+}
+
 // ── Database Context Utility ────────────────────────────────────────
 
 async function fetchUserContext(token: string, userId: string) {
@@ -436,12 +485,8 @@ function formatNutritionTargets(profile: any, activeKnowledgeBases: any[] | null
 
   let text = `${rationale}\n`;
 
-  const targets = profile?.active_nutrition_targets;
-  if (targets?.macros) {
-    text += `Макросы: Ккал=${targets.macros.calories || 2000}, Белки=${targets.macros.protein || 120}г, Жиры=${targets.macros.fat || 60}г, Углеводы=${targets.macros.carbs || 250}г\n`;
-  } else {
-    text += `Макросы: Ккал=2000, Белки=120г, Жиры=60г, Углеводы=250г (стандарт)\n`;
-  }
+  const macros = computeDeterministicMacros(profile);
+  text += `Макросы: Ккал=${macros.calories}, Белки=${macros.protein}г, Жиры=${macros.fat}г, Углеводы=${macros.carbs}г\n`;
 
   const microEntries = Object.entries(micros).map(([k, v]) => `${k}: ${v}`).join(", ");
   text += `Микронутриенты: ${microEntries}\n`;
@@ -1503,13 +1548,8 @@ export async function handleGetNutritionTargets(
 
     const { profile, activeKnowledgeBases } = dbContext;
 
-    // Macro fallback
-    const macros = profile?.active_nutrition_targets?.macros || {
-      calories: 2000,
-      protein: 120,
-      fat: 60,
-      carbs: 250
-    };
+    // Macro deterministic compute
+    const macros = computeDeterministicMacros(profile);
 
     // Micro deterministic compute
     const { micros, rationale } = computeDeterministicMicros(profile, activeKnowledgeBases);
@@ -1695,6 +1735,100 @@ export async function handleDeleteAccount(
       message: "Account and all data deleted successfully",
     });
   } catch (error: unknown) {
+    next(error);
+  }
+}
+
+/**
+ * Aggregates daily macronutrients and micronutrients directly from the database for the diary counter.
+ */
+export async function handleGetDiaryMacros(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const startDate = req.query.startDate as string;
+    const endDate = req.query.endDate as string;
+    const userId = req.user?.id;
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!userId || !token) {
+      res.status(401).json({ success: false, message: "Unauthorized" });
+      return;
+    }
+
+    if (!startDate || !endDate) {
+      res.status(400).json({ success: false, message: "Missing startDate or endDate" });
+      return;
+    }
+
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      res.status(500).json({ success: false, message: "Supabase configuration missing" });
+      return;
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    });
+
+    const { data: recentMeals, error } = await supabase
+      .from("meal_logs")
+      .select("id, total_calories, micronutrients, meal_items(food_name, weight_g, calories, protein_g, fat_g, carbs_g)")
+      .eq("user_id", userId)
+      .gte("logged_at", startDate)
+      .lte("logged_at", endDate);
+
+    if (error) {
+      console.error("[handleGetDiaryMacros] Supabase error:", error);
+      res.status(500).json({ success: false, message: "Database query failed" });
+      return;
+    }
+
+    let calories = 0, protein = 0, fat = 0, carbs = 0;
+    const microsMap: Record<string, number> = {};
+
+    if (recentMeals) {
+      for (const m of recentMeals) {
+        calories += m.total_calories || 0;
+        if (m.meal_items && Array.isArray(m.meal_items)) {
+          for (const i of m.meal_items) {
+            protein += i.protein_g || 0;
+            fat += i.fat_g || 0;
+            carbs += i.carbs_g || 0;
+          }
+        }
+        if (m.micronutrients && typeof m.micronutrients === "object") {
+          for (const [key, val] of Object.entries(m.micronutrients)) {
+            if (typeof val === "number") {
+              microsMap[key] = (microsMap[key] || 0) + val;
+            }
+          }
+        }
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        macros: {
+          calories: Math.round(calories),
+          protein: Math.round(protein),
+          fat: Math.round(fat),
+          carbs: Math.round(carbs)
+        },
+        microsMap
+      }
+    });
+  } catch (error: unknown) {
+    console.error("[handleGetDiaryMacros] Internal error:", error);
     next(error);
   }
 }

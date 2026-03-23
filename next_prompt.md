@@ -1,23 +1,95 @@
-# TASK: Short Copy for Verification Infobox (Single Icon)
+# TECHNICAL TASK: Deterministic KBJU Macro Calculation
 
-**Required Skills:**
-- Read `C:\store\ag_skills\skills\frontend-developer\SKILL.md` before coding.
-- Read `C:\store\ag_skills\skills\ui-ux-pro-max\SKILL.md` before coding.
+## Context
+When a user updates their profile (e.g., activity level, weight), the Python backend successfully drops the `active_nutrition_targets` cache. However, the Express API (`handleGetNutritionTargets`) incorrectly responds by falling back to a static $2000$ kcal preset because the AI generator (`runNutritionAnalyzer`) is never invoked. Wait times for LLM-based basal metabolic rate calculation are unacceptable ($5+$ seconds) and LLMs are notoriously bad at math.
 
-**Architecture Context:**
-The user found the text inside the verification infobox (next to the "Сформировать отчёт" button in `MedicalResultsView.tsx`) to be too long and confusing. 
-The user explicitly selected the following short copy: `"⚠️ Внимание! Сверьте данные с оригиналом."` 
+## Architectural Decision
+We are completely deprecating the use of the LLM for macronutrient targets. Like we did for `computeDeterministicMicros`, you will implement a rigid, instant mathematical calculation for macros using the standard Mifflin-St Jeor equation inside `ai.controller.ts`. 
 
-**Implementation Steps:**
-1. Open the file `C:\project\VITOGRAPH\apps\web\src\components\medical\MedicalResultsView.tsx`.
-2. Locate the informational infobox (around line 444) that currently contains the text: 
-   *"Проверьте результаты сканирования. ИИ мог допустить неточность..."*
-3. Replace the text and layout with the new short version: `"⚠️ Внимание! Сверьте данные с оригиналом."`
-4. **CRITICAL DESIGN REQUIREMENT**: 
-   - **Do NOT** show a separate info or warning icon circle next to the text. The `⚠️` emoji inside the string itself acts as the single, perfectly sufficient icon. 
-   - Remove the `<div className="flex h-8 w-8 shrink-0...">` that contains the cyan SVG info icon entirely.
-   - Refine the text and container styling to look extremely clean, minimalist, and natural (e.g., `<div className="text-sm font-semibold text-amber-700">⚠️ Внимание! Сверьте данные с оригиналом.</div>` inside a subtle background wrapper). 
-   - The end result must be ONE warning emoji, ONE sentence, and zero clutter.
-5. Create a short report `next_report.md` in the VITOGRAPH folder once done. Do NOT run auto-deploy scripts.
+## Required Changes
 
-Использованные скиллы: `frontend-developer`, `ui-ux-pro-max`
+### 1. `apps/api/src/ai/src/ai.controller.ts`
+
+**A. Create `computeDeterministicMacros`**
+Implement this standalone function near `computeDeterministicMicros`:
+```ts
+function computeDeterministicMacros(profile: any): { calories: number; protein: number; fat: number; carbs: number; } {
+  // 1. Fallback base
+  const base = { calories: 2000, protein: 120, fat: 60, carbs: 250 };
+  if (!profile || !profile.weight_kg || !profile.height_cm || !profile.date_of_birth) return base;
+
+  // 2. Parse basic metrics
+  const weight = profile.weight_kg;
+  const height = profile.height_cm;
+  const age = new Date().getFullYear() - new Date(profile.date_of_birth).getFullYear();
+  const isFemale = profile.biological_sex === 'female';
+
+  // 3. Mifflin-St Jeor BMR
+  let bmr = (10 * weight) + (6.25 * height) - (5 * age);
+  bmr = isFemale ? (bmr - 161) : (bmr + 5);
+
+  // 4. Activity Multiplier (TDEE)
+  const activityMap: Record<string, number> = {
+    'sedentary': 1.2,
+    'light_active': 1.375,
+    'moderate': 1.55,
+    'active': 1.725,
+    'very_active': 1.9
+  };
+  const multiplier = activityMap[profile.activity_level] || 1.2;
+  
+  let tdee = Math.round(bmr * multiplier);
+
+  // 5. Diet Goal / Type modifier (Optional basic modifiers, default is maintenance)
+  // Example: if profile has a goal, we could add/subtract. For now, maintenance:
+  
+  // 6. Macro Split
+  // Protein: ~1.8g per kg
+  const protein = Math.round(weight * 1.8);
+  // Fat: ~1.0g per kg
+  const fat = Math.round(weight * 1.0);
+  
+  // Carbs: The rest of the calories
+  // (Protein=4kcal/g, Fat=9kcal/g, Carbs=4kcal/g)
+  const remainingCalories = tdee - (protein * 4) - (fat * 9);
+  const carbs = Math.max(0, Math.round(remainingCalories / 4));
+
+  return {
+    calories: tdee,
+    protein,
+    fat,
+    carbs
+  };
+}
+```
+
+**B. Update `handleGetNutritionTargets`**
+Delete the rigid $2000$ fallback completely and replace it with:
+```ts
+    // Macro deterministic compute
+    const macros = computeDeterministicMacros(profile);
+
+    // Micro deterministic compute
+    const { micros, rationale } = computeDeterministicMicros(profile, activeKnowledgeBases);
+```
+
+**C. Update `formatNutritionTargets` system prompt builder**
+In `formatNutritionTargets`, you must also replace the `profile?.active_nutrition_targets?.macros` check with `computeDeterministicMacros(profile)` so that the AI Assistant's context window gets the EXACT same dynamic KBJU targets as the UI!
+```ts
+function formatNutritionTargets(profile: any, activeKnowledgeBases: any[] | null): string {
+  const { micros, rationale } = computeDeterministicMicros(profile, activeKnowledgeBases);
+  const macros = computeDeterministicMacros(profile);
+
+  let text = `${rationale}\n`;
+  text += `Макросы: Ккал=${macros.calories}, Белки=${macros.protein}г, Жиры=${macros.fat}г, Углеводы=${macros.carbs}г\n`;
+  ...
+```
+
+### 2. Verify Output
+Run `npm run build` in `apps/api` to ensure TypeScript compiles successfully without errors.
+
+## Strict Rules
+- Do NOT alter `computeDeterministicMicros`.
+- Make sure to cover the case where `profile` fields (like `weight_kg`) are missing by securely falling back to $2000$ kcal.
+
+**SKILLS TO APPLY:** `senior-architect`, `code-reviewer`

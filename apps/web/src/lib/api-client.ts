@@ -327,6 +327,14 @@ class AiApiClient {
   }
 
   /**
+   * Fetches aggregated macronutrients and micronutrients for the diary counter.
+   */
+  async getDiaryDailyMacros(startIso: string, endIso: string): Promise<any> {
+    const endpoint = `/diary-macros?startDate=${encodeURIComponent(startIso)}&endDate=${encodeURIComponent(endIso)}`;
+    return this.get<any>(endpoint, {});
+  }
+
+  /**
    * Analyzes symptom correlations based on history.
    */
   async analyze(symptoms: SymptomEntry[]): Promise<CorrelationResult[]> {

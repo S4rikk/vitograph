@@ -32,6 +32,7 @@ import {
   handleGetSomaticHistory,
   handleGetNutritionTargets,
   handleDeleteAccount,
+  handleGetDiaryMacros,
 } from "../../ai.controller.js";
 
 /** AI engine router — mount at /api/v1/ai */
@@ -51,3 +52,4 @@ aiRouter.get("/lab-reports/history", handleGetLabReportsHistory);
 aiRouter.delete("/lab-reports/history/:timestamp", handleDeleteLabReport);
 aiRouter.get("/somatic-history", handleGetSomaticHistory);
 aiRouter.get("/nutrition-targets", handleGetNutritionTargets);
+aiRouter.get("/diary-macros", handleGetDiaryMacros);

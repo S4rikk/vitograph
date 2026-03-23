@@ -49,7 +49,11 @@ export default function FoodDiaryView() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       const profile = await apiClient.getProfile(user.id);
-      const tz = profile?.timezone || "UTC";
+      
+      // CRITICAL FIX: Fallback to the local browser TZ instead of "UTC" to prevent boundary shifting
+      const fallbackTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+      const tz = profile?.timezone || fallbackTz;
+      
       setUserTimezone(tz);
       // Initialize selectedDate with Tz-aware "Today"
       setSelectedDate(getTzToday(tz));
@@ -59,22 +63,7 @@ export default function FoodDiaryView() {
 
   const [threadId] = useState("diary"); // Backend ignores this for DB but uses mode
 
-  // Load user profile to get timezone
-  useEffect(() => {
-    async function loadProfile() {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-        const profile = await apiClient.getProfile(user.id);
-        if (profile?.timezone) {
-          setUserTimezone(profile.timezone);
-        }
-      } catch (err) {
-        console.error("Failed to load user profile for timezone:", err);
-      }
-    }
-    loadProfile();
-  }, [supabase]);
+
 
   // Load chat history when date changes
   useEffect(() => {
@@ -137,40 +126,10 @@ export default function FoodDiaryView() {
       const { startIso, endIso } = getTzDayBoundaries(date, userTimezone);
       console.info('[Diary] Querying macro boundaries:', { startIso, endIso });
 
-      const { data: mealLogs } = await supabase
-        .from('meal_logs')
-        .select('id, total_calories, total_protein, total_fat, total_carbs, micronutrients')
-        .eq('user_id', user.id)
-        .gte('logged_at', startIso)
-        .lte('logged_at', endIso);
-
-      if (mealLogs) {
-        let calories = 0, protein = 0, fat = 0, carbs = 0;
-        const microsMap: Record<string, number> = {};
-
-        mealLogs.forEach((log: any) => {
-          calories += Number(log.total_calories || 0);
-          protein += Number(log.total_protein || 0);
-          fat += Number(log.total_fat || 0);
-          carbs += Number(log.total_carbs || 0);
-
-          // Aggregate micronutrients
-          if (log.micronutrients && typeof log.micronutrients === 'object') {
-            for (const [key, val] of Object.entries(log.micronutrients)) {
-              if (typeof val === 'number') {
-                microsMap[key] = (microsMap[key] || 0) + val;
-              }
-            }
-          }
-        });
-
-        // Round all micros to 2 decimal places max
-        for (const key in microsMap) {
-          microsMap[key] = Number(microsMap[key].toFixed(2));
-        }
-
-        setConsumed({ calories, protein, fat, carbs });
-        setConsumedMicros(microsMap);
+      const data = await apiClient.getDiaryDailyMacros(startIso, endIso);
+      if (data && data.macros) {
+        setConsumed(data.macros);
+        setConsumedMicros(data.microsMap || {});
       } else {
         setConsumed({ calories: 0, protein: 0, fat: 0, carbs: 0 });
         setConsumedMicros({});
