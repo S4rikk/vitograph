@@ -1,23 +1,23 @@
-# TASK: Enforce Strict Internal App Boundaries for AI Assistant
+# TASK: Short Copy for Verification Infobox (Single Icon)
 
 **Required Skills:**
-- Read `C:\store\ag_skills\skills\prompt-engineering-patterns\SKILL.md` before coding.
-- Read `C:\store\ag_skills\skills\ai-engineer\SKILL.md` before coding.
+- Read `C:\store\ag_skills\skills\frontend-developer\SKILL.md` before coding.
+- Read `C:\store\ag_skills\skills\ui-ux-pro-max\SKILL.md` before coding.
 
 **Architecture Context:**
-The user reported that the AI assistant hallucinated a response suggesting the user install a "Google Workspace extension" to parse lab reports. The AI must be strictly confined to the Vitograph application's context. It must NEVER reference external sites, browser extensions, or third-party applications.
+The user found the text inside the verification infobox (next to the "Сформировать отчёт" button in `MedicalResultsView.tsx`) to be too long and confusing. 
+The user explicitly selected the following short copy: `"⚠️ Внимание! Сверьте данные с оригиналом."` 
 
 **Implementation Steps:**
-1. Open the file `C:\project\VITOGRAPH\apps\api\src\ai\src\ai.controller.ts`.
-2. Locate the main `systemPrompt` definition (around line 719).
-3. Add a new section called `### APP BOUNDARIES (CRITICAL)` right below the `### CONVERSATIONAL RULES` block.
-4. Insert the following strict prompt engineering enforcement:
-   ```text
-   ### APP BOUNDARIES (CRITICAL)
-   - STRICT PROHIBITION: You are strictly FOREVER FORBIDDEN from referencing, suggesting, or linking to ANY external internet resources, websites, browser extensions (e.g., Google Workspace), or third-party apps.
-   - INTERNAL ONLY: Everything the user discusses must be addressed EXCLUSIVELY within the context of the Vitograph app, your own internal capabilities, and your built-in tools.
-   - NO HALLUCINATIONS: Do not invent features, extensions, or integrations that are not explicitly provided in your tools.
-   ```
-5. Create a short report `next_report.md` stating what was done. Do NOT attempt to run any deployment scripts.
+1. Open the file `C:\project\VITOGRAPH\apps\web\src\components\medical\MedicalResultsView.tsx`.
+2. Locate the informational infobox (around line 444) that currently contains the text: 
+   *"Проверьте результаты сканирования. ИИ мог допустить неточность..."*
+3. Replace the text and layout with the new short version: `"⚠️ Внимание! Сверьте данные с оригиналом."`
+4. **CRITICAL DESIGN REQUIREMENT**: 
+   - **Do NOT** show a separate info or warning icon circle next to the text. The `⚠️` emoji inside the string itself acts as the single, perfectly sufficient icon. 
+   - Remove the `<div className="flex h-8 w-8 shrink-0...">` that contains the cyan SVG info icon entirely.
+   - Refine the text and container styling to look extremely clean, minimalist, and natural (e.g., `<div className="text-sm font-semibold text-amber-700">⚠️ Внимание! Сверьте данные с оригиналом.</div>` inside a subtle background wrapper). 
+   - The end result must be ONE warning emoji, ONE sentence, and zero clutter.
+5. Create a short report `next_report.md` in the VITOGRAPH folder once done. Do NOT run auto-deploy scripts.
 
-Использованные скиллы: `prompt-engineering-patterns`, `ai-engineer`
+Использованные скиллы: `frontend-developer`, `ui-ux-pro-max`

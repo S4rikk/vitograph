@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import UploadZone from "./UploadZone";
 import PhotoUploader from "./PhotoUploader";
 import SomaticAnalysisCard from "./SomaticAnalysisCard";
@@ -25,6 +25,17 @@ export default function MedicalResultsView() {
   const [isDirty, setIsDirty] = useState(false);
   const [dirtyIndexes, setDirtyIndexes] = useState<Set<number>>(new Set());
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const controlsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (uploadState === "done" && editableBiomarkers && editableBiomarkers.length > 0) {
+      const timer = setTimeout(() => {
+        controlsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [uploadState, editableBiomarkers]);
 
   // ── Somatic Analysis State ───────────────────────────────────
   const [somaticHistory, setSomaticHistory] = useState<SomaticHistoryResponse>({});
@@ -391,7 +402,7 @@ export default function MedicalResultsView() {
           </div>
 
           {/* ── Control Buttons ────────────────────────────────── */}
-          <div className="mt-8 flex flex-wrap items-center gap-4 p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <div ref={controlsRef} className="mt-8 flex flex-wrap items-center gap-4 p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
             <button
               onClick={handleRefreshNotes}
               disabled={!isDirty || isRefreshing}
@@ -413,16 +424,30 @@ export default function MedicalResultsView() {
               disabled={isDirty || isDiagnosing || isRefreshing}
               className={`flex-1 sm:flex-none px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
                 !isDirty && !isDiagnosing && !isRefreshing
-                  ? "bg-purple-600 text-white shadow-lg shadow-purple-200 hover:bg-purple-700 hover:-translate-y-0.5 active:translate-y-0"
+                  ? "bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.6)] animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite] hover:bg-purple-700 hover:-translate-y-0.5 active:translate-y-0"
                   : "bg-slate-100 text-slate-400 cursor-not-allowed opacity-70"
               }`}
             >
               {isDiagnosing ? "Анализируем..." : "Сформировать отчёт"}
             </button>
-            {isDirty && (
-              <p className="w-full sm:w-auto text-sm text-amber-600 font-medium flex items-center gap-2">
-                <span className="text-lg">⚠️</span> Сохраните изменения перед формированием отчёта
-              </p>
+            {isDirty ? (
+              <div className="ml-auto w-full lg:w-auto flex-1 max-w-md flex items-start gap-3 rounded-xl bg-amber-50/80 p-3.5 border border-amber-200 shadow-sm transition-all duration-300">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 shadow-inner">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div className="text-xs font-medium leading-relaxed text-amber-700 pt-1">
+                  <span className="font-bold text-amber-900 block mb-0.5">Несохраненные изменения</span>
+                  Нажмите «Обновить показатели», чтобы применить ваши правки.
+                </div>
+              </div>
+            ) : (
+              <div className="ml-auto w-full lg:w-auto flex items-center justify-center rounded-xl bg-amber-50/50 px-5 py-3 border border-amber-200/30 transition-all duration-300 hover:bg-amber-50 hover:border-amber-200/60">
+                <div className="text-sm font-semibold text-amber-700">
+                  ⚠️ Внимание! Сверьте данные с оригиналом.
+                </div>
+              </div>
             )}
           </div>
 

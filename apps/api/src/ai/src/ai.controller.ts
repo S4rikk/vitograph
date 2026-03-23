@@ -299,7 +299,8 @@ async function fetchUserContext(token: string, userId: string) {
 // ── Context Formatting Helpers ─────────────────────────────────────
 
 function formatTestResults(tests: any[] | null, timezone: string = "UTC"): string {
-  if (!tests || tests.length === 0) return "Нет загруженных анализов.";
+  if (!tests || tests.length === 0) return `Нет загруженных анализов.
+⚠️ ИНСТРУКЦИЯ ДЛЯ ИИ ПРО АНАЛИЗЫ: Если пользователь хочет обсудить анализы, НЕМЕДЛЕННО скажи ему: "Пожалуйста, перейдите в раздел 'Анализы' и загрузите фото или PDF ваших бланков, чтобы я мог их изучить." Категорически НЕ предлагай никаких иных способов загрузки.`;
 
   return tests.map(t => {
     const name = t.biomarkers?.name_ru || t.biomarkers?.name_en || "Неизвестный маркер";
