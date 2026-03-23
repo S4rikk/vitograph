@@ -827,22 +827,39 @@ export async function handleUpdateMealLog(req: Request, res: Response, next: Nex
       for (const msg of messages) {
         let newContent = msg.content;
         
-        newContent = newContent.replace(/(\d+)г/g, `${Math.round(new_weight_g)}г`);
+        // 5a. Atomic Reconstruction of the Macro Line
+        const foodName = items[0]?.food_name || 'Блюдо';
+        const newMacroLine = `Записал ${Math.round(new_weight_g)}г ${foodName}: ${Math.round(updatedMacros.total_calories)} ккал, ${updatedMacros.total_protein.toFixed(1)}г белков, ${updatedMacros.total_fat.toFixed(1)}г жиров, ${updatedMacros.total_carbs.toFixed(1)}г углеводов`;
         
-        newContent = newContent.replace(/(\d+(?:[.,]\d+)?)\s*ккал/g, (_unused: any, val: any) => {
-          const scaled = Number(parseFloat(val.replace(',', '.')) * ratio);
-          return `${Math.round(scaled)} ккал`;
-        });
+        // Replace the entire block from "Записал" to "углеводов"
+        newContent = newContent.replace(/Записал[\s\S]*?углеводов/g, newMacroLine);
 
-        newContent = newContent.replace(/(\d+(?:[.,]\d+)?)\s*г\s*(белков|жиров|углеводов)/g, (_unused: any, val: any, type: any) => {
-          const scaled = Number(parseFloat(val.replace(',', '.')) * ratio);
-          return `${scaled.toFixed(1)}г ${type}`;
-        });
+        // 5b. Atomic Reconstruction of Micros
+        // Remove old micro tags first to avoid duplicates or orphans
+        newContent = newContent.replace(/<nutr type="micro">[\s\S]*?<\/nutr>/g, "").trim();
 
-        newContent = newContent.replace(/([А-ЯЁ][а-яё]+(?:\s+[а-яё]+)*):\s*(\d+(?:[.,]\d+)?)\s*(мг|мкг|г)/g, (_unused: any, name: any, val: any, unit: any) => {
-           const scaled = Number(parseFloat(val.replace(',', '.')) * ratio);
-           return `${name}: ${scaled.toFixed(1)}${unit}`;
-        });
+        // Build new tags
+        const microTags = Object.entries(updatedMicros)
+          .map(([k, v]) => {
+            const nameOnly = k.split(' (')[0];
+            const unit = k.match(/\((.*?)\)/)?.[1] || 'г';
+            return `<nutr type="micro">${nameOnly} (${v}${unit})</nutr>`;
+          })
+          .join(' ');
+
+        // Insert new tags after <meal_score ... />
+        if (newContent.includes('</meal_score>')) {
+           newContent = newContent.replace('</meal_score>', `</meal_score>\n${microTags}`);
+        } else if (newContent.includes('/>')) {
+           // Fallback for self-closing meal_score
+           newContent = newContent.replace(/<meal_score[\s\S]*?\/>/, (match: string) => `${match}\n${microTags}`);
+        } else {
+           // Fallback: just append if no tag found
+           newContent += `\n${microTags}`;
+        }
+
+        // Clean up double newlines
+        newContent = newContent.replace(/\n\n+/g, "\n\n").trim();
 
         await supabaseAdmin
           .from("ai_chat_messages")
@@ -850,6 +867,7 @@ export async function handleUpdateMealLog(req: Request, res: Response, next: Nex
           .eq("id", msg.id);
       }
     }
+
 
     // 6. Update items as well - Use Admin for consistency
     for (const item of items) {

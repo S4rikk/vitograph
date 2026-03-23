@@ -282,33 +282,31 @@ export default function FoodDiaryView() {
 
       await apiClient.updateMealLog(editingMealId, editWeight);
       
-      // Optimistic UI update for BOTH card and text
-      setMessages(prev => prev.map(m => {
-          const parsed = detectAndParseFoodLog(m.text, m.time);
-          if (parsed?.cardProps.mealId !== editingMealId) return m;
-
-          let newText = m.text;
-          // Same regex as backend
-          newText = newText.replace(/(\d+)г/g, `${Math.round(editWeight)}г`);
-          newText = newText.replace(/(\d+(?:[.,]\d+)?)\s*ккал/g, (_, val) => {
-              const scaled = parseFloat(val.replace(',', '.')) * ratio;
-              return `${Math.round(scaled)} ккал`;
-          });
-          newText = newText.replace(/(\d+(?:[.,]\d+)?)\s*г\s*(белков|жиров|углеводов)/g, (_, val, type) => {
-              const scaled = parseFloat(val.replace(',', '.')) * ratio;
-              return `${scaled.toFixed(1)}г ${type}`;
-          });
-          newText = newText.replace(/([А-ЯЁ][а-яё]+(?:\s+[а-яё]+)*):\s*(\d+(?:[.,]\d+)?)\s*(мг|мкг|г)/g, (_, name, val, unit) => {
-             const scaled = parseFloat(val.replace(',', '.')) * ratio;
-             return `${name}: ${scaled.toFixed(1)}${unit}`;
-          });
-
-          return { ...m, text: newText };
-      }));
+      // Phase 56 v8: STOP manual string scaling. Just refresh from the source of truth.
+      await fetchMacrosForDate(selectedDate);
       
-      fetchMacrosForDate(selectedDate);
+      if (!userTimezone) return;
+
+      // Trigger a reload of history messages by resetting messages or calling loadHistory logic
+      const { startIso, endIso } = getTzDayBoundaries(selectedDate, userTimezone);
+
+      const data = await apiClient.getChatHistory("diary", startIso, endIso);
+      if (data.history) {
+        const mapped: Message[] = data.history.map((m: any, idx: number) => {
+          const dateStr = m.createdAt ? new Date(m.createdAt) : new Date();
+          return {
+            id: idx + 1,
+            variant: m.role === "assistant" ? "system" : "user",
+            text: m.content,
+            time: `${dateStr.getHours().toString().padStart(2, "0")}:${dateStr.getMinutes().toString().padStart(2, "0")}`,
+          };
+        });
+        setMessages([...INITIAL_MESSAGES, ...mapped]);
+      }
+
       setEditingMealId(null);
     } catch (err) {
+
       console.error("Failed to update meal:", err);
       // alert("Не удалось обновить вес");
     } finally {
