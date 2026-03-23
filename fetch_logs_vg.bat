@@ -13,4 +13,10 @@ echo ===================================================
 ssh -o StrictHostKeyChecking=no root@69.12.79.201 "pm2 logs vitograph-ai --lines 50 --nostream"
 
 echo.
+echo ===================================================
+echo [ PYTHON CORE LOGS (vitograph-api) ]
+echo ===================================================
+ssh -o StrictHostKeyChecking=no root@69.12.79.201 "pm2 logs vitograph-api --lines 50 --nostream"
+
+echo.
 echo ✅ Fetch complete.

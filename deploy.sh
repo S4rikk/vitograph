@@ -18,5 +18,11 @@ npm install
 npm run build
 cd ../../../
 
-# Перезагружаем оба процесса
-pm2 restart vitograph vitograph-ai
+# Обновление Python Core
+echo "Updating Python Engine..."
+cd apps/api
+pip install -r requirements.txt
+cd ../..
+
+# Перезагружаем все три процесса (NextJS, Node API, Python Core) для синхронизации версий
+pm2 restart vitograph vitograph-ai vitograph-api
