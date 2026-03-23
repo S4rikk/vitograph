@@ -68,10 +68,10 @@ class PythonCoreClient {
   public async request<T>(
     endpoint: string,
     options: RequestInit = {},
-    timeoutMs: number = 90_000
+    timeoutMs: number = 300_000 // Default to 5 minutes
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    console.log(`[PythonCore] Calling ${url}`);
+    console.log(`[PythonCore] Calling ${url} (timeout: ${Math.round(timeoutMs/1000)}s)`);
 
     try {
       const response = await fetch(url, {
@@ -180,7 +180,7 @@ class PythonCoreClient {
         method: "POST",
         body: formData,
       },
-      300_000 // 5 minute timeout for batch processing
+      1_000_000 // ~16.6 minute timeout for 10-page batch processing
     );
   }
 

@@ -319,6 +319,10 @@ router.post(
         throw new AppError("No files uploaded", 400);
       }
 
+      if (files.length > 10) {
+        throw new AppError("Максимальное количество файлов для пакетной загрузки — 10.", 400);
+      }
+
       console.log(`[parse-image-batch] ②  Files received: ${files.length}`);
 
       for (const file of files) {

@@ -34,8 +34,8 @@ async function callModel(state: typeof GraphAnnotation.State, config?: any) {
   const latestSystemMessage = systemMessages.length > 0 ? systemMessages[systemMessages.length - 1] : null;
   
   let convoMessages = state.messages.filter(m => !m._getType || m._getType() !== "system");
-  if (convoMessages.length > 20) {
-    convoMessages = convoMessages.slice(convoMessages.length - 20);
+  if (convoMessages.length > 12) {
+    convoMessages = convoMessages.slice(convoMessages.length - 12);
   }
 
   // Phase 54: Nutritional Context scaling preservation
@@ -53,11 +53,25 @@ async function callModel(state: typeof GraphAnnotation.State, config?: any) {
 
   const finalMessages = latestSystemMessage ? [latestSystemMessage, ...convoMessages] : convoMessages;
   
+  // DEBUG: Log full prompt to a file for Sasha (Surgical Pruning Verification)
+  try {
+    const fs = await import("fs");
+    const chatMode = config?.configurable?.chatMode || 'default';
+    const logFile = chatMode === 'diary' ? "debug_diary_prompt.txt" : "debug_assistant_prompt.txt";
+    const fullPromptLog = finalMessages.map(m => `--- ${m._getType?.() || 'unknown'} ---\n${m.content}`).join("\n\n");
+    fs.writeFileSync(logFile, `[FULL PROMPT LOG (${chatMode}) - ${new Date().toISOString()}]\n${fullPromptLog}\n`);
+  } catch (err) {
+    console.error("[DEBUG] Failed to write full prompt log:", err);
+  }
+
   console.log(`[AGENT] 🧠 Thinking... Mode: ${config?.configurable?.chatMode || 'default'}`);
   
   const response = await modelToUse.invoke(finalMessages);
   
-  console.log(`[AGENT] ✅ Response received | model=${response.response_metadata?.model_name || 'unknown'}`);
+  const usage = response.usage_metadata;
+  const usageInfo = usage ? ` | tokens: P=${usage.input_tokens}, C=${usage.output_tokens}, T=${usage.total_tokens}` : "";
+
+  console.log(`[AGENT] ✅ Response received | model=${response.response_metadata?.model_name || 'unknown'}${usageInfo}`);
   return { messages: [response] };
 }
 const toolNode = new ToolNode(agentTools);
