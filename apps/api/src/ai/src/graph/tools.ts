@@ -82,7 +82,7 @@ export const updateProfileTool = new DynamicStructuredTool({
 
 export const logMealTool = new DynamicStructuredTool({
   name: "log_meal",
-  description: "Logs a food item into the user's daily meal diary. You MUST estimate the calories, macros, and micronutrients. You MUST ALSO evaluate the overall healthiness of the meal and provide a `meal_quality_score` (0-100) and `meal_quality_reason` based on the system instructions. NEVER leave micronutrients empty if the food contains them.",
+  description: "Logs a food item into the user's daily meal diary. You MUST estimate the calories, macros, and micronutrients. You MUST ALSO evaluate the overall healthiness of the meal and provide a `meal_quality_score` (0-100) and `meal_quality_reason` based on the system instructions. NEVER leave micronutrients empty if the food contains them. After successful logging, you MUST preserve the <meal_id/> tag provided in the tool output at the end of your response.",
   schema: z.object({
     meal_type: z.enum(["breakfast", "lunch", "dinner", "snack", "drink"]).describe("The category of the meal"),
     food_name: z.string().describe("The name of the food eaten (e.g. 'Oatmeal', 'Chicken Breast')"),
@@ -272,6 +272,8 @@ export const logMealTool = new DynamicStructuredTool({
     if (finalScore !== undefined && finalScore !== null) {
       baseResponse += ` AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="${finalScore}" reason="${finalReason || ''}" />`;
     }
+
+    baseResponse += ` <meal_id id="${logId}" />`;
 
     return baseResponse;
   }

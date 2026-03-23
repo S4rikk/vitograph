@@ -11,6 +11,8 @@ type ChatMessageProps = {
   text: string;
   /** Formatted timestamp string. */
   time: string;
+  onDelete?: (id: string) => void;
+  onEdit?: (id: string) => void;
 };
 
 // Logic moved to food-log-parser.ts
@@ -83,12 +85,15 @@ export default function ChatMessage({
   variant,
   text,
   time,
+  onDelete,
+  onEdit,
 }: ChatMessageProps) {
   const isUser = variant === "user";
 
   if (!isUser) {
     const parsed = detectAndParseFoodLog(text, time);
     if (parsed) {
+      console.log("[ChatMessage] CardProps:", parsed.cardProps);
       return (
         <div className="flex flex-col gap-2 w-full">
            {parsed.comment && (
@@ -100,7 +105,7 @@ export default function ChatMessage({
                </div>
            )}
            <div className="flex justify-start">
-             <FoodCard {...parsed.cardProps} />
+             <FoodCard {...parsed.cardProps} onDelete={onDelete} onEdit={onEdit} />
            </div>
         </div>
       );

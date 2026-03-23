@@ -335,6 +335,46 @@ class AiApiClient {
   }
 
   /**
+   * Deletes a specific meal log by ID (Phase 56)
+   */
+  async deleteMealLog(id: string): Promise<void> {
+    const token = await getAuthToken();
+    const url = `${this.baseUrl}/meal-log/${encodeURIComponent(id)}`;
+    const headers: HeadersInit = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(url, { method: 'DELETE', headers });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.message || `API Error: ${res.status}`);
+    }
+  }
+
+  /**
+   * Updates a specific meal log weight (Phase 56)
+   */
+  async updateMealLog(id: string, newWeightG: number): Promise<any> {
+    const token = await getAuthToken();
+    const url = `${this.baseUrl}/meal-log/${encodeURIComponent(id)}`;
+    const headers: HeadersInit = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(url, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify({ new_weight_g: newWeightG }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.message || `API Error: ${res.status}`);
+    }
+
+    const json = await res.json();
+    return json.data;
+  }
+
+  /**
    * Analyzes symptom correlations based on history.
    */
   async analyze(symptoms: SymptomEntry[]): Promise<CorrelationResult[]> {

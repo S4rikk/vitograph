@@ -148,3 +148,13 @@ export const AnalyzeLabReportRequestSchema = z.object({
 });
 
 export type AnalyzeLabReportRequest = z.infer<typeof AnalyzeLabReportRequestSchema>;
+
+// ── PATCH /api/v1/ai/meal-log/:id ───────────────────────────────────
+
+/** Schema for updating meal log weight (Phase 56) */
+export const UpdateMealLogSchema = z.object({
+  /** New total weight of the meal in grams */
+  new_weight_g: z.number().positive("Weight must be positive"),
+});
+
+export type UpdateMealLogRequest = z.infer<typeof UpdateMealLogSchema>;

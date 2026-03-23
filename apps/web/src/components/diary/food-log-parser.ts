@@ -13,11 +13,13 @@ export interface ParsedFoodLog {
     scoreReason?: string;
     micros: { name: string; value: string; type: string }[];
     time: string;
+    mealId?: string;
   };
   comment: string;
 }
 
 export function detectAndParseFoodLog(text: string, time: string): ParsedFoodLog | null {
+  console.log("[Parser] Full Text:", text);
   try {
     const macroMatch = text.match(macroRegex);
     if (!macroMatch) return null;
@@ -30,6 +32,13 @@ export function detectAndParseFoodLog(text: string, time: string): ParsedFoodLog
     const protein = parseFloat(protStr.replace(',', '.'));
     const fat = parseFloat(fatStr.replace(',', '.'));
     const carbs = parseFloat(carbStr.replace(',', '.'));
+
+    let mealId = undefined;
+    const mealIdMatch = /<meal_id\s+id="([^"]+)"\s*\/>/i.exec(text);
+    if (mealIdMatch) {
+      mealId = mealIdMatch[1];
+    }
+    console.log("[Parser] Found mealId:", mealId);
 
     let score = 0;
     let scoreReason = undefined;
@@ -63,6 +72,7 @@ export function detectAndParseFoodLog(text: string, time: string): ParsedFoodLog
     let comment = text
       .replace(macroRegex, '')
       .replace(/<meal_score[^>]*\/>/gi, '')
+      .replace(/<meal_id[^>]*\/>/gi, '')
       // Remove ONLY technical micro tags (for card) but preserve marker tags for highlights
       .replace(/<nut[a-z]*\s+[^>]*type=["']micro["'][^>]*>.*?<\/nut[a-z]*>/gi, '')
       .trim();
@@ -70,7 +80,20 @@ export function detectAndParseFoodLog(text: string, time: string): ParsedFoodLog
     comment = comment.replace(/^[\s,.]+/, '').replace(/[\s,.]+$/, '').trim();
 
     return {
-      cardProps: { name, emoji: "", weight, calories, protein, fat, carbs, score, scoreReason, micros: micros.filter(m => m.type === 'micro' || (m.value && m.value.length > 0)), time },
+      cardProps: { 
+        name, 
+        emoji: "", 
+        weight, 
+        calories, 
+        protein, 
+        fat, 
+        carbs, 
+        score, 
+        scoreReason, 
+        micros: micros.filter(m => m.type === 'micro' || (m.value && m.value.length > 0)), 
+        time,
+        mealId
+      },
       comment
     };
 

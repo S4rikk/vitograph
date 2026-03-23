@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Info } from "lucide-react";
 import ChatMessage from "./ChatMessage";
+import { detectAndParseFoodLog } from "./food-log-parser";
+import { nutrientColors } from "@/lib/food-diary/nutrient-colors";
 import FoodInputForm from "./FoodInputForm";
 import { FeedbackButton } from "./FeedbackButton";
 import DailyAllowancesPanel from "./DailyAllowancesPanel";
@@ -30,6 +33,11 @@ const INITIAL_MESSAGES: Message[] = [
 export default function FoodDiaryView() {
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
   const [isThinking, setIsThinking] = useState(false);
+  
+  // Weight Modal State
+  const [editingMealId, setEditingMealId] = useState<string | null>(null);
+  const [editWeight, setEditWeight] = useState<number>(0);
+  const [isUpdating, setIsUpdating] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const nextId = useRef(1000); // Start high to avoid collision with mapped history IDs
 
@@ -216,6 +224,98 @@ export default function FoodDiaryView() {
       });
   }, [threadId, fetchMacrosForDate, selectedDate]);
 
+  // ── Meal Actions ──────────────────────────────────────────────────
+
+  const handleDeleteMeal = useCallback(async (id: string) => {
+    if (!window.confirm("Вы уверены, что хотите удалить этот приём пищи?")) return;
+
+    try {
+      await apiClient.deleteMealLog(id);
+      
+      // Optimistic UI: remove the message containing this card
+      setMessages(prev => prev.filter(m => {
+          const parsed = detectAndParseFoodLog(m.text, m.time);
+          return parsed?.cardProps.mealId !== id;
+      }));
+
+      // Refresh bars
+      fetchMacrosForDate(selectedDate);
+    } catch (err) {
+      console.error("Failed to delete meal:", err);
+      // alert("Не удалось удалить приём пищи");
+    }
+  }, [apiClient, fetchMacrosForDate, selectedDate]);
+
+  const handleStartEdit = useCallback((id: string) => {
+    // Find current weight from messages
+    const msg = messages.find(m => {
+        const parsed = detectAndParseFoodLog(m.text, m.time);
+        return parsed?.cardProps.mealId === id;
+    });
+    
+    if (msg) {
+        const parsed = detectAndParseFoodLog(msg.text, msg.time);
+        if (parsed) {
+            setEditWeight(parsed.cardProps.weight);
+            setEditingMealId(id);
+        }
+    }
+  }, [messages]);
+
+  const handleUpdateWeight = async () => {
+    if (!editingMealId || isUpdating) return;
+    setIsUpdating(true);
+    try {
+      // Find current weight to calculate ratio
+      const msg = messages.find(m => {
+          const parsed = detectAndParseFoodLog(m.text, m.time);
+          return parsed?.cardProps.mealId === editingMealId;
+      });
+      
+      let ratio = 1;
+      if (msg) {
+          const parsed = detectAndParseFoodLog(msg.text, msg.time);
+          if (parsed && parsed.cardProps.weight > 0) {
+              ratio = editWeight / parsed.cardProps.weight;
+          }
+      }
+
+      await apiClient.updateMealLog(editingMealId, editWeight);
+      
+      // Optimistic UI update for BOTH card and text
+      setMessages(prev => prev.map(m => {
+          const parsed = detectAndParseFoodLog(m.text, m.time);
+          if (parsed?.cardProps.mealId !== editingMealId) return m;
+
+          let newText = m.text;
+          // Same regex as backend
+          newText = newText.replace(/(\d+)г/g, `${Math.round(editWeight)}г`);
+          newText = newText.replace(/(\d+(?:[.,]\d+)?)\s*ккал/g, (_, val) => {
+              const scaled = parseFloat(val.replace(',', '.')) * ratio;
+              return `${Math.round(scaled)} ккал`;
+          });
+          newText = newText.replace(/(\d+(?:[.,]\d+)?)\s*г\s*(белков|жиров|углеводов)/g, (_, val, type) => {
+              const scaled = parseFloat(val.replace(',', '.')) * ratio;
+              return `${scaled.toFixed(1)}г ${type}`;
+          });
+          newText = newText.replace(/([А-ЯЁ][а-яё]+(?:\s+[а-яё]+)*):\s*(\d+(?:[.,]\d+)?)\s*(мг|мкг|г)/g, (_, name, val, unit) => {
+             const scaled = parseFloat(val.replace(',', '.')) * ratio;
+             return `${name}: ${scaled.toFixed(1)}${unit}`;
+          });
+
+          return { ...m, text: newText };
+      }));
+      
+      fetchMacrosForDate(selectedDate);
+      setEditingMealId(null);
+    } catch (err) {
+      console.error("Failed to update meal:", err);
+      // alert("Не удалось обновить вес");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   if (!isMounted || !userTimezone) {
     return null; // Prevent hydration mismatch and race conditions
   }
@@ -247,6 +347,8 @@ export default function FoodDiaryView() {
               variant={msg.variant}
               text={msg.text}
               time={msg.time}
+              onDelete={handleDeleteMeal}
+              onEdit={handleStartEdit}
             />
           ))}
           {isThinking && (
@@ -264,6 +366,41 @@ export default function FoodDiaryView() {
           <FoodInputForm onSubmit={handleSubmit} />
         </div>
       </div>
+
+      {/* ── Weight Modal ── */}
+      {editingMealId && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[320px] p-6 flex flex-col gap-4 animate-in zoom-in-95 duration-200">
+                  <h3 className="text-lg font-bold text-ink">Изменить вес</h3>
+                  <div className="flex flex-col gap-1">
+                      <label className="text-xs text-ink-muted uppercase font-bold tracking-wider">Новый вес (граммы)</label>
+                      <input 
+                          type="number" 
+                          value={editWeight} 
+                          onChange={(e) => setEditWeight(Number(e.target.value))}
+                          className="w-full bg-surface-subtle border border-border rounded-xl px-4 py-3 text-lg font-bold text-ink focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                          autoFocus
+                          onKeyDown={(e) => e.key === 'Enter' && handleUpdateWeight()}
+                      />
+                  </div>
+                  <div className="flex gap-2">
+                      <button 
+                          onClick={() => setEditingMealId(null)}
+                          className="flex-1 px-4 py-2.5 rounded-xl border border-border text-ink font-semibold hover:bg-surface-muted transition-colors"
+                      >
+                          Отмена
+                      </button>
+                      <button 
+                          onClick={handleUpdateWeight}
+                          disabled={isUpdating}
+                          className="flex-1 px-4 py-2.5 rounded-xl bg-primary-600 text-white font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50"
+                      >
+                          {isUpdating ? "Сохраняю..." : "Сохранить"}
+                      </button>
+                  </div>
+              </div>
+          </div>
+      )}
     </>
   );
 }

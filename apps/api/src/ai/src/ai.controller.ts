@@ -730,6 +730,209 @@ const DEFAULT_USER_PROFILE = {
   is_pregnant: false,
 };
 
+// ── PATCH /api/v1/ai/meal-log/:id ───────────────────────────────────
+
+export async function handleUpdateMealLog(req: Request, res: Response, next: NextFunction) {
+  try {
+    const userId = req.user?.id;
+    const token = req.headers.authorization?.split(" ")[1];
+    const { id: mealLogId } = req.params;
+    const { new_weight_g } = req.body;
+
+    if (!userId || !token) throw new Error("Unauthorized");
+
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_ANON_KEY;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseKey || !supabaseServiceKey) {
+      throw new Error("Supabase internal configuration missing");
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
+
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    console.log("[handleUpdateMealLog] Debug:", { mealLogId, userId, hasToken: !!token });
+
+    // 1. Fetch current meal log to get original weight and macros
+    // Diagnostic: Fetch without user_id filter first to see if it even exists
+    const { data: log, error: fetchError } = await supabase
+      .from("meal_logs")
+      .select("*, meal_items(*)")
+      .eq("id", mealLogId)
+      .single();
+
+    if (fetchError) {
+      console.error("[handleUpdateMealLog] Fetch Error:", fetchError);
+      throw new Error(`Meal log fetch failed: ${fetchError.message}`);
+    }
+
+    if (!log) {
+       console.error("[handleUpdateMealLog] Log not found for ID:", mealLogId);
+       throw new Error("Meal log not found");
+    }
+
+    // 2. Verify ownership in code
+    if (log.user_id !== userId) {
+       console.error("[handleUpdateMealLog] Access Denied. Owner:", log.user_id, "Requestor:", userId);
+       throw new Error("Access denied: You do not own this meal log");
+    }
+
+    // We assume there's at least one item. If multiple, we scale all proportionately.
+    // For now, most logs have 1 main item from the assistant.
+    const items = log.meal_items || [];
+    const oldWeight = items.reduce((sum: number, i: any) => sum + (i.weight_g || 0), 0) || 1;
+    const ratio = new_weight_g / oldWeight;
+
+    // 2. Scale Macros
+    const updatedMacros = {
+      total_calories: Number((log.total_calories * ratio).toFixed(1)),
+      total_protein: Number((log.total_protein * ratio).toFixed(1)),
+      total_fat: Number((log.total_fat * ratio).toFixed(1)),
+      total_carbs: Number((log.total_carbs * ratio).toFixed(1)),
+    };
+
+    // 3. Scale Micros
+    const updatedMicros: Record<string, number> = {};
+    if (log.micronutrients && typeof log.micronutrients === 'object') {
+      Object.entries(log.micronutrients).forEach(([k, v]) => {
+        if (typeof v === 'number') {
+          updatedMicros[k] = Number((v * ratio).toFixed(1));
+        }
+      });
+    }
+
+    // 4. Update Database
+    const { error: updateLogError } = await supabase
+      .from("meal_logs")
+      .update({
+        ...updatedMacros,
+        micronutrients: updatedMicros
+      })
+      .eq("id", mealLogId);
+
+    if (updateLogError) throw updateLogError;
+
+    // 5. Update Chat Message Content (Sync) - Use Admin to bypass RLS
+    const { data: messages, error: msgFetchError } = await supabaseAdmin
+      .from("ai_chat_messages")
+      .select("*")
+      .eq("user_id", userId)
+      .ilike("content", `%<meal_id id="${mealLogId}"%`);
+
+    if (!msgFetchError && messages && messages.length > 0) {
+      for (const msg of messages) {
+        let newContent = msg.content;
+        
+        newContent = newContent.replace(/(\d+)г/g, `${Math.round(new_weight_g)}г`);
+        
+        newContent = newContent.replace(/(\d+(?:[.,]\d+)?)\s*ккал/g, (_unused: any, val: any) => {
+          const scaled = Number(parseFloat(val.replace(',', '.')) * ratio);
+          return `${Math.round(scaled)} ккал`;
+        });
+
+        newContent = newContent.replace(/(\d+(?:[.,]\d+)?)\s*г\s*(белков|жиров|углеводов)/g, (_unused: any, val: any, type: any) => {
+          const scaled = Number(parseFloat(val.replace(',', '.')) * ratio);
+          return `${scaled.toFixed(1)}г ${type}`;
+        });
+
+        newContent = newContent.replace(/([А-ЯЁ][а-яё]+(?:\s+[а-яё]+)*):\s*(\d+(?:[.,]\d+)?)\s*(мг|мкг|г)/g, (_unused: any, name: any, val: any, unit: any) => {
+           const scaled = Number(parseFloat(val.replace(',', '.')) * ratio);
+           return `${name}: ${scaled.toFixed(1)}${unit}`;
+        });
+
+        await supabaseAdmin
+          .from("ai_chat_messages")
+          .update({ content: newContent })
+          .eq("id", msg.id);
+      }
+    }
+
+    // 6. Update items as well - Use Admin for consistency
+    for (const item of items) {
+       const itemRatio = new_weight_g / oldWeight;
+       await supabaseAdmin.from("meal_items").update({
+         weight_g: Number((item.weight_g * itemRatio).toFixed(1)),
+         calories: Number((item.calories * itemRatio).toFixed(1)),
+         protein_g: Number((item.protein_g * itemRatio).toFixed(1)),
+         fat_g: Number((item.fat_g * itemRatio).toFixed(1)),
+         carbs_g: Number((item.carbs_g * itemRatio).toFixed(1)),
+       }).eq("id", item.id);
+    }
+
+    res.json({ success: true, data: { id: mealLogId, ...updatedMacros, weight_g: new_weight_g } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// ── DELETE /api/v1/ai/meal-log/:id ──────────────────────────────────
+
+export async function handleDeleteMealLog(req: Request, res: Response, next: NextFunction) {
+  try {
+    const userId = req.user?.id;
+    const token = req.headers.authorization?.split(" ")[1];
+    const { id: mealLogId } = req.params;
+
+    if (!userId || !token) throw new Error("Unauthorized");
+
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_ANON_KEY;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseKey || !supabaseServiceKey) {
+      throw new Error("Supabase internal configuration missing");
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
+
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Step 1: Delete from meal_items first (Bypass RLS via Admin)
+    const { error: itemDeleteError } = await supabaseAdmin
+      .from("meal_items")
+      .delete()
+      .eq("meal_log_id", mealLogId);
+
+    if (itemDeleteError) {
+       console.error("[handleDeleteMealLog] Item Delete Error:", itemDeleteError);
+       throw itemDeleteError;
+    }
+
+    // Step 2: Delete from ai_chat_messages (Bypass RLS via Admin)
+    const { error: msgDeleteError } = await supabaseAdmin
+      .from("ai_chat_messages")
+      .delete()
+      .eq("user_id", userId)
+      .ilike("content", `%<meal_id id="${mealLogId}"%`);
+    
+    if (msgDeleteError) {
+       console.error("[handleDeleteMealLog] Message Delete Error:", msgDeleteError);
+    }
+
+    // Step 3: Delete from meal_logs (User credentials for ownership check)
+    const { error: logDeleteError } = await supabase
+      .from("meal_logs")
+      .delete()
+      .eq("id", mealLogId)
+      .eq("user_id", userId);
+
+    if (logDeleteError) {
+       console.error("[handleDeleteMealLog] Log Delete Error:", logDeleteError);
+       throw logDeleteError;
+    }
+
+    res.json({ success: true, data: { id: mealLogId } });
+  } catch (err) {
+    next(err);
+  }
+}
+
 // ── POST /api/v1/ai/chat ────────────────────────────────────────────
 
 /**

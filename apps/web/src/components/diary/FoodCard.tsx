@@ -1,4 +1,5 @@
 import React from "react";
+import { Pencil, Trash2 } from "lucide-react";
 import { nutrientColors } from "@/lib/food-diary/nutrient-colors";
 
 interface FoodCardProps {
@@ -13,6 +14,9 @@ interface FoodCardProps {
   scoreReason?: string; // "Оценка" (опционально, для тултипа или логов)
   micros?: { name: string; value: string; type: string }[]; // Парсится из <nutr>
   time: string;        // "14:54"
+  mealId?: string;     // UUID из БД
+  onDelete?: (id: string) => void;
+  onEdit?: (id: string) => void;
 }
 
 export function getEmojiForFood(foodName: string): string {
@@ -133,6 +137,9 @@ export default function FoodCard({
   scoreReason,
   micros,
   time,
+  mealId,
+  onDelete,
+  onEdit,
 }: FoodCardProps) {
   const finalEmoji = emoji && emoji !== "🍽️" ? emoji : getEmojiForFood(name);
 
@@ -190,7 +197,27 @@ export default function FoodCard({
       )}
 
       {/* Footer */}
-      <div className="flex justify-end mt-auto pt-1">
+      <div className="flex justify-between items-center mt-auto pt-1">
+          <div className="flex gap-3">
+              {mealId && (
+                  <>
+                      <button 
+                          onClick={() => onEdit?.(mealId)}
+                          className="text-blue-500 hover:text-blue-600 transition-colors p-1 rounded-md hover:bg-blue-50 z-[50]"
+                          title="Изменить вес"
+                      >
+                          <Pencil size={16} />
+                      </button>
+                      <button 
+                          onClick={() => onDelete?.(mealId)}
+                          className="text-red-500 hover:text-red-600 transition-colors p-1 rounded-md hover:bg-red-50 z-[50]"
+                          title="Удалить"
+                      >
+                          <Trash2 size={16} />
+                      </button>
+                  </>
+              )}
+          </div>
           <span className="text-[10px] text-ink-faint">{time}</span>
       </div>
     </div>
