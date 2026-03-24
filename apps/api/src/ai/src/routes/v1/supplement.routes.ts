@@ -6,5 +6,6 @@ const supplementRouter = Router();
 // /api/v1/supplements/...
 supplementRouter.get("/today", supplementController.getTodaySupplements.bind(supplementController));
 supplementRouter.post("/log", supplementController.logSupplement.bind(supplementController));
+supplementRouter.delete("/log/:id", supplementController.deleteSupplementLog.bind(supplementController));
 
 export { supplementRouter };

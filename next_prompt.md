@@ -1,61 +1,43 @@
-# VITOGRAPH: TECHNICAL TASK (Phase 59 - AI TEMPORAL HOTFIX)
-# Objectives: Differentiate Today vs Yesterday in AI Context
+# TECHNICAL TASK (PROMPT) FOR THE CODER - FIX 500 POST ERROR
 
-## 1. Context: Temporal Overlap
-The AI currently receives a sliding 24h window of meals. If a user ate breakfast 4 hours ago (Today) and another breakfast 23 hours ago (Yesterday), the AI sees them as the same day. We must fix this.
+## CONTEXT
+The UI redesign (Pill format) and the routing fixes were implemented perfectly! Visually everything is exact. However, there is one last bug preventing the checkboxes from saving.
+When the user clicks the checkbox, a `POST /api/v1/supplements/log` request is made. It crashes with a **500 Internal Server Error**. Because the API fails, the widget rolls back the optimistic UI state and unchecks the box.
+The micronutrients don't calculate because the log is never successfully saved to the database.
 
-## 2. Technical Task - API (`ai.controller.ts`)
+**Why does the POST fail?**
+The `supplement_logs` table schema was created with `"id" UUID NOT NULL` but WITHOUT `DEFAULT gen_random_uuid()`.
+Because of this, `Supabase` rejects any insert that doesn't explicitly provide an `id`. Your `logEntry` object in `supplement.controller.ts` omits the `id` field.
 
-### 2.1 Update System Prompt (Line 980-987)
-Modify `handleChat` to pass the full local date to the AI:
-```typescript
-const userTimeStr = now.toLocaleTimeString('ru-RU', { 
-  hour: '2-digit', 
-  minute: '2-digit',
-  timeZone: timezone
-});
-const userDateStr = now.toLocaleDateString('ru-RU', { 
-  day: '2-digit', month: '2-digit', year: 'numeric',
-  timeZone: timezone
-});
+## REQUIRED SKILLS
+Использованные скиллы: `backend-api-design`
 
-let systemPrompt = `You are ${dbContext.profile.ai_name || 'Maya'}...
-Current User Local Date: ${userDateStr}
-Current User Local Time: ${userTimeStr}
-```
+## TASKS
 
-### 2.2 Fix `formatMealLogs` (Line 361)
-Add the `Today/Yesterday` label to each meal:
-```typescript
-function formatMealLogs(meals: any[] | null, timezone: string = "UTC"): string {
-  if (!meals || meals.length === 0) return "Сегодня пользователь ещё ничего не ел.";
-  
-  const now = new Date();
-  const todayDateStr = now.toLocaleDateString("en-CA", { timeZone: timezone }); // YYYY-MM-DD
+### 1. Fix Database Insert (`apps/api/src/ai/src/supplement/supplement.controller.ts`)
+In `logSupplement(req: Request, res: Response)`, append a randomly generated UUID to the `logEntry` payload.
 
-  return meals.map(m => {
-    const mealDate = new Date(m.logged_at);
-    const mealDateStr = mealDate.toLocaleDateString("en-CA", { timeZone: timezone });
-    const isToday = mealDateStr === todayDateStr;
-    const dayLabel = isToday ? "Сегодня" : "Вчера";
-    
-    const time = mealDate.toLocaleTimeString("ru-RU", {
-      hour: '2-digit', minute: '2-digit', timeZone: timezone
-    });
+**Steps:**
+1. Import Node's crypto at the top of the file: 
+   ```typescript
+   import crypto from "crypto";
+   ```
+2. Update the `logEntry` object around line 104 to include an explicit `id`:
+   ```typescript
+   const logEntry = {
+       id: crypto.randomUUID(),  // <--- ADD THIS LINE
+       user_id: userId,
+       supplement_name,
+       dosage_taken: dosage,
+       taken_at: taken_at_iso || new Date().toISOString(),
+       was_on_time: typeof was_on_time === "boolean" ? was_on_time : true,
+       source: source || "manual",
+   };
+   ```
 
-    let text = `- [${dayLabel}, ${time}]`;
-    // ... (rest of formatting logic)
-```
-
-### 2.3 Fix `formatTodayProgress` (Line 500)
-Ensure aggregation only includes items from the **current local calendar day**:
-1. First, filter `meals` to include only those where `toLocaleDateString("en-CA", { timeZone: timezone })` matches today's string.
-2. Only aggregate these filtered meals.
-
-## 3. Verification
-1. Log a meal today. 
-2. Wait for a meal from "Yesterday" to still be in the 24h window (if possible, or simulate).
-3. Ask AI: "Что я ел сегодня на завтрак?". 
-4. Verify it only lists today's breakfast and correctly identifies it.
-
-Использованные скиллы: [list of skill names from vitograph_skills.json]
+### 2. Verify Fix
+This one-line fix satisfies the `NOT NULL` constraint for the `id` column.
+Once implemented:
+1. Clicking the checkbox will succeed (HTTP 201).
+2. The checkbox will stay checked.
+3. Upon refresh, the `handleGetDiaryMacros` logic you previously implemented will successfully read the saved log and increment the daily micronutrients bar magically! 

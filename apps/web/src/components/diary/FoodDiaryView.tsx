@@ -342,7 +342,15 @@ export default function FoodDiaryView() {
           className="flex-1 overflow-y-auto bg-surface-subtle flex flex-col"
         >
           <div className="shrink-0 bg-white flex flex-col pt-1">
-            <DailyAllowancesPanel consumed={consumed} consumedMicros={consumedMicros} dynamicTarget={dynamicTarget} dynamicMicros={dynamicMicros} rationale={rationale} />
+            <DailyAllowancesPanel 
+              consumed={consumed} 
+              consumedMicros={consumedMicros} 
+              dynamicTarget={dynamicTarget} 
+              dynamicMicros={dynamicMicros} 
+              rationale={rationale} 
+              startIso={getTzDayBoundaries(selectedDate, userTimezone || "UTC").startIso}
+              endIso={getTzDayBoundaries(selectedDate, userTimezone || "UTC").endIso}
+            />
             <WaterTracker selectedDate={selectedDate} userTimezone={userTimezone} />
           </div>
 

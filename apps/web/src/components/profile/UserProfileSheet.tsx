@@ -17,6 +17,7 @@ import {
     Trash2,
     MapPin,
 } from "lucide-react";
+import SupplementChecklistWidget from "@/components/shared/SupplementChecklistWidget";
 
 const COMMON_TIMEZONES = [
     "UTC",
@@ -1170,6 +1171,9 @@ export default function UserProfileSheet({
                                                         <Plus size={16} />
                                                     </button>
                                                 </div>
+                                                
+                                                {/* Daily Supplements Checklist */}
+                                                <SupplementChecklistWidget variant="default" providedMeds={meds} />
                                             </div>
                                         </div>
                                     </TabsContent>

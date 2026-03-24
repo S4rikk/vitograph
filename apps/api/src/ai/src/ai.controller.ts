@@ -1986,6 +1986,40 @@ export async function handleDeleteAccount(
 /**
  * Aggregates daily macronutrients and micronutrients directly from the database for the diary counter.
  */
+function parseSupplementMicro(name: string): Record<string, number> {
+  const micros: Record<string, number> = {};
+  const lower = name.toLowerCase();
+  if (lower.includes("витамин d") || lower.includes("vitamin d")) {
+    const match = lower.match(/(?:\D|^)(\d+)\s*(iu|me|ме)/i);
+    micros["Витамин D"] = match ? parseInt(match[1], 10) / 40 : 50; 
+  }
+  if (lower.includes("витамин c") || lower.includes("vitamin c")) {
+    const match = lower.match(/(?:\D|^)(\d+)\s*(mg|мг)/i);
+    micros["Витамин C"] = match ? parseInt(match[1], 10) : 500;
+  }
+  if (lower.includes("магний") || lower.includes("magnesium")) {
+    const match = lower.match(/(?:\D|^)(\d+)\s*(mg|мг)/i);
+    micros["Магний"] = match ? parseInt(match[1], 10) : 400;
+  }
+  if (lower.includes("омега") || lower.includes("omega")) {
+    const match = lower.match(/(?:\D|^)(\d+)\s*(mg|мг)/i);
+    micros["Омега-3"] = match ? parseInt(match[1], 10) : 1000;
+  }
+  if (lower.includes("цинк") || lower.includes("zinc")) {
+    const match = lower.match(/(?:\D|^)(\d+)\s*(mg|мг)/i);
+    micros["Цинк"] = match ? parseInt(match[1], 10) : 15;
+  }
+  if (lower.includes("железо") || lower.includes("iron")) {
+    const match = lower.match(/(?:\D|^)(\d+)\s*(mg|мг)/i);
+    micros["Железо"] = match ? parseInt(match[1], 10) : 18;
+  }
+  if (lower.includes("b12")) {
+    const match = lower.match(/(?:\D|^)(\d+)\s*(mcg|мкг)/i);
+    micros["Витамин B12"] = match ? parseInt(match[1], 10) : 2.4;
+  }
+  return micros;
+}
+
 export async function handleGetDiaryMacros(
   req: Request,
   res: Response,
@@ -2036,6 +2070,13 @@ export async function handleGetDiaryMacros(
       return;
     }
 
+    const { data: recentSupps } = await supabase
+      .from("supplement_logs")
+      .select("supplement_name")
+      .eq("user_id", userId)
+      .gte("taken_at", startDate)
+      .lte("taken_at", endDate);
+
     let calories = 0, protein = 0, fat = 0, carbs = 0;
     const microsMap: Record<string, number> = {};
 
@@ -2055,6 +2096,16 @@ export async function handleGetDiaryMacros(
               microsMap[key] = (microsMap[key] || 0) + val;
             }
           }
+        }
+      }
+    }
+
+    if (recentSupps) {
+      for (const supp of recentSupps) {
+        if (!supp.supplement_name) continue;
+        const parsed = parseSupplementMicro(supp.supplement_name);
+        for (const [k, v] of Object.entries(parsed)) {
+          microsMap[k] = (microsMap[k] || 0) + v;
         }
       }
     }

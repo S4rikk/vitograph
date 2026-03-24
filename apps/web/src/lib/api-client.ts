@@ -320,6 +320,67 @@ class AiApiClient {
   }
 
   /**
+   * Fetches the user's active supplement protocol and today's logs.
+   */
+  async getTodaySupplements(startIso?: string, endIso?: string): Promise<{ activeProtocol: any, medications: string[], todayLogs: any[] }> {
+    const queryParams = new URLSearchParams();
+    if (startIso) queryParams.append("startDate", startIso);
+    if (endIso) queryParams.append("endDate", endIso);
+    const queryString = queryParams.toString() ? `?${queryParams.toString()}` : "";
+    
+    const token = await getAuthToken();
+    const url = `${this.baseUrl.replace('/ai', '/supplements')}/today${queryString}`;
+    const headers: HeadersInit = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(url, { method: "GET", headers });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.message || `API Error: ${res.status}`);
+    }
+    const json = await res.json();
+    return json;
+  }
+
+  /**
+   * Logs a supplement intake.
+   */
+  async logSupplement(data: { supplement_name: string, dosage: string, taken_at_iso?: string }): Promise<any> {
+    const token = await getAuthToken();
+    const url = `${this.baseUrl.replace('/ai', '/supplements')}/log`;
+    const headers: HeadersInit = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.message || `API Error: ${res.status}`);
+    }
+    const json = await res.json();
+    return json;
+  }
+
+  /**
+   * Deletes a specific supplement log by ID.
+   */
+  async deleteSupplementLog(id: string): Promise<void> {
+    const token = await getAuthToken();
+    const url = `${this.baseUrl.replace('/ai', '/supplements')}/log/${encodeURIComponent(id)}`;
+    const headers: HeadersInit = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(url, { method: 'DELETE', headers });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.message || `API Error: ${res.status}`);
+    }
+  }
+
+  /**
    * Fetches deterministic personalized nutrition targets based on profile and active diagnoses.
    */
   async getNutritionTargets(): Promise<any> {
