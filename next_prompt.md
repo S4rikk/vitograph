@@ -1,36 +1,42 @@
-# VITOGRAPH: TECHNICAL TASK (Phase 56 v8 - ATOMIC MACRO SYNC)
-# Objectives: Fix Double-Scaling Bug + Atomic Sync
+# VITOGRAPH: TECHNICAL TASK (Phase 58 v3 - ASSISTANT CHAT UX)
+# Objectives: Auto-expanding Textarea for Assistant Chat
 
-## 1. Context: The "Double-Scaling" Bug
-In v7, when updating weight (e.g., 40g -> 80g), the code used a global regex that:
-1. Replaced "0г" (protein) with "80г" (new total weight).
-2. Then multiplied that "80г" by the ratio (2), resulting in "160г".
-This is WRONG. Honey should not have 160g of protein.
+## 1. Context: Parity with Food Diary 
+The Food Diary chat input now correctly expands as a textarea. We must apply the EXACT same logic to the **Main Assistant Chat** (`AiAssistantView.tsx`) to ensure a consistent experience.
 
-## 2. Technical Task - BACKEND (`ai.controller.ts`)
+## 2. Technical Task - WEB (`AiAssistantView.tsx`)
 
-### 2.1 handleUpdateMealLog (Sync Logic)
-**STOP using `.replace()` with multipliers on existing numbers.**
-Instead, use **Atomic Reconstruction**:
-
-1. **Get New Totals**: You already have `updatedMacros` (calories, protein, fat, carbs) and `updatedMicros`.
-2. **Rebuild the String**: Construct the exact "Записал..." line:
-   ```ts
-   const newMacroLine = `Записал ${Math.round(new_weight_g)}г ${log.meal_items[0].food_name}: ${Math.round(updatedMacros.total_calories)} ккал, ${updatedMacros.total_protein.toFixed(1)}г белков, ${updatedMacros.total_fat.toFixed(1)}г жиров, ${updatedMacros.total_carbs.toFixed(1)}г углеводов`;
+### 2.1 Textarea Transformation
+1. **Locate the Input**: In `AiAssistantView.tsx`, find the `input type="text"` around line 417.
+2. **Replace with Textarea**:
+   Swap it for a `<textarea />` with the following attributes:
+   ```tsx
+   <textarea
+     value={input}
+     onChange={(e) => setInput(e.target.value)}
+     disabled={isLoading}
+     placeholder="Задайте вопрос о здоровье..."
+     rows={1}
+     style={{ fieldSizing: "content" } as any}
+     onKeyDown={(e) => {
+       if (e.key === "Enter" && !e.shiftKey) {
+         e.preventDefault();
+         handleSubmit(e);
+       }
+     }}
+     className="flex-1 rounded-xl border-cloud-dark bg-white px-4 py-3 text-[15px] text-ink shadow-sm transition-all focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 max-h-[150px] min-h-[44px] overflow-y-auto resize-none"
+   />
    ```
-3. **Replace the Block**:
-   - Use one regex to find the ENTIRE block from "Записал" to "углеводов" and replace it with `newMacroLine`.
-   - **Micros**: Similarly, rebuild the micronutrient tags from scratch using the `updatedMicros` object.
+3. **No UI Changes**: Do NOT add any new buttons (camera, gallery, etc.). The Assistant Chat remains text-only. Only the input field type changes.
 
-## 3. Technical Task - FRONTEND (`FoodDiaryView.tsx`)
+### 2.2 Layout & Scroll
+- Verify that when the textarea expands, the chat history scrolls to the bottom properly (existing `ResizeObserver` or `useEffect` should handle this, but double check).
 
-### 3.1 handleUpdateWeight
-- Remove the local regex scaling `newContent.replace(...)`.
-- Instead, after `apiClient.updateMealLog` succeeds, just call `getChatHistory` for that day to get the perfectly synced text from the server. (It's safer than trying to mock the complex reconstruction on the client).
+---
 
-## 4. Verification
-1. Log Honey (40g).
-2. Edit to 100g.
-3. **F5 (Refresh)**. Verify: Calories ~305, Protein 0g, Fat 0g, Carbs ~85g. (No crazy 160g values).
+## 3. Verification
+1. Open Assistant Chat.
+2. Type long text (2+ lines). Verify it grows.
+3. Verify "Enter" sends and "Shift + Enter" creates a newline.
 
 Использованные скиллы: [list of skill names from vitograph_skills.json]

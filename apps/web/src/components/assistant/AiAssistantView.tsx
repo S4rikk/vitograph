@@ -175,6 +175,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   
   // Use state for threadId so it survives renders but can be synced
   const [threadId, setThreadId] = useState<string>("");
@@ -244,9 +245,21 @@ export default function AiAssistantView({ userId }: { userId: string }) {
   // We no longer do this manually. The backend saves messages directly into ai_chat_messages
   // during the POST /chat request.
 
-  // 3. Auto-scroll to bottom of chat
+  // 3. Auto-scroll to bottom of chat when messages change or container resizes
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = scrollRef.current;
+    if (!el) return;
+
+    // Scroll to bottom
+    el.scrollTop = el.scrollHeight;
+
+    // Also scroll when the container itself resizes (e.g. input expands)
+    const resizeObserver = new ResizeObserver(() => {
+      el.scrollTop = el.scrollHeight;
+    });
+
+    resizeObserver.observe(el);
+    return () => resizeObserver.disconnect();
   }, [messages]);
 
   // Handle the actual chat submission logic (separated so it can be called programmatically)
@@ -355,7 +368,10 @@ export default function AiAssistantView({ userId }: { userId: string }) {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4">
+      <div 
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4"
+      >
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -413,19 +429,26 @@ export default function AiAssistantView({ userId }: { userId: string }) {
 
       {/* Input Area */}
       <div className="border-t border-cloud p-3 sm:p-6 bg-cloud-light/30">
-        <form onSubmit={handleSubmit} className="flex space-x-3">
-          <input
-            type="text"
+        <form onSubmit={handleSubmit} className="flex space-x-3 items-end">
+          <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={isLoading}
             placeholder="Задайте вопрос о здоровье..."
-            className="flex-1 rounded-xl border-cloud-dark bg-white px-4 py-3 text-[15px] text-ink shadow-sm transition-all focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50"
+            rows={1}
+            style={{ fieldSizing: "content" } as any}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit(e);
+              }
+            }}
+            className="flex-1 rounded-xl border-cloud-dark bg-white px-4 py-3 text-[15px] text-ink shadow-sm transition-all focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 max-h-[150px] min-h-[44px] overflow-y-auto resize-none"
           />
           <button
             type="submit"
             disabled={isLoading || !input.trim()}
-            className="inline-flex items-center justify-center rounded-xl bg-primary-600 px-3 sm:px-5 py-3 text-[15px] font-semibold text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-cloud-dark disabled:text-ink-muted disabled:shadow-none"
+            className="inline-flex items-center justify-center rounded-xl bg-primary-600 px-3 sm:px-5 py-3 text-[15px] font-semibold text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-cloud-dark disabled:text-ink-muted disabled:shadow-none min-h-[44px]"
           >
             <span className="hidden sm:inline">Отправить</span>
             <svg className="w-5 h-5 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">

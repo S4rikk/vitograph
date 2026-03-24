@@ -31,7 +31,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
   const [weight, setWeight] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [photoResult, setPhotoResult] = useState<FoodRecognitionResult | null>(null);
-  const nameRef = useRef<HTMLInputElement>(null);
+  const nameRef = useRef<HTMLTextAreaElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const [showPhotoMenu, setShowPhotoMenu] = useState(false);
@@ -207,14 +207,21 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
             aria-hidden="true"
           />
           <div className="relative">
-            <input
+            <textarea
               ref={nameRef}
               id="food-name"
-              type="text"
               placeholder="Овсянка"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-border bg-surface-muted px-3 py-2 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit(e);
+                }
+              }}
+              rows={1}
+              style={{ fieldSizing: "content" } as any}
+              className="w-full rounded-lg border border-border bg-surface-muted px-3 py-2 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100 max-h-[150px] min-h-[44px] overflow-y-auto resize-none"
             />
           </div>
         </div>

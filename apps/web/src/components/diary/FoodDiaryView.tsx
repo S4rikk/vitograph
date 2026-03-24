@@ -170,12 +170,21 @@ export default function FoodDiaryView() {
     return () => window.removeEventListener("profile-updated", handler);
   }, [fetchMacrosForDate, selectedDate, supabase]);
 
-  /* Auto scroll to bottom when new messages arrive */
+  /* Auto scroll to bottom when new messages arrive or container resizes (e.g. input expands) */
   useEffect(() => {
     const el = scrollRef.current;
-    if (el) {
+    if (!el) return;
+
+    // Scroll when messages change
+    el.scrollTop = el.scrollHeight;
+
+    // Also scroll when the container itself resizes
+    const resizeObserver = new ResizeObserver(() => {
       el.scrollTop = el.scrollHeight;
-    }
+    });
+
+    resizeObserver.observe(el);
+    return () => resizeObserver.disconnect();
   }, [messages]);
 
   const handleSubmit = useCallback((name: string, weight: number, nutritionalContext?: any) => {
