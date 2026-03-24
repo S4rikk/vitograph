@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { apiClient } from "@/lib/api-client";
 
 interface Props {
-  variant?: "default" | "compact";
+  variant?: "default" | "compact" | "mobileStrip";
   providedMeds?: string[];
   startIso?: string;
   endIso?: string;
@@ -146,6 +146,60 @@ export default function SupplementChecklistWidget({
           })}
         </div>
       </>
+    );
+  }
+
+  if (variant === "mobileStrip") {
+    if (isLoading && meds.length === 0) {
+      return (
+        <div className="w-full flex flex-col gap-2">
+          <h4 className="text-[11px] font-bold text-ink-muted uppercase tracking-wider px-1">Добавки на сегодня</h4>
+          <div className="grid grid-cols-2 gap-2 px-1 pb-1">
+            <div className="w-full h-6 bg-surface-muted rounded-full animate-pulse"></div>
+            <div className="w-full h-6 bg-surface-muted rounded-full animate-pulse"></div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="w-full flex flex-col gap-2">
+         <h4 className="text-[11px] font-bold text-ink-muted uppercase tracking-wider px-1">Добавки на сегодня</h4>
+         <div className="grid grid-cols-2 gap-2 px-1 pb-1">
+           {meds.map((med, i) => {
+             const matchedLog = todaySuppLogs.find((log) => log.supplement_name === med);
+             const isChecked = !!matchedLog;
+
+             return (
+               <label
+                 key={`supp-${i}`}
+                 className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold tracking-tight transition-all cursor-pointer border select-none w-full ${
+                   isChecked 
+                     ? "bg-primary-50 text-primary-800 border-primary-200 shadow-sm ring-1 ring-primary-100" 
+                     : "bg-surface-subtle text-ink-muted border-divider hover:bg-surface-base hover:border-border"
+                 }`}
+               >
+                 <input
+                   type="checkbox"
+                   className="sr-only"
+                   checked={isChecked}
+                   onChange={() => handleToggle(med, isChecked, matchedLog)}
+                 />
+                 <div className={`w-3 h-3 rounded-full flex items-center justify-center transition-colors shrink-0 ${
+                   isChecked ? "bg-primary-500" : "bg-white border border-ink-faint"
+                 }`}>
+                   {isChecked && (
+                     <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
+                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                     </svg>
+                   )}
+                 </div>
+                 <span className="truncate min-w-0" title={med}>{med}</span>
+               </label>
+             );
+           })}
+         </div>
+      </div>
     );
   }
 

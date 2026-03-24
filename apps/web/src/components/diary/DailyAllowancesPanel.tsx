@@ -254,7 +254,7 @@ export default function DailyAllowancesPanel({
             </div>
           </div>
 
-          <div className="flex-1 ml-4 flex justify-end h-full">
+          <div className="hidden sm:flex flex-1 ml-4 justify-end h-full">
             <SupplementChecklistWidget variant="compact" startIso={startIso} endIso={endIso} />
           </div>
         </div>
@@ -285,6 +285,13 @@ export default function DailyAllowancesPanel({
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* ── Mobile Supplements Block ────────────────────────────────── */}
+      <div className="sm:hidden w-full px-1 mb-3.5">
+        <div className="bg-white rounded-[20px] shadow-sm border border-border p-3.5">
+          <SupplementChecklistWidget variant="mobileStrip" startIso={startIso} endIso={endIso} />
         </div>
       </div>
 

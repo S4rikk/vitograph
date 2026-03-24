@@ -1,48 +1,58 @@
-# TECHNICAL TASK (PROMPT) FOR THE CODER - WATER BAR RELOCATION
+# TECHNICAL TASK (PROMPT) FOR THE CODER - MOBILE SUPPLEMENTS UI
 
 ## CONTEXT
-The user has requested to move the "Water Bar" (`WaterTracker.tsx`) from the top of the Diary view (where it scrolls away) down into the chat field, making it sticky at the very bottom right above the text input.
-
-"Бар воды перенеси в чат в самый низ, пусть он будет приклеен внизу в поле чата."
+The newly designed "Pill" checklist looks amazing, but on small mobile screens, the pills squeeze into the left side and overlap the "Calories for the day" (Калории за день) circle, breaking the layout. The user explicitly requested:
+"В мобильной версии БАДы нужно в отдельную плашку между КБЖУ и микронутриентами." (In the mobile version, Supplements need to be in a separate box between the Macros and Micronutrients).
 
 ## REQUIRED SKILLS
-Использованные скиллы: `react-components`, `css-architecture`
+Использованные скиллы: `react-components`, `css-architecture`, `mobile-first-design`
 
 ## TASKS
 
-### 1. Relocate `<WaterTracker>` in `FoodDiaryView.tsx`
-- **Remove** `<WaterTracker selectedDate={selectedDate} userTimezone={userTimezone} />` from line ~354 (where it sits below `DailyAllowancesPanel`).
-- **Move** it down to the `Input` section (around line 380), placing it *inside* the `sticky bottom-0` container but *above* the `FoodInputForm`.
+### 1. Update `SupplementChecklistWidget.tsx` with a Mobile Variant
+Open `apps/web/src/components/shared/SupplementChecklistWidget.tsx`.
+- Update the `Props` interface to allow the new variant: `variant?: "default" | "compact" | "mobileStrip";`
+- Below the `compact` variant return block, add the rendering logic for the new `mobileStrip` variant.
+- The `mobileStrip` variant should wrap pills downwards in two columns (`grid grid-cols-2 gap-2 pb-1`).
+  ```tsx
+  if (variant === "mobileStrip") {
+    // If loading or empty, return null or skeletons matching the 2-column layout
+    return (
+      <div className="w-full flex flex-col gap-2">
+         <h4 className="text-[11px] font-bold text-ink-muted uppercase tracking-wider px-1">Добавки на сегодня</h4>
+         <div className="grid grid-cols-2 gap-2 px-1 pb-1">
+             {/* Map through meds yielding the same pill buttons as 'compact', but with full width in their grid cell */}
+             {meds.map(med => { ... (copy pill design here, ensure the span has 'truncate' so long text doesn't overflow) ... })}
+         </div>
+      </div>
+    );
+  }
+  ```
+- **Important for the Pill in `mobileStrip`:** Ensure the label has `w-full` and its inner text span has `truncate` so that very long supplement names don't break the 2-column grid layout.
 
-**Current Structure:**
+### 2. Update `DailyAllowancesPanel.tsx` Layout
+Open `apps/web/src/components/diary/DailyAllowancesPanel.tsx`.
+
+**A. Hide the top-right widget on mobile:**
+Find the container holding the `compact` variant (around line 257):
 ```tsx
-<div className="sticky bottom-0 z-20 border-t border-border p-3 bg-white/80 backdrop-blur-md pb-[safe-area-inset-bottom]">
-  <FoodInputForm onSubmit={handleSubmit} />
+<div className="flex-1 ml-4 flex justify-end h-full">
+  <SupplementChecklistWidget variant="compact" startIso={startIso} endIso={endIso} />
 </div>
 ```
+Change the class to: `className="hidden sm:flex flex-1 ml-4 justify-end h-full"`
 
-**New Structure:**
+**B. Insert the new dedicated mobile strip:**
+Find the space *between* the end of the BJU Block and the start of the Micronutrients Expansion Panel (around line 290).
+Add this code:
 ```tsx
-<div className="sticky bottom-0 z-20 flex flex-col bg-white/80 backdrop-blur-md pb-[safe-area-inset-bottom]">
-  {/* Move border-t here and adjust padding so they stack flush */}
-  <div className="w-full border-t border-border">
-    <WaterTracker selectedDate={selectedDate} userTimezone={userTimezone} />
-  </div>
-  <div className="p-3 w-full border-t border-surface-muted">
-    <FoodInputForm onSubmit={handleSubmit} />
+{/* ── Mobile Supplements Block ────────────────────────────────── */}
+<div className="sm:hidden w-full px-1 mb-3.5">
+  <div className="bg-white rounded-[20px] shadow-sm border border-border p-3.5">
+    <SupplementChecklistWidget variant="mobileStrip" startIso={startIso} endIso={endIso} />
   </div>
 </div>
 ```
-
-### 2. Update CSS in `WaterTracker.tsx`
-Since it's no longer a standalone block with a bottom border, we need to adjust its styling so it blends natively into the sticky footer.
-- Open `apps/web/src/components/diary/WaterTracker.tsx`.
-- Change its root container classes (around line 98).
-**Old:** `className="bg-white border-b border-border px-4 py-2.5 flex items-center justify-between"`
-**New:** `className="bg-transparent px-4 py-2.5 flex items-center justify-between w-full"` (We removed `bg-white` and `border-b` because the sticky parent handles the background and borders now).
-- Change the loading skeleton state in `WaterTracker.tsx` (around line 89).
-**Old:** `className="bg-white border-b border-border p-4 flex items-center justify-center h-16"`
-**New:** `className="w-full bg-transparent px-4 py-2.5 flex items-center justify-center"`
 
 ### AUDIT
-Test visually in the browser. The Water Bar should now float perfectly above the input form, staying stuck to the bottom of the screen regardless of how many chat messages exist. It should NOT have double borders separating it from the chat.
+- Test the layout on a resized desktop window (Mobile view). The overlapping pills at the top should vanish, replaced by a beautiful, scrolling "Добавки на сегодня" strip sitting directly between the Macro cards and the Micronutrients box. On large screens, it should seamlessly swap back to the top-right pills.
