@@ -361,12 +361,20 @@ function formatTestResults(tests: any[] | null, timezone: string = "UTC"): strin
 function formatMealLogs(meals: any[] | null, timezone: string = "UTC"): string {
   if (!meals || meals.length === 0) return "Сегодня пользователь ещё ничего не ел.";
 
+  const now = new Date();
+  const todayDateStr = now.toLocaleDateString("en-CA", { timeZone: timezone });
+
   return meals.map(m => {
-    const time = new Date(m.logged_at).toLocaleTimeString("ru-RU", {
+    const mealDate = new Date(m.logged_at);
+    const mealDateStr = mealDate.toLocaleDateString("en-CA", { timeZone: timezone });
+    const isToday = mealDateStr === todayDateStr;
+    const dayLabel = isToday ? "Сегодня" : "Вчера";
+
+    const time = mealDate.toLocaleTimeString("ru-RU", {
       hour: '2-digit', minute: '2-digit', timeZone: timezone
     });
 
-    let text = `- [${time}]`;
+    let text = `- [${dayLabel}, ${time}]`;
     let mTotalCal = 0, mTotalP = 0, mTotalF = 0, mTotalC = 0;
 
     if (m.meal_items && Array.isArray(m.meal_items) && m.meal_items.length > 0) {
@@ -497,13 +505,23 @@ function formatNutritionTargets(profile: any, activeKnowledgeBases: any[] | null
 /**
  * Aggregates today's consumed nutrients from meal_logs into a summary for deficit calculation.
  */
-function formatTodayProgress(meals: any[] | null): string {
+function formatTodayProgress(meals: any[] | null, timezone: string = "UTC"): string {
   if (!meals || meals.length === 0) return "Сегодня пользователь ещё ничего не ел.";
+
+  const now = new Date();
+  const todayDateStr = now.toLocaleDateString("en-CA", { timeZone: timezone });
+
+  const todayMeals = (meals || []).filter(m => {
+    const mealDate = new Date(m.logged_at);
+    return mealDate.toLocaleDateString("en-CA", { timeZone: timezone }) === todayDateStr;
+  });
+
+  if (todayMeals.length === 0) return "Сегодня пользователь ещё ничего не ел.";
 
   let totalCal = 0, totalP = 0, totalF = 0, totalC = 0;
   const microTotals: Record<string, number> = {};
 
-  for (const m of meals) {
+  for (const m of todayMeals) {
     totalCal += m.total_calories || 0;
     if (m.meal_items && Array.isArray(m.meal_items)) {
       for (const i of m.meal_items) {
@@ -982,8 +1000,13 @@ export async function handleChat(
             minute: '2-digit',
             timeZone: timezone
           });
+          const userDateStr = now.toLocaleDateString('ru-RU', { 
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            timeZone: timezone
+          });
 
           let systemPrompt = `You are ${dbContext.profile.ai_name || 'Maya'}, a senior medical expert and supportive health companion. 
+Current User Local Date: ${userDateStr}
 Current User Local Time: ${userTimeStr}
 
 ### FOOD LOGGING (CRITICAL)
@@ -1044,7 +1067,7 @@ ${formatNutritionTargets(dbContext.profile, dbContext.activeKnowledgeBases)}
 
 #### 🍽️ RECENT MEALS (LAST 24H)
 Агрегированный итог:
-${formatTodayProgress(dbContext.recentMeals)}
+${formatTodayProgress(dbContext.recentMeals, timezone)}
 
 Детальный лог приёмов пищи:
 ${formatMealLogs(dbContext.recentMeals, timezone)}
@@ -1083,7 +1106,7 @@ ${formatNutritionTargets(dbContext.profile, dbContext.activeKnowledgeBases)}
 
 #### 🍽️ RECENT MEALS (LAST 24H)
 Агрегированный итог:
-${formatTodayProgress(dbContext.recentMeals)}
+${formatTodayProgress(dbContext.recentMeals, timezone)}
 
 Детальный лог приёмов пищи:
 ${formatMealLogs(dbContext.recentMeals, timezone)}
