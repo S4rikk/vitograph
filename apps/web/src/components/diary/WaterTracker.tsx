@@ -86,7 +86,7 @@ export default function WaterTracker({ selectedDate, userTimezone }: WaterTracke
 
   if (isLoading) {
     return (
-      <div className="bg-white border-b border-border p-4 flex items-center justify-center h-16">
+      <div className="w-full bg-transparent px-4 py-2.5 flex items-center justify-center">
         <div className="animate-pulse w-32 h-4 bg-surface-muted rounded"></div>
       </div>
     );
@@ -95,7 +95,7 @@ export default function WaterTracker({ selectedDate, userTimezone }: WaterTracke
   const isFull = glasses >= targetGlasses;
 
   return (
-    <div className="bg-white border-b border-border px-4 py-2.5 flex items-center justify-between">
+    <div className="bg-transparent px-4 py-2.5 flex items-center justify-between w-full">
       <div className="flex items-center gap-2">
         <span className="text-[1.1rem]">💧</span>
         <div>

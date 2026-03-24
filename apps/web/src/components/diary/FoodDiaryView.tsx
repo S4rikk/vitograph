@@ -351,7 +351,6 @@ export default function FoodDiaryView() {
               startIso={getTzDayBoundaries(selectedDate, userTimezone || "UTC").startIso}
               endIso={getTzDayBoundaries(selectedDate, userTimezone || "UTC").endIso}
             />
-            <WaterTracker selectedDate={selectedDate} userTimezone={userTimezone} />
           </div>
 
           {/* ── Messages ──────────────────────────────────────── */}
@@ -377,8 +376,13 @@ export default function FoodDiaryView() {
         </div>
 
         {/* ── Input ─────────────────────────────────────────── */}
-        <div className="sticky bottom-0 z-20 border-t border-border p-3 bg-white/80 backdrop-blur-md pb-[safe-area-inset-bottom]">
-          <FoodInputForm onSubmit={handleSubmit} />
+        <div className="sticky bottom-0 z-20 flex flex-col bg-white/80 backdrop-blur-md pb-[safe-area-inset-bottom]">
+          <div className="w-full border-t border-border">
+            <WaterTracker selectedDate={selectedDate} userTimezone={userTimezone} />
+          </div>
+          <div className="p-3 w-full border-t border-surface-muted">
+            <FoodInputForm onSubmit={handleSubmit} />
+          </div>
         </div>
       </div>
 
