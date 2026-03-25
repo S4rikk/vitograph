@@ -20,7 +20,7 @@ type ChatMessageProps = {
 function parseNutrientTags(text: string) {
   if (!text) return text;
 
-  const combinedRegex = /(<nut[a-z]*\s+[^>]*type=["']([^"']*)["'][^>]*>([\s\S]*?)<\/nut[a-z]*>)|(<meal_score\s+score="([^"]*)"(?:\s+reason="([^"]*)")?\s*\/>)/gi;
+  const combinedRegex = /(<nut[a-z]*\s+[^>]*type[a-z]*=["']([^"']*)["'][^>]*>([\s\S]*?)<\/nut[a-z]*>)|(<meal_score\s+score="([^"]*)"(?:\s+reason="([^"]*)")?\s*\/>)/gi;
   const result: React.ReactNode[] = [];
   let lastIndex = 0;
   let match;

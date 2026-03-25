@@ -82,7 +82,7 @@ const AssistantMessageContent = ({ content }: { content: string }) => {
   processed = processed.replace(/<meal_score[^>]*\/>/gi, '');
 
   // Strip micro-nutrient tags (Diary-only data for FoodCard)
-  processed = processed.replace(/<nut[a-z]*\s+[^>]*type=["']micro["'][^>]*>[\s\S]*?<\/nut[a-z]*>/gi, '');
+  processed = processed.replace(/<nut[a-z]*\s+[^>]*type[a-z]*=["']micro["'][^>]*>[\s\S]*?<\/nut[a-z]*>/gi, '');
 
   // Strip image placeholders [Image of ...]
   processed = processed.replace(/\[(?:Image|Graphic|Photo|Illustration)\s+of\s+[^\]]+\]/gi, '');
@@ -102,7 +102,7 @@ const AssistantMessageContent = ({ content }: { content: string }) => {
   if (processed.includes("SUCCESS") && processed.length < 50) return null;
 
   const fragments: React.ReactNode[] = [];
-  const nutrRegex = /<nut[a-z]*\s+[^>]*?type=['"]*([^'"]+?)['"]*[^>]*?>([\s\S]*?)<\/nut[a-z]*>/gi;
+  const nutrRegex = /<nut[a-z]*\s+[^>]*?type[a-z]*=['"]*([^'"]+?)['"]*[^>]*?>([\s\S]*?)<\/nut[a-z]*>/gi;
 
   const allMatches: { index: number; length: number; component: React.ReactNode }[] = [];
   let match;
