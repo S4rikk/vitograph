@@ -79,7 +79,7 @@ const AssistantMessageContent = ({ content }: { content: string }) => {
   processed = processed.replace(/Записал\s+[\d.,]+\s*[гg]\s+[^:]+:\s*[\d.,]+\s*ккал[^\n]*/gi, '');
 
   // Strip <meal_score> tags entirely (Diary-only feature)
-  processed = processed.replace(/<meal_score[^>]*\/>/gi, '');
+  processed = processed.replace(/<meal_score\s+[\s\S]*?\/>/gi, '');
 
   // Strip micro-nutrient tags (Diary-only data for FoodCard)
   processed = processed.replace(/<nut[a-z]*\s+[^>]*type[a-z]*=["']micro["'][^>]*>[\s\S]*?<\/nut[a-z]*>/gi, '');

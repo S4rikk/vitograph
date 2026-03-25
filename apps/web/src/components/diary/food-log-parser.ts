@@ -42,14 +42,14 @@ export function detectAndParseFoodLog(text: string, time: string): ParsedFoodLog
 
     let score = 0;
     let scoreReason = undefined;
-    const scoreMatch = /<meal_score\s+score="([^"]+)"(?:\s+reason="([^"]*)")?\s*\/>/i.exec(text);
+    const scoreMatch = /<meal_score\s+score="([^"]+)"(?:\s+reason="([\s\S]*?)")?\s*\/>/i.exec(text);
     if (scoreMatch) {
        score = parseInt(scoreMatch[1], 10) || 0;
        scoreReason = scoreMatch[2];
     }
 
     const micros: {name: string, value: string, type: string}[] = [];
-    const nutrRegex = /<nut[a-z]*\s+[^>]*type=["']([^"']*)["'][^>]*>([\s\S]*?)<\/nut[a-z]*>/gi;
+    const nutrRegex = /<nut[a-z]*\s+[^>]*type[a-z]*=["']([^"']*)["'][^>]*>([\s\S]*?)<\/nut[a-z]*>/gi;
     let match;
     while ((match = nutrRegex.exec(text)) !== null) {
       const type = match[1];
@@ -71,10 +71,10 @@ export function detectAndParseFoodLog(text: string, time: string): ParsedFoodLog
 
     let comment = text
       .replace(macroRegex, '')
-      .replace(/<meal_score[^>]*\/>/gi, '')
+      .replace(/<meal_score\s+[\s\S]*?\/>/gi, '')
       .replace(/<meal_id[^>]*\/>/gi, '')
       // Remove ONLY technical micro tags (for card) but preserve marker tags for highlights
-      .replace(/<nut[a-z]*\s+[^>]*type=["']micro["'][^>]*>.*?<\/nut[a-z]*>/gi, '')
+      .replace(/<nut[a-z]*\s+[^>]*type[a-z]*=["']micro["'][^>]*>[\s\S]*?<\/nut[a-z]*>/gi, '')
       .trim();
     
     comment = comment.replace(/^[\s,.]+/, '').replace(/[\s,.]+$/, '').trim();

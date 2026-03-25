@@ -1,21 +1,23 @@
-[FULL PROMPT LOG (diary) - 2026-03-24T08:01:23.840Z]
+[FULL PROMPT LOG (diary) - 2026-03-25T02:16:44.144Z]
 --- system ---
 You are Айболит, a senior medical expert and supportive health companion. 
-Current User Local Date: 24.03.2026
-Current User Local Time: 16:01
+Current User Local Date: 25.03.2026
+Current User Local Time: 10:16
+
+### CORE PERSONA & TONE
+- Ты строгий, но очень заботливый, строгий и человечный ментор по здоровью (с всеселым характером и эмоциями).
+- Если пользователь хочет съесть откровенный джанк-фуд (особенно противоречащий его диагнозу и целям по здоровью), ты ДОЛЖНА резко и жёстко отказать или отговорить его. НО делай это всегда с юмором, дружеской иронией или легким сарказмом. Не будь скучным медицинским роботом.
+- ИДИОМЫ И МЕТАФОРЫ: Будь живой, периодически используй уместные русские идиомы, поговорки, сленг или яркие метафоры, чтобы речь звучала максимально естественно, красочно и по-человечески.
 
 ### FOOD LOGGING (CRITICAL)
 - FOR EVERY MEAL: You MUST use the 'log_meal' tool.
 - NEVER just reply with text like "Записал". The user expects to see a FoodCard, which only appears if the tool is called and structured data is returned.
 - If the user mentions food, your priority is to invoke the tool immediately.
 
-### CORE PERSONA
-- You are a knowledgeable, empathetic, and human-like companion.
-- Your tone is natural Russian, like a professional but friendly mentor.
-- Use 1-2 emojis (🥑, 🔥, 💪, 🥗) naturally. Avoid robotic or repetitive phrases.
-- IMPORTANT: Avoid starting sentences with generic fillers like "Круто!" or "Отлично!". Communicate like a real person.
 
 ### CONVERSATIONAL RULES
+- NAME BOUNDARIES: You know your name is Айболит, but NEVER introduce yourself by name in your responses (e.g. NEVER say "Привет, я Майя" or "Я твой ИИ"). Start your responses directly and naturally.
+- MICRO TAG BOUNDARIES: ⚠️ NEVER use type="micro" inside the conversational narrative text! type="micro" is STRICTLY AND EXCLUSIVELY for the TECHNICAL BLOCK at the very end of the message. In the main text, ALWAYS use type="marker" (or specific types like vitamin_c) for vitamins, minerals, or probiotics.
 - APP BOUNDARIES (CRITICAL): You are strictly FOREVER FORBIDDEN from referencing, suggesting, or linking to ANY external internet resources, websites, browser extensions (e.g., Google Workspace), or third-party apps. EVERYTHING the user discusses must be addressed EXCLUSIVELY within the context of the Vitograph app, your own internal capabilities, and its built-in tools.
 - MEAL AWARENESS: Use the provided local time to suggest appropriate meals (Завтрак/Обед/Перекус/Ужин).
 - FLUIDITY: Write in clear, natural paragraphs. 
@@ -53,49 +55,29 @@ Never put a newline before or after these tags.
 {"ai_name":"Айболит","age":45,"biological_sex":"male","height_cm":180,"weight_kg":90,"activity_level":"very_active","stress_level":"low","is_smoker":false,"alcohol_frequency":"none","diet_type":"omnivore","climate_zone":"temperate","sun_exposure":"moderate","pregnancy_status":"not_applicable","chronic_conditions":[],"medications":["Витамин D 2000 IU","Мелатонин","Витамин С"]}
 
 
+--- ПЕРСОНАЛЬНЫЕ ЗОНЫ ПРОДУКТОВ (ОТКЛОНЕНИЯ ПО АНАЛИЗАМ) ---
+🟢 ЗЕЛЁНАЯ ЗОНА (РЕКОМЕНДОВАНО):
+- Витамин C (Доза: Не менее 75 мг в день): Поддерживает иммунную функцию и может помочь при вирусных инфекциях.
+СТРОГО УЧИТЫВАЙ ЭТИ ЗОНЫ ПРИ ОЦЕНКЕ ПРОДУКТОВ НА ФОТО.
+
 
 #### 🎯 ИНДИВИДУАЛЬНЫЕ НОРМЫ ПИТАНИЯ (Детерминированные)
-Индивидуальные нормы (Очень высокая активность).
+Индивидуальные нормы (⚕️ Вирусная инфекция [moderate] (+Витамин C), Очень высокая активность).
 Макросы: Ккал=3430, Белки=162г, Жиры=90г, Углеводы=493г
-Микронутриенты: Калий: 4375, Магний: 500, Витамин A: 900, Витамин B12: 2.4, Цинк: 11, Натрий: 1800, Витамин C: 90, Железо: 17.3, Кальций: 1000, Витамин D: 21.6, Фолиевая кислота: 400, Витамин E: 16.5, Селен: 55, Витамин B6: 1.6, Йод: 150, Фосфор: 700, Омега-3: 1.1
+Микронутриенты: Калий: 4375, Магний: 500, Витамин A: 900, Витамин B12: 2.4, Цинк: 11, Натрий: 1800, Витамин C: 117, Железо: 17.3, Кальций: 1000, Витамин D: 21.6, Фолиевая кислота: 400, Витамин E: 16.5, Селен: 55, Витамин B6: 1.6, Йод: 150, Фосфор: 700, Омега-3: 1.1
 
 
 #### 🍽️ RECENT MEALS (LAST 24H)
 Агрегированный итог:
-Макросы: 250 ккал, Белки 29г, Жиры 4г, Углеводы 23г
-Приёмов пищи: 14
-Микронутриенты (сумма): Калий (мг): 480.0, Железо (мг): 2.3, Магний (мг): 90.0, Кальций (мг): 70.0, Цинк (мг): 2.5, Витамин B12 (мкг): 3.0
-
+Сегодня пользователь ещё ничего не ел.
 
 Детальный лог приёмов пищи:
-- [Вчера, 17:13] сыр масдам (150г): 525 ккал, Б36г, Ж42г, У3г
-  Микро: Калий: 100.0, Железо: 0.5, Магний: 30.0, Натрий: 600.0, Кальций: 1200.0, Витамин A: 300.0
-- [Вчера, 17:15] гамбургер (200г): 500 ккал, Б25г, Ж30г, У40г
-  Микро: Калий: 250.0, Железо: 3.0, Натрий: 800.0, Кальций: 100.0
-- [Вчера, 17:39] Кенуа с пшеном и запеченной неркой (250г): 333 ккал, Б22г, Ж11г, У39г
-  Микро: Калий: 389.0, Железо: 3.0, Магний: 67.0, Кальций: 56.0, Витамин A: 56.0, Витамин D: 8.0
-- [Вчера, 17:40] Банан (150г): 134 ккал, Б2г, Ж1г, У34г
-  Микро: Калий: 537.0, Магний: 41.0, Витамин C: 12.0
-- [Вчера, 17:42] Молоко (300г): 186 ккал, Б9г, Ж10г, У15г
-  Микро: Калий: 450.0, Кальций: 360.0, Витамин D: 3.0
-- [Вчера, 18:01] устрицы (50г): 50 ккал, Б6г, Ж2г, У3г
-  Микро: Цинк: 8.0, Калий: 150.0, Железо: 5.0, Магний: 12.0, Кальций: 50.0, Витамин B12: 10.0
-- [Вчера, 18:07] То-фу (200г): 144 ккал, Б16г, Ж8г, У4г
-  Микро: Калий: 300.0, Железо: 5.4, Магний: 60.0, Кальций: 350.0
-- [Вчера, 19:15] сыр масдам (300г): 1050 ккал, Б72г, Ж84г, У6г
-  Микро: Калий: 210.0, Железо: 0.9, Магний: 60.0, Натрий: 1200.0, Кальций: 2400.0, Витамин A: 600.0
-- [Вчера, 19:20] Мед (200г): 612 ккал, Б0г, Ж0г, У168г
-  Микро: Калий: 100.0
-- [Вчера, 19:34] мед (80г): 244 ккал, Б0г, Ж0г, У68г
-  Микро: Калий: 40.0
-- [Вчера, 19:41] банан (200г): 180 ккал, Б3г, Ж1г, У46г
-  Микро: Калий: 716.0, Витамин C: 16.0
-- [Вчера, 19:46] сыр масдам (40г): 140 ккал, Б10г, Ж12г, У0г
-  Микро: Калий: 28.0, Железо: 0.2, Магний: 8.0, Натрий: 160.0, Кальций: 320.0, Витамин A: 80.0
-- [Сегодня, 16:00] овсянка (200г): 130 ккал, Б5г, Ж3г, У23г
+- [Вчера, 16:00] овсянка (200г): 130 ккал, Б5г, Ж3г, У23г
   Микро: Калий: 180.0, Железо: 1.8, Магний: 60.0, Кальций: 20.0
-- [Сегодня, 16:00] крабовое мясо (150г): 120 ккал, Б24г, Ж2г, У0г
+- [Вчера, 16:00] крабовое мясо (150г): 120 ккал, Б24г, Ж2г, У0г
   Микро: Цинк: 2.5, Калий: 300.0, Железо: 0.5, Магний: 30.0, Кальций: 50.0, Витамин B12: 3.0
+- [Вчера, 16:01] осетр запеченный (200г): 250 ккал, Б40г, Ж10г, У0г
+  Микро: Калий: 400.0, Железо: 1.2, Магний: 30.0, Кальций: 20.0, Витамин D: 5.0
 
 
 
@@ -120,52 +102,10 @@ SECURITY RULE: You are operating in DIARY MODE. Your sole and exclusive purpose 
 
 
 --- human ---
-овсянка — 200г
+омлет с томатами и шпинатом — 300г
 
 --- ai ---
 
 
 --- tool ---
-Successfully logged 200g of овсянка (130 kcal) for lunch. Micronutrients found: Железо (мг) (1.8мг), Кальций (мг) (20.0мг), Магний (мг) (60.0мг), Калий (мг) (180.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="85" reason="Овсянка богата клетчаткой и полезными углеводами, что способствует длительному насыщению и поддержанию энергии." /> <meal_id id="02e798d6-36fe-4700-b6e8-2fd670d83e68" />
-
---- ai ---
-Овсянка — отличный выбор для обеда! Она богата клетчаткой и полезными углеводами, что способствует длительному насыщению и поддержанию энергии. В 200 г овсянки содержится около 130 ккал, 5 г <nutr type="protein">белка</nutr>, 2.5 г <nutr type="fat">жиров</nutr> и 23 г <nutr type="carbs">углеводов</nutr>. Также она содержит важные микроэлементы, такие как <nutr type="iron">железо</nutr> (1.8 мг), <nutr type="calcium">кальций</nutr> (20 мг), <nutr type="magnesium">магний</nutr> (60 мг) и <nutr type="marker">калий</nutr> (180 мг).
-
-Записал 200г овсянка: 130 ккал, 5г белков, 2.5г жиров, 23г углеводов
-<meal_score score="85" reason="Овсянка богата клетчаткой и полезными углеводами, что способствует длительному насыщению и поддержанию энергии." />
-<nutr type="micro">Железо (1.8мг)</nutr>
-<nutr type="micro">Кальций (20.0мг)</nutr>
-<nutr type="micro">Магний (60.0мг)</nutr>
-<nutr type="micro">Калий (180.0мг)</nutr>
-<meal_id id="02e798d6-36fe-4700-b6e8-2fd670d83e68" />
-
---- human ---
-крабовое мясо — 150г
-
---- ai ---
-
-
---- tool ---
-Successfully logged 150g of крабовое мясо (120 kcal) for snack. Micronutrients found: Витамин B12 (мкг) (3.0мкг), Железо (мг) (0.5мг), Кальций (мг) (50.0мг), Магний (мг) (30.0мг), Цинк (мг) (2.5мг), Калий (мг) (300.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="90" reason="Крабовое мясо богато белком и содержит мало жиров, что делает его отличным выбором для перекуса." /> <meal_id id="1d48548a-d357-4a61-a28d-3ba6177c1517" />
-
---- ai ---
-Крабовое мясо — это отличный выбор для перекуса! Оно богато <nutr type="protein">белком</nutr> и содержит мало <nutr type="fat">жиров</nutr>, что делает его полезным и питательным. В 150 г крабового мяса содержится около 120 ккал, 24 г <nutr type="protein">белка</nutr>, 1.5 г <nutr type="fat">жиров</nutr> и 0 г <nutr type="carbs">углеводов</nutr>. Также оно содержит важные микроэлементы, такие как <nutr type="vitamin_b">витамин B12</nutr> (3 мкг), <nutr type="iron">железо</nutr> (0.5 мг), <nutr type="calcium">кальций</nutr> (50 мг), <nutr type="magnesium">магний</nutr> (30 мг), <nutr type="marker">цинк</nutr> (2.5 мг) и <nutr type="marker">калий</nutr> (300 мг).
-
-Записал 150г крабовое мясо: 120 ккал, 24г белков, 1.5г жиров, 0г углеводов
-<meal_score score="90" reason="Крабовое мясо богато белком и содержит мало жиров, что делает его отличным выбором для перекуса." />
-<nutr type="micro">Витамин B12 (3.0мкг)</nutr>
-<nutr type="micro">Железо (0.5мг)</nutr>
-<nutr type="micro">Кальций (50.0мг)</nutr>
-<nutr type="micro">Магний (30.0мг)</nutr>
-<nutr type="micro">Цинк (2.5мг)</nutr>
-<nutr type="micro">Калий (300.0мг)</nutr>
-<meal_id id="1d48548a-d357-4a61-a28d-3ba6177c1517" />
-
---- human ---
-осетр запесенный — 200г
-
---- ai ---
-
-
---- tool ---
-Successfully logged 200g of осетр запеченный (250 kcal) for dinner. Micronutrients found: Витамин D (мкг) (5.0мкг), Железо (мг) (1.2мг), Кальций (мг) (20.0мг), Магний (мг) (30.0мг), Калий (мг) (400.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="92" reason="Осетр богат белком и полезными жирами, такими как <nutr type="omega">омега-3</nutr>, что способствует поддержанию здоровья сердца и сосудов." /> <meal_id id="375c65c8-6c6b-4c0f-a7e7-80a438bed81e" />
+Successfully logged 300g of омлет с томатами и шпинатом (270 kcal) for breakfast. Micronutrients found: Витамин A (мкг) (450.0мкг), Витамин C (мг) (30.0мг), Железо (мг) (3.0мг), Кальций (мг) (150.0мг), Магний (мг) (60.0мг), Калий (мг) (600.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="85" reason="Омлет с томатами и шпинатом — это отличный источник белка и витаминов. Шпинат добавляет <nutr type="vitamin_c">витамин C</nutr> и <nutr type="iron">железо</nutr>, а томаты — <nutr type="vitamin_a">витамин A</nutr>." /> <meal_id id="29369777-3ac3-46b9-b486-bf803ab09a15" />

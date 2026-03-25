@@ -97,7 +97,7 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
           aria-labelledby="tab-medical"
           hidden={activeTab !== "medical"}
         >
-          {activeTab === "medical" && <MedicalResultsView />}
+          <MedicalResultsView />
         </div>
 
         <div
@@ -106,7 +106,7 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
           aria-labelledby="tab-diary"
           hidden={activeTab !== "diary"}
         >
-          {activeTab === "diary" && <FoodDiaryView />}
+          <FoodDiaryView />
         </div>
 
         <div
@@ -115,7 +115,7 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
           aria-labelledby="tab-assistant"
           hidden={activeTab !== "assistant"}
         >
-          {activeTab === "assistant" && <AiAssistantView userId={userId} />}
+          <AiAssistantView userId={userId} />
         </div>
       </main>
     </div>
