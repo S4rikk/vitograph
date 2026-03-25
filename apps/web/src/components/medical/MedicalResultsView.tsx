@@ -7,6 +7,7 @@ import SomaticAnalysisCard from "./SomaticAnalysisCard";
 import DiagnosticReportCard from "./DiagnosticReportCard";
 import { apiClient, type BiomarkerResult, type LabReportExtraction, type StoredDiagnosticReport, type SomaticHistoryResponse, type SomaticHistoryItem } from "@/lib/api-client";
 import { compressImageToBlob } from "@/lib/image-utils";
+import SymptomTrackerWidget from "./SymptomTrackerWidget";
 
 /**
  * Medical Results view — orchestrates:
@@ -256,6 +257,9 @@ export default function MedicalResultsView() {
 
   return (
     <div className="space-y-6">
+      {/* ── Symptom Tracker ─────────────────────────────────── */}
+      <SymptomTrackerWidget />
+
       {/* ── Upload Zone ─────────────────────────────────── */}
       <UploadZone
         onFilesAccepted={handleFilesAccepted}

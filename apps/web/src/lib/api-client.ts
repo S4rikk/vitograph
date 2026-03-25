@@ -68,6 +68,13 @@ export type CorrelationResult = {
   explanation: string;
 };
 
+export type SymptomCorrelationResult = {
+  symptom: string;
+  triggers: string[];
+  confidence: number;
+  explanation: string;
+};
+
 export type DiagnosticHypothesis = {
   hypothesis: string;
   evidenceLevel: "strong" | "moderate" | "weak";
@@ -440,6 +447,13 @@ class AiApiClient {
    */
   async analyze(symptoms: SymptomEntry[]): Promise<CorrelationResult[]> {
     return this.post<CorrelationResult[]>("/analyze", { symptoms });
+  }
+
+  /**
+   * Generates correlations between symptoms, meals and weather.
+   */
+  async correlateSymptoms(): Promise<SymptomCorrelationResult[]> {
+    return this.post<SymptomCorrelationResult[]>("/analytics/correlate-symptoms", {});
   }
 
   /**

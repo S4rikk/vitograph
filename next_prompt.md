@@ -1,22 +1,46 @@
-# TASK: Смягчение стилистики общения AI-ассистента (Эмпатия и Юмор)
+# ЗАДАЧА ДЛЯ КОДЕРА: Проактивный прогноз погоды (7 дней)
 
-**Required Skills:**
-- Read `C:\store\ag_skills\skills\prompt-engineering-patterns\SKILL.md` before coding.
-- Read `C:\store\ag_skills\skills\ai-engineer\SKILL.md` before coding.
+## Контекст
+Пользователь запрашивает механизм **проактивного предупреждения**. Вместо того чтобы говорить о погоде только "по факту" сегодня, ИИ должен заглядывать в будущее (на 7 дней) и ровно **один раз в день** (утром) предупреждать об ожидаемых магнитных бурях и скачках давления.
 
-**Architecture Context:**
-Пользователи жалуются на слишком сухой и "книжный" стиль ответов ИИ. Это произошло из-за жесткого ограничения на использование воодушевляющих и эмоциональных фраз в системном промпте. Нужно вернуть ассистенту "человеческое" лицо, разрешив эмпатию, уместный юмор и более непринужденный стиль (как у Gemini). 
-*Обрати внимание: мы пока НЕ меняем правило про Markdown, меняем только тональность.*
+Мы провели Дебат-Протокол и выявили уязвимости в кешировании, поэтому задача содержит критические улучшения логики БД.
 
-**Implementation Steps:**
-1. Открой файл `apps/api/src/ai/src/ai.controller.ts`.
-2. Найди блок `### CORE PERSONA` внутри формирования переменной `systemPrompt` (около строк 1017-1025).
-3. Найди и строго УДАЛИ строку:
-   `- IMPORTANT: Avoid starting sentences with generic fillers like "Круто!" or "Отлично!". Communicate like a real person.`
-4. ЗАМЕНИ её на новые инструкции, разрешающие эмоции и поддержку:
-   ```text
-   - TONE & EMPATHY: Be warm, enthusiastic, and genuinely human (similar to Gemini's default persona). You are highly encouraged to show empathy, use appropriate humor, and maintain a relaxed, engaging conversational style.
-   - ENCOURAGEMENT: Feel free to use encouraging interjections like "Отлично!", "Круто!", "Здорово!" when celebrating the user's healthy choices, logged meals, or progress. 
-   ```
-5. Никакие другие правила (например, `APP BOUNDARIES` или `FORBIDDEN FORMATTING`) трогать не нужно.
-6. Убедись, что нет синтаксических ошибок компиляции TypeScript, и заверши задачу, написав отчет в `C:\project\kOSI\next_report.md`.
+## Задачи реализации
+В проекте `C:\project\VITOGRAPH` выполни следующее:
+
+### 1. Модернизация `weather.service.ts`
+- **Новый URL для Open-Meteo**: Запрашивай `forecast_days=7`.
+- **Новый URL для NOAA**: NOAA Kp-index API по умолчанию отдает 3 дня.
+- **Цикл Upsert'ов**: Собирай прогнозы и делай `upsert` массива объектов в таблицу `environmental_logs` (до 7 будущих дней).
+- **Кеширование (CRITICAL FIX)**:
+  В начале сервиса ты достаешь из БД сегодняшнюю запись `environmental_logs`. 
+  - Если ее **нет**, делаешь fetch.
+  - Если она **есть**, проверь поле `synced_at`. Если `new Date(row.synced_at) < startOfTodayUTC`, значит прогноз был скачан вчера. Его нужно **перекачать** свежим на 7 дней вперед! Иначе через неделю у пользователя закончится прогноз.
+
+### 2. Логика "Первого Утреннего Обращения" в `ai.controller.ts`
+В `handleChat` перед сборкой системного промпта:
+- Вычисли `startOfDay_5AM` в локальной таймзоне пользователя: `startOfToday(timezone) + 5 часов`. Если сейчас меньше 5 утра, бери `вчера + 5 часов`.
+- Выполни запрос:
+  ```typescript
+  const { data: earlyMsg } = await supabase.from('ai_chat_messages')
+    .select('id')
+    .eq('user_id', user.id)
+    .gte('created_at', startOfDay_5AM.toISOString())
+    .limit(1);
+  ```
+- **Условие 1**: Если `earlyMsg.length === 0` (т.е. это самое первое сообщение за этот "день").
+  - Тогда сделай запрос к `environmental_logs`, где `date > today_str` и `date <= today+7`.
+  - Отфильтруй дни, где `max_kp_index >= 5` ИЛИ `pressure_drop_max_hpa >= 10`.
+  - Если такие дни есть, сформируй строку `[PROACTIVE_FORECAST_ALERT: Внимание! В ближайшие дни ожидаются неблагоприятные метеоусловия. <Список дней с проблемами>. Аккуратно упомяни об этом пользователю и дай советы по подготовке (сон, лекарства, отдых)...]` и добавь ее к системному промпту (как мы делаем с текущим днем).
+- **Условие 2**: Если это не специфика первого запуска, просто оставь работу с текущим днем (как уже реализовано сейчас).
+
+### 3. Ограничения
+- Не ломай существующую логику алертов за текущий день.
+- Не запускай миграции или скрипты! Выполняй изменения локально и безопасно.
+- Соблюдай строгую типизацию.
+
+## Обязательные скиллы (SKILLS)
+Ты обязан использовать следующие скиллы при написании кода:
+1. `nodejs-backend-patterns` (логика расчета таймзон и дат в Node.js)
+2. `postgres-best-practices` (эффективное использование `limit(1)` вместо `count()` для быстрой проверки)
+3. `prompt-engineering-patterns` (при формировании инжектного `[PROACTIVE_FORECAST_ALERT]`)

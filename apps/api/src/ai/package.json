@@ -8,6 +8,7 @@
     "start": "node dist/server.js",
     "dev": "npx tsx watch src/server.ts",
     "test:ai": "npx tsx src/test-ai.ts",
+    "test:weather": "tsx scripts/test_weather_alert.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
