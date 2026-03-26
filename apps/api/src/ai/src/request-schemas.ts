@@ -115,6 +115,16 @@ export const AnalyzeFoodRequestSchema = z.object({
 
 export type AnalyzeFoodRequest = z.infer<typeof AnalyzeFoodRequestSchema>;
 
+// ── POST /api/v1/ai/vision/label ────────────────────────────────────
+
+/** Schema for analyzing a base64 photo of a food label/ingredients. */
+export const AnalyzeLabelRequestSchema = z.object({
+  /** Base64 encoded image string starting with data:image/... */
+  imageBase64: z.string().min(100, "Base64 image is required"),
+});
+
+export type AnalyzeLabelRequest = z.infer<typeof AnalyzeLabelRequestSchema>;
+
 // ── GET /api/v1/ai/chat/history ───────────────────────────────
 // No specific body parsing needed for GET, but we leave this comment to mark the boundary
 

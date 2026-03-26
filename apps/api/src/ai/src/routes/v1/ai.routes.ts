@@ -16,6 +16,7 @@ import {
   DiagnoseRequestSchema,
   AnalyzeSomaticRequestSchema,
   AnalyzeFoodRequestSchema,
+  AnalyzeLabelRequestSchema,
   AnalyzeLabReportRequestSchema,
   UpdateMealLogSchema,
 } from "../../request-schemas.js";
@@ -25,6 +26,7 @@ import {
   handleDiagnose,
   handleAnalyzeSomatic,
   handleAnalyzeFood,
+  handleAnalyzeLabel,
   handleGetChatHistory,
   handleClearChatHistory,
   handleAnalyzeLabReport,
@@ -51,6 +53,7 @@ aiRouter.post("/analyze", validate(AnalyzeRequestSchema), handleAnalyze);
 aiRouter.post("/diagnose", validate(DiagnoseRequestSchema), handleDiagnose);
 aiRouter.post("/analyze-somatic", validate(AnalyzeSomaticRequestSchema), handleAnalyzeSomatic);
 aiRouter.post("/analyze-food", validate(AnalyzeFoodRequestSchema), handleAnalyzeFood);
+aiRouter.post("/vision/label", validate(AnalyzeLabelRequestSchema), handleAnalyzeLabel);
 aiRouter.post("/analyze-lab-report", validate(AnalyzeLabReportRequestSchema), handleAnalyzeLabReport);
 aiRouter.get("/lab-reports/history", handleGetLabReportsHistory);
 aiRouter.delete("/lab-reports/history/:timestamp", handleDeleteLabReport);

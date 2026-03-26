@@ -21,6 +21,7 @@ import { uploadAndRotateNailPhoto, uploadAndRotateFoodPhoto } from "./lib/storag
 import { runSomaticVisionAnalyzer } from "./graph/vision-analyzer.js";
 import { runFoodVisionAnalyzer } from "./graph/food-vision-analyzer.js";
 import { runLabReportAnalyzer } from "./graph/lab-report-analyzer.js";
+import { runLabelScanner } from "./graph/label-scanner.js";
 import * as fs from "fs";
 import type {
   FoodContext,
@@ -33,6 +34,7 @@ import type {
   AnalyzeLabReportRequest,
   AnalyzeSomaticRequest,
   AnalyzeFoodRequest,
+  AnalyzeLabelRequest,
 } from "./request-schemas.js";
 
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
@@ -2259,6 +2261,67 @@ export async function handleCorrelateSymptoms(
       data: result.data.correlations,
     });
   } catch (error: unknown) {
+    next(error);
+  }
+}
+
+// ── Label Scanner (Vision AI) ────────────────────────────────────────
+
+export async function handleAnalyzeLabel(
+  req: Request<{}, {}, AnalyzeLabelRequest>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const userId = req.user?.id;
+    const token = req.headers.authorization?.split(" ")[1];
+    
+    if (!userId || !token) {
+      res.status(401).json({ success: false, error: "Unauthorized" });
+      return;
+    }
+
+    const { imageBase64 } = req.body;
+
+    console.log(`[handleAnalyzeLabel] Starting label scan for user ${userId}`);
+
+    // 1. Fetch user context & format constraints strictly for Label Scanner
+    const rawContext = await fetchUserContext(token, userId);
+    const leanProfile = getLeanUserContext(rawContext)?.profile;
+
+    let profileSummary = "";
+    if (leanProfile) {
+      profileSummary += `Возраст: ${leanProfile.age}, Пол: ${leanProfile.biological_sex}\n`;
+      profileSummary += `Диета: ${leanProfile.diet_type || "смешанная"}\n`;
+      
+      if (leanProfile.chronic_conditions?.length) {
+        profileSummary += `Хронические заболевания: ${leanProfile.chronic_conditions.join(", ")}\n`;
+      }
+      
+      // Also format dietary constraints from raw context
+      const dietaryConstraints = formatDietaryRestrictions(rawContext?.profile);
+      if (dietaryConstraints) {
+        profileSummary += `\n${dietaryConstraints}`;
+      }
+      
+      // Form contraindications
+      const foodZones = formatFoodContraindicationZones(rawContext?.profile);
+      if (foodZones) {
+        profileSummary += `\n${foodZones}`;
+      }
+    } else {
+      profileSummary = "Профиль не заполнен. Оцените как стандартного взрослого человека.";
+    }
+
+    console.log(`[handleAnalyzeLabel] Profile summary extracted. Calling LLM...`);
+
+    // 2. Call the new graph function for Label Scanner
+    const output = await runLabelScanner(imageBase64, profileSummary);
+    
+    // 3. Return JSON response
+    res.status(200).json({ success: true, data: output });
+  } catch (error: unknown) {
+    console.error("[handleAnalyzeLabel] Error:", error);
     next(error);
   }
 }

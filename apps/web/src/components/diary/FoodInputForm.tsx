@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { compressImage } from "@/lib/image-utils";
 import { apiClient } from "@/lib/api-client";
-import type { FoodRecognitionResult } from "@/lib/api-client";
+import type { FoodRecognitionResult, LabelScannerOutput } from "@/lib/api-client";
 import { MealScoreBadge } from "./MealScoreBadge";
 
 type FoodInputFormProps = {
@@ -31,10 +31,15 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
   const [weight, setWeight] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [photoResult, setPhotoResult] = useState<FoodRecognitionResult | null>(null);
+  const [isAnalyzingLabel, setIsAnalyzingLabel] = useState(false);
+  const [labelResult, setLabelResult] = useState<LabelScannerOutput | null>(null);
   const nameRef = useRef<HTMLTextAreaElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
+  const labelCameraRef = useRef<HTMLInputElement>(null);
+  const labelGalleryRef = useRef<HTMLInputElement>(null);
   const [showPhotoMenu, setShowPhotoMenu] = useState(false);
+  const [showLabelMenu, setShowLabelMenu] = useState(false);
   // Force remount of file inputs to prevent mobile browsers from caching the picker type
   const [fileInputKey, setFileInputKey] = useState(Date.now());
 
@@ -66,6 +71,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
       setName("");
       setWeight("");
       setPhotoResult(null);
+      setLabelResult(null);
       nameRef.current?.focus();
     },
     [name, weight, onSubmit, photoResult],
@@ -116,11 +122,47 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
     [onPhotoResult],
   );
 
+  const handleLabelCapture = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (!file.type.startsWith("image/")) return;
+
+      try {
+        setIsAnalyzingLabel(true);
+        setLabelResult(null);
+
+        const base64Image = await compressImage(file, 1024);
+        const result = await apiClient.analyzeLabel(base64Image);
+
+        setLabelResult(result);
+
+        if (result.product_name && result.product_name !== "Неизвестно") {
+          setName((prev) => prev ? `${result.product_name}, ${prev}` : result.product_name);
+        }
+      } catch (err: any) {
+        console.error("[LabelScanner] Label analysis failed:", err);
+      } finally {
+        setIsAnalyzingLabel(false);
+        setFileInputKey(Date.now());
+      }
+    },
+    [],
+  );
+
   const handleCameraClick = useCallback(() => {
     if (isMobile) {
       setShowPhotoMenu(true);
     } else {
       galleryRef.current?.click();
+    }
+  }, [isMobile]);
+
+  const handleLabelClick = useCallback(() => {
+    if (isMobile) {
+      setShowLabelMenu(true);
+    } else {
+      labelGalleryRef.current?.click();
     }
   }, [isMobile]);
 
@@ -149,6 +191,54 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
         </div>
       )}
 
+      {/* ── Label Scanner Notification ─────────────────────────── */}
+      {labelResult && (
+        <div
+          className={`rounded-xl border p-3 text-sm flex flex-col gap-2 ${
+            labelResult.verdict === "GREEN"
+              ? "bg-green-50 border-green-200 text-green-800"
+              : labelResult.verdict === "YELLOW"
+              ? "bg-yellow-50 border-yellow-200 text-yellow-800"
+              : "bg-red-50 border-red-200 text-red-800"
+          }`}
+        >
+          <div className="flex justify-between items-start gap-2">
+            <p className="font-semibold text-[15px]">{labelResult.product_name}</p>
+            <span className={`px-2 py-0.5 rounded-full text-xs font-bold leading-none flex items-center shrink-0 ${
+              labelResult.verdict === "GREEN" ? "bg-green-100 text-green-800" :
+              labelResult.verdict === "YELLOW" ? "bg-yellow-100 text-yellow-800" :
+              "bg-red-100 text-red-800"
+            }`}>
+              {labelResult.verdict === "GREEN" ? "Можно" :
+               labelResult.verdict === "YELLOW" ? "Осторожно" : "Нельзя"}
+            </span>
+          </div>
+          <p className="text-xs opacity-90 leading-relaxed font-medium">
+            {labelResult.verdict_reason}
+          </p>
+          
+          {labelResult.e_codes && labelResult.e_codes.length > 0 && (
+            <div className="mt-1 space-y-1">
+              <p className="text-[10px] font-bold opacity-60 uppercase tracking-wider mb-1">Е-добавки</p>
+              {labelResult.e_codes.map((eCode, idx) => (
+                <div key={idx} className="flex flex-col text-xs bg-black/5 p-1.5 rounded text-ink">
+                  <span className="font-semibold flex items-center gap-1">
+                    <span className={
+                      eCode.danger_level === "HIGH" ? "text-red-600" :
+                      eCode.danger_level === "MEDIUM" ? "text-yellow-600" : "text-green-600"
+                    }>
+                      {eCode.code}
+                    </span> 
+                    - {eCode.name}
+                  </span>
+                  <span className="opacity-80 text-[11px] leading-tight">{eCode.description}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Analyzing Spinner ───────────────────────────────────── */}
       {isAnalyzing && (
         <div className="flex items-center gap-2 rounded-xl border border-primary-200 bg-primary-50 p-3 text-sm text-primary-700">
@@ -156,34 +246,29 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
-          Анализирую фото…
+          Анализирую еду…
+        </div>
+      )}
+
+      {isAnalyzingLabel && (
+        <div className="flex items-center gap-2 rounded-xl border border-purple-200 bg-purple-50 p-3 text-sm text-purple-700">
+          <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+          Чтение состава…
         </div>
       )}
 
       {/* ── Form ────────────────────────────────────────────────── */}
       <form
         onSubmit={handleSubmit}
-        className="flex items-end gap-2 sm:gap-3 rounded-2xl border border-border bg-white p-2 sm:p-3 shadow-sm"
+        className="flex flex-col gap-2 rounded-2xl border border-border bg-white p-3 shadow-sm"
       >
-        {/* Dish name and Camera */}
-        <div className="flex-1 min-w-0">
-          <label
-            htmlFor="food-name"
-            className="block text-[10px] sm:text-xs font-medium text-ink-muted mb-1 sm:mb-2 flex items-center justify-between gap-2"
-          >
-            <span>Блюдо</span>
-            <button
-              type="button"
-              onClick={handleCameraClick}
-              disabled={isAnalyzing}
-              className={`p-2 rounded-full bg-primary-50 text-primary-600 hover:bg-primary-100 hover:text-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-200 shadow-sm ${isAnalyzing ? "opacity-50 cursor-not-allowed" : ""}`}
-              title="Сфотографировать еду"
-            >
-              <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" strokeLinejoin="round" strokeWidth="2" d="M4 18V8a1 1 0 0 1 1-1h1.5l1.707-1.707A1 1 0 0 1 8.914 5h6.172a1 1 0 0 1 .707.293L17.5 7H19a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z" />
-                <path stroke="currentColor" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-              </svg>
-            </button>
+        {/* Row 1: Dish name — full width */}
+        <div className="w-full">
+          <label htmlFor="food-name" className="block text-xs font-medium text-ink-muted mb-1">
+            Блюдо
           </label>
           {/* Camera — with capture (forces camera on mobile) */}
           <input
@@ -206,66 +291,107 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
             className="absolute w-0 h-0 opacity-0 -z-10 pointer-events-none"
             aria-hidden="true"
           />
-          <div className="relative">
-            <textarea
-              ref={nameRef}
-              id="food-name"
-              placeholder="Овсянка"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSubmit(e);
-                }
-              }}
-              rows={1}
-              style={{ fieldSizing: "content" } as any}
-              className="w-full rounded-lg border border-border bg-surface-muted px-3 py-2 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100 max-h-[150px] min-h-[44px] overflow-y-auto resize-none"
-            />
-          </div>
-        </div>
-
-        {/* Weight */}
-        <div className="w-24 flex-shrink-0">
-          <label
-            htmlFor="food-weight"
-            className="block text-[10px] sm:text-xs font-medium text-ink-muted mb-1"
-          >
-            Вес (г)
-          </label>
+          {/* Label specific inputs */}
           <input
-            id="food-weight"
-            type="number"
-            min={1}
-            placeholder="200"
-            value={weight}
-            onChange={(e) => setWeight(e.target.value)}
-            className="w-full rounded-lg border border-border bg-surface-muted px-3 py-2 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100"
+            key={`label-camera-${fileInputKey}`}
+            ref={labelCameraRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleLabelCapture}
+            className="absolute w-0 h-0 opacity-0 -z-10 pointer-events-none"
+            aria-hidden="true"
+          />
+          <input
+            key={`label-gallery-${fileInputKey}`}
+            ref={labelGalleryRef}
+            type="file"
+            accept="image/*"
+            onChange={handleLabelCapture}
+            className="absolute w-0 h-0 opacity-0 -z-10 pointer-events-none"
+            aria-hidden="true"
+          />
+          <textarea
+            ref={nameRef}
+            id="food-name"
+            placeholder="Овсянка"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit(e);
+              }
+            }}
+            rows={1}
+            style={{ fieldSizing: "content" } as any}
+            className="w-full rounded-lg border border-border bg-surface-muted px-3 py-2 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100 max-h-[150px] min-h-[44px] overflow-y-auto resize-none"
           />
         </div>
 
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={!isValid}
-          aria-label="Отправить"
-          className={`cursor-pointer flex-shrink-0 rounded-xl p-3 sm:p-2.5 transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center ${isValid ? "bg-primary-600 text-white shadow-sm hover:bg-primary-700 hover:shadow-md active:scale-95" : "bg-surface-hover text-ink-faint cursor-not-allowed"}`}
-        >
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
+        {/* Row 2: Camera | Label | Weight | Submit */}
+        <div className="flex items-end gap-2">
+          {/* Camera button */}
+          <div className="flex-1 flex flex-col gap-1">
+            <span className="text-xs font-medium text-ink-muted">Блюдо</span>
+            <button
+              type="button"
+              onClick={handleCameraClick}
+              disabled={isAnalyzing || isAnalyzingLabel}
+              className={`h-[44px] w-full rounded-xl bg-primary-50 text-primary-600 hover:bg-primary-100 hover:text-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-200 shadow-sm flex items-center justify-center ${isAnalyzing || isAnalyzingLabel ? "opacity-50 cursor-not-allowed" : ""}`}
+              title="Сфотографировать еду"
+            >
+              <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" strokeLinejoin="round" strokeWidth="2" d="M4 18V8a1 1 0 0 1 1-1h1.5l1.707-1.707A1 1 0 0 1 8.914 5h6.172a1 1 0 0 1 .707.293L17.5 7H19a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z" />
+                <path stroke="currentColor" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Label Scanner button */}
+          <div className="flex-1 flex flex-col gap-1">
+            <span className="text-xs font-medium text-ink-muted">Этикетка</span>
+            <button
+              type="button"
+              onClick={handleLabelClick}
+              disabled={isAnalyzing || isAnalyzingLabel}
+              className={`h-[44px] w-full rounded-xl bg-purple-50 text-purple-600 hover:bg-purple-100 hover:text-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-200 shadow-sm flex items-center justify-center ${isAnalyzing || isAnalyzingLabel ? "opacity-50 cursor-not-allowed" : ""}`}
+              title="Отсканировать состав"
+            >
+              <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 12h14M5 16h14m-3.5 4H19a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4.5"/>
+              </svg>
+            </button>
+          </div>
+
+          {/* Weight input */}
+          <div className="flex-1 flex flex-col gap-1">
+            <label htmlFor="food-weight" className="text-xs font-medium text-ink-muted">
+              Вес (г)
+            </label>
+            <input
+              id="food-weight"
+              type="number"
+              min={1}
+              placeholder="200"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              className="w-full rounded-xl border border-border bg-surface-muted px-3 py-2 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100 h-[44px]"
             />
-          </svg>
-        </button>
+          </div>
+
+          {/* Submit button */}
+          <button
+            type="submit"
+            disabled={!isValid}
+            aria-label="Отправить"
+            className={`cursor-pointer flex-shrink-0 rounded-xl p-3 transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center self-end ${isValid ? "bg-primary-600 text-white shadow-sm hover:bg-primary-700 hover:shadow-md active:scale-95" : "bg-surface-hover text-ink-faint cursor-not-allowed"}`}
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+            </svg>
+          </button>
+        </div>
       </form>
       {/* ── Photo Source Action Sheet (mobile only) ────────────── */}
       {showPhotoMenu && (
@@ -304,6 +430,51 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
             <button
               type="button"
               onClick={() => setShowPhotoMenu(false)}
+              className="w-full rounded-xl p-3 text-center text-sm text-ink-muted hover:bg-surface-hover"
+            >
+              Отмена
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Label Action Sheet (mobile only) ────────────── */}
+      {showLabelMenu && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/30"
+            onClick={() => setShowLabelMenu(false)}
+          />
+          {/* Menu */}
+          <div className="photo-action-sheet relative z-10 w-full max-w-md rounded-t-2xl bg-white p-4 pb-8 shadow-2xl animate-slide-up">
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-gray-300" />
+            <h3 className="text-center text-sm font-semibold text-ink mb-4">
+              Сканировать этикетку
+            </h3>
+            <button
+              type="button"
+              onClick={() => {
+                labelCameraRef.current?.click();
+                setTimeout(() => setShowLabelMenu(false), 300);
+              }}
+              className="w-full rounded-xl bg-purple-50 p-4 text-left text-sm font-medium text-purple-700 hover:bg-purple-100 mb-2 flex items-center gap-3"
+            >
+              📸 Сделать снимок
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                labelGalleryRef.current?.click();
+                setTimeout(() => setShowLabelMenu(false), 300);
+              }}
+              className="w-full rounded-xl bg-surface-muted p-4 text-left text-sm font-medium text-ink hover:bg-surface-hover mb-2 flex items-center gap-3"
+            >
+              🖼️ Выбрать из галереи
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowLabelMenu(false)}
               className="w-full rounded-xl p-3 text-center text-sm text-ink-muted hover:bg-surface-hover"
             >
               Отмена

@@ -245,6 +245,28 @@ export const FoodRecognitionOutputSchema = z.object({
 
 export type FoodRecognitionOutput = z.infer<typeof FoodRecognitionOutputSchema>;
 
+// ── Food Label & Ingredients Recognition (Vision AI) ────────────────
+
+export const LabelScannerOutputSchema = z.object({
+  product_name: z.string().describe("Название продукта"),
+  verdict: z.enum(["GREEN", "YELLOW", "RED"]).describe("Вердикт по полезности и безопасности для данного пользователя: GREEN (разрешено/полезно), YELLOW (ограничить), RED (запрещено/вредно)"),
+  verdict_reason: z.string().describe("Краткое, четкое, конкретное пояснение полезности данного продукта для ЭТОГО пользователя с учетом профиля здоровья"),
+  e_codes: z.array(z.object({
+    code: z.string().describe("E-код добавки, например 'E211'"),
+    name: z.string().describe("Название добавки, например 'Бензоат натрия'"),
+    danger_level: z.enum(["LOW", "MEDIUM", "HIGH"]).describe("Уровень опасности добавки"),
+    description: z.string().describe("Краткое описание влияния на здоровье")
+  })).describe("Найденные E-добавки в составе (если нет - верни пустой массив)"),
+  macronutrients_per_100g: z.object({
+    calories: z.number().nullable().describe("Если неизвестно, верни null"),
+    protein: z.number().nullable().describe("Если неизвестно, верни null"),
+    fat: z.number().nullable().describe("Если неизвестно, верни null"),
+    carbs: z.number().nullable().describe("Если неизвестно, верни null")
+  }).nullable().describe("Указанные на этикетке макросы на 100г, если видно, иначе null")
+});
+
+export type LabelScannerOutput = z.infer<typeof LabelScannerOutputSchema>;
+
 // ═══════════════════════════════════════════════════════════════════════
 // §6  Lab Diagnostic Report (GPT-5.2 Premium Analysis)
 // ═══════════════════════════════════════════════════════════════════════

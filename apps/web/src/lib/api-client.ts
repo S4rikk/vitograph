@@ -131,6 +131,24 @@ export interface SomaticHistoryItem {
 
 export type SomaticHistoryResponse = Record<string, SomaticHistoryItem[]>;
 
+export interface LabelScannerOutput {
+  product_name: string;
+  verdict: "GREEN" | "YELLOW" | "RED";
+  verdict_reason: string;
+  e_codes: {
+    code: string;
+    name: string;
+    danger_level: "LOW" | "MEDIUM" | "HIGH";
+    description: string;
+  }[];
+  macronutrients_per_100g: {
+    calories: number | null;
+    protein: number | null;
+    fat: number | null;
+    carbs: number | null;
+  } | null;
+}
+
 /* ── API Client ────────────────────────────────────────────────────── */
 
 class AiApiClient {
@@ -594,6 +612,13 @@ class AiApiClient {
    */
   async analyzeFood(imageBase64: string): Promise<FoodRecognitionResult> {
     return this.post<FoodRecognitionResult>("/analyze-food", { imageBase64 });
+  }
+
+  /**
+   * Uploads a food label photo for ingredient & E-additives analysis.
+   */
+  async analyzeLabel(imageBase64: string): Promise<LabelScannerOutput> {
+    return this.post<LabelScannerOutput>("/vision/label", { imageBase64 });
   }
 
   /**
