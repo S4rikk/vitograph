@@ -275,7 +275,7 @@ class AiApiClient {
       method: "POST",
       headers,
       body: JSON.stringify(body),
-      signal: AbortSignal.timeout(300_000), // 5-minute timeout
+      signal: AbortSignal.timeout(900_000), // 15-minute timeout
     });
 
     if (!response.ok) {

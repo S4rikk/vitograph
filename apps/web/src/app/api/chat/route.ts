@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 // Vercel / Next.js allows up to 5 minutes for pro plans.
 // Locally, setting this bypasses the default 30s timeout of Next.js dev server.
-export const maxDuration = 300; // 5 minutes for LangGraph agent (chat)
+export const maxDuration = 900; // 15 minutes for LangGraph agent (chat)
 
 export async function POST(req: NextRequest) {
     try {
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
             headers,
             body: JSON.stringify(json),
             // Pass the timeout to the underlying node-fetch
-            signal: AbortSignal.timeout(300_000),
+            signal: AbortSignal.timeout(900_000),
         });
 
         if (!response.ok) {
