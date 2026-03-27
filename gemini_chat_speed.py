@@ -9,12 +9,12 @@ def chat_with_gemini_3_pro():
     api_key = os.getenv("GEMINI_API")
     
     if not api_key:
-        print("[!] Ошибка: GEMINI_API не найдена в .env")
+        print("[!] Error: GEMINI_API not found in .env")
         return
 
     host = "api.ourzhishi.top"
     endpoint = "/v1/chat/completions"
-    model_id = "gemini-3.1-pro-preview"
+    model_id = "gemini-3.1-pro-preview-thinking"
     
     headers = {
         'Accept': 'application/json',
@@ -23,13 +23,13 @@ def chat_with_gemini_3_pro():
     }
 
     history = []
-    print(f"--- Интерактивный чат с {model_id} ---")
-    print(f"Хост: {host}")
-    print("Пиши 'exit' для выхода.\n")
+    print(f"--- Interactive chat with {model_id} ---")
+    print(f"Host: {host}")
+    print("Type 'exit' to quit.\n")
 
     while True:
-        user_input = input("Вы: ")
-        if user_input.lower() in ["exit", "quit", "выход"]:
+        user_input = input("You: ")
+        if user_input.lower() in ["exit", "quit", "output"]:
             break
 
         history.append({"role": "user", "content": user_input})
@@ -41,7 +41,7 @@ def chat_with_gemini_3_pro():
             "stream": False
         })
 
-        print("Ожидание ответа...", end="", flush=True)
+        print("Waiting for response...", end="", flush=True)
         try:
             start_time = time.time()
             
@@ -60,14 +60,14 @@ def chat_with_gemini_3_pro():
                 content = response_json['choices'][0]['message']['content']
                 history.append({"role": "assistant", "content": content})
                 
-                print(f"\r{model_id} [{total_time:.2f} сек]:")
+                print(f"\r{model_id} [{total_time:.2f} sec]:")
                 print(content)
                 print("-" * 20)
             else:
-                print(f"\r[ОШИБКА] Статус {res.status}: {data[:200]}")
+                print(f"\r[ERROR] Status {res.status}: {data[:200]}")
                 
         except Exception as e:
-            print(f"\n[ОШИБКА СОЕДИНЕНИЯ]: {e}")
+            print(f"\n[CONNECTION ERROR]: {e}")
 
 if __name__ == "__main__":
     chat_with_gemini_3_pro()

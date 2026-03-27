@@ -12,7 +12,7 @@ export default function WaterTracker({ selectedDate, userTimezone }: WaterTracke
   const [logId, setLogId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const targetGlasses = 8;
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   const loadWater = useCallback(async () => {
     setIsLoading(true);

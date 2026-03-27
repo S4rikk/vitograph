@@ -17,7 +17,7 @@ const SECTIONS = [
 
 export default function OnboardingWizard({ userId }: { userId: string }) {
   const router = useRouter();
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});

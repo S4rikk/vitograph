@@ -30,7 +30,7 @@ export default function SymptomTrackerWidget() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
 
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   useEffect(() => {
     // Optionally fetch today's symptoms on mount

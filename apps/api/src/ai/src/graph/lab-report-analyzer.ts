@@ -36,7 +36,7 @@ const LAB_ANALYSIS_TIMEOUT_MS = 120_000;
 const LAB_ANALYSIS_TEMPERATURE = 0.2;
 
 /** Model for premium diagnostics. */
-const LAB_ANALYSIS_MODEL = "gpt-4o";
+const LAB_ANALYSIS_MODEL = "gemini-3.1-pro-preview-thinking";
 
 // ── System Prompt ───────────────────────────────────────────────────
 

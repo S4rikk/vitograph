@@ -146,7 +146,6 @@ export async function callLlmStructured<T extends AnyZodObject>(
   const EXCLUDED_SCHEMAS = [
     "food_recognition", 
     "nutrition_targets", 
-    "lab_diagnostic_report", 
     "somatic_diagnostics",
     "psychological_response",
     "symptom_correlation",

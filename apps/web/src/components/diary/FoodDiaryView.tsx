@@ -45,7 +45,7 @@ export default function FoodDiaryView() {
   const [isMounted, setIsMounted] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [userTimezone, setUserTimezone] = useState<string | null>(null);
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   useEffect(() => {
     setIsMounted(true);
