@@ -56,7 +56,7 @@ ${userProfileContext}
         e_codes: [],
         macronutrients_per_100g: null,
       },
-      model: "gpt-4o",
+      model: "gpt-5.4-mini",
       temperature: 0.1,
     });
 

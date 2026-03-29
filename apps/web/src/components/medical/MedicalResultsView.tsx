@@ -14,7 +14,7 @@ import SymptomTrackerWidget from "./SymptomTrackerWidget";
  * 1. PDF upload zone
  * 2. Loading skeleton
  * 3. Grid of Biomarker cards
- * 4. General Recommendations and GPT-5.2 diagnostic report
+ * 4. General Recommendations and GPT-5.4 diagnostic report
  */
 export default function MedicalResultsView() {
   const [uploadState, setUploadState] = useState<
@@ -102,7 +102,7 @@ export default function MedicalResultsView() {
   }, []);
 
   /**
-   * Triggers GPT-5.2 diagnostic analysis after biomarker parsing.
+   * Triggers GPT-5.4 diagnostic analysis after biomarker parsing.
    * Fires automatically when ≥3 biomarkers are detected.
    */
   const runDiagnosticAnalysis = useCallback(async (biomarkers: BiomarkerResult[]) => {
@@ -487,14 +487,14 @@ export default function MedicalResultsView() {
         <p className="text-center text-ink-muted">Анализы не найдены.</p>
       )}
 
-      {/* ── GPT-5.2 Diagnostic Report ─────────────────────── */}
+      {/* ── GPT-5.4 Diagnostic Report ─────────────────────── */}
       {isDiagnosing && (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-purple-200 bg-purple-50 p-8">
           <div className="relative h-10 w-10">
             <div className="absolute inset-0 animate-spin rounded-full border-2 border-purple-200 border-t-purple-600" />
           </div>
           <p className="text-sm font-medium text-purple-700">
-            Готовим диагностический отчёт (GPT-5.2)…
+            Готовим диагностический отчёт (GPT-5.4)…
           </p>
           <p className="text-xs text-purple-500">
             Глубокий анализ займёт до 2 минут

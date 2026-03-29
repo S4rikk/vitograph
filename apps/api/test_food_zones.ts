@@ -75,7 +75,7 @@ async function runTest() {
     console.log("Calling OpenAI GPT-4o...");
     try {
         const { object } = await generateObject({
-            model: openai('gpt-4o'),
+            model: openai('gpt-5.4-mini'),
             schema: LabDiagnosticReportSchema,
             schemaName: "lab_diagnostic_report",
             system: SYSTEM_PROMPT,

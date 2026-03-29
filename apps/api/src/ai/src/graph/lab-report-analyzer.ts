@@ -1,5 +1,5 @@
 /**
- * Lab Report Analyzer — GPT-5.2 premium diagnostics.
+ * Lab Report Analyzer — GPT-5.4 premium diagnostics.
  *
  * Receives parsed biomarker results and produces a deep structured
  * diagnostic report using Chain-of-Thought clinical analysis.
@@ -29,7 +29,7 @@ interface BiomarkerInput {
 
 // ── Constants ───────────────────────────────────────────────────────
 
-/** Timeout for GPT-5.2 analysis (2 minutes — for stable medical analysis). */
+/** Timeout for GPT-5.4 analysis (2 minutes — for stable medical analysis). */
 const LAB_ANALYSIS_TIMEOUT_MS = 120_000;
 
 /** Temperature for clinical precision. */

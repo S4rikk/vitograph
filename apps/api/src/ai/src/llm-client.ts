@@ -24,7 +24,7 @@ import { z } from "zod";
 // ── Configuration ───────────────────────────────────────────────────
 
 /** Default model for all LLM calls. */
-const DEFAULT_MODEL = "gpt-4o";
+const DEFAULT_MODEL = "gpt-5.4-mini";
 
 /** Timeout presets: sync (user-facing) vs async (background). */
 export const LLM_TIMEOUTS = {

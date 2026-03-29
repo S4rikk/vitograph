@@ -1361,7 +1361,7 @@ export async function handleDiagnose(
 
 /**
  * Handles the somatic photo analysis endpoint.
- * Passes the image to LangChain vision node (gpt-4o) to extract markers.
+ * Passes the image to LangChain vision node (gpt-5.4-mini) to extract markers.
  */
 export async function handleAnalyzeSomatic(
   req: Request,
@@ -1566,7 +1566,7 @@ export async function handleAnalyzeFood(
 // ── POST /api/v1/ai/analyze-lab-report ──────────────────────────────
 
 /**
- * Handles premium GPT-5.2 diagnostic analysis of parsed biomarkers.
+ * Handles premium GPT-5.4 diagnostic analysis of parsed biomarkers.
  * Produces a structured diagnostic report and saves it to the user's profile.
  */
 export async function handleAnalyzeLabReport(
@@ -1600,7 +1600,7 @@ export async function handleAnalyzeLabReport(
         historySynopsis: formatHistorySynopsis(dbContext.profile),
       });
 
-      // 2. Run GPT-5.2 diagnostic analysis
+      // 2. Run GPT-5.4 diagnostic analysis
       const report = await runLabReportAnalyzer(
         body.biomarkers,
         userContext,

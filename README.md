@@ -7,7 +7,7 @@
 | Layer                 | Technology                                     |
 | --------------------- | ---------------------------------------------- |
 | Frontend              | Next.js 16, React 19, TypeScript, Tailwind CSS |
-| AI Backend (Node)     | Express, LangChain, GPT-5.2 (lab diagnostics)  |
+| AI Backend (Node)     | Express, LangChain, GPT-5.4 (lab diagnostics)  |
 | Core Backend (Python) | FastAPI, AsyncOpenAI (file parser)             |
 | Database              | Supabase (PostgreSQL), Prisma ORM              |
 | Auth                  | Supabase Auth (JWT)                            |

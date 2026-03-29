@@ -25,7 +25,7 @@ import type { z } from "zod";
 // ── Configuration ───────────────────────────────────────────────────
 
 /** Default model for all LLM calls. */
-const DEFAULT_MODEL = "gpt-4o";
+const DEFAULT_MODEL = "gpt-5.4-mini";
 
 /** Timeout presets: sync (user-facing) vs async (background). */
 export const LLM_TIMEOUTS = {
@@ -61,7 +61,7 @@ export interface LlmCallOptions<T extends z.ZodType> {
   readonly maxRetries: number;
   /** Fallback value returned if LLM call fails entirely. */
   readonly fallback: z.infer<T>;
-  /** Optional model override (defaults to gpt-4o). */
+  /** Optional model override (defaults to gpt-5.4-mini). */
   readonly model?: string;
   /** Optional temperature override (defaults to 0.7). */
   readonly temperature?: number;

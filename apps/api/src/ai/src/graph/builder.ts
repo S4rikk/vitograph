@@ -3,24 +3,29 @@ import { ChatOpenAI } from "@langchain/openai";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { BaseMessage } from "@langchain/core/messages";
 import { GraphAnnotation } from "./state.js";
-import { agentTools } from "./tools.js";
+import { agentTools, assistantTools, diaryTools } from "./tools.js";
 import { checkpointer } from "./checkpointer.js";
 const primaryModel = new ChatOpenAI({
   modelName: "gpt-5.4-mini",
   apiKey: process.env.OPENAI_API_KEY,
   temperature: 0.2,
-}).bindTools(agentTools);
+}).bindTools(assistantTools);
 
 const diaryModel = new ChatOpenAI({
-  modelName: "gpt-4o",
+  modelName: "gpt-5.4-mini",
   apiKey: process.env.OPENAI_API_KEY,
   temperature: 0,
-}).bindTools(agentTools);
+}).bindTools(diaryTools);
 
-const backupModel = new ChatOpenAI({
+const backupModelAssistant = new ChatOpenAI({
   modelName: "gpt-4o-mini",
   temperature: 0.2,
-}).bindTools(agentTools);
+}).bindTools(assistantTools);
+
+const backupModelDiary = new ChatOpenAI({
+  modelName: "gpt-4o-mini",
+  temperature: 0.2,
+}).bindTools(diaryTools);
 
 /**
  * Sanitizes the message history to prevent INVALID_TOOL_RESULTS errors.
@@ -109,7 +114,9 @@ function sanitizeMessages(messages: BaseMessage[]): BaseMessage[] {
 }
 
 async function callModel(state: typeof GraphAnnotation.State, config?: any) {
-  const modelToUse = config?.configurable?.chatMode === "diary" ? diaryModel : primaryModel.withFallbacks([backupModel]);
+  const modelToUse = config?.configurable?.chatMode === "diary" 
+    ? diaryModel.withFallbacks([backupModelDiary]) 
+    : primaryModel.withFallbacks([backupModelAssistant]);
   
   // Prevent token explosion: 
   // 1. Keep only the LATEST SystemMessage (LangGraph appends a new one on every request)

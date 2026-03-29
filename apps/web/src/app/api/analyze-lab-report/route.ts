@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 // Vercel / Next.js allows up to 5 minutes for pro plans.
 // Locally, setting this bypasses the default 30s timeout of Next.js dev server.
-export const maxDuration = 300; // 5 minutes for reasoning models (GPT-5.2)
+export const maxDuration = 300; // 5 minutes for reasoning models (GPT-5.4)
 
 export async function POST(req: NextRequest) {
     try {

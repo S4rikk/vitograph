@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AI Controller тАФ Thin HTTP adapter between routes and AI services.
  *
  * Each handler:
@@ -1502,7 +1502,7 @@ export async function handleAnalyzeFood(
 // тФАтФА POST /api/v1/ai/analyze-lab-report тФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФАтФА
 
 /**
- * Handles premium GPT-5.2 diagnostic analysis of parsed biomarkers.
+ * Handles premium GPT-5.4 diagnostic analysis of parsed biomarkers.
  * Produces a structured diagnostic report and saves it to the user's profile.
  */
 export async function handleAnalyzeLabReport(
@@ -1536,7 +1536,7 @@ export async function handleAnalyzeLabReport(
         historySynopsis: formatHistorySynopsis(dbContext.profile),
       });
 
-      // 2. Run GPT-5.2 diagnostic analysis
+      // 2. Run GPT-5.4 diagnostic analysis
       const report = await runLabReportAnalyzer(
         body.biomarkers,
         userContext,

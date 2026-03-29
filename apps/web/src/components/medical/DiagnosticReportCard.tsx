@@ -31,7 +31,7 @@ type DiagnosticReportCardProps = {
 };
 
 /**
- * Renders a structured diagnostic report from GPT-5.2 analysis.
+ * Renders a structured diagnostic report from GPT-5.4 analysis.
  *
  * Sections: summary, biomarker assessments, diagnostic patterns,
  * priority actions, additional tests, dietary recommendations, disclaimer.
@@ -48,7 +48,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
                     <h3 className="text-lg font-semibold text-ink">
                         Диагностический отчёт
                     </h3>
-                    <p className="text-xs text-ink-muted">GPT-5.2 · Премиум-анализ</p>
+                    <p className="text-xs text-ink-muted">GPT-5.4 · Премиум-анализ</p>
                 </div>
             </div>
 

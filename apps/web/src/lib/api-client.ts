@@ -622,7 +622,7 @@ class AiApiClient {
   }
 
   /**
-   * Runs GPT-5.2 premium diagnostic analysis on parsed biomarkers.
+   * Runs GPT-5.4 premium diagnostic analysis on parsed biomarkers.
    * Uses DIRECT backend URL to bypass Next.js proxy timeout (~30s).
    */
   async analyzeLabReport(biomarkers: BiomarkerResult[]): Promise<LabDiagnosticReport> {
@@ -636,7 +636,7 @@ class AiApiClient {
       method: "POST",
       headers,
       body: JSON.stringify({ biomarkers }),
-      signal: AbortSignal.timeout(180_000), // 3-minute timeout for GPT-5.2 analysis
+      signal: AbortSignal.timeout(180_000), // 3-minute timeout for GPT-5.4 analysis
     });
 
     if (!response.ok) {

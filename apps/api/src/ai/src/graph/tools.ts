@@ -380,7 +380,10 @@ export const get_today_diary_summary = new DynamicStructuredTool({
   }
 });
 
-// We can export an array of all available tools for easy binding
-export const agentTools = [calculateNormsTool, updateProfileTool, logMealTool, log_supplement_intake_tool, get_today_diary_summary];
+export const assistantTools = [calculateNormsTool, updateProfileTool, get_today_diary_summary];
+export const diaryTools = [calculateNormsTool, updateProfileTool, logMealTool, log_supplement_intake_tool, get_today_diary_summary];
+
+// We can export an array of all available tools for easy binding to ToolNode
+export const agentTools = diaryTools;
 
 

@@ -268,7 +268,7 @@ export const LabelScannerOutputSchema = z.object({
 export type LabelScannerOutput = z.infer<typeof LabelScannerOutputSchema>;
 
 // ═══════════════════════════════════════════════════════════════════════
-// §6  Lab Diagnostic Report (GPT-5.2 Premium Analysis)
+// §6  Lab Diagnostic Report (GPT-5.4 Premium Analysis)
 // ═══════════════════════════════════════════════════════════════════════
 
 // ── Food Contraindication Zones ──────────────────────────────────────
