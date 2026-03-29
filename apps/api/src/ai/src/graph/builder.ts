@@ -6,11 +6,8 @@ import { GraphAnnotation } from "./state.js";
 import { agentTools } from "./tools.js";
 import { checkpointer } from "./checkpointer.js";
 const primaryModel = new ChatOpenAI({
-  modelName: "gemini-3.1-pro-preview-thinking",
-  configuration: {
-    baseURL: "https://api.ourzhishi.top/v1",
-    apiKey: process.env.GEMINI_API,
-  },
+  modelName: "gpt-5.4-mini",
+  apiKey: process.env.OPENAI_API_KEY,
   temperature: 0.2,
 }).bindTools(agentTools);
 
