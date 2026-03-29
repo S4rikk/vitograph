@@ -57,7 +57,6 @@ ${userProfileContext}
         macronutrients_per_100g: null,
       },
       model: "gpt-4o",
-      useRouter: false, // Отключаем роутер, используем openai(gpt-4o) как для еды
       temperature: 0.1,
     });
 

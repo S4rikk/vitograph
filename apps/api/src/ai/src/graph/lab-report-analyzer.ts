@@ -36,7 +36,7 @@ const LAB_ANALYSIS_TIMEOUT_MS = 120_000;
 const LAB_ANALYSIS_TEMPERATURE = 0.2;
 
 /** Model for premium diagnostics. */
-const LAB_ANALYSIS_MODEL = "gemini-3.1-pro-preview-thinking";
+const LAB_ANALYSIS_MODEL = "gpt-5.4-mini"; // Switched from router to official OpenAI 2026-03-29
 
 // ── System Prompt ───────────────────────────────────────────────────
 

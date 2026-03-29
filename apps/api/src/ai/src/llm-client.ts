@@ -12,10 +12,13 @@
  * - Retry with exponential backoff (§5.2) — via SDK internals
  * - Fallback strategy (§5.3) — graceful degradation
  * - Structured logging (§4.2) — token + latency tracking
+ *
+ * NOTE: Router api.ourzhishi.top permanently removed 2026-03-29.
+ * All calls go directly to official OpenAI API.
  */
 
 import { generateObject } from "ai";
-import { openai, createOpenAI } from "@ai-sdk/openai";
+import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
 
 // ── Configuration ───────────────────────────────────────────────────
@@ -23,49 +26,12 @@ import { z } from "zod";
 /** Default model for all LLM calls. */
 const DEFAULT_MODEL = "gpt-4o";
 
-/** Custom Router for Gemini-3.1-Pro-Thinking */
-const routerProvider = createOpenAI({
-  baseURL: "https://api.ourzhishi.top/v1",
-  apiKey: process.env.GEMINI_API || "",
-});
-
-/** Router Health State (Simplified Circuit Breaker) */
-const routerHealth = {
-  isHealthy: true,
-  lastFailureTime: 0,
-  COOLDOWN_MS: 300_000, // 5 minutes
-};
-
-/**
- * Checks if the router is healthy.
- * Resets health after cooldown period.
- */
-function isRouterHealthy(): boolean {
-  if (!routerHealth.isHealthy) {
-    const timeSinceFailure = Date.now() - routerHealth.lastFailureTime;
-    if (timeSinceFailure > routerHealth.COOLDOWN_MS) {
-      routerHealth.isHealthy = true;
-      console.log("[LLM:HEALTH] 🛡️ Circuit breaker reset. Router is back in service.");
-    }
-  }
-  return routerHealth.isHealthy;
-}
-
-/** Trips the circuit breaker. */
-function tripRouterCircuit(error: string): void {
-  routerHealth.isHealthy = false;
-  routerHealth.lastFailureTime = Date.now();
-  console.warn(`[LLM:FAILOVER] ⚠️ Router failed (${error}). Tripping circuit breaker for 5m.`);
-}
-
 /** Timeout presets: sync (user-facing) vs async (background). */
 export const LLM_TIMEOUTS = {
   /** User is waiting for chat response — keep fast. */
   sync: 15_000,
   /** Background analysis — can take longer. */
   async: 30_000,
-  /** Failover limit for router attempt. */
-  router: 120_000, // 2 minutes — Mandatory for stable medical analysis
 } as const;
 
 /** Retry presets: sync vs async. */
@@ -109,8 +75,6 @@ export interface LlmCallOptions<T extends AnyZodObject> {
   readonly temperature?: number;
   /** Optional max output tokens override. */
   readonly maxOutputTokens?: number;
-  /** Optional: Force routing to custom router (defaults to true for non-excluded tasks). */
-  readonly useRouter?: boolean;
 }
 
 /** Result of a structured LLM call with metadata. */
@@ -135,94 +99,42 @@ export interface LlmCallResult<T> {
 
 /**
  * Calls an LLM with structured output validation via Zod.
- * Supports routing and failover logic.
+ * Uses official OpenAI API directly (no external router).
  */
 export async function callLlmStructured<T extends AnyZodObject>(
   options: LlmCallOptions<T>,
 ): Promise<LlmCallResult<z.infer<T>>> {
   const startTime = Date.now();
-
-  // 1. Determine Routing Policy
-  const EXCLUDED_SCHEMAS = [
-    "food_recognition", 
-    "nutrition_targets", 
-    "somatic_diagnostics",
-    "psychological_response",
-    "symptom_correlation",
-    "diagnostic_hypothesis"
-  ];
-  const isExcluded = EXCLUDED_SCHEMAS.includes(options.schemaName);
-  
-  // useRouter defaults to true UNLESS excluded or explicitly disabled
-  const shouldTryRouter = options.useRouter !== false && !isExcluded && isRouterHealthy();
-
-  // 2. Initial Attempt (Router or OpenAI)
-  const initialProvider = shouldTryRouter ? routerProvider : openai;
-  const initialModel = shouldTryRouter 
-    ? (options.model ?? "gemini-3.1-pro-preview-thinking") 
-    : (options.model ?? DEFAULT_MODEL);
-  
-  const providerName = shouldTryRouter ? "router" : "openai";
+  const model = options.model ?? DEFAULT_MODEL;
 
   try {
     // @ts-ignore - maxOutputTokens is supported in AI SDK 6.x but types might be outdated
     const result = await generateObject({
-      model: initialProvider(initialModel),
+      model: openai(model),
       output: "object" as const,
       schema: options.schema,
       schemaName: options.schemaName,
       system: options.systemPrompt,
       ...(options.messages ? { messages: options.messages as any } : { prompt: options.userMessage as string }),
-      // Router calls use 0 retries and capped timeout to fail fast
-      maxRetries: shouldTryRouter ? 0 : options.maxRetries,
-      abortSignal: AbortSignal.timeout(shouldTryRouter ? Math.min(options.timeoutMs, LLM_TIMEOUTS.router) : options.timeoutMs),
+      maxRetries: options.maxRetries,
+      abortSignal: AbortSignal.timeout(options.timeoutMs),
       temperature: options.temperature ?? 0.7,
       maxOutputTokens: options.maxOutputTokens,
     });
 
-    return finalizeResult(result, startTime, options.schemaName, providerName, initialModel);
+    return finalizeResult(result, startTime, options.schemaName, model);
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-
-    // 3. Failover Logic
-    if (shouldTryRouter) {
-      tripRouterCircuit(errorMessage);
-      const failoverModel = "gpt-4o-mini";
-      console.log(`[LLM:FAILOVER] 🔄 Retrying via ${failoverModel}...`);
-      
-      try {
-        // @ts-ignore - maxOutputTokens is supported in AI SDK 6.x but types might be outdated
-        const failoverResult = await generateObject({
-          model: openai(failoverModel),
-          output: "object" as const,
-          schema: options.schema,
-          schemaName: options.schemaName,
-          system: options.systemPrompt,
-          ...(options.messages ? { messages: options.messages as any } : { prompt: options.userMessage as string }),
-          maxRetries: options.maxRetries,
-          abortSignal: AbortSignal.timeout(options.timeoutMs),
-          temperature: options.temperature ?? 0.7,
-          maxOutputTokens: options.maxOutputTokens,
-        });
-
-        return finalizeResult(failoverResult, startTime, options.schemaName, "openai", failoverModel);
-      } catch (failoverError: unknown) {
-        return handleFinalFailure(failoverError, startTime, options.schemaName, failoverModel, options.fallback);
-      }
-    }
-
-    // Direct failure (already on OpenAI or router explicitly bypassed)
-    return handleFinalFailure(error, startTime, options.schemaName, initialModel, options.fallback);
+    return handleFinalFailure(error, startTime, options.schemaName, model, options.fallback);
   }
 }
 
 /** Formats the successful LLM result. */
-function finalizeResult(result: any, startTime: number, schemaName: string, provider: string, model: string) {
+function finalizeResult(result: any, startTime: number, schemaName: string, model: string) {
   const latencyMs = Date.now() - startTime;
   const totalTokens = (result.usage.inputTokens ?? 0) + (result.usage.outputTokens ?? 0);
 
   console.log(
-    `[LLM] ✅ ${schemaName} | provider=${provider} | model=${model} | ` +
+    `[LLM] ✅ ${schemaName} | provider=openai | model=${model} | ` +
     `tokens=${totalTokens} | latency=${latencyMs}ms`,
   );
 
