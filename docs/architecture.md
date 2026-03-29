@@ -1,6 +1,6 @@
 # VITOGRAPH — Architecture: Database Schema & API Structure
 
-> **Последнее обновление:** 16 марта 2026
+> **Последнее обновление:** 29 марта 2026
 >
 > Смотрите также: [API Reference](./api_reference.md) | [Frontend Components](./frontend_components.md) | [AI Pipeline](./ai_pipeline.md)
 
@@ -22,6 +22,7 @@
 | Auth       | Supabase Auth (JWT, RLS integration)           |
 | Storage    | Supabase Storage (blood test PDFs / images)    |
 | AI/ML      | pgvector for embeddings, external LLM services |
+| LLM        | Gemini 3.1 Pro Thinking (primary), GPT-4o (diary/vision), GPT-4o-mini (fallback) |
 
 ---
 
@@ -238,6 +239,7 @@
 | `meal_logs`                        | Food diary entries with `micronutrients` JSONB (Phase 33)     |
 | `meal_items`                       | Individual food items within a meal                           |
 | `supplement_logs`                  | BAD intake tracking with `taken_at`, `was_on_time` (Phase 34) |
+| `ai_chat_messages`                 | Chat history persistence (user/assistant messages)            |
 | `feedback`                         | User feedback with anti-spam (`created_at` cooldown)          |
 | `active_condition_knowledge_bases` | Medical condition knowledge for norm adjustments (Phase 53f)  |
 
@@ -374,9 +376,9 @@ apps/api/
         ├── llm-client.ts        # callLlmStructured wrapper
         ├── request-schemas.ts   # Zod input validation
         ├── graph/               # LangGraph ReAct Agent
-        │   ├── builder.ts       # Graph definition + dedup interceptor
+        │   ├── builder.ts       # Graph definition + dedup interceptor + sanitizeMessages()
         │   ├── state.ts         # GraphAnnotation (messages + medicalContext)
-        │   ├── tools.ts         # calculate_norms, update_profile, log_meal
+        │   ├── tools.ts         # 5 tools: calculate_norms, update_profile, log_meal, log_supplement, diary_summary
         │   ├── food-vision-analyzer.ts
         │   ├── lab-report-analyzer.ts
         │   ├── nutrition-analyzer.ts

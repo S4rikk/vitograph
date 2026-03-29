@@ -1,6 +1,6 @@
 # VITOGRAPH — AI Pipeline Documentation
 
-> **Дата актуальности:** 16 марта 2026
+> **Дата актуальности:** 29 марта 2026
 >
 > Документация AI/LLM пайплайна: LangGraph, GPT-4o, structured outputs, детерминированные нормы.
 
@@ -63,12 +63,27 @@ graph LR
     TOOLS --> AGENT
 ```
 
-**Модель:** `gpt-4o-mini` (temperature: 0.2) — для чата. Для анализа крови и Vision используется `gpt-4o`.
+**Модели (актуально на март 2026):**
+
+| Роль | Модель | Temperature | Назначение |
+| :--- | :----- | :---------- | :--------- |
+| **Primary** | `gemini-3.1-pro-preview-thinking` | 0.2 | Режим `assistant` — через прокси `api.ourzhishi.top/v1`, env: `GEMINI_API` |
+| **Diary** | `gpt-4o` | 0 | Режим `diary` — логирование еды, tool-вызовы |
+| **Backup** | `gpt-4o-mini` | 0.2 | Fallback при отказе Primary |
+| **Vision / Lab** | `gpt-4o` | 0.2 | Standalone analyzers (food-vision, lab-report) |
+
+> 📌 Для assistant-режима используется цепочка: `primaryModel.withFallbacks([backupModel])`.
+> Для diary-режима — `diaryModel` напрямую (GPT-4o лучше работает с tool-вызовами).
 
 ### 2.2 Оптимизации в `callModel`
 
-1. **Token explosion prevention:** Только ПОСЛЕДНИЙ SystemMessage сохраняется (LangGraph добавляет новый на каждый запрос). Конвенционные сообщения обрезаются до 20 последних.
+1. **Token explosion prevention:** Только ПОСЛЕДНИЙ SystemMessage сохраняется (LangGraph добавляет новый на каждый запрос). Конвенционные сообщения обрезаются до **12 последних** (ранее 20).
 2. **Deduplication interceptor (Phase 33.2):** Если LLM возвращает несколько `log_meal` tool_calls с одинаковым `food_name + weight_g`, дубликаты отсеиваются. Решает баг 10x дублирования.
+3. **sanitizeMessages() (Phase 55):** Перед отправкой в LLM, массив сообщений проходит через санитайзер, который удаляет:
+   - Orphaned AI messages с `tool_calls` без соответствующих `tool` responses → заменяются на plain AIMessage
+   - Orphaned `tool` responses без parent AI message → удаляются
+   - При ошибке `INVALID_TOOL_RESULTS` при invoke — last-resort retry с полной зачисткой tool-истории
+4. **Phase 54 — Vision nutritionalContext:** Если запрос содержит `nutritionalContext` в configurable, в начало сообщений инжектируется SystemMessage с готовыми нутриентами от Vision, чтобы LLM не пересчитывал их самостоятельно.
 
 ### 2.3 State (GraphAnnotation)
 
@@ -83,11 +98,13 @@ graph LR
 
 Файл: [`tools.ts`](file:///c:/project/VITOGRAPH/apps/api/src/ai/src/graph/tools.ts)
 
-| Tool                  | Описание                                                            | Целевая таблица              |
-| :-------------------- | :------------------------------------------------------------------ | :--------------------------- |
-| `calculate_norms`     | Расчёт динамической нормы биомаркера через Python Core API          | — (прокси к Python)          |
-| `update_user_profile` | Точечное обновление ключа в `lifestyle_markers` JSONB               | `profiles.lifestyle_markers` |
-| `log_meal`            | Логирование приёма пищи с КБЖУ, микронутриентами и оценкой качества | `meal_logs`, `meal_items`    |
+| Tool                       | Описание                                                            | Целевая таблица              |
+| :------------------------- | :------------------------------------------------------------------ | :--------------------------- |
+| `calculate_norms`          | Расчёт динамической нормы биомаркера через Python Core API          | — (прокси к Python)          |
+| `update_user_profile`      | Точечное обновление ключа в `lifestyle_markers` JSONB               | `profiles.lifestyle_markers` |
+| `log_meal`                 | Логирование приёма пищи с КБЖУ, микронутриентами и оценкой качества | `meal_logs`, `meal_items`    |
+| `log_supplement_intake`    | Логирование приёма БАДа из протокола пользователя                   | `supplement_logs`            |
+| `get_today_diary_summary`  | Получение дневника за сегодня (калории, макросы, список блюд)       | `meal_logs` (read-only)      |
 
 **Сигнатура `log_meal`:**
 ```
@@ -103,6 +120,23 @@ micronutrients: {
   zinc_mg, magnesium_mg, folate_mcg,
   selenium_mcg, potassium_mg, sodium_mg,
   vitamin_e_mg, phosphorus_mg, omega3_g
+}
+```
+
+**Сигнатура `log_supplement_intake`:**
+```
+supplement_name: string (e.g. "Omega-3", "Zinc")
+dosage: string (e.g. "1000mg", "1 pill")
+was_on_time: boolean
+```
+
+**Сигнатура `get_today_diary_summary`:**
+```
+dummy: string? (пустой параметр для совместимости)
+→ Возвращает JSON: {
+  summary_date, total_calories_today, total_protein_today,
+  total_fat_today, total_carbs_today,
+  meals: [{ meal_type, time, calories, items[] }]
 }
 ```
 
