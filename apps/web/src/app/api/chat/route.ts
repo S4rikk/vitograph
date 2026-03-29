@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import axios from "axios";
 
 // Vercel / Next.js allows up to 5 minutes for pro plans.
 // Locally, setting this bypasses the default 30s timeout of Next.js dev server.
@@ -14,31 +15,27 @@ export async function POST(req: NextRequest) {
         const backendUrl = `${baseUrl}/chat`;
 
         const authorization = req.headers.get("Authorization");
-        const headers: HeadersInit = {
+        const headers: Record<string, string> = {
             "Content-Type": "application/json",
         };
         if (authorization) {
             headers["Authorization"] = authorization;
         }
 
-        const response = await fetch(backendUrl, {
-            method: "POST",
+        const response = await axios.post(backendUrl, json, {
             headers,
-            body: JSON.stringify(json),
-            // Pass the timeout to the underlying node-fetch
-            signal: AbortSignal.timeout(900_000),
+            timeout: 900_000,
+            validateStatus: () => true // Allow handling non-2xx status codes downstream
         });
 
-        if (!response.ok) {
-            const errorText = await response.text();
+        if (response.status >= 400) {
             return NextResponse.json(
-                { error: true, message: `Backend error: ${response.status}`, detail: errorText },
+                { error: true, message: `Backend error: ${response.status}`, detail: typeof response.data === "string" ? response.data : JSON.stringify(response.data) },
                 { status: response.status }
             );
         }
 
-        const data = await response.json();
-        return NextResponse.json(data);
+        return NextResponse.json(response.data);
     } catch (error: any) {
         console.error("[Next.js Proxy API] Error in chat agent:", error);
         return NextResponse.json(
@@ -57,28 +54,27 @@ export async function DELETE(req: NextRequest) {
         const backendUrl = `${baseUrl}/chat/history?mode=${mode}`;
 
         const authorization = req.headers.get("Authorization");
-        const headers: HeadersInit = {
+        const headers: Record<string, string> = {
             "Content-Type": "application/json",
         };
         if (authorization) {
             headers["Authorization"] = authorization;
         }
 
-        const response = await fetch(backendUrl, {
-            method: "DELETE",
+        const response = await axios.delete(backendUrl, {
             headers,
+            timeout: 900_000,
+            validateStatus: () => true
         });
 
-        if (!response.ok) {
-            const errorText = await response.text();
+        if (response.status >= 400) {
             return NextResponse.json(
-                { error: true, message: `Backend error: ${response.status}`, detail: errorText },
+                { error: true, message: `Backend error: ${response.status}`, detail: typeof response.data === "string" ? response.data : JSON.stringify(response.data) },
                 { status: response.status }
             );
         }
 
-        const data = await response.json();
-        return NextResponse.json(data);
+        return NextResponse.json(response.data);
     } catch (error: any) {
         console.error("[Next.js Proxy API] Error in DELETE chat history:", error);
         return NextResponse.json(

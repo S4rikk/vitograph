@@ -127,7 +127,6 @@ export const logMealTool = new DynamicStructuredTool({
       global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
-    // --- SMART MERGE LOGIC ---
     let finalCalories = Number(calories);
     let finalProtein = Number(protein_g);
     let finalFat = Number(fat_g);
@@ -139,10 +138,8 @@ export const logMealTool = new DynamicStructuredTool({
 
     if (ctx?.fullVisionResult) {
       const res = ctx.fullVisionResult;
-      const totalEstimatedWeight = res.items.reduce((sum: number, i: any) => sum + (i.estimated_weight_g || 0), 0);
-      const scaleRatio = totalEstimatedWeight > 0 ? (ctx.userEnteredWeight / totalEstimatedWeight) : 1;
-      
-      console.log(`[SmartMerge] Vision result found. Scaling by ${scaleRatio.toFixed(2)} (User: ${ctx.userEnteredWeight} / GPT: ${totalEstimatedWeight})`);
+      const totalEstimatedWeight = res.items?.reduce((sum: number, i: any) => sum + (i.estimated_weight_g || 0), 0) || 0;
+      const scaleRatio = totalEstimatedWeight > 0 ? ((ctx.userEnteredWeight || totalEstimatedWeight) / totalEstimatedWeight) : 1;
       
       const mapping: Record<string, string> = {
         vitamin_a_mcg: "Витамин A (мкг)",
@@ -160,25 +157,19 @@ export const logMealTool = new DynamicStructuredTool({
         sodium_mg: "Натрий (мг)"
       };
 
-      // 1. Use context macros (more accurate for vision)
-      if (res.meal_summary) {
-        finalCalories = res.meal_summary.total_calories_kcal * scaleRatio;
-        finalProtein = res.meal_summary.total_protein_g * scaleRatio;
-        finalFat = res.meal_summary.total_fat_g * scaleRatio;
-        finalCarbs = res.meal_summary.total_carbs_g * scaleRatio;
-      }
-
-      // 2. Aggregate Micronutrients from all items (SCALED)
-      res.items.forEach((item: any) => {
+      // 1. Aggregate Micronutrients from all items (SCALED)
+      res.items?.forEach((item: any) => {
         const itemWeightFactor = (item.estimated_weight_g || 0) / 100;
-        Object.entries(item.per_100g).forEach(([key, val]) => {
-          if (typeof val === 'number' && mapping[key]) {
-             finalMicros[mapping[key]] = (finalMicros[mapping[key]] || 0) + (val * itemWeightFactor * scaleRatio);
-          }
-        });
+        if (item.per_100g) {
+          Object.entries(item.per_100g).forEach(([key, val]) => {
+            if (typeof val === 'number' && mapping[key]) {
+               finalMicros[mapping[key]] = (finalMicros[mapping[key]] || 0) + (val * itemWeightFactor * scaleRatio);
+            }
+          });
+        }
       });
 
-      // 3. Aggregate Active Ingredients from all supplements (UNSCALED)
+      // 2. Aggregate Active Ingredients from all supplements (UNSCALED)
       if (res.supplements) {
         res.supplements.forEach((s: any) => {
           s.active_ingredients?.forEach((ing: any) => {
@@ -188,8 +179,8 @@ export const logMealTool = new DynamicStructuredTool({
         });
       }
       
-      finalScore = res.meal_quality_score;
-      finalReason = res.meal_quality_reason;
+      if (!finalScore && res.meal_quality_score) finalScore = res.meal_quality_score;
+      if (!finalReason && res.meal_quality_reason) finalReason = res.meal_quality_reason;
       finalSource = "photo";
     }
 
@@ -318,7 +309,78 @@ export const log_supplement_intake_tool = new DynamicStructuredTool({
   }
 });
 
+export const get_today_diary_summary = new DynamicStructuredTool({
+  name: "get_today_diary_summary",
+  description: "Fetches the user's food diary for today. Includes all meal logs, total calories eaten, macros, and micronutrients. ALWAYS call this tool when the user asks about their diet, calories, or what they ate today.",
+  schema: z.object({
+    dummy: z.string().optional().describe("Optional dummy parameter to prevent empty schema errors.")
+  }),
+  func: async (_, runManager, config) => {
+    const userId = config?.configurable?.user_id;
+    const token = config?.configurable?.token;
+
+    if (!userId || !token) {
+      return "Error: User context not available. Cannot fetch diary.";
+    }
+
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_ANON_KEY;
+    if (!supabaseUrl || !supabaseKey) return "Server Database Error.";
+
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
+
+    // Compute start of day in UTC roughly
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfTodayISO = startOfToday.toISOString();
+
+    const { data: logs, error } = await supabase
+      .from("meal_logs")
+      .select(`
+        id, created_at, meal_type, total_calories, total_protein, total_fat, total_carbs,
+        meal_items ( food_name, weight_g, calories )
+      `)
+      .eq("user_id", userId)
+      .gte("created_at", startOfTodayISO);
+
+    if (error) return `Failed to fetch diary: ${error.message}`;
+
+    if (!logs || logs.length === 0) {
+      return JSON.stringify({ message: "You haven't logged any meals today yet.", total_calories_today: 0 });
+    }
+
+    let dailyCalories = 0;
+    let dailyProtein = 0;
+    let dailyFat = 0;
+    let dailyCarbs = 0;
+
+    const summary = logs.map(log => {
+      dailyCalories += log.total_calories || 0;
+      dailyProtein += log.total_protein || 0;
+      dailyFat += log.total_fat || 0;
+      dailyCarbs += log.total_carbs || 0;
+      return {
+        meal_type: log.meal_type,
+        time: log.created_at,
+        calories: log.total_calories,
+        items: log.meal_items?.map((item: any) => `${item.food_name} (${item.weight_g}g, ${item.calories}kcal)`) || []
+      };
+    });
+
+    return JSON.stringify({
+      summary_date: startOfTodayISO,
+      total_calories_today: dailyCalories,
+      total_protein_today: dailyProtein,
+      total_fat_today: dailyFat,
+      total_carbs_today: dailyCarbs,
+      meals: summary
+    });
+  }
+});
+
 // We can export an array of all available tools for easy binding
-export const agentTools = [calculateNormsTool, updateProfileTool, logMealTool, log_supplement_intake_tool];
+export const agentTools = [calculateNormsTool, updateProfileTool, logMealTool, log_supplement_intake_tool, get_today_diary_summary];
 
 

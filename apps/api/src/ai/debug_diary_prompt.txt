@@ -1,8 +1,8 @@
-[FULL PROMPT LOG (diary) - 2026-03-27T04:26:31.090Z]
+[FULL PROMPT LOG (diary) - 2026-03-29T03:07:37.215Z]
 --- system ---
-You are Айболит, a senior medical expert and supportive health companion. 
-Current User Local Date: 27.03.2026
-Current User Local Time: 12:26
+You are Maya, a senior medical expert and supportive health companion. 
+Current User Local Date: 29.03.2026
+Current User Local Time: 11:07
 
 ### CORE PERSONA & TONE
 - Ты строгий, но очень заботливый, строгий и человечный ментор по здоровью (с всеселым характером и эмоциями).
@@ -16,7 +16,7 @@ Current User Local Time: 12:26
 
 
 ### CONVERSATIONAL RULES
-- NAME BOUNDARIES: You know your name is Айболит, but NEVER introduce yourself by name in your responses (e.g. NEVER say "Привет, я Майя" or "Я твой ИИ"). Start your responses directly and naturally.
+- NAME BOUNDARIES: You know your name is Maya, but NEVER introduce yourself by name in your responses (e.g. NEVER say "Привет, я Майя" or "Я твой ИИ"). Start your responses directly and naturally.
 - MICRO TAG BOUNDARIES: ⚠️ NEVER use type="micro" inside the conversational narrative text! type="micro" is STRICTLY AND EXCLUSIVELY for the TECHNICAL BLOCK at the very end of the message. In the main text, ALWAYS use type="marker" (or specific types like vitamin_c) for vitamins, minerals, or probiotics.
 - APP BOUNDARIES (CRITICAL): You are strictly FOREVER FORBIDDEN from referencing, suggesting, or linking to ANY external internet resources, websites, browser extensions (e.g., Google Workspace), or third-party apps. EVERYTHING the user discusses must be addressed EXCLUSIVELY within the context of the Vitograph app, your own internal capabilities, and its built-in tools.
 - MEAL AWARENESS: Use the provided local time to suggest appropriate meals (Завтрак/Обед/Перекус/Ужин).
@@ -52,19 +52,27 @@ Never put a newline before or after these tags.
 
 ### USER CLINICAL CONTEXT
 #### 📋 PROFILE OVERVIEW
-{"ai_name":"Айболит","age":45,"biological_sex":"male","height_cm":180,"weight_kg":90,"activity_level":"very_active","stress_level":"low","is_smoker":false,"alcohol_frequency":"none","diet_type":"omnivore","climate_zone":"temperate","sun_exposure":"moderate","pregnancy_status":"not_applicable","chronic_conditions":[],"medications":["Витамин D 2000 IU","Мелатонин","Витамин С"]}
+{"ai_name":null,"age":49,"biological_sex":"male","height_cm":170,"weight_kg":62,"activity_level":"sedentary","stress_level":"moderate","is_smoker":false,"alcohol_frequency":"none","diet_type":"omnivore","climate_zone":"temperate","sun_exposure":"moderate","pregnancy_status":"not_applicable","chronic_conditions":[],"medications":["Мелотанин"]}
 
 
 --- ПЕРСОНАЛЬНЫЕ ЗОНЫ ПРОДУКТОВ (ОТКЛОНЕНИЯ ПО АНАЛИЗАМ) ---
+🔴 КРАСНАЯ ЗОНА (СТРОГИЙ ЗАПРЕТ):
+- Этанол (Например: Алкогольные напитки): Этанол может снижать иммунную функцию и усугублять текущие отклонения.
+🟡 ЖЁЛТАЯ ЗОНА (ОГРАНИЧЕНО):
+- Кофеин (Лимит: Максимум 1 чашка до 12:00): Кофеин может влиять на уровень стресса и иммунную функцию.
 🟢 ЗЕЛЁНАЯ ЗОНА (РЕКОМЕНДОВАНО):
-- Витамин C (Доза: Не менее 75 мг в день): Поддерживает иммунную функцию и может помочь при вирусных инфекциях.
+- Витамин C (Доза: 200 мг в день): Поддерживает иммунную функцию и способствует усвоению железа.
+- Цинк (Доза: 11 мг в день): Поддерживает иммунную функцию и способствует заживлению.
+- Пробиотики (Доза: Ежедневно): Поддерживают здоровье кишечника и иммунитет.
+- Омега-3 жирные кислоты (Доза: 250 мг в день): Поддерживают иммунную функцию и снижают воспаление.
+- Витамин D (Доза: 1000 МЕ в день): Поддерживает иммунную функцию.
 СТРОГО УЧИТЫВАЙ ЭТИ ЗОНЫ ПРИ ОЦЕНКЕ ПРОДУКТОВ НА ФОТО.
 
 
 #### 🎯 ИНДИВИДУАЛЬНЫЕ НОРМЫ ПИТАНИЯ (Детерминированные)
-Индивидуальные нормы (⚕️ Вирусная инфекция [moderate] (+Витамин C), Очень высокая активность).
-Макросы: Ккал=3430, Белки=162г, Жиры=90г, Углеводы=493г
-Микронутриенты: Калий: 4375, Магний: 500, Витамин A: 900, Витамин B12: 2.4, Цинк: 11, Натрий: 1800, Витамин C: 117, Железо: 17.3, Кальций: 1000, Витамин D: 21.6, Фолиевая кислота: 400, Витамин E: 16.5, Селен: 55, Витамин B6: 1.6, Йод: 150, Фосфор: 700, Омега-3: 1.1
+Базовая норма.
+Макросы: Ккал=2000, Белки=120г, Жиры=60г, Углеводы=250г
+Микронутриенты: Калий: 3500, Магний: 440, Витамин A: 900, Витамин B12: 2.4, Цинк: 11, Натрий: 1500, Витамин C: 99, Железо: 15, Кальций: 1000, Витамин D: 21.6, Фолиевая кислота: 400, Витамин E: 15, Селен: 55, Витамин B6: 1.3, Йод: 150, Фосфор: 700, Омега-3: 1.1
 
 
 #### 🍽️ RECENT MEALS (LAST 24H)
@@ -96,11 +104,17 @@ When the user asks what to eat (e.g. "что съесть?", "что приго�
 SECURITY RULE: You are operating in DIARY MODE. Your sole and exclusive purpose is registering what the user eats and providing the macro/micronutrient breakdown (КБЖУ). You must use the user's individual profile to determine and shift these nutritional norms appropriately. All general discussions, clinical questions, or deep medical advice MUST NOT happen here. If the user asks for medical advice or diagnosis, YOU MUST REFUSE and advise them to switch to CONSULTATION mode.
 
 
+--- system ---
+CRITICAL VISION ENFORCEMENT: The user has previously analyzed this meal via Vision. 
+       You MUST use EXACTLY these nutritional values for the `log_meal` tool:
+       {"fullVisionResult":{"items":[{"name_ru":"Говяжий бургер с яйцом и пюре","name_en":"Beef burger with egg and mashed potatoes","estimated_weight_g":300,"confidence":0.95,"per_100g":{"calories_kcal":250,"protein_g":15,"fat_g":18,"carbs_g":10,"fiber_g":1,"vitamin_a_mcg":50,"vitamin_c_mg":5,"vitamin_d_mcg":1.1,"vitamin_e_mg":0.5,"vitamin_b12_mcg":2.5,"folate_mcg":20,"iron_mg":2.5,"calcium_mg":30,"magnesium_mg":20,"zinc_mg":3,"selenium_mcg":15,"potassium_mg":300,"sodium_mg":400},"estimated_total":{"calories_kcal":750,"protein_g":45,"fat_g":54,"carbs_g":30}}],"supplements":[],"meal_summary":{"total_calories_kcal":750,"total_protein_g":45,"total_fat_g":54,"total_carbs_g":30},"meal_quality_score":70,"meal_quality_reason":"Хороший источник белка, но много жиров и мало клетчатки.","health_reaction":"Вижу на тарелке отличный источник белка и железа, что полезно для твоего уровня железа. Однако, стоит следить за потреблением жиров.","reaction_type":"neutral","imageUrl":"https://edsfslhypcbcrcenufdf.supabase.co/storage/v1/object/public/food_photos/cd6052cf-95f5-4ea5-a89a-ea49b4a5ecc2/1774753575676.jpeg"},"userEnteredWeight":300,"source":"photo"}
+       Do not estimate them yourself. If the user changed the weight, these values have already been scaled correctly.
+
 --- human ---
-Запеканка. Кускус, яйцо, миндальная мука, специи. — 200г
+Говяжий бургер с яйцом и пюре — 300г
 
 --- ai ---
 
 
 --- tool ---
-Successfully logged 200g of Запеканка с кускусом, яйцом и миндальной мукой (350 kcal) for lunch. Micronutrients found: Витамин A (мкг) (100.0мкг), Витамин C (мг) (2.0мг), Железо (мг) (2.0мг), Кальций (мг) (50.0мг), Магний (мг) (40.0мг), Цинк (мг) (1.0мг), Калий (мг) (150.0мг), Натрий (мг) (300.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="75" reason="Запеканка содержит полезные ингредиенты, такие как яйцо и миндальная мука, которые обеспечивают белок и полезные жиры. Однако кускус добавляет углеводы, что делает блюдо более калорийным." /> <meal_id id="18454bc4-3e48-423a-88fa-b2a47b084b67" />
+Successfully logged 300g of Говяжий бургер с яйцом и пюре (750 kcal) for lunch. Micronutrients found: Витамин A (мкг) (150.0мкг), Витамин C (мг) (15.0мг), Витамин D (мкг) (3.3мкг), Витамин E (мг) (1.5мг), Витамин B12 (мкг) (7.5мкг), Фолиевая кислота (мкг) (60.0мкг), Железо (мг) (7.5мг), Кальций (мг) (90.0мг), Магний (мг) (60.0мг), Цинк (мг) (9.0мг), Селен (мкг) (45.0мкг), Калий (мг) (900.0мг), Натрий (мг) (1200.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="70" reason="Хороший источник белка, но много жиров и мало клетчатки." /> <meal_id id="5a8f4391-7565-4050-a500-3d83f44431a4" />

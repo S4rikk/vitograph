@@ -9,7 +9,8 @@
     "dev": "npx tsx watch src/server.ts",
     "test:ai": "npx tsx src/test-ai.ts",
     "test:weather": "tsx scripts/test_weather_alert.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.29",
@@ -35,6 +36,7 @@
     "@types/node": "^22.19.11",
     "ts-node": "^10.9.2",
     "tsx": "^4.0.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.5"
   }
 }

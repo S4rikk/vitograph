@@ -1274,14 +1274,18 @@ When the user asks what to eat (e.g. "что съесть?", "что приго�
           content: finalContent,
         };
 
-        // Delay AI message timestamp slightly to ensure consistent ordering on rapid inserts
-        const { error: err1 } = await supabase.from("ai_chat_messages").insert([userMsgPayload]);
-        if (err1) console.error("[handleChat] Error inserting user msg:", err1);
+        try {
+          // Delay AI message timestamp slightly to ensure consistent ordering on rapid inserts
+          const { error: err1 } = await supabase.from("ai_chat_messages").insert([userMsgPayload]);
+          if (err1) console.error("[handleChat] Error inserting user msg (possible JWT expired):", err1);
 
-        await new Promise(resolve => setTimeout(resolve, 10)); // 10ms delay
+          await new Promise((resolve) => setTimeout(resolve, 10)); // 10ms delay
 
-        const { error: err2 } = await supabase.from("ai_chat_messages").insert([aiMsgPayload]);
-        if (err2) console.error("[handleChat] Error inserting AI msg:", err2);
+          const { error: err2 } = await supabase.from("ai_chat_messages").insert([aiMsgPayload]);
+          if (err2) console.error("[handleChat] Error inserting AI msg:", err2);
+        } catch (insertError) {
+          console.error("[handleChat] Exception during message insertion:", insertError);
+        }
       }
     }
 
