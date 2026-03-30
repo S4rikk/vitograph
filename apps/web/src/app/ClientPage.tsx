@@ -65,20 +65,20 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-3 sm:px-6 lg:px-8 sm:py-8 h-full flex flex-col">
+    <div className="mx-auto max-w-3xl px-2 sm:px-6 lg:px-8 sm:py-8 h-full flex flex-col">
       {/* ── Header ────────────────────────────────────────── */}
-      <header className="mb-3 sm:mb-8 text-center">
-        <h1 className="text-xl font-bold tracking-tight text-ink sm:text-3xl">
+      <header className="mb-1 sm:mb-8 text-center">
+        <h1 className="text-lg font-bold tracking-tight text-ink sm:text-3xl">
           VITO
           <span className="text-primary-600">GRAPH</span>
         </h1>
-        <p className="mt-1 text-sm text-ink-muted">
+        <p className="mt-1 text-sm text-ink-muted hidden sm:block">
           Feed your cells, find balance
         </p>
       </header>
 
       {/* ── Tab Switcher ──────────────────────────────────── */}
-      <div className="flex justify-center mb-3 sm:mb-8">
+      <div className="flex justify-center mb-2 sm:mb-8">
         <TabSwitcher
           tabs={TABS}
           activeTab={activeTab}

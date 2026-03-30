@@ -351,10 +351,10 @@ export default function AiAssistantView({ userId }: { userId: string }) {
   };
 
   return (
-    <div className="flex flex-1 min-h-[500px] sm:min-h-[600px] h-[calc(100vh-210px)] sm:h-[600px] flex-col overflow-hidden rounded-xl border border-cloud-dark bg-white shadow-sm">
+    <div className="flex flex-1 min-h-[500px] sm:min-h-[600px] h-[85dvh] sm:h-[600px] flex-col overflow-hidden rounded-xl border border-cloud-dark bg-white shadow-sm">
       {/* Header with Clear Button */}
-      <div className="flex items-center justify-between border-b border-cloud px-4 py-3 bg-white">
-        <h3 className="text-sm font-semibold text-ink-muted uppercase tracking-wider">
+      <div className="flex items-center justify-between border-b border-cloud px-3 py-1.5 sm:py-3 bg-white">
+        <h3 className="text-xs sm:text-sm font-semibold text-ink-muted uppercase tracking-wider">
           {profile?.ai_name || "ИИ-Помощник"}
         </h3>
         <button
@@ -382,7 +382,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${
+              className={`max-w-[95%] sm:max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${
                 msg.role === "user"
                   ? "bg-primary-600 text-white rounded-br-none"
                   : "bg-cloud-light text-ink rounded-bl-none"
