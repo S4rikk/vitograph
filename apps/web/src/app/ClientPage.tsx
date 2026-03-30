@@ -65,10 +65,10 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 lg:px-8 sm:py-8 h-full flex flex-col">
+    <div className="mx-auto max-w-3xl px-4 py-3 sm:px-6 lg:px-8 sm:py-8 h-full flex flex-col">
       {/* ── Header ────────────────────────────────────────── */}
-      <header className="mb-8 text-center">
-        <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+      <header className="mb-3 sm:mb-8 text-center">
+        <h1 className="text-xl font-bold tracking-tight text-ink sm:text-3xl">
           VITO
           <span className="text-primary-600">GRAPH</span>
         </h1>
@@ -78,7 +78,7 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
       </header>
 
       {/* ── Tab Switcher ──────────────────────────────────── */}
-      <div className="flex justify-center mb-8">
+      <div className="flex justify-center mb-3 sm:mb-8">
         <TabSwitcher
           tabs={TABS}
           activeTab={activeTab}
@@ -90,12 +90,13 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
       </div>
 
       {/* ── Tab Panels ────────────────────────────────────── */}
-      <main>
+      <main className="flex-1 flex flex-col min-h-0">
         <div
           id="panel-medical"
           role="tabpanel"
           aria-labelledby="tab-medical"
           hidden={activeTab !== "medical"}
+          className="flex-1 flex flex-col min-h-0"
         >
           <MedicalResultsView />
         </div>
@@ -105,6 +106,7 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
           role="tabpanel"
           aria-labelledby="tab-diary"
           hidden={activeTab !== "diary"}
+          className="flex-1 flex flex-col min-h-0"
         >
           <FoodDiaryView />
         </div>
@@ -114,6 +116,7 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
           role="tabpanel"
           aria-labelledby="tab-assistant"
           hidden={activeTab !== "assistant"}
+          className="flex-1 flex flex-col min-h-0"
         >
           <AiAssistantView userId={userId} />
         </div>

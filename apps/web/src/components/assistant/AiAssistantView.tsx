@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
 import Image from "next/image";
 import React from "react";
+import HealthGoalsWidget from "@/components/shared/HealthGoalsWidget";
 
 
 // ── CUSTOM PREMIUM RENDERERS ──
@@ -282,6 +283,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
         content: res.response,
       };
       setMessages((prev) => [...prev, assistantMsg]);
+      window.dispatchEvent(new Event("refresh-health-goals"));
     } catch (error) {
       console.error("[AiAssistant] Chat Error:", error);
       const errorMsg: Message = {
@@ -349,7 +351,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
   };
 
   return (
-    <div className="flex h-[500px] sm:h-[600px] flex-col overflow-hidden rounded-xl border border-cloud-dark bg-white shadow-sm">
+    <div className="flex flex-1 min-h-[500px] sm:min-h-[600px] h-[calc(100vh-210px)] sm:h-[600px] flex-col overflow-hidden rounded-xl border border-cloud-dark bg-white shadow-sm">
       {/* Header with Clear Button */}
       <div className="flex items-center justify-between border-b border-cloud px-4 py-3 bg-white">
         <h3 className="text-sm font-semibold text-ink-muted uppercase tracking-wider">
@@ -366,6 +368,8 @@ export default function AiAssistantView({ userId }: { userId: string }) {
           </svg>
         </button>
       </div>
+
+      <HealthGoalsWidget />
 
       {/* Messages Area */}
       <div 
