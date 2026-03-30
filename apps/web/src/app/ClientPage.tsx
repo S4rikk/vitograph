@@ -7,6 +7,7 @@ import MedicalResultsView from "@/components/medical/MedicalResultsView";
 import FoodDiaryView from "@/components/diary/FoodDiaryView";
 import AiAssistantView from "@/components/assistant/AiAssistantView";
 import OnboardingWizard from "@/components/onboarding/OnboardingWizard";
+import Logo from "@/components/ui/Logo";
 
 /* ── SVG Icons ────────────────────────────────────────────── */
 
@@ -67,14 +68,8 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
   return (
     <div className="mx-auto w-full max-w-3xl px-2 sm:px-6 lg:px-8 sm:py-8 flex-1 flex flex-col min-h-0 sm:h-full">
       {/* ── Header ────────────────────────────────────────── */}
-      <header className="hidden sm:block shrink-0 mb-8 text-center">
-        <h1 className="text-lg font-bold tracking-tight text-ink sm:text-3xl">
-          VITO
-          <span className="text-primary-600">GRAPH</span>
-        </h1>
-        <p className="mt-1 text-sm text-ink-muted hidden sm:block">
-          Feed your cells, find balance
-        </p>
+      <header className="hidden sm:flex shrink-0 mb-8 justify-center">
+        <Logo size="lg" showSubtitle={true} />
       </header>
 
       {/* ── Tab Switcher ──────────────────────────────────── */}

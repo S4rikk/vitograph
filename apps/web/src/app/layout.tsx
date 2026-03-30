@@ -3,6 +3,7 @@ import "./globals.css";
 import SignOutButton from "@/components/auth/SignOutButton";
 import { createClient } from "@/lib/supabase/server";
 import UserProfileSheet from "@/components/profile/UserProfileSheet";
+import Logo from "@/components/ui/Logo";
 
 export const metadata: Metadata = {
   title: "VITOGRAPH — Feed your cells, find balance",
@@ -31,9 +32,7 @@ export default async function RootLayout({
       <body className="h-[100dvh] flex flex-col bg-surface-muted sm:h-auto sm:min-h-screen sm:block">
         {user && (
           <header className="shrink-0 bg-white border-b border-border px-4 py-2 sm:px-6 sm:py-3 flex items-center justify-between">
-            <span className="font-bold text-lg tracking-tight text-ink">
-              VITO<span className="text-primary-600">GRAPH</span>
-            </span>
+            <Logo size="sm" showSubtitle={false} />
             <div className="flex items-center gap-4">
               <UserProfileSheet userId={user.id} userEmail={user.email || "User"} />
               <SignOutButton />
