@@ -30,9 +30,9 @@ export default async function RootLayout({
       </head>
       <body className="min-h-screen bg-surface-muted">
         {user && (
-          <header className="bg-white border-b border-border px-6 py-3 flex items-center justify-between">
-            <span className="font-bold text-lg text-primary-600">
-              VITOGRAPH
+          <header className="bg-white border-b border-border px-4 py-2 sm:px-6 sm:py-3 flex items-center justify-between">
+            <span className="font-bold text-lg tracking-tight text-ink">
+              VITO<span className="text-primary-600">GRAPH</span>
             </span>
             <div className="flex items-center gap-4">
               <UserProfileSheet userId={user.id} userEmail={user.email || "User"} />
