@@ -369,11 +369,16 @@ function formatMealLogs(meals: any[] | null, timezone: string = "UTC"): string {
   const now = new Date();
   const todayDateStr = now.toLocaleDateString("en-CA", { timeZone: timezone });
 
-  return meals.map(m => {
+  const todayMeals = meals.filter(m => {
     const mealDate = new Date(m.logged_at);
-    const mealDateStr = mealDate.toLocaleDateString("en-CA", { timeZone: timezone });
-    const isToday = mealDateStr === todayDateStr;
-    const dayLabel = isToday ? "Сегодня" : "Вчера";
+    return mealDate.toLocaleDateString("en-CA", { timeZone: timezone }) === todayDateStr;
+  });
+
+  if (todayMeals.length === 0) return "Сегодня пользователь ещё ничего не ел.";
+
+  return todayMeals.map(m => {
+    const mealDate = new Date(m.logged_at);
+    const dayLabel = "Сегодня";
 
     const time = mealDate.toLocaleTimeString("ru-RU", {
       hour: '2-digit', minute: '2-digit', timeZone: timezone
@@ -545,7 +550,7 @@ function formatTodayProgress(meals: any[] | null, timezone: string = "UTC"): str
   }
 
   let text = `Макросы: ${Math.round(totalCal)} ккал, Белки ${Math.round(totalP)}г, Жиры ${Math.round(totalF)}г, Углеводы ${Math.round(totalC)}г\n`;
-  text += `Приёмов пищи: ${meals.length}\n`;
+  text += `Приёмов пищи: ${todayMeals.length}\n`;
 
   if (Object.keys(microTotals).length > 0) {
     const entries = Object.entries(microTotals).map(([k, v]) => `${k}: ${Number(v).toFixed(1)}`).join(", ");
@@ -980,6 +985,13 @@ export async function handleDeleteMealLog(req: Request, res: Response, next: Nex
  * Handles the conversational chat endpoint using LangGraph.
  * Maintains memory via threadId and can call tools like calculateNorms.
  */
+function formatHealthGoals(profile: any): string {
+  if (!profile?.health_goals || !Array.isArray(profile.health_goals)) return "";
+  const activeGoals = profile.health_goals.filter((g: any) => g.is_active !== false);
+  if (activeGoals.length === 0) return "";
+  return `\n#### 🎯 ACTIVE HEALTH GOALS\nПользователь поставил следующие цели:\n${activeGoals.map((g: any) => `- [${g.category || 'Focus'}] ${g.title}`).join('\n')}\nУчитывай эти цели во всех своих ответах и рекомендациях. Хвали пользователя за шаги к их достижению и мягко корректируй, если он от них отклоняется.`;
+}
+
 export async function handleChat(
   req: Request,
   res: Response,
@@ -1109,7 +1121,12 @@ Never put a newline before or after these tags.
 ### USER CLINICAL CONTEXT
 #### 📋 PROFILE OVERVIEW
 ${JSON.stringify(leanContext!.profile)}
-${formatDietaryRestrictions(dbContext.profile)}`;
+${formatDietaryRestrictions(dbContext.profile)}
+${formatHealthGoals(dbContext.profile)}
+
+### УПРАВЛЕНИЕ ЦЕЛЯМИ (CRITICAL)
+- Если пользователь прямо или косвенно заявляет о цели (например: хочу похудеть, поставь цель и тд), ты ОБЯЗАН немедленно использовать инструмент manage_health_goals!
+- НИКОГДА не отвечай просто текстом 'Я запомнил цель'. Обязательно вызови инструмент, иначе UI не обновится.`;
 
           if (chatMode === "diary") {
             systemPrompt += `
@@ -1123,7 +1140,7 @@ ${formatFoodContraindicationZones(dbContext.profile)}
 #### 🎯 ИНДИВИДУАЛЬНЫЕ НОРМЫ ПИТАНИЯ (Детерминированные)
 ${formatNutritionTargets(dbContext.profile, dbContext.activeKnowledgeBases)}
 
-#### 🍽️ RECENT MEALS (LAST 24H)
+#### 🍽️ СЪЕДЕНО СЕГОДНЯ (ДНЕВНИК)
 Агрегированный итог:
 ${formatTodayProgress(dbContext.recentMeals, timezone)}
 

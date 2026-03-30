@@ -380,10 +380,74 @@ export const get_today_diary_summary = new DynamicStructuredTool({
   }
 });
 
-export const assistantTools = [calculateNormsTool, updateProfileTool, get_today_diary_summary];
+export const manageHealthGoalsTool = new DynamicStructuredTool({
+  name: "manage_health_goals",
+  description: "Добавляет, обновляет или завершает цель здоровья пользователя. Обязательно используй всегда, когда пользователь просит тебя поставить цель (например 'Хочу скинуть вес').",
+  schema: z.object({
+    action: z.enum(['add', 'remove']).describe("Действие: добавить или удалить/завершить цель"),
+    goal_title: z.string().describe("Краткое название цели (например 'Снизить вес до 70 кг', 'Пить больше воды')"),
+    category: z.string().describe("Категория (weight, nutrition, habit, fitness, etc)")
+  }),
+  func: async ({ action, goal_title, category }, runManager, config) => {
+    const userId = config?.configurable?.user_id;
+    const token = config?.configurable?.token;
+
+    if (!userId || !token) {
+      return "Error: User context not available. Cannot manage health goals.";
+    }
+
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_ANON_KEY;
+    if (!supabaseUrl || !supabaseKey) return "Server Database Error.";
+
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
+
+    const { data: profile, error } = await supabase.from("profiles").select("health_goals").eq("id", userId).single();
+    if (error) return `Failed to fetch profile: ${error.message}`;
+
+    let goals = Array.isArray(profile?.health_goals) ? profile.health_goals : [];
+    
+    if (action === "add") {
+      const newGoal = {
+        id: "goal-" + Date.now() + Math.random().toString(36).substring(2, 7),
+        title: goal_title,
+        category: category,
+        is_active: true,
+        created_at: new Date().toISOString()
+      };
+      goals = [...goals, newGoal];
+    } else if (action === "remove") {
+      let found = false;
+      goals = goals.map((g: any) => {
+        if (g.title.toLowerCase().includes(goal_title.toLowerCase()) && g.is_active) {
+          found = true;
+          return { ...g, is_active: false };
+        }
+        return g;
+      });
+      if (!found) return `Goal matching title '${goal_title}' not found or already inactive.`;
+    }
+
+    const { error: updateError } = await supabase.from("profiles").update({ health_goals: goals }).eq("id", userId);
+    if (updateError) return `Failed to update health goals: ${updateError.message}`;
+
+    return action === "add" ? `Успешно добавлена цель: ${goal_title}` : `Успешно завершена/удалена цель: ${goal_title}`;
+  }
+});
+
+export const assistantTools = [calculateNormsTool, updateProfileTool, get_today_diary_summary, manageHealthGoalsTool];
 export const diaryTools = [calculateNormsTool, updateProfileTool, logMealTool, log_supplement_intake_tool, get_today_diary_summary];
 
 // We can export an array of all available tools for easy binding to ToolNode
-export const agentTools = diaryTools;
+export const agentTools = [
+  calculateNormsTool, 
+  updateProfileTool, 
+  logMealTool, 
+  log_supplement_intake_tool, 
+  get_today_diary_summary, 
+  manageHealthGoalsTool
+];
 
 

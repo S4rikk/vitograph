@@ -13,6 +13,7 @@ import WaterTracker from "./WaterTracker";
 import { apiClient } from "@/lib/api-client";
 import { createClient } from "@/lib/supabase/client";
 import { getTzDayBoundaries, getTzToday } from "@/lib/date-utils";
+import HealthGoalsWidget from "@/components/shared/HealthGoalsWidget";
 
 type Message = {
   id: number;
@@ -218,6 +219,7 @@ export default function FoodDiaryView() {
         };
         setMessages((prev) => [...prev, aiMsg]);
         fetchMacrosForDate(selectedDate); // Re-fetch to update progress bars
+        window.dispatchEvent(new Event("refresh-health-goals"));
       })
       .catch((err) => {
         const errorMsg: Message = {
@@ -335,6 +337,8 @@ export default function FoodDiaryView() {
         <div className="flex flex-col bg-surface-muted px-5 pt-5 pb-2 shrink-0 z-10 border-b border-border/50">
           <DatePaginator selectedDate={selectedDate} onChange={setSelectedDate} userTimezone={userTimezone} />
         </div>
+
+        <HealthGoalsWidget />
 
         {/* ── Scrollable Content (Panels + Chat) ──────────────────────── */}
         <div

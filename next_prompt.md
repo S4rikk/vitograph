@@ -1,94 +1,35 @@
-# TASK: Full Router Removal — Purge ourzhishi.top from Codebase
+﻿# 📝 Техническое задание: Строгая привязка контекста питания к "Сегодняшнему дню" (Timezone aware)
 
-**Required Skills:**
-- Read `C:\store\ag_skills\skills\systematic-debugging\SKILL.md` before starting.
-- Read `C:\store\ag_skills\skills\senior-fullstack\SKILL.md` before coding.
+Привет! Обнаружился баг с галлюцинациями ИИ: когда пользователь спрашивает ассистента о съеденных калориях, ИИ иногда берёт приёмы пищи со вчерашнего вечера (потому что они попадают в окно 24 часов) и приплюсовывает их к сегодняшнему итогу. Это ломает логику дневника.
+Нам нужно жестко ограничить видимость списка блюд для ИИ строго рамками "Сегодня" в локальной таймзоне пользователя.
 
-**Architecture Context:**
+**ИСПОЛЬЗУЕМЫЕ СКИЛЛЫ ДЛЯ ЭТОЙ ЗАДАЧИ:** langgraph, prompt-engineering-patterns.
 
-Роутер `api.ourzhishi.top` (китайский OpenAI-совместимый прокси для Gemini) **навсегда исключён из проекта**. Официальная причина: хроническая нестабильность (ECONNRESET, задержки 200-280s, периодические outage). Теперь используются только официальные API (OpenAI). Задача — полностью вычистить все следы роутера из кода, конфигов и переменных окружения.
+### Шаг 1: Исправление агрегации в ormatTodayProgress
+Открой pps/api/src/ai/src/ai.controller.ts и найди функцию ormatTodayProgress (примерно 513 строка).
+- Сейчас там есть баг: подсчет макросов идет по 	odayMeals, но количество приёмов пищи выводится от общего массива: 	ext += \Приёмов пищи: \\n\;.
+- Замени meals.length на 	odayMeals.length.
 
----
+### Шаг 2: Строгая фильтрация в ormatMealLogs
+В том же файле найди функцию ormatMealLogs (примерно 366 строка).
+Сейчас эта функция проходится map по всему массиву, помечая часть приемов как "Вчера". Нам нужно скрыть вчерашнее от LLM в принципе!
+- Сразу после получения таймзоны (const todayDateStr = ...) сделай фильтрацию:
+`	ypescript
+const todayMeals = meals.filter(m => {
+  const mealDate = new Date(m.logged_at);
+  return mealDate.toLocaleDateString("en-CA", { timeZone: timezone }) === todayDateStr;
+});
 
-## Implementation Steps
+if (todayMeals.length === 0) return "Сегодня пользователь ещё ничего не ел.";
+`
+- И далее выполняй map только по отфильтрованному 	odayMeals. Внутри map логику label можно немного упростить (там всегда будет "Сегодня" раз мы отфильтровали).
 
-### 1. `apps/api/src/ai/src/llm-client.ts` — ПОЛНАЯ ЧИСТКА ROUTER-ЛОГИКИ
+### Шаг 3: Корректировка заголовков в системном промпте
+Найди функцию handleChat и тот кусок, где мы формируем секцию истории питания (примерно строка 1138), он выглядит так:
+#### 🍽️ RECENT MEALS (LAST 24H)
+- Измени этот заголовок на #### 🍽️ СЪЕДЕНО СЕГОДНЯ (ДНЕВНИК)
+- Это психологически жестко сориентирует LLM, что внутри лежат данные ТОЛЬКО за сегодня.
 
-Это главный файл. Убери весь router-специфичный код.
-
-**Удалить целиком:**
-- Импорт `createOpenAI` из `"@ai-sdk/openai"` (строка 18 — убрать `createOpenAI` из импорта, оставить `openai`)
-- Переменную `routerProvider` (строки 27–30 — весь блок `const routerProvider = createOpenAI({...})`)
-- Объект `routerHealth` (строки 33–37)
-- Функцию `isRouterHealthy()` (строки 43–52)
-- Функцию `tripRouterCircuit()` (строки 55–59)
-- `router: 120_000` из `LLM_TIMEOUTS` (строка 68 — убрать только эту строку, оставить `sync` и `async`)
-- Поле `useRouter?: boolean` из интерфейса `LlmCallOptions` (строка 113)
-
-**Упростить логику в `callLlmStructured()`:**
-- Удалить весь блок `// 1. Determine Routing Policy` (строки 146–157) — константы `EXCLUDED_SCHEMAS`, `isExcluded`, `shouldTryRouter`
-- Упростить инициализацию провайдера: всегда `openai`, всегда `options.model ?? DEFAULT_MODEL`
-- Удалить `providerName` (больше не нужен, всегда `"openai"`)
-- Удалить весь блок `// 3. Failover Logic` (строки 188–212) — он был нужен только для router failover
-- Упростить `try/catch`: при ошибке — сразу `handleFinalFailure()`
-- В `generateObject()` убрать router-специфичные параметры: `maxRetries: shouldTryRouter ? 0 : options.maxRetries` → просто `maxRetries: options.maxRetries`; `abortSignal` — просто `AbortSignal.timeout(options.timeoutMs)`
-
-**Итого llm-client.ts станет:** чистый враппер над `openai` без какого-либо router-кода.
-
----
-
-### 2. `apps/api/src/ai/src/graph/lab-report-analyzer.ts` — строка 39
-
-```typescript
-// БЫЛО:
-const LAB_ANALYSIS_MODEL = "gemini-3.1-pro-preview-thinking";
-
-// ЗАМЕНИТЬ НА:
-const LAB_ANALYSIS_MODEL = "gpt-5.4-mini";
-```
-
----
-
-### 3. `apps/api/src/ai/src/graph/label-scanner.ts` — строка 60
-
-Убрать параметр `useRouter: false` из вызова `callLlmStructured()` — этого поля больше нет в интерфейсе.
-
----
-
-### 4. `.env` файлы — закомментировать GEMINI_API
-
-В каждом из трёх файлов:
-- `C:\project\VITOGRAPH\.env`
-- `C:\project\VITOGRAPH\apps\api\src\ai\.env`
-- `C:\project\VITOGRAPH\apps\api\.env`
-
-Найди строку `GEMINI_API=...` и закомментируй её:
-```
-# GEMINI_API=sk-jKEVgeaAluPPWQShhxWIIzRHhL7WW2muPv5Y5VG9dbBK1YvG  # REMOVED: ourzhishi.top router deprecated 2026-03-29
-```
-
----
-
-### 5. `gemini_chat_speed.py` (в корне VITOGRAPH) — удалить файл
-
-```
-C:\project\VITOGRAPH\gemini_chat_speed.py
-```
-
-Это тестовый скрипт для роутера. Удалить полностью.
-
----
-
-## После изменений
-
-1. TypeScript должен компилироваться без ошибок (проверь через LSP/фоновый tsc)
-2. Git commit:
-   ```
-   chore: remove ourzhishi.top router — switch to official OpenAI only
-   ```
-3. **НЕ деплоить** — Maya deployes manually.
-
-## Skills Directive
-> **WARNING:** Использование навыков обязательно, в указанном порядке:
-> 1. `systematic-debugging` — читай SKILL.md перед началом
-> 2. `senior-fullstack` — читай SKILL.md перед кодированием
+### Шаг 4: Ревью и коммит
+Убедись, что нигде в системном промпте больше нет упоминаний (LAST 24H) относительно дневника питания.
+Сделай локальный коммит. Деплой не нужен.
