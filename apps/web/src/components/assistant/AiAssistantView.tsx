@@ -353,14 +353,14 @@ export default function AiAssistantView({ userId }: { userId: string }) {
   return (
     <div className="flex flex-1 sm:flex-none flex-col overflow-hidden rounded-xl border border-cloud-dark bg-white shadow-sm sm:h-[750px] mb-[env(safe-area-inset-bottom)]">
       {/* Header with Clear Button */}
-      <div className="flex items-center justify-between border-b border-cloud px-3 py-1.5 sm:py-3 bg-white">
-        <h3 className="text-xs sm:text-sm font-semibold text-ink-muted uppercase tracking-wider">
+      <div className="flex items-center justify-between border-b border-cloud px-4 py-1 sm:py-1.5 bg-white">
+        <h3 className="text-[11px] sm:text-xs font-semibold text-ink-muted uppercase tracking-widest">
           {profile?.ai_name || "ИИ-Помощник"}
         </h3>
         <button
           onClick={handleClearChat}
           disabled={isLoading || messages.length <= 1}
-          className="p-2 text-ink-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          className="p-1.5 text-ink-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           title="Очистить чат"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
