@@ -65,9 +65,9 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-2 sm:px-6 lg:px-8 sm:py-8 h-full flex flex-col">
+    <div className="mx-auto w-full max-w-3xl px-2 sm:px-6 lg:px-8 sm:py-8 flex-1 flex flex-col min-h-0 sm:h-full">
       {/* ── Header ────────────────────────────────────────── */}
-      <header className="hidden sm:block mb-8 text-center">
+      <header className="hidden sm:block shrink-0 mb-8 text-center">
         <h1 className="text-lg font-bold tracking-tight text-ink sm:text-3xl">
           VITO
           <span className="text-primary-600">GRAPH</span>
@@ -78,7 +78,7 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
       </header>
 
       {/* ── Tab Switcher ──────────────────────────────────── */}
-      <div className="flex justify-center mt-2 mb-2 sm:mt-0 sm:mb-8">
+      <div className="flex justify-center shrink-0 mt-2 mb-2 sm:mt-0 sm:mb-8">
         <TabSwitcher
           tabs={TABS}
           activeTab={activeTab}
@@ -96,7 +96,7 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
           role="tabpanel"
           aria-labelledby="tab-medical"
           hidden={activeTab !== "medical"}
-          className="flex-1 flex flex-col min-h-0"
+          className="flex-1 flex flex-col min-h-0 overflow-y-auto sm:overflow-visible"
         >
           <MedicalResultsView />
         </div>
@@ -106,7 +106,7 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
           role="tabpanel"
           aria-labelledby="tab-diary"
           hidden={activeTab !== "diary"}
-          className="flex-1 flex flex-col min-h-0"
+          className="flex-1 flex flex-col min-h-0 overflow-y-auto sm:overflow-visible"
         >
           <FoodDiaryView />
         </div>

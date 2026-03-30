@@ -28,9 +28,9 @@ export default async function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-surface-muted">
+      <body className="h-[100dvh] flex flex-col bg-surface-muted sm:h-auto sm:min-h-screen sm:block">
         {user && (
-          <header className="bg-white border-b border-border px-4 py-2 sm:px-6 sm:py-3 flex items-center justify-between">
+          <header className="shrink-0 bg-white border-b border-border px-4 py-2 sm:px-6 sm:py-3 flex items-center justify-between">
             <span className="font-bold text-lg tracking-tight text-ink">
               VITO<span className="text-primary-600">GRAPH</span>
             </span>
@@ -40,7 +40,7 @@ export default async function RootLayout({
             </div>
           </header>
         )}
-        <main>{children}</main>
+        <main className="flex-1 flex flex-col min-h-0">{children}</main>
       </body>
     </html>
   );

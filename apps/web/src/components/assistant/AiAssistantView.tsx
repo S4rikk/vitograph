@@ -351,7 +351,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
   };
 
   return (
-    <div className="flex flex-1 min-h-[300px] sm:min-h-[600px] h-[calc(100dvh-175px)] sm:h-[600px] flex-col overflow-hidden rounded-xl border border-cloud-dark bg-white shadow-sm">
+    <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-cloud-dark bg-white shadow-sm sm:min-h-[600px] mb-[env(safe-area-inset-bottom)]">
       {/* Header with Clear Button */}
       <div className="flex items-center justify-between border-b border-cloud px-3 py-1.5 sm:py-3 bg-white">
         <h3 className="text-xs sm:text-sm font-semibold text-ink-muted uppercase tracking-wider">
