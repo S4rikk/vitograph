@@ -78,7 +78,7 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
       </header>
 
       {/* ── Tab Switcher ──────────────────────────────────── */}
-      <div className="flex justify-center mb-2 sm:mb-8">
+      <div className="flex justify-center mt-2 mb-2 sm:mt-0 sm:mb-8">
         <TabSwitcher
           tabs={TABS}
           activeTab={activeTab}
