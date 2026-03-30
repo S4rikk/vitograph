@@ -93,7 +93,26 @@ export default function HealthGoalsWidget() {
     );
   }
   
-  if (goals.length === 0) return <div className="hidden" />; // Hide completely if no active goals
+  if (goals.length === 0) {
+    return (
+      <div 
+        className="flex items-center gap-3 px-4 sm:px-6 py-4 bg-[#f8fafc] border-b border-slate-200 w-full animate-in fade-in slide-in-from-top-1 duration-500"
+        style={{ minHeight: '64px' }}
+      >
+        <div className="flex shrink-0 items-center justify-center bg-white border border-slate-200 text-primary-600 rounded-xl w-10 h-10 shadow-sm">
+          <Target className="w-5 h-5" />
+        </div>
+        <div className="flex flex-col">
+          <p className="text-[13px] font-medium text-slate-700 leading-tight">
+            У вас пока нет активных целей здоровья.
+          </p>
+          <p className="text-[12px] text-slate-500 italic mt-0.5">
+            Попросите меня: «Помоги мне похудеть на 5 кг»
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none px-3 sm:px-6 pt-2 bg-gradient-to-b from-slate-50/50 to-transparent">
