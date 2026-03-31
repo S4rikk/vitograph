@@ -13,7 +13,6 @@ import WaterTracker from "./WaterTracker";
 import { apiClient } from "@/lib/api-client";
 import { createClient } from "@/lib/supabase/client";
 import { getTzDayBoundaries, getTzToday } from "@/lib/date-utils";
-import HealthGoalsWidget from "@/components/shared/HealthGoalsWidget";
 
 type Message = {
   id: number;
@@ -334,11 +333,9 @@ export default function FoodDiaryView() {
       <FeedbackButton className="z-30" />
       <div className="flex flex-col h-[100dvh] sm:h-[85vh] sm:max-h-[1000px] sm:min-h-[750px] sm:rounded-2xl border-x sm:border border-border bg-white overflow-hidden shadow-sm">
         {/* ── Header & Time Machine ──────────────────────── */}
-        <div className="flex flex-col bg-surface-muted px-5 pt-5 pb-2 shrink-0 z-10 border-b border-border/50">
+        <div className="flex flex-col bg-surface-muted px-5 pt-2 sm:pt-5 pb-2 shrink-0 z-10 border-b border-border/50">
           <DatePaginator selectedDate={selectedDate} onChange={setSelectedDate} userTimezone={userTimezone} />
         </div>
-
-        <HealthGoalsWidget />
 
         {/* ── Scrollable Content (Panels + Chat) ──────────────────────── */}
         <div
