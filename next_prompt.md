@@ -1,34 +1,45 @@
-# 📱 Техническое задание: Финализация высоты формы (Мобильная версия)
+# 🔧 Техническое задание: Корректировка UI плашек в чате (удаление точки)
 
-**ИСПОЛЬЗУЕМЫЕ СКИЛЛЫ:** `frontend-developer`, `ui-ux-pro-max`, `tailwind-design-system`
+**ИСПОЛЬЗУЕМЫЕ СКИЛЛЫ:** `react-components`, `tailwind-styling`
 
-### Контекст
-Мы успешно сделали форму более компактной, но пользователю нужно еще немного "поджать" интерфейс по вертикали. 
-**Наша цель:** Уменьшить высоту нижнего ряда кнопок (Камера, Этикетка, Вес, Отправить) еще на 20% от текущего состояния. 
-Сейчас высота кнопок составляет `38px`. Уменьшение на 20% дает нам примерно **30px** (или `32px` для лучшей кратности сетке). 
+### Проблема:
+В режиме ассистента в компоненте `NutrPill` (цветные плашки для выделения понятий типа "ужин", "перекус") отображается дополнительная цветная точка-маркер. Пользователь просит её аккуратно убрать, оставив только цветной текст внутри плашечного контейнера.
 
----
+### Файл для редактирования: 
+`apps/web/src/components/assistant/AiAssistantView.tsx`
 
-### План действий
+### Что нужно сделать:
+1. Найди компонент `NutrPill` (примерно строка 58).
+2. Вырежи из него `<span>`, который отвечает за точку (`<span className={w-1.5 h-1.5 rounded-full...`).
+3. Для чистоты DOM-дерева, перенеси класс цвета текста (`colorSpace.text`) на основной контейнер `span`, удалив внутреннюю обертку `span`.
 
-Сделай изменения в файле `apps/web/src/components/diary/FoodInputForm.tsx`:
+**Код ДО:**
+```tsx
+const NutrPill = ({ type, children }: { type: string; children: React.ReactNode }) => {
+  const content = String(children);
+  const colorSpace = getMicronutrientColor(content);
+  
+  return (
+    <span className={`inline-flex items-center rounded-lg px-2 py-0.5 text-[13px] font-semibold border bg-slate-50 border-slate-200 mx-0.5 my-0 transition-all hover:scale-105 cursor-default shadow-sm`}>
+       <span className={`w-1.5 h-1.5 rounded-full mr-1.5 shrink-0 ${colorSpace.dot}`}></span>
+       <span className={colorSpace.text}>{children}</span>
+    </span>
+  );
+};
+```
 
-1. **Нижний ряд элементов управления (строка 333+):**
-   - **Контейнеры с кнопками "Камера" и "Этикетка":** найди классы `h-[38px]` и измени их на `h-[30px]`.
-   - **Поле "Вес (г)":** в `<input id="food-weight">` найди класс `h-[38px]` и также измени на `h-[30px]`.
-   - **Кнопка "Отправить" (Submit):** найди классы `min-h-[38px] min-w-[38px]` и замени на `min-h-[30px] min-w-[30px]`. 
-   - **Иконки внутри:** Чтобы иконки смотрелись пропорционально в кнопках `30px`, уменьши их размер:
-     - SVG внутри камеры/этикетки: измени `w-5 h-5` на `w-4 h-4`.
-     - SVG внутри кнопки отправить: измени `h-5 w-5` на `h-4 w-4`.
+**Код ПОСЛЕ:**
+```tsx
+const NutrPill = ({ type, children }: { type: string; children: React.ReactNode }) => {
+  const content = String(children);
+  const colorSpace = getMicronutrientColor(content);
+  
+  return (
+    <span className={`inline-flex items-center rounded-lg px-2 py-0.5 text-[13px] font-semibold border bg-slate-50 border-slate-200 mx-0.5 my-0 transition-all hover:scale-105 cursor-default shadow-sm ${colorSpace.text}`}>
+       {children}
+    </span>
+  );
+};
+```
 
-2. **Текстовое поле "Блюдо" (`textarea`, строка 314+):**
-   - Уменьши минимальную высоту: замени `min-h-[38px]` на `min-h-[30px]`.
-   - Подправь внутренние отступы (padding), чтобы текст не прилипал: например, `py-1.5` измени на `py-1`.
-
-3. **Метки (Labels):**
-   - Чтобы еще больше сэкономить место, можно уменьшить `gap-1` в контейнерах меток (строки 335, 352, 368) до `gap-0.5`, если это еще не было сделано.
-
-4. **Результат:**
-   - После внесения изменений форма должна выглядеть еще более эстетично и компактно на маленьких экранах. Высота всех контрольных элементов в нижнем ряду должна быть строго **30px**.
-
-**Важно:** Убедись, что текст в инпутах (особенно в поле веса) остается читаемым. Выполняй задачу!
+Готово. Сохрани файл. Деплой не требуется.

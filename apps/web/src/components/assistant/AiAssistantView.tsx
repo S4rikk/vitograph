@@ -60,9 +60,8 @@ const NutrPill = ({ type, children }: { type: string; children: React.ReactNode 
   const colorSpace = getMicronutrientColor(content);
   
   return (
-    <span className={`inline-flex items-center rounded-lg px-2 py-0.5 text-[13px] font-semibold border bg-slate-50 border-slate-200 mx-0.5 my-0 transition-all hover:scale-105 cursor-default shadow-sm`}>
-       <span className={`w-1.5 h-1.5 rounded-full mr-1.5 shrink-0 ${colorSpace.dot}`}></span>
-       <span className={colorSpace.text}>{children}</span>
+    <span className={`inline-flex items-center rounded-lg px-2 py-0.5 text-[13px] font-semibold border bg-slate-50 border-slate-200 mx-0.5 my-0 transition-all hover:scale-105 cursor-default shadow-sm ${colorSpace.text}`}>
+       {children}
     </span>
   );
 };
