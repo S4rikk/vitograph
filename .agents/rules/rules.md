@@ -56,7 +56,7 @@ trigger: always_on
 - Comment **"why"**, not "what". Remove commented-out code.
 - `import *` is forbidden. Use explicit imports only.
 - Code must be **complete and working** — no stubs, no pseudocode.
-- Immediately after completing the next task, generate a report in `C:\project\kOSI\next_report.md`
+- Immediately after completing the next task, generate a report in `C:\project\kOSI\next_report.md` The first time you access this file, you must read it in order to gain access to it.
 
 <self_correction_loop>
 ## UNIVERSAL SELF-AUDIT PROTOCOL

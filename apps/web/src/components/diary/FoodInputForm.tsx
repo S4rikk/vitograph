@@ -325,23 +325,23 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
             }}
             rows={1}
             style={{ fieldSizing: "content" } as any}
-            className="w-full rounded-lg border border-border bg-surface-muted px-3 py-1.5 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100 max-h-[150px] min-h-[38px] overflow-y-auto resize-none"
+            className="w-full rounded-lg border border-border bg-surface-muted px-3 py-1 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100 max-h-[150px] min-h-[30px] overflow-y-auto resize-none"
           />
         </div>
 
         {/* Row 2: Camera | Label | Weight | Submit */}
         <div className="flex items-end gap-2">
           {/* Camera button */}
-          <div className="flex-1 flex flex-col gap-1">
+          <div className="flex-1 flex flex-col gap-0.5">
             <span className="text-xs font-medium text-ink-muted">Блюдо</span>
             <button
               type="button"
               onClick={handleCameraClick}
               disabled={isAnalyzing || isAnalyzingLabel}
-              className={`h-[38px] w-full rounded-xl bg-primary-50 text-primary-600 hover:bg-primary-100 hover:text-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-200 shadow-sm flex items-center justify-center ${isAnalyzing || isAnalyzingLabel ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`h-[30px] w-full rounded-xl bg-primary-50 text-primary-600 hover:bg-primary-100 hover:text-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-200 shadow-sm flex items-center justify-center ${isAnalyzing || isAnalyzingLabel ? "opacity-50 cursor-not-allowed" : ""}`}
               title="Сфотографировать еду"
             >
-              <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <path stroke="currentColor" strokeLinejoin="round" strokeWidth="2" d="M4 18V8a1 1 0 0 1 1-1h1.5l1.707-1.707A1 1 0 0 1 8.914 5h6.172a1 1 0 0 1 .707.293L17.5 7H19a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z" />
                 <path stroke="currentColor" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
               </svg>
@@ -349,23 +349,23 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
           </div>
 
           {/* Label Scanner button */}
-          <div className="flex-1 flex flex-col gap-1">
+          <div className="flex-1 flex flex-col gap-0.5">
             <span className="text-xs font-medium text-ink-muted">Этикетка</span>
             <button
               type="button"
               onClick={handleLabelClick}
               disabled={isAnalyzing || isAnalyzingLabel}
-              className={`h-[38px] w-full rounded-xl bg-purple-50 text-purple-600 hover:bg-purple-100 hover:text-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-200 shadow-sm flex items-center justify-center ${isAnalyzing || isAnalyzingLabel ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`h-[30px] w-full rounded-xl bg-purple-50 text-purple-600 hover:bg-purple-100 hover:text-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-200 shadow-sm flex items-center justify-center ${isAnalyzing || isAnalyzingLabel ? "opacity-50 cursor-not-allowed" : ""}`}
               title="Отсканировать состав"
             >
-              <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 12h14M5 16h14m-3.5 4H19a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4.5"/>
               </svg>
             </button>
           </div>
 
           {/* Weight input */}
-          <div className="flex-1 flex flex-col gap-1">
+          <div className="flex-1 flex flex-col gap-0.5">
             <label htmlFor="food-weight" className="text-xs font-medium text-ink-muted">
               Вес (г)
             </label>
@@ -376,7 +376,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
               placeholder="200"
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
-              className="w-full rounded-xl border border-border bg-surface-muted px-3 py-1.5 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100 h-[38px]"
+              className="w-full rounded-xl border border-border bg-surface-muted px-3 py-1 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100 h-[30px]"
             />
           </div>
 
@@ -385,9 +385,9 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
             type="submit"
             disabled={!isValid}
             aria-label="Отправить"
-            className={`cursor-pointer flex-shrink-0 rounded-xl transition-all duration-200 min-h-[38px] min-w-[38px] flex items-center justify-center self-end ${isValid ? "bg-primary-600 text-white shadow-sm hover:bg-primary-700 hover:shadow-md active:scale-95" : "bg-surface-hover text-ink-faint cursor-not-allowed"}`}
+            className={`cursor-pointer flex-shrink-0 rounded-xl transition-all duration-200 min-h-[30px] min-w-[30px] flex items-center justify-center self-end ${isValid ? "bg-primary-600 text-white shadow-sm hover:bg-primary-700 hover:shadow-md active:scale-95" : "bg-surface-hover text-ink-faint cursor-not-allowed"}`}
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
             </svg>
           </button>

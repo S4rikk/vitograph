@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
+import { nutrientColors, getMicronutrientColor } from "@/lib/food-diary/nutrient-colors";
 import { compressImage } from "@/lib/image-utils";
 import Image from "next/image";
 import React from "react";
@@ -55,17 +56,13 @@ const ScoreBadge = ({ score, reason }: { score: number; reason: string }) => {
 };
 
 const NutrPill = ({ type, children }: { type: string; children: React.ReactNode }) => {
-  const t = type?.toLowerCase() || "";
-  const isVitamin = t.includes('vit') || t.includes('вит');
-  const isMineral = t.includes('min') || t.includes('мин') || t.includes('жел') || t.includes('цинк') || t.includes('магн') || t.includes('кальц') || t.includes('калий') || t.includes('селен') || t.includes('фосф');
-  
-  let colorClass = "bg-slate-100 text-slate-700 border-slate-200";
-  if (isVitamin) colorClass = "bg-purple-50 text-purple-700 border-purple-200";
-  else if (isMineral) colorClass = "bg-blue-50 text-blue-700 border-blue-200";
+  const content = String(children);
+  const colorSpace = getMicronutrientColor(content);
   
   return (
-    <span className={`inline-flex items-center rounded-lg px-2 py-0.5 text-[13px] font-semibold border ${colorClass} mx-0.5 my-0 transition-all hover:scale-105 cursor-default shadow-sm`}>
-      {children}
+    <span className={`inline-flex items-center rounded-lg px-2 py-0.5 text-[13px] font-semibold border bg-slate-50 border-slate-200 mx-0.5 my-0 transition-all hover:scale-105 cursor-default shadow-sm`}>
+       <span className={`w-1.5 h-1.5 rounded-full mr-1.5 shrink-0 ${colorSpace.dot}`}></span>
+       <span className={colorSpace.text}>{children}</span>
     </span>
   );
 };

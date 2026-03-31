@@ -2,7 +2,7 @@ import React from "react";
 import { MealScoreBadge } from "./MealScoreBadge";
 import FoodCard from "./FoodCard";
 import { detectAndParseFoodLog } from "./food-log-parser";
-import { nutrientColors } from "@/lib/food-diary/nutrient-colors";
+import { nutrientColors, getMicronutrientColor } from "@/lib/food-diary/nutrient-colors";
 
 type ChatMessageProps = {
   /** "user" for right-aligned, "system" for left-aligned. */
@@ -35,18 +35,23 @@ function parseNutrientTags(text: string) {
       const type = match[2];
       const content = match[3];
 
-      let config = (nutrientColors as any)[type] || nutrientColors.default;
+      let colorClass = "";
 
-      // Safeguard: if the AI uses a generic type but the content is a macro-nutrient, use the correct color
-      if (type === "marker" || type === "default") {
-        const lower = content.toLowerCase();
-        if (lower.includes("белок") || lower.includes("белк")) config = nutrientColors.protein;
-        else if (lower.includes("жир")) config = nutrientColors.fat;
-        else if (lower.includes("углевод")) config = nutrientColors.carbs;
-        else if (lower.includes("калори") || lower.includes("ккал")) config = nutrientColors.calories;
+      // 1. Check for macros
+      const lower = content.toLowerCase();
+      if (lower.includes("белок") || lower.includes("белк")) {
+        colorClass = nutrientColors.protein.text;
+      } else if (lower.includes("жир")) {
+        colorClass = nutrientColors.fat.text;
+      } else if (lower.includes("углевод")) {
+        colorClass = nutrientColors.carbs.text;
+      } else if (lower.includes("калори") || lower.includes("ккал")) {
+        colorClass = nutrientColors.calories.text;
+      } else {
+        // 2. Otherwise it's a micro-nutrient — use getMicronutrientColor (same as FoodCard)
+        const microColor = getMicronutrientColor(content);
+        colorClass = microColor.text;
       }
-
-      const colorClass = config.text;
 
       result.push(
         <span key={match.index} className={colorClass}>
