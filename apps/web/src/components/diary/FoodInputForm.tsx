@@ -263,7 +263,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
       {/* ── Form ────────────────────────────────────────────────── */}
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-2 rounded-2xl border border-border bg-white p-3 shadow-sm"
+        className="flex flex-col gap-1.5 rounded-2xl border border-border bg-white px-3 py-2 shadow-sm"
       >
         {/* Row 1: Dish name — full width */}
         <div className="w-full">
@@ -325,7 +325,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
             }}
             rows={1}
             style={{ fieldSizing: "content" } as any}
-            className="w-full rounded-lg border border-border bg-surface-muted px-3 py-2 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100 max-h-[150px] min-h-[44px] overflow-y-auto resize-none"
+            className="w-full rounded-lg border border-border bg-surface-muted px-3 py-1.5 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100 max-h-[150px] min-h-[38px] overflow-y-auto resize-none"
           />
         </div>
 
@@ -338,7 +338,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
               type="button"
               onClick={handleCameraClick}
               disabled={isAnalyzing || isAnalyzingLabel}
-              className={`h-[44px] w-full rounded-xl bg-primary-50 text-primary-600 hover:bg-primary-100 hover:text-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-200 shadow-sm flex items-center justify-center ${isAnalyzing || isAnalyzingLabel ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`h-[38px] w-full rounded-xl bg-primary-50 text-primary-600 hover:bg-primary-100 hover:text-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-200 shadow-sm flex items-center justify-center ${isAnalyzing || isAnalyzingLabel ? "opacity-50 cursor-not-allowed" : ""}`}
               title="Сфотографировать еду"
             >
               <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -355,7 +355,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
               type="button"
               onClick={handleLabelClick}
               disabled={isAnalyzing || isAnalyzingLabel}
-              className={`h-[44px] w-full rounded-xl bg-purple-50 text-purple-600 hover:bg-purple-100 hover:text-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-200 shadow-sm flex items-center justify-center ${isAnalyzing || isAnalyzingLabel ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`h-[38px] w-full rounded-xl bg-purple-50 text-purple-600 hover:bg-purple-100 hover:text-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-200 shadow-sm flex items-center justify-center ${isAnalyzing || isAnalyzingLabel ? "opacity-50 cursor-not-allowed" : ""}`}
               title="Отсканировать состав"
             >
               <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -376,7 +376,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
               placeholder="200"
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
-              className="w-full rounded-xl border border-border bg-surface-muted px-3 py-2 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100 h-[44px]"
+              className="w-full rounded-xl border border-border bg-surface-muted px-3 py-1.5 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100 h-[38px]"
             />
           </div>
 
@@ -385,7 +385,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
             type="submit"
             disabled={!isValid}
             aria-label="Отправить"
-            className={`cursor-pointer flex-shrink-0 rounded-xl p-3 transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center self-end ${isValid ? "bg-primary-600 text-white shadow-sm hover:bg-primary-700 hover:shadow-md active:scale-95" : "bg-surface-hover text-ink-faint cursor-not-allowed"}`}
+            className={`cursor-pointer flex-shrink-0 rounded-xl transition-all duration-200 min-h-[38px] min-w-[38px] flex items-center justify-center self-end ${isValid ? "bg-primary-600 text-white shadow-sm hover:bg-primary-700 hover:shadow-md active:scale-95" : "bg-surface-hover text-ink-faint cursor-not-allowed"}`}
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />

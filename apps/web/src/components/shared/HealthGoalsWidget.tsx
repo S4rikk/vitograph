@@ -105,7 +105,7 @@ export default function HealthGoalsWidget() {
               У вас пока нет целей
             </p>
             <p className="text-[11px] text-slate-500 italic mt-0.5 leading-snug">
-              Попробуйте: «Хочу похудеть на 5 кг»
+              Напишите в чат: «Хочу похудеть на 5 кг»
             </p>
           </div>
         </div>

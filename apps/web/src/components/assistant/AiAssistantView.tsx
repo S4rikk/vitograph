@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
+import { compressImage } from "@/lib/image-utils";
 import Image from "next/image";
 import React from "react";
 import HealthGoalsWidget from "@/components/shared/HealthGoalsWidget";
@@ -178,10 +179,26 @@ export default function AiAssistantView({ userId }: { userId: string }) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   
-  // Use state for threadId so it survives renders but can be synced
   const [threadId, setThreadId] = useState<string>("");
 
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
+  const [selectedImageBase64, setSelectedImageBase64] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const base64 = await compressImage(file, 1024);
+      setSelectedImageBase64(base64);
+    } catch (err) {
+      console.error("Failed to compress image:", err);
+      alert("Не удалось загрузить фото. Попробуйте другое.");
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   // 1. Hydrate state from Database on client mount
   useEffect(() => {
@@ -264,19 +281,19 @@ export default function AiAssistantView({ userId }: { userId: string }) {
   }, [messages]);
 
   // Handle the actual chat submission logic (separated so it can be called programmatically)
-  const sendChatMessage = useCallback(async (content: string, thread: string, optionalImageUrl?: string) => {
+  const sendChatMessage = useCallback(async (content: string, thread: string, optionalImageUrl?: string, base64?: string) => {
     const userMsg: Message = {
       id: Date.now().toString(),
       role: "user",
       content,
-      imageUrl: optionalImageUrl,
+      imageUrl: optionalImageUrl || base64 || undefined,
     };
 
     setMessages((prev) => [...prev, userMsg]);
     setIsLoading(true);
 
     try {
-      const res = await apiClient.chat(content, thread, undefined, "assistant", optionalImageUrl);
+      const res = await apiClient.chat(content, thread, undefined, "assistant", optionalImageUrl, undefined, base64);
       const assistantMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -318,11 +335,14 @@ export default function AiAssistantView({ userId }: { userId: string }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading || !threadId) return;
+    if ((!input.trim() && !selectedImageBase64) || isLoading || !threadId) return;
 
-    const content = input.trim();
+    const content = input.trim() || "Оцени этот продукт на фото.";
+    const base64 = selectedImageBase64 || undefined;
+    
     setInput("");
-    await sendChatMessage(content, threadId);
+    setSelectedImageBase64(null);
+    await sendChatMessage(content, threadId, undefined, base64);
   };
   
   const handleClearChat = async () => {
@@ -433,7 +453,38 @@ export default function AiAssistantView({ userId }: { userId: string }) {
 
       {/* Input Area */}
       <div className="border-t border-cloud p-3 sm:p-6 bg-cloud-light/30">
+        {selectedImageBase64 && (
+          <div className="relative inline-block mb-3 border border-cloud rounded-lg overflow-hidden shadow-sm">
+            <img src={selectedImageBase64} alt="Selected" className="h-20 w-auto object-cover" />
+            <button
+              onClick={() => setSelectedImageBase64(null)}
+              className="absolute top-1 right-1 bg-black/60 hover:bg-black/80 text-white rounded-full p-1 transition-colors"
+              title="Удалить фото"
+              type="button"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="flex space-x-3 items-end">
+          <input 
+            type="file" 
+            accept="image/*" 
+            ref={fileInputRef} 
+            onChange={handleImageSelect}
+            className="hidden" 
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="inline-flex items-center justify-center rounded-xl bg-white border border-cloud-dark px-3 py-3 text-ink-muted hover:text-primary-600 hover:border-primary-300 transition-colors focus:outline-none min-h-[44px]"
+            title="Прикрепить фото этикетки или продукта"
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -451,7 +502,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
           />
           <button
             type="submit"
-            disabled={isLoading || !input.trim()}
+            disabled={isLoading || (!input.trim() && !selectedImageBase64)}
             className="inline-flex items-center justify-center rounded-xl bg-primary-600 px-3 sm:px-5 py-3 text-[15px] font-semibold text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-cloud-dark disabled:text-ink-muted disabled:shadow-none min-h-[44px]"
           >
             <span className="hidden sm:inline">Отправить</span>

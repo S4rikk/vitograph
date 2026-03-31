@@ -21,6 +21,9 @@ export const ChatRequestSchema = z.object({
   /** Optional image URL associated with this chat message */
   imageUrl: z.string().optional(),
 
+  /** Optional base64 encoded image string (e.g., from a food label photo) */
+  imageBase64: z.string().optional(),
+
   /** Unique identifier for the conversation thread to maintain state/memory. */
   threadId: z.string().min(1, "threadId is required"),
 

@@ -251,7 +251,8 @@ class AiApiClient {
     },
     chatMode: "diary" | "assistant" = "diary",
     imageUrl?: string,
-    nutritionalContext?: any
+    nutritionalContext?: any,
+    imageBase64?: string
   ): Promise<{ response: string }> {
     // Generate a default session thread if one isn't provided
     const sessionThread = threadId || `session-${Math.random().toString(36).substring(7)}`;
@@ -269,6 +270,7 @@ class AiApiClient {
       chatMode,
       imageUrl,
       nutritionalContext,
+      imageBase64,
     };
 
     const response = await fetch(directUrl, {

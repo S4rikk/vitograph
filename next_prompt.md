@@ -1,56 +1,67 @@
-# 📱 Техническое задание: Редизайн UI-плашек микронутриентов (Компактность)
-
-**ИСПОЛЬЗУЕМЫЕ СКИЛЛЫ:** `frontend-developer`, `ui-ux-pro-max`, `react-ui-patterns`
-
-### Контекст
-Блок «МИКРОНУТРИЕНТЫ» внутри добавленного продукта (`FoodCard.tsx`) занимает слишком много места по высоте, а сами плашки (pills) выглядят «дутыми» (слишком много пустого воздуха по бокам и внутри).
-**Строгое правило:** Мы НЕ трогаем логику рендера (маппинг массива, функции вызова), меняем ТОЛЬКО классы Tailwind, отвечающие за размер, отступы (padding/margin) и шрифт.
+# ЗАДАЧА: ДОБАВИТЬ СКАНИРОВАНИЕ ЭТИКЕТОК В ЧАТ-АССИСТЕНТ
 
 ---
-
-### Шаги выполнения
-**Файл:** `apps/web/src/components/diary/FoodCard.tsx`
-
-Найди блок рендера `{/* Micros */}`.
-
-#### 1. Ужимаем верхнюю часть и заголовок
-Сейчас там:
-```tsx
-<div className="mb-3 pt-3 border-t border-border/50">
-  <div className="text-[10px] text-ink-faint uppercase font-bold tracking-wider mb-2">Микронутриенты</div>
-```
-Замени отступы на более тесные:
-```tsx
-<div className="mb-2 pt-2 border-t border-border/50">
-  <div className="text-[9px] text-ink-faint uppercase font-bold tracking-wider mb-1">Микронутриенты</div>
-```
-
-#### 2. Раздвигаем (сужаем) границы самих плашек
-Сейчас обертка плашек имеет `gap-1.5`, а сама плашка: `gap-1.5 px-2 py-1 text-xs`.
-Это даёт огромные "уши" по бокам и делает плашки высокими.
-
-**Новый дизайн-код обертки и плашки:**
-- Зазор между плашками: `gap-1` (вместо 1.5).
-- Внутренние отступы плашки: `px-1.5 py-0.5` (убираем лишний воздух по бокам и сверху/снизу).
-- Внутренний зазор между кружочком и текстом: `gap-1` (вместо 1.5).
-- Размер шрифта: `text-[11px] leading-tight` (чуть меньше стандартного `text-xs`, чтобы больше влезало).
-
-Итоговый JSX-код внутри массива должен выглядеть так (замени только классы у `div`):
-```tsx
-<div className="flex flex-wrap gap-1">
-    {micros.map((micro, idx) => {
-        const colorSpace = getMicronutrientColor(micro.name);
-        return (
-            <div key={idx} className="flex items-center gap-1 px-1.5 py-0.5 bg-surface-subtle border border-border/60 rounded-full text-[11px] leading-tight">
-                <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${colorSpace.dot}`}></div>
-                <span className={colorSpace.text}>{micro.name} <span className="opacity-60 ml-0.5">{micro.value}</span></span>
-            </div>
-        );
-    })}
-</div>
-```
-*(Также добавлено `shrink-0` к кружочку, чтобы его не сплющивало в редких случаях длинного текста, и `ml-0.5` между названием и значением).*
-
+description: Внедрить возможность отправки фото продукта или этикетки прямо в строку чата с ИИ, чтобы получать советы по питанию без сохранения в дневник.
 ---
 
-Деплой пока не нужен. Заверши задачу.
+## Обязательные скиллы:
+При выполнении задачи обязательно строго следуй паттернам из следующих документов (используй view_file для их прочтения перед началом редактирования):
+1. `C:\store\ag_skills\skills\frontend-developer\SKILL.md`
+2. `C:\store\ag_skills\skills\nodejs-backend-patterns\SKILL.md`
+
+## 1. Контекст
+Пользователю необходимо сфотографировать этикетку продукта в магазине и задать чат-помощнику вопрос: "Могу ли я это съесть?". 
+Особенности:
+1. Интегрировано в обычное окно чата `AiAssistantView`.
+2. Анализ проходит напрямую через `handleChat` с использованием `gpt-5.4-mini` (передача мультимодального массива в `HumanMessage`).
+3. Запись в дневник или логирование в БД (кроме истории чата) строго запрещено.
+
+## 2. Что нужно сделать
+
+### Шаг 1: Backend (`apps/api/src/ai/src/request-schemas.ts`)
+- Обнови `ChatRequestSchema`. Добавь опциональное поле `imageBase64?: z.string()`.
+
+### Шаг 2: Backend (`apps/api/src/ai/src/ai.controller.ts`)
+Внутри обработчика `handleChat`:
+- Импортируй `uploadAndRotateFoodPhoto` из `./lib/storage.js` (если еще нет).
+- Если в теле запроса есть `body.imageBase64`, вызови загрузку:
+  ```typescript
+  let finalImageUrl = body.imageUrl;
+  if (body.imageBase64) {
+    finalImageUrl = await uploadAndRotateFoodPhoto(req.user.id, body.imageBase64, token);
+  }
+  ```
+- В объекте `userMsgPayload`, если определен `finalImageUrl`, сохраняй его `image_url: finalImageUrl`.
+- При пробросе пользовательского сообщения в массив для LangGraph (`messagesToInvoke.push`) сделай следующее:
+  ```typescript
+  if (finalImageUrl) {
+      messagesToInvoke.push(
+        new HumanMessage({
+          content: [
+            { type: "text", text: body.message || "Пожалуйста, проанализируй это фото этикетки." },
+            { type: "image_url", image_url: { url: finalImageUrl } }
+          ]
+        })
+      );
+  } else {
+      messagesToInvoke.push(new HumanMessage(body.message));
+  }
+  ```
+- В **System Prompt** (который создается внутри `handleChat` для `assistant` mode) добавь короткую инструкцию (где-то рядом с условием про 'HOWEVER, you CANNOT log, save...'):
+  `Если пользователь приложил фото продукта или этикетки, проанализируй состав (учитывай E-добавки, вредные жиры, сахар), соотнеси с его зонами противопоказаний и аллергиями, и ответь: можно ли ему это съесть и почему. Будь строг и краток.`
+
+### Шаг 3: Frontend (`apps/web/src/lib/api-client.ts`)
+- В методе `chat` добавь поддержку аргумента `imageBase64?: string` и передавай его в `body` POST-запроса. 
+
+### Шаг 4: Frontend (`apps/web/src/components/assistant/AiAssistantView.tsx`)
+- Импортируй утилиту `compressImage` из `@/lib/image-utils`.
+- Добавь стейт для хранения картинки `const [selectedImageBase64, setSelectedImageBase64] = useState<string | null>(null);`.
+- Добавь иконку скрепки/камеры возле `<textarea>`, клик по которой триггерит реф скрытого `<input type="file" accept="image/*" />`.
+- В `onChange` инпута сжимай файл через `compressImage(file, 1024)` и клади в стейт `selectedImageBase64`.
+- Над `textarea` отображай миниатюру выбранного фото (с маленьким крестиком по центру или в углу для снятия/очистки стейта).
+- В `handleSendMessage` передай `selectedImageBase64` в вызов `apiClient.chat`. Сразу после отправки очищай стейт фото.
+
+## 3. Критерии приемки
+- Загруженное фото попадает в историю чата, а LLM (gpt-5.4-mini) успешно видит фото и оценивает пищевой продукт согласно контексту здоровья пользователя.
+- Не использован сторонний `runLabelScanner`.
+- Код компилируется без TS ошибок.
