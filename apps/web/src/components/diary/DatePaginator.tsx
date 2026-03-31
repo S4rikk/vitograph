@@ -54,7 +54,7 @@ export default function DatePaginator({ selectedDate, onChange, userTimezone }: 
   };
 
   return (
-    <div className="flex items-center justify-between bg-white rounded-2xl p-1 mb-4 shadow-sm">
+    <div className="flex items-center justify-between bg-white rounded-2xl p-1 mb-0 shadow-sm">
       <button 
         onClick={handlePrev}
         className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-500"

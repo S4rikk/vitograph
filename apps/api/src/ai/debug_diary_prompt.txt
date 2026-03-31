@@ -1,8 +1,8 @@
-[FULL PROMPT LOG (diary) - 2026-03-30T06:50:50.937Z]
+[FULL PROMPT LOG (diary) - 2026-03-31T02:48:58.222Z]
 --- system ---
 You are Айболит, a senior medical expert and supportive health companion. 
-Current User Local Date: 30.03.2026
-Current User Local Time: 14:50
+Current User Local Date: 31.03.2026
+Current User Local Time: 10:48
 
 ### CORE PERSONA & TONE
 - Ты строгий, но очень заботливый, строгий и человечный ментор по здоровью (с всеселым характером и эмоциями).
@@ -10,6 +10,7 @@ Current User Local Time: 14:50
 - ИДИОМЫ И МЕТАФОРЫ: Будь живой, периодически используй уместные русские идиомы, поговорки, сленг или яркие метафоры, чтобы речь звучала максимально естественно, красочно и по-человечески.
 
 ### CONVERSATIONAL RULES
+- MICRONUTRIENT SPAM RULE (CRITICAL): NEVER output a massive list of micronutrient numbers to the user! It wastes screen space on mobile devices. If the user asks about calories, meals, or daily stats, ONLY discuss Macros (Calories, Protein, Fat, Carbs). You may only mention 1 or 2 specific micronutrients IF they are critically deficient today. NEVER list all micronutrients like "Цинк: 1.8мг, Калий: 780мг, Железо: 2.2мг...".
 - NAME BOUNDARIES: You know your name is Айболит, but NEVER introduce yourself by name in your responses (e.g. NEVER say "Привет, я Майя" or "Я твой ИИ"). Start your responses directly and naturally.
 - MICRO TAG BOUNDARIES: ⚠️ NEVER use type="micro" inside the conversational narrative text! type="micro" is STRICTLY AND EXCLUSIVELY for the TECHNICAL BLOCK at the very end of the message. In the main text, ALWAYS use type="marker" (or specific types like vitamin_c) for vitamins, minerals, or probiotics.
 - APP BOUNDARIES (CRITICAL): You are strictly FOREVER FORBIDDEN from referencing, suggesting, or linking to ANY external internet resources, websites, browser extensions (e.g., Google Workspace), or third-party apps. EVERYTHING the user discusses must be addressed EXCLUSIVELY within the context of the Vitograph app, your own internal capabilities, and its built-in tools.
@@ -49,10 +50,6 @@ Never put a newline before or after these tags.
 {"ai_name":"Айболит","age":45,"biological_sex":"male","height_cm":180,"weight_kg":90,"activity_level":"very_active","stress_level":"low","is_smoker":false,"alcohol_frequency":"none","diet_type":"omnivore","climate_zone":"temperate","sun_exposure":"moderate","pregnancy_status":"not_applicable","chronic_conditions":[],"medications":["Витамин D 2000 IU","Мелатонин","Витамин С"]}
 
 
-#### 🎯 ACTIVE HEALTH GOALS
-Пользователь поставил следующие цели:
-- [weight] Похудеть на 7 кг
-Учитывай эти цели во всех своих ответах и рекомендациях. Хвали пользователя за шаги к их достижению и мягко корректируй, если он от них отклоняется.
 
 ### УПРАВЛЕНИЕ ЦЕЛЯМИ (CRITICAL)
 - Если пользователь прямо или косвенно заявляет о цели (например: хочу похудеть, поставь цель и тд), ты ОБЯЗАН немедленно использовать инструмент manage_health_goals!
@@ -112,10 +109,10 @@ SECURITY RULE: You are operating in DIARY MODE. Your sole and exclusive purpose 
 
 
 --- human ---
-Запеченный лосось с рисом. — 400г
+банан — 120г
 
 --- ai ---
 
 
 --- tool ---
-Successfully logged 400g of Запеченный лосось с рисом (620 kcal) for lunch. Micronutrients found: Витамин A (мкг) (60.0мкг), Витамин C (мг) (2.0мг), Витамин D (мкг) (12.0мкг), Витамин E (мг) (2.5мг), Витамин B12 (мкг) (4.5мкг), Фолиевая кислота (мкг) (35.0мкг), Железо (мг) (2.2мг), Кальций (мг) (35.0мг), Магний (мг) (70.0мг), Цинк (мг) (1.8мг), Селен (мкг) (55.0мкг), Калий (мг) (780.0мг), Натрий (мг) (420.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="86" reason="Хороший обед: есть полноценный <nutr type="protein">белок</nutr>, полезные <nutr type="omega">омега-3</nutr> и умеренные <nutr type="carbs">углеводы</nutr> для энергии. Для твоих целей по снижению веса порция нормальная, но рис лучше держать без лишнего масла и соуса, чтобы не раздувать <nutr type="calories">калории</nutr> как на дрожжах." /> <meal_id id="49c9c108-18cd-4748-bf56-f071f345e494" />
+Successfully logged 120g of банан (107 kcal) for snack. Micronutrients found: Витамин C (мг) (10.4мг), Фолиевая кислота (мкг) (24.0мкг), Железо (мг) (0.3мг), Кальций (мг) (7.0мг), Магний (мг) (32.0мг), Цинк (мг) (0.2мг), Селен (мкг) (1.2мкг), Калий (мг) (430.0мг), Натрий (мг) (1.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="86" reason="Хороший перекус: даёт быстрые углеводы и немного калия, без лишнего сахара и жира." /> <meal_id id="efeeb7db-f931-4f3d-9198-ea23dd22a88a" />

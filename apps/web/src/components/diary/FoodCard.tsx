@@ -1,6 +1,6 @@
 import React from "react";
 import { Pencil, Trash2 } from "lucide-react";
-import { nutrientColors } from "@/lib/food-diary/nutrient-colors";
+import { nutrientColors, getMicronutrientColor } from "@/lib/food-diary/nutrient-colors";
 
 interface FoodCardProps {
   name: string;        // "мёда" (или "Мёд", как вытащишь)
@@ -96,34 +96,6 @@ function getHealthScoreStyle(score: number) {
     return "bg-[linear-gradient(135deg,#D1FAE5,#A7F3D0)] text-[#27AE60]";
 }
 
-function getMicroColorClass(type: string, name?: string): string {
-  // 1. Сначала пробуем прямое попадание по типу
-  if (type && (nutrientColors as any)[type] && type !== 'micro' && type !== 'marker') {
-    return (nutrientColors as any)[type].dot;
-  }
-  
-  // 2. Если тип общий (micro/marker/default), маппим по названию (ищем вхождения)
-  if (name) {
-    const n = name.toLowerCase();
-    
-    // Кальций
-    if (n.includes('кальц') || n.includes('calc')) return nutrientColors.calcium.dot;
-    // Железо
-    if (n.includes('желез') || n.includes('iron')) return nutrientColors.iron.dot;
-    // Магний
-    if (n.includes('магн') || n.includes('magne')) return nutrientColors.magnesium.dot;
-    // Витамины D / C / B / Омега
-    if (n.includes('витамин d') || n.includes('vitamin d') || n.includes('витамином d')) return nutrientColors.vitamin_d.dot;
-    if (n.includes('витамин c') || n.includes('vitamin c') || n.includes('витамином c')) return nutrientColors.vitamin_c.dot;
-    // Витамин B (Проверяем латинскую B и кириллическую В)
-    if (n.includes('витамин b') || n.includes('vitamin b') || n.includes('витамин в') || n.includes('фолат')) return nutrientColors.vitamin_b.dot;
-    if (n.includes('омега') || n.includes('omega')) return nutrientColors.omega.dot;
-    if (n.includes('зелень') || n.includes('овощ') || n.includes('greens')) return nutrientColors.greens.dot;
-  }
-
-  // 3. Дефолт
-  return nutrientColors.default.dot;
-}
 
 export default function FoodCard({
   name,
@@ -144,80 +116,81 @@ export default function FoodCard({
   const finalEmoji = emoji && emoji !== "🍽️" ? emoji : getEmojiForFood(name);
 
   return (
-    <div className="bg-white border border-border shadow-sm rounded-2xl p-4 w-full flex flex-col max-w-[320px] sm:max-w-[400px]">
+    <div className="bg-white border border-border shadow-sm rounded-2xl px-3 pt-3 pb-2 w-full flex flex-col max-w-[320px] sm:max-w-[400px]">
       {/* Header */}
-      <div className="flex items-start justify-between mb-3 gap-2">
-        <div className="flex items-start gap-2.5">
+      <div className="flex items-start justify-between mb-2 gap-2">
+        <div className="flex items-start gap-2">
             <div className="flex flex-col items-center justify-center shrink-0">
-                <span className="text-[26px] leading-none mb-0.5">{finalEmoji}</span>
-                <span className="text-[11px] text-ink-muted font-medium whitespace-nowrap">{weight} г</span>
+                <span className="text-[24px] leading-none">{finalEmoji}</span>
+                <span className="text-[11px] text-ink-muted font-medium whitespace-nowrap mt-0.5">{weight} г</span>
             </div>
-            <span className="font-bold text-ink text-[14px] leading-snug line-clamp-2 max-w-[160px] sm:max-w-[220px] pt-1" title={name}>
+            <span className="font-bold text-ink text-[14px] leading-tight line-clamp-2 max-w-[160px] sm:max-w-[220px] pt-0.5" title={name}>
                 {name}
             </span>
         </div>
-        <div title={scoreReason} className={`shrink-0 px-2 py-1 rounded-full text-[11px] font-bold shadow-sm mt-0.5 ${getHealthScoreStyle(score)}`}>
+        <div title={scoreReason} className={`shrink-0 px-2 py-0.5 rounded-full text-[11px] font-bold shadow-sm mt-0.5 ${getHealthScoreStyle(score)}`}>
             {score}/100
         </div>
       </div>
 
       {/* Macros */}
-      <div className="flex gap-2 mb-4 justify-between">
-        <div className={`flex-1 flex flex-col items-center ${nutrientColors.calories.bg} border ${nutrientColors.calories.border} rounded-xl py-1.5 px-1`}>
-            <span className={`text-[10px] font-semibold ${nutrientColors.calories.text} uppercase tracking-wider mb-0.5`}>ККАЛ</span>
-            <span className={`font-bold ${nutrientColors.calories.label} leading-none`}>{calories}</span>
+      <div className="flex gap-1.5 mb-2 justify-between">
+        <div className={`flex-1 flex flex-col items-center ${nutrientColors.calories.bg} border ${nutrientColors.calories.border} rounded-xl py-1 px-0.5`}>
+            <span className={`text-[9px] font-semibold ${nutrientColors.calories.text} uppercase tracking-wider`}>ККАЛ</span>
+            <span className={`font-bold text-[13px] ${nutrientColors.calories.label} leading-none mt-0.5`}>{calories}</span>
         </div>
-        <div className={`flex-1 flex flex-col items-center ${nutrientColors.protein.bg} border ${nutrientColors.protein.border} rounded-xl py-1.5 px-1`}>
-            <span className={`text-[10px] font-semibold ${nutrientColors.protein.text} uppercase tracking-wider mb-0.5`}>БЕЛКИ</span>
-            <span className={`font-bold ${nutrientColors.protein.label} leading-none`}>{protein}г</span>
+        <div className={`flex-1 flex flex-col items-center ${nutrientColors.protein.bg} border ${nutrientColors.protein.border} rounded-xl py-1 px-0.5`}>
+            <span className={`text-[9px] font-semibold ${nutrientColors.protein.text} uppercase tracking-wider`}>БЕЛКИ</span>
+            <span className={`font-bold text-[13px] ${nutrientColors.protein.label} leading-none mt-0.5`}>{protein}г</span>
         </div>
-        <div className={`flex-1 flex flex-col items-center ${nutrientColors.fat.bg} border ${nutrientColors.fat.border} rounded-xl py-1.5 px-1`}>
-            <span className={`text-[10px] font-semibold ${nutrientColors.fat.text} uppercase tracking-wider mb-0.5`}>ЖИРЫ</span>
-            <span className={`font-bold ${nutrientColors.fat.label} leading-none`}>{fat}г</span>
+        <div className={`flex-1 flex flex-col items-center ${nutrientColors.fat.bg} border ${nutrientColors.fat.border} rounded-xl py-1 px-0.5`}>
+            <span className={`text-[9px] font-semibold ${nutrientColors.fat.text} uppercase tracking-wider`}>ЖИРЫ</span>
+            <span className={`font-bold text-[13px] ${nutrientColors.fat.label} leading-none mt-0.5`}>{fat}г</span>
         </div>
-        <div className={`flex-1 flex flex-col items-center ${nutrientColors.carbs.bg} border ${nutrientColors.carbs.border} rounded-xl py-1.5 px-1`}>
-            <span className={`text-[10px] font-semibold ${nutrientColors.carbs.text} uppercase tracking-wider mb-0.5`}>УГЛЕВОДЫ</span>
-            <span className={`font-bold ${nutrientColors.carbs.label} leading-none`}>{carbs}г</span>
+        <div className={`flex-1 flex flex-col items-center ${nutrientColors.carbs.bg} border ${nutrientColors.carbs.border} rounded-xl py-1 px-0.5`}>
+            <span className={`text-[9px] font-semibold ${nutrientColors.carbs.text} uppercase tracking-wider`}>УГЛЕВОДЫ</span>
+            <span className={`font-bold text-[13px] ${nutrientColors.carbs.label} leading-none mt-0.5`}>{carbs}г</span>
         </div>
       </div>
 
       {/* Micros */}
       {micros && micros.length > 0 && (
-          <div className="mb-3 pt-3 border-t border-border/50">
-             <div className="text-[10px] text-ink-faint uppercase font-bold tracking-wider mb-2">Микронутриенты</div>
-             <div className="flex flex-wrap gap-1.5">
-                 {micros.map((micro, idx) => (
-                     <div key={idx} className="flex items-center gap-1.5 px-2 py-1 bg-surface-subtle border border-border rounded-full text-xs text-ink-muted">
-                         <div className={`w-1.5 h-1.5 rounded-full ${getMicroColorClass(micro.type, micro.name)}`}></div>
-                         <span className="font-medium">{micro.name} <span className="opacity-60">{micro.value}</span></span>
-                     </div>
-                 ))}
+          <div className="mb-1 pt-1.5 border-t border-border/50">
+             <div className="text-[9px] text-ink-faint uppercase font-bold tracking-wider mb-1">Микронутриенты</div>
+             <div className="flex flex-wrap gap-1">
+                 {micros.map((micro, idx) => {
+                     const colorSpace = getMicronutrientColor(micro.name);
+                     return (
+                         <div key={idx} className="flex items-center gap-1 px-1.5 py-0.5 bg-surface-subtle border border-border/60 rounded-full text-[11px] leading-tight">
+                             <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${colorSpace.dot}`}></div>
+                             <span className={colorSpace.text}>{micro.name} <span className="opacity-60 ml-0.5">{micro.value}</span></span>
+                         </div>
+                     );
+                 })}
              </div>
           </div>
       )}
 
       {/* Footer */}
-      <div className="flex justify-between items-center mt-auto pt-1">
-          <div className="flex gap-3">
-              {mealId && (
-                  <>
-                      <button 
-                          onClick={() => onEdit?.(mealId)}
-                          className="text-blue-500 hover:text-blue-600 transition-colors p-1 rounded-md hover:bg-blue-50 z-[50]"
-                          title="Изменить вес"
-                      >
-                          <Pencil size={16} />
-                      </button>
-                      <button 
-                          onClick={() => onDelete?.(mealId)}
-                          className="text-red-500 hover:text-red-600 transition-colors p-1 rounded-md hover:bg-red-50 z-[50]"
-                          title="Удалить"
-                      >
-                          <Trash2 size={16} />
-                      </button>
-                  </>
-              )}
-          </div>
+      <div className="flex justify-end items-center mt-auto pt-0 gap-2.5">
+          {mealId && (
+              <div className="flex gap-1.5">
+                  <button 
+                      onClick={() => onEdit?.(mealId)}
+                      className="text-blue-500 hover:text-blue-600 transition-colors p-1 rounded-md hover:bg-blue-50 z-[50]"
+                      title="Изменить вес"
+                  >
+                      <Pencil size={16} />
+                  </button>
+                  <button 
+                      onClick={() => onDelete?.(mealId)}
+                      className="text-red-500 hover:text-red-600 transition-colors p-1 rounded-md hover:bg-red-50 z-[50]"
+                      title="Удалить"
+                  >
+                      <Trash2 size={16} />
+                  </button>
+              </div>
+          )}
           <span className="text-[10px] text-ink-faint">{time}</span>
       </div>
     </div>
