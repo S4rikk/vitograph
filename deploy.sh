@@ -21,7 +21,12 @@ cd ../../../
 # Обновление Python Core
 echo "Updating Python Engine..."
 cd apps/api
-pip install -r requirements.txt
+# Используем venv, который прописан в PM2
+if [ -d "venv" ]; then
+    ./venv/bin/pip install -r requirements.txt
+else
+    pip install -r requirements.txt
+fi
 cd ../..
 
 # Перезагружаем все три процесса (NextJS, Node API, Python Core) для синхронизации версий
