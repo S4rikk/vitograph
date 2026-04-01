@@ -15,8 +15,12 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 import traceback
+import asyncio
+from fastembed import TextEmbedding
 
 logger = logging.getLogger(__name__)
+
+embedding_model = TextEmbedding("BAAI/bge-small-en-v1.5")
 
 from api.v1.endpoints import analysis, analytics, norms, profiles, test_results, users
 from core.database import supabase_manager
@@ -204,95 +208,192 @@ def recalculate_flag(value: Optional[float], ref: Optional[ReferenceRange]) -> O
 
     return None
 
+async def enrich_biomarkers_with_insights(
+    biomarkers: list[BiomarkerResult],
+) -> list[BiomarkerResult]:
+    """Enrich biomarkers with AI clinical notes via semantic cache + LLM fallback.
+
+    For each biomarker:
+    1. Recalculates the flag deterministically.
+    2. Performs a vector similarity lookup in the Supabase insights_cache table.
+    3. Falls back to a bulk OpenAI call for cache misses.
+    4. Writes new insights back to the cache asynchronously.
+
+    Args:
+        biomarkers: Mutable list of BiomarkerResult objects to enrich.
+
+    Returns:
+        The same list with `ai_clinical_note` and `flag` fields populated in-place.
+    """
+    import json
+
+    supabase_client = await supabase_manager.get_client()
+    llm_input: list[dict] = []
+
+    # ── Phase 1: Flag recalculation & semantic cache lookup ──────────
+    for idx, marker in enumerate(biomarkers):
+        new_flag = recalculate_flag(marker.value_numeric, marker.reference_range)
+        marker.flag = new_flag
+
+        signature = f"{marker.original_name} - {new_flag}"
+        emb_generator = embedding_model.embed([signature])
+        query_emb = list(emb_generator)[0].tolist()
+
+        rpc_response = None
+        try:
+            rpc_response = await supabase_client.rpc(
+                "match_insights",
+                {"query_embedding": query_emb, "match_threshold": 0.95, "match_count": 1},
+            ).execute()
+        except Exception as cache_err:
+            logger.error("Semantic cache lookup failed for '%s': %s", signature, cache_err)
+
+        if rpc_response and hasattr(rpc_response, "data") and len(rpc_response.data) > 0:
+            cached_insight = rpc_response.data[0]
+            marker.ai_clinical_note = cached_insight.get("ai_clinical_note", "")
+            asyncio.create_task(
+                supabase_client.table("insights_cache")
+                .update({"hit_count": (cached_insight.get("hit_count") or 0) + 1})
+                .eq("id", cached_insight["id"])
+                .execute()
+            )
+        else:
+            llm_input.append(
+                {
+                    "index": idx,
+                    "name": marker.original_name,
+                    "value": (
+                        marker.value_numeric
+                        if marker.value_numeric is not None
+                        else marker.value_string
+                    ),
+                    "unit": marker.unit,
+                    "flag": new_flag,
+                    "reference_range": (
+                        marker.reference_range.text if marker.reference_range else None
+                    ),
+                    "signature": signature,
+                    "query_emb": query_emb,
+                }
+            )
+
+    # ── Phase 2: Bulk LLM call for cache misses ──────────────────────
+    if not llm_input:
+        return biomarkers
+
+    api_key = settings.openai_api_key
+    model_name = settings.openai_model or "gpt-4o"
+    if not api_key:
+        logger.error("OPENAI_API_KEY is not configured — skipping LLM enrichment.")
+        return biomarkers
+
+    client = AsyncOpenAI(api_key=api_key, timeout=60.0)
+
+    system_prompt = (
+        "You are a medical lab expert for VITOGRAPH.\n"
+        "For each biomarker provided, generate exactly 1 concise sentence in Russian "
+        "(`ai_clinical_note`) explaining what this marker's current value means clinically.\n"
+        "Focus on the recalculated flag."
+    )
+
+    # Structured Outputs schema — must not be modified to preserve strict mode.
+    schema = {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "biomarker_notes",
+            "strict": True,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "notes": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "index": {"type": "integer"},
+                                "ai_clinical_note": {"type": "string"},
+                            },
+                            "required": ["index", "ai_clinical_note"],
+                            "additionalProperties": False,
+                        },
+                    }
+                },
+                "required": ["notes"],
+                "additionalProperties": False,
+            },
+        },
+    }
+
+    try:
+        clean_llm_input = [
+            {k: v for k, v in item.items() if k not in ("signature", "query_emb")}
+            for item in llm_input
+        ]
+
+        completion = await client.chat.completions.create(
+            model=model_name,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"Biomarkers to process:\n{clean_llm_input}"},
+            ],
+            response_format=schema,
+            temperature=0.0,
+        )
+
+        llm_output = json.loads(completion.choices[0].message.content or "{}")
+        notes_list: list[dict] = llm_output.get("notes", [])
+
+        # ── Phase 3: Merge LLM results & write to cache ───────────────
+        for item in llm_input:
+            idx: int = item["index"]
+            match = next((n for n in notes_list if n.get("index") == idx), None)
+            note: str = match.get("ai_clinical_note", "") if match else ""
+
+            if not note:
+                note = "[Ошибка генерации]"
+
+            biomarkers[idx].ai_clinical_note = note
+
+            if note and note != "[Ошибка генерации]":
+                asyncio.create_task(
+                    supabase_client.table("insights_cache")
+                    .insert(
+                        {
+                            "marker_signature": item["signature"],
+                            "embedding": item["query_emb"],
+                            "ai_clinical_note": note,
+                        }
+                    )
+                    .execute()
+                )
+
+    except Exception as llm_err:
+        logger.error("LLM enrichment error: %s", llm_err)
+        # Graceful degradation: mark cache-miss markers as failed but keep others intact.
+        for item in llm_input:
+            if not biomarkers[item["index"]].ai_clinical_note:
+                biomarkers[item["index"]].ai_clinical_note = "[Ошибка AI]"
+
+    return biomarkers
+
+
 @app.post("/refresh-notes", response_model=RefreshNotesResponse, tags=["integration"])
 async def refresh_biomarker_notes(request: RefreshNotesRequest):
     """Recalculate flags and generate concise AI clinical notes for updated biomarkers."""
     if not request.biomarkers:
         return RefreshNotesResponse(markers=[])
-        
-    refreshed_markers = []
-    llm_input = []
-    
-    # 1. Recalculate flags
-    for idx, marker in enumerate(request.biomarkers):
-        new_flag = recalculate_flag(marker.value_numeric, marker.reference_range)
-        # Update flag in local marker object for LLM context
-        marker.flag = new_flag
-        
-        llm_input.append({
-            "index": idx,
-            "name": marker.original_name,
-            "value": marker.value_numeric if marker.value_numeric is not None else marker.value_string,
-            "unit": marker.unit,
-            "flag": new_flag,
-            "reference_range": marker.reference_range.text if marker.reference_range else None
-        })
-        
-    # 2. Bulk LLM call
-    api_key = settings.openai_api_key
-    model_name = settings.openai_model or "gpt-4o"
-    if not api_key:
-        raise HTTPException(status_code=500, detail="OPENAI_API_KEY is not configured.")
-        
-    client = AsyncOpenAI(api_key=api_key, timeout=60.0)
-    
-    system_prompt = (
-        "You are a medical lab expert for VITOGRAPH.\n"
-        "For each biomarker provided, generate exactly 1 concise sentence in Russian "
-        "(`ai_clinical_note`) explaining what this marker's current value means clinically.\n"
-        "Focus on the recalculated flag. Be professional and direct.\n"
-        "Return ONLY a JSON array of objects: `[{\"index\": 0, \"ai_clinical_note\": \"...\"}]`."
-    )
-    
-    try:
-        completion = await client.chat.completions.create(
-            model=model_name,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Biomarkers to process:\n{llm_input}"}
-            ],
-            response_format={"type": "json_object"}, # Using json_object for reliability
-            temperature=0.0,
+
+    enriched_markers = await enrich_biomarkers_with_insights(request.biomarkers)
+
+    result = [
+        RefreshedMarker(
+            index=idx,
+            ai_clinical_note=marker.ai_clinical_note or "",
+            flag=marker.flag,
         )
-        
-        import json
-        llm_output = json.loads(completion.choices[0].message.content or "{}")
-        # Robustly extract the list of notes from the LLM response.
-        # json_object mode forces a dict wrapper; the key name is unpredictable.
-        notes_list = []
-        if isinstance(llm_output, dict):
-            for v in llm_output.values():
-                if isinstance(v, list):
-                    notes_list = v
-                    break
-        elif isinstance(llm_output, list):
-            notes_list = llm_output
-        
-        # 3. Merge results
-        for item in llm_input:
-            idx = item["index"]
-            # Find matching note from LLM output
-            note = ""
-            if isinstance(notes_list, list):
-                match = next((n for n in notes_list if n.get("index") == idx), None)
-                if match:
-                    note = match.get("ai_clinical_note", "")
-            
-            refreshed_markers.append(RefreshedMarker(
-                index=idx,
-                ai_clinical_note=note,
-                flag=item["flag"]
-            ))
-            
-        return RefreshNotesResponse(markers=refreshed_markers)
-        
-    except Exception as exc:
-        logger.error(f"Refresh notes LLM error: {exc}")
-        # Fallback: return recalculated flags without AI notes if LLM fails
-        return RefreshNotesResponse(markers=[
-            RefreshedMarker(index=i["index"], ai_clinical_note="[Ошибка AI]", flag=i["flag"])
-            for i in llm_input
-        ])
+        for idx, marker in enumerate(enriched_markers)
+    ]
+    return RefreshNotesResponse(markers=result)
 
 
 # ── Core Engine Endpoints (Phase 18) ─────────────────────────────────
@@ -310,13 +411,14 @@ async def parse_lab_report(file: UploadFile = File(...)):
     try:
         content = await file.read()
         parsed_data = await extract_biomarkers(content, filename)
-        
+
         if not parsed_data.biomarkers:
             raise HTTPException(
                 status_code=400,
-                detail="Не удалось распознать медицинские показатели. Пожалуйста, загрузите четкое фото бланка анализов."
+                detail="Не удалось распознать медицинские показатели. Пожалуйста, загрузите четкое фото бланка анализов.",
             )
-            
+
+
         return parsed_data
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
@@ -352,6 +454,8 @@ async def parse_lab_report_image(file: UploadFile = File(...)):
                     "Убедитесь, что бланк хорошо освещен и текст читаем."
                 ),
             )
+
+
         return parsed_data
     except HTTPException:
         raise
@@ -384,7 +488,7 @@ async def parse_lab_report_image_batch(files: List[UploadFile] = File(...)):
         total_size += len(content)
         if total_size > max_total_size:
             raise HTTPException(status_code=400, detail="Total size of images too large. Max 50MB.")
-            
+
         images_data.append((content, content_type))
 
     if not images_data:
@@ -401,6 +505,8 @@ async def parse_lab_report_image_batch(files: List[UploadFile] = File(...)):
                     "Убедитесь, что бланки хорошо освещены и текст читаем."
                 ),
             )
+
+
         return parsed_data
     except HTTPException:
         raise

@@ -126,6 +126,8 @@ export default function UserProfileSheet({
 
     // ── Profile data ──
     const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
+    const [initialFormData, setInitialFormData] = useState<Record<string, unknown> | null>(null);
+    const [showUnsavedConfirm, setShowUnsavedConfirm] = useState(false);
     const [loadingProfile, setLoadingProfile] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -194,6 +196,24 @@ export default function UserProfileSheet({
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
     });
 
+    const isDirty = initialFormData ? JSON.stringify(formData) !== JSON.stringify(initialFormData) : false;
+
+    const handleRequestClose = () => {
+        if (isDirty) {
+            setShowUnsavedConfirm(true);
+        } else {
+            setIsOpen(false);
+        }
+    };
+
+    const handleForceClose = () => {
+        setShowUnsavedConfirm(false);
+        if (initialFormData) {
+            setFormData(initialFormData);
+        }
+        setIsOpen(false);
+    };
+
     // ── Load profile on panel open ──
 
     useEffect(() => {
@@ -209,7 +229,7 @@ export default function UserProfileSheet({
         try {
             const data = await apiClient.getProfile(userId);
             setProfile(data);
-            setFormData({
+            const newFormData = {
                 display_name: data.display_name ?? "",
                 ai_name: data.ai_name ?? "",
                 date_of_birth: data.date_of_birth
@@ -238,7 +258,9 @@ export default function UserProfileSheet({
                 timezone:
                     data.timezone ??
                     Intl.DateTimeFormat().resolvedOptions().timeZone,
-            });
+            };
+            setFormData(newFormData);
+            setInitialFormData(newFormData);
         } catch (err: unknown) {
             const message =
                 err instanceof Error ? err.message : "Unknown error";
@@ -285,14 +307,16 @@ export default function UserProfileSheet({
 
             // 2. Обновляем локальный стейт НАПРЯМУЮ, без вызова loadProfile()
             setProfile(updatedData);
-            setFormData(prev => ({
-                ...prev,
+            const updatedState = {
+                ...formData,
                 ...updatedData,
                 ai_name: updatedData.ai_name ?? "",
                 date_of_birth: updatedData.date_of_birth
                     ? new Date(updatedData.date_of_birth as string).toISOString().split("T")[0]
                     : "",
-            }));
+            };
+            setFormData(updatedState);
+            setInitialFormData(updatedState);
 
             // 3. Показываем успех
             setSaveSuccess(true);
@@ -503,7 +527,7 @@ export default function UserProfileSheet({
             {mounted && isOpen && (
                 <div
                     className="fixed inset-0 bg-black/50 z-40 transition-opacity backdrop-blur-sm"
-                    onClick={() => setIsOpen(false)}
+                    onClick={handleRequestClose}
                 />
             )}
 
@@ -520,7 +544,7 @@ export default function UserProfileSheet({
                             <p className="text-sm text-ink-muted mt-0.5">{userEmail}</p>
                         </div>
                         <button
-                            onClick={() => setIsOpen(false)}
+                            onClick={handleRequestClose}
                             className="p-2 text-ink-muted hover:text-ink-main hover:bg-surface-muted rounded-full transition-colors cursor-pointer"
                         >
                             <X size={20} />
@@ -1339,6 +1363,36 @@ export default function UserProfileSheet({
                                 className="w-full py-4 bg-surface-muted text-ink-main font-bold rounded-2xl hover:bg-surface-hover disabled:opacity-50 transition-all border border-divider cursor-pointer"
                             >
                                 Отмена
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Unsaved Changes Confirmation Modal */}
+            {showUnsavedConfirm && (
+                <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
+                    <div className="bg-white rounded-3xl max-w-sm w-full p-8 shadow-2xl border border-divider animate-in fade-in zoom-in duration-300">
+                        <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <AlertTriangle size={32} />
+                        </div>
+                        <h2 className="text-2xl font-bold text-ink-main text-center mb-3">
+                            Закрыть профиль?
+                        </h2>
+                        <p className="text-ink-muted text-center leading-relaxed mb-8">
+                            У вас есть несохраненные изменения. Если вы выйдете сейчас, они будут потеряны.
+                        </p>
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={handleForceClose}
+                                className="w-full py-4 bg-amber-600 text-white font-bold rounded-2xl hover:bg-amber-700 transition-all shadow-lg shadow-amber-200 active:scale-[0.98] cursor-pointer"
+                            >
+                                Выйти без сохранения
+                            </button>
+                            <button
+                                onClick={() => setShowUnsavedConfirm(false)}
+                                className="w-full py-4 bg-surface-muted text-ink-main font-bold rounded-2xl hover:bg-surface-hover transition-all border border-divider cursor-pointer"
+                            >
+                                Остаться и продолжить
                             </button>
                         </div>
                     </div>

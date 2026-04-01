@@ -202,6 +202,79 @@ function formatBiomarkersForLLM(results: BiomarkerInput[]): string {
     return `Результаты лабораторных анализов:\n\n${lines.join("\n")}`;
 }
 
+/**
+ * Maps a biomarker flag (Low/High/Normal/null) to the Zod status enum value.
+ */
+function mapFlagToStatus(flag: string | null | undefined): "critical_low" | "low" | "normal" | "high" | "critical_high" {
+    if (!flag) return "normal";
+    const f = flag.toLowerCase();
+    if (f === "low") return "low";
+    if (f === "high") return "high";
+    return "normal";
+}
+
+/**
+ * Lookup cached clinical notes for biomarkers by slug + flag.
+ * Returns a Map<string, string> where key = "slug::flag" and value = clinical_note.
+ */
+async function lookupCachedNotes(
+    supabase: ReturnType<typeof createClient>,
+    biomarkers: BiomarkerInput[],
+): Promise<Map<string, string>> {
+    const cache = new Map<string, string>();
+
+    const slugs = [...new Set(
+        biomarkers
+            .filter((b) => b.standardized_slug && b.flag)
+            .map((b) => b.standardized_slug),
+    )];
+
+    if (slugs.length === 0) return cache;
+
+    const { data, error } = await supabase
+        .from("biomarker_note_cache")
+        .select("standardized_slug, flag, clinical_note")
+        .in("standardized_slug", slugs);
+
+    if (error) {
+        console.error("[NoteCache] Lookup failed (non-fatal):", error.message);
+        return cache;
+    }
+
+    if (data) {
+        for (const row of data) {
+            cache.set(`${row.standardized_slug}::${row.flag}`, row.clinical_note);
+        }
+    }
+
+    return cache;
+}
+
+/**
+ * Save new assessment notes to the deterministic cache (best-effort, non-blocking).
+ */
+async function saveCachedNotes(
+    supabase: ReturnType<typeof createClient>,
+    entries: Array<{ slug: string; flag: string; note: string }>,
+): Promise<void> {
+    if (entries.length === 0) return;
+
+    try {
+        await supabase
+            .from("biomarker_note_cache")
+            .upsert(
+                entries.map((e) => ({
+                    standardized_slug: e.slug,
+                    flag: e.flag,
+                    clinical_note: e.note,
+                })),
+                { onConflict: "standardized_slug,flag" },
+            );
+    } catch (err) {
+        console.error("[NoteCache] Save failed (non-fatal):", err);
+    }
+}
+
 // ── Core Function ───────────────────────────────────────────────────
 
 export async function runLabReportAnalyzer(
@@ -261,12 +334,58 @@ SUPPLEMENTS: ${JSON.stringify(supps ? supps : [])}
         }
     }
 
+    // ── Deterministic Note Cache ─────────────────────────────────────
+    const noteCache = supabase
+        ? await lookupCachedNotes(supabase, biomarkerResults)
+        : new Map<string, string>();
+
+    const cachedAssessments: Array<{
+        name: string;
+        value: number;
+        unit: string;
+        reference_range: string;
+        status: "critical_low" | "low" | "normal" | "high" | "critical_high";
+        clinical_significance: string;
+    }> = [];
+    const uncachedBiomarkers: BiomarkerInput[] = [];
+
+    for (const bm of biomarkerResults) {
+        const key = `${bm.standardized_slug}::${bm.flag}`;
+        const cached = noteCache.get(key);
+
+        if (cached) {
+            cachedAssessments.push({
+                name: bm.original_name,
+                value: bm.value_numeric ?? 0,
+                unit: bm.unit ?? "",
+                reference_range: "",
+                status: mapFlagToStatus(bm.flag),
+                clinical_significance: cached,
+            });
+        } else {
+            uncachedBiomarkers.push(bm);
+        }
+    }
+
+    // ── Build LLM prompt ─────────────────────────────────────────────
+    let userMessage = formatBiomarkersForLLM(biomarkerResults);
+
+    if (cachedAssessments.length > 0) {
+        const cachedNames = cachedAssessments.map((a) => a.name).join(", ");
+        userMessage += `\n\nВАЖНО: Для следующих показателей индивидуальная оценка (biomarker_assessment) УЖЕ ГОТОВА и будет подставлена автоматически. НЕ генерируй для них поле clinical_significance, просто напиши "см. кэш". Используй их данные ТОЛЬКО для паттерн-анализа и рекомендаций. Показатели: ${cachedNames}`;
+    }
+
+    console.log(
+        `[LabAnalyzer] Cache: ${cachedAssessments.length} hits, ` +
+        `${uncachedBiomarkers.length} misses out of ${biomarkerResults.length} total`,
+    );
+
     // ── Run LLM Analysis ─────────────────────────────────────────────
     const result = await callLlmStructured({
         schema: LabDiagnosticReportSchema,
         schemaName: "lab_diagnostic_report",
         systemPrompt: LAB_DIAGNOSTIC_SYSTEM_PROMPT.replace("{userContext}", userContext),
-        userMessage: formatBiomarkersForLLM(biomarkerResults),
+        userMessage,
         model: LAB_ANALYSIS_MODEL,
         temperature: LAB_ANALYSIS_TEMPERATURE,
         timeoutMs: LAB_ANALYSIS_TIMEOUT_MS,
@@ -280,6 +399,34 @@ SUPPLEMENTS: ${JSON.stringify(supps ? supps : [])}
     if (result.source === "fallback") {
         console.warn("[AI:LabAnalyzer] Using fallback — LLM unavailable");
         return result.data;
+    }
+
+    // ── Merge cached + LLM assessments ──────────────────────────────
+    const llmAssessments = result.data.biomarker_assessments || [];
+    const mergedAssessments = [
+        ...cachedAssessments,
+        ...llmAssessments.filter((a) => a.clinical_significance !== "см. кэш"),
+    ];
+    result.data.biomarker_assessments = mergedAssessments;
+
+    // ── Save newly generated assessments to cache ───────────────────
+    if (supabase) {
+        const newEntries = llmAssessments
+            .filter((a) => a.clinical_significance && a.clinical_significance !== "см. кэш")
+            .map((a) => {
+                const original = biomarkerResults.find(
+                    (bm) => bm.original_name === a.name,
+                );
+                if (!original?.standardized_slug || !original?.flag) return null;
+                return {
+                    slug: original.standardized_slug,
+                    flag: original.flag,
+                    note: a.clinical_significance,
+                };
+            })
+            .filter(Boolean) as Array<{ slug: string; flag: string; note: string }>;
+
+        saveCachedNotes(supabase, newEntries).catch(() => {});
     }
 
     // ── Persist report in profiles.lab_diagnostic_reports ────────────

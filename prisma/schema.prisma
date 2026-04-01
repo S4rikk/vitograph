@@ -21,8 +21,6 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -1012,4 +1010,14 @@ model AiInsight {
   @@index([userId, generatedAt])
   @@index([userId])
   @@map("ai_insights")
+}
+model InsightCache {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  markerSignature String   @map("marker_signature") // e.g. "Витамин D - High"
+  embedding       Unsupported("vector(384)")? // Размерность 384 для BAAI/bge-small
+  aiClinicalNote  String   @map("ai_clinical_note")
+  hitCount        Int      @default(0) @map("hit_count")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("insights_cache")
 }
