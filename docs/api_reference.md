@@ -349,6 +349,23 @@ Auth: `requireAuth`. Файл: [`integration.ts`](file:///c:/project/VITOGRAPH/a
 
 ---
 
+#### `POST /parse-image-batch`
+
+Пакетный парсинг фото анализов крови (до 10 файлов) → OCR через GPT-4o Vision.
+
+**Content-Type:** `multipart/form-data`
+**Поле:** `files` — массив изображений
+
+---
+
+#### `POST /refresh-notes`
+
+AI-пересчет флагов и генерация коротких интерпретаций `ai_clinical_note` для измененных показателей.
+
+**Тело запроса:** `RefreshNotesRequest` — массив обновленных биомаркеров для обработки GPT-4o.
+
+---
+
 #### `POST /calculate`
 
 Расчёт динамической нормы (Mock Logic, MVP).

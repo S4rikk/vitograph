@@ -419,6 +419,8 @@ apps/api/
 | ------- | -------------------------------------------------- | --------------------------------------- |
 | `POST`  | `/parse`                                           | Extract biomarkers from PDF/DOCX/TXT    |
 | `POST`  | `/parse-image`                                     | OCR lab report photo (GPT-4o Vision)    |
+| `POST`  | `/parse-image-batch`                               | Parse batch of lab report photos (up to 10) |
+| `POST`  | `/refresh-notes`                                   | Recalculate flags & generate AI clinical notes |
 | `POST`  | `/calculate`                                       | Dynamic Norm calculation (MVP)          |
 | `GET`   | `/api/v1/profiles/{user_id}`                       | Get user profile                        |
 | `POST`  | `/api/v1/profiles`                                 | Create profile (onboarding)             |

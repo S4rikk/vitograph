@@ -252,7 +252,8 @@ class AiApiClient {
     chatMode: "diary" | "assistant" = "diary",
     imageUrl?: string,
     nutritionalContext?: any,
-    imageBase64?: string
+    imageBase64?: string,
+    onToken?: (token: string) => void,
   ): Promise<{ response: string }> {
     // Generate a default session thread if one isn't provided
     const sessionThread = threadId || `session-${Math.random().toString(36).substring(7)}`;
@@ -285,8 +286,49 @@ class AiApiClient {
       throw new Error(errorData.message || `API Error: ${response.status}`);
     }
 
-    const json = await response.json();
-    return (json.data || json) as { response: string };
+    // Streaming path: when onToken callback is provided
+    if (onToken && response.body) {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullResponse = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        fullResponse += chunk;
+        onToken(chunk);
+      }
+
+      return { response: fullResponse };
+    }
+
+    // Fallback: non-streaming path (for Diary mode)
+    if (response.body) {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullResponse = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        fullResponse += decoder.decode(value, { stream: true });
+      }
+
+      // Backward compatibility: If the response is a legacy structure {"response": "..."}
+      try {
+        const json = JSON.parse(fullResponse);
+        if (json.data && json.data.response !== undefined) return { response: json.data.response };
+        if (json.response !== undefined) return { response: json.response };
+      } catch (e) {
+        // Plain text stream detected (Expected behavior), ignore catch
+      }
+
+      return { response: fullResponse };
+    }
+
+    const text = await response.text();
+    return { response: text };
   }
 
   /**

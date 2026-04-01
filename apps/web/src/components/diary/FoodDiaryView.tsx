@@ -46,32 +46,55 @@ export default function FoodDiaryView() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [userTimezone, setUserTimezone] = useState<string | null>(null);
   const [supabase] = useState(() => createClient());
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  // 1. Load Profile & Timezone
-  useEffect(() => {
-    async function loadProfile() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const profile = await apiClient.getProfile(user.id);
-      
-      // CRITICAL FIX: Fallback to the local browser TZ instead of "UTC" to prevent boundary shifting
-      const fallbackTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-      const tz = profile?.timezone || fallbackTz;
-      
-      setUserTimezone(tz);
-      // Initialize selectedDate with Tz-aware "Today"
-      setSelectedDate(getTzToday(tz));
-    }
-    loadProfile();
-  }, [supabase]);
-
   const [threadId] = useState("diary"); // Backend ignores this for DB but uses mode
 
+  const [consumed, setConsumed] = useState({ calories: 0, protein: 0, fat: 0, carbs: 0 });
+  const [consumedMicros, setConsumedMicros] = useState<Record<string, number>>({});
+  const [dynamicTarget, setDynamicTarget] = useState({ calories: 2000, protein: 120, fat: 60, carbs: 250 });
+  const [dynamicMicros, setDynamicMicros] = useState<Record<string, number>>({});
+  const [rationale, setRationale] = useState<string>("Базовая норма");
 
+  // 1. Мгновенная инициализация на клиенте (Разблокирует рендер и загрузку историй!)
+  useEffect(() => {
+    setIsMounted(true);
+    // Берем таймзону прямо из браузера синхронно
+    const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+    setUserTimezone(localTz);
+    setSelectedDate(getTzToday(localTz));
+  }, []);
+
+  const fetchGlobalNutritionTargets = useCallback(async () => {
+    try {
+      const aiTargets = await apiClient.getNutritionTargets();
+      if (aiTargets?.macros) setDynamicTarget(aiTargets.macros);
+      if (aiTargets?.micros) setDynamicMicros(aiTargets.micros);
+      if (aiTargets?.rationale) setRationale(aiTargets.rationale);
+    } catch (err) {
+      console.error("Failed to load nutrition targets:", err);
+    }
+  }, []);
+
+  // 2. Фоновая проверка настроек профиля (Без блокировки UI)
+  useEffect(() => {
+    async function fetchUserPreferences() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Параллельно запускаем фоновую загрузку Глобальных Норм
+      fetchGlobalNutritionTargets();
+
+      // Сверяем БД-таймзону с локальной
+      const profile = await apiClient.getProfile(user.id);
+      const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+      
+      // Обновляем UI только если пользователь ЖЕСТКО задал другую зону в настройках
+      if (profile?.timezone && profile.timezone !== localTz) {
+        setUserTimezone(profile.timezone);
+        setSelectedDate(getTzToday(profile.timezone));
+      }
+    }
+    fetchUserPreferences();
+  }, [supabase, fetchGlobalNutritionTargets]);
 
   // Load chat history when date changes
   useEffect(() => {
@@ -107,30 +130,10 @@ export default function FoodDiaryView() {
     loadHistory();
   }, [selectedDate, userTimezone]);
 
-  const [consumed, setConsumed] = useState({ calories: 0, protein: 0, fat: 0, carbs: 0 });
-  const [consumedMicros, setConsumedMicros] = useState<Record<string, number>>({});
-  const [dynamicTarget, setDynamicTarget] = useState({ calories: 2000, protein: 120, fat: 60, carbs: 250 });
-  const [dynamicMicros, setDynamicMicros] = useState<Record<string, number>>({});
-  const [rationale, setRationale] = useState<string>("Базовая норма");
-
   // Fetch macros based on the selected date
   const fetchMacrosForDate = useCallback(async (date: Date) => {
+    if (!userTimezone) return;
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Use the new single source of truth for deterministic norms
-      try {
-        const aiTargets = await apiClient.getNutritionTargets();
-        if (aiTargets?.macros) setDynamicTarget(aiTargets.macros);
-        if (aiTargets?.micros) setDynamicMicros(aiTargets.micros);
-        if (aiTargets?.rationale) setRationale(aiTargets.rationale);
-      } catch (err) {
-        console.error("Failed to load nutrition targets:", err);
-      }
-
-      if (!userTimezone) return;
-
       const { startIso, endIso } = getTzDayBoundaries(date, userTimezone);
       console.info('[Diary] Querying macro boundaries:', { startIso, endIso });
 
@@ -145,17 +148,19 @@ export default function FoodDiaryView() {
     } catch (e) {
       console.error("Failed to fetch macros", e);
     }
-  }, [supabase, userTimezone]);
+  }, [userTimezone]);
 
   useEffect(() => {
     if (!isMounted || !userTimezone) return;
     fetchMacrosForDate(selectedDate);
-  }, [selectedDate, userTimezone, isMounted]);
+  }, [selectedDate, userTimezone, isMounted, fetchMacrosForDate]);
 
   // Re-fetch norms when profile is saved from UserProfileSheet
   useEffect(() => {
     const handler = () => {
       fetchMacrosForDate(selectedDate);
+      fetchGlobalNutritionTargets(); // КРИТИЧЕСКИ ВАЖНО ДЛЯ РЕАКТИВНОСТИ
+      
       // Also refresh timezone
       async function refreshTz() {
         const { data: { user } } = await supabase.auth.getUser();
@@ -168,7 +173,7 @@ export default function FoodDiaryView() {
     };
     window.addEventListener("profile-updated", handler);
     return () => window.removeEventListener("profile-updated", handler);
-  }, [fetchMacrosForDate, selectedDate, supabase]);
+  }, [fetchMacrosForDate, fetchGlobalNutritionTargets, selectedDate, supabase]);
 
   /* Auto scroll to bottom when new messages arrive or container resizes (e.g. input expands) */
   useEffect(() => {

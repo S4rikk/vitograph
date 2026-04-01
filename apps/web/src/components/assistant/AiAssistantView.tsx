@@ -8,6 +8,7 @@ import { compressImage } from "@/lib/image-utils";
 import Image from "next/image";
 import React from "react";
 import HealthGoalsWidget from "@/components/shared/HealthGoalsWidget";
+import { useTypewriter } from "@/hooks/use-typewriter";
 
 
 // ── CUSTOM PREMIUM RENDERERS ──
@@ -128,12 +129,40 @@ const AssistantMessageContent = ({ content }: { content: string }) => {
   // Render in a container with pre-wrap to respect the preserved double-newlines as paragraph breaks
   return (
     <div className="assistant-content flex flex-col gap-3">
-
       <div className="whitespace-pre-wrap leading-relaxed text-[15px] text-ink-muted/90">
         {fragments}
       </div>
     </div>
   );
+};
+
+// 1. Создаем выделенный компонент только для АКТИВНОЙ печати
+const ActiveTypewriterNode = ({ content, speed }: { content: string; speed: number }) => {
+  const displayedText = useTypewriter(content, speed);
+  
+  // Автоскролл только здесь
+  useEffect(() => {
+    const container = document.getElementById("ai-chat-scroll-container");
+    if (container) {
+      requestAnimationFrame(() => {
+        container.scrollTop = container.scrollHeight;
+      });
+    }
+  }, [displayedText]);
+
+  return <AssistantMessageContent content={displayedText} />;
+};
+
+// 2. Умная обертка для разделения потоков (История vs Новый текст)
+const TypewritingAssistantMessage = ({ content, isTyping }: { content: string; isTyping: boolean }) => {
+  // Если это старое сообщение из базы данных, мы ВООБЩЕ избегаем стейт-хуков.
+  // Это гарантирует 0 миллисекунд задержки и никаких мерцаний при загрузке страницы.
+  if (!isTyping) {
+    return <AssistantMessageContent content={content} />;
+  }
+
+  // Задержка 30мс (примерно 33 символа в секунду) дает комфортную скорость для чтения
+  return <ActiveTypewriterNode content={content} speed={30} />;
 };
 
 const parseInline = (text: string) => {
@@ -152,6 +181,7 @@ type Message = {
   role: "user" | "assistant";
   content: string;
   imageUrl?: string;
+  isStreaming?: boolean;
 };
 
 export default function AiAssistantView({ userId }: { userId: string }) {
@@ -285,26 +315,42 @@ export default function AiAssistantView({ userId }: { userId: string }) {
       imageUrl: optionalImageUrl || base64 || undefined,
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    // Create an empty placeholder for the assistant response BEFORE the API call
+    const placeholderId = (Date.now() + 1).toString();
+    const placeholderMsg: Message = { id: placeholderId, role: "assistant", content: "", isStreaming: true };
+    setMessages((prev) => [...prev, userMsg, placeholderMsg]);
     setIsLoading(true);
 
     try {
-      const res = await apiClient.chat(content, thread, undefined, "assistant", optionalImageUrl, undefined, base64);
-      const assistantMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: res.response,
-      };
-      setMessages((prev) => [...prev, assistantMsg]);
+      const res = await apiClient.chat(content, thread, undefined, "assistant", optionalImageUrl, undefined, base64,
+        (token) => {
+          setMessages(prev =>
+            prev.map(m => m.id === placeholderId
+              ? { ...m, content: m.content + token }
+              : m
+            )
+          );
+        }
+      );
+
+      // After stream completes, update the placeholder with the final full response
+      // DO NOT set isStreaming to false! The typewriter must finish typing at its own pace.
+      setMessages(prev =>
+        prev.map(m => m.id === placeholderId
+          ? { ...m, content: res.response }
+          : m
+        )
+      );
+
       window.dispatchEvent(new Event("refresh-health-goals"));
     } catch (error) {
       console.error("[AiAssistant] Chat Error:", error);
-      const errorMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "Извините, произошла ошибка сети при обращении к ИИ. Пожалуйста, попробуйте позже.",
-      };
-      setMessages((prev) => [...prev, errorMsg]);
+      setMessages(prev =>
+        prev.map(m => m.id === placeholderId
+          ? { ...m, content: "Извините, произошла ошибка сети при обращении к ИИ. Пожалуйста, попробуйте позже." }
+          : m
+        )
+      );
     } finally {
       setIsLoading(false);
     }
@@ -390,6 +436,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
       {/* Messages Area */}
       <div 
         ref={scrollRef}
+        id="ai-chat-scroll-container"
         className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4"
       >
         {messages.map((msg) => (
@@ -425,7 +472,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
                     </div>
                   )}
                   {msg.role === "assistant" ? (
-                    <AssistantMessageContent content={msg.content} />
+                    <TypewritingAssistantMessage content={msg.content} isTyping={!!msg.isStreaming} />
                   ) : (
                     <p className="whitespace-pre-wrap text-[15px]">{msg.content}</p>
                   )}
@@ -433,7 +480,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
             </div>
           </div>
         ))}
-        {isLoading && (
+        {isLoading && messages.length > 0 && messages[messages.length - 1].content === "" && (
           <div className="flex justify-start">
             <div className="max-w-[85%] rounded-2xl bg-cloud-light px-4 py-3 text-ink shadow-sm rounded-bl-none">
               <div className="flex space-x-1">

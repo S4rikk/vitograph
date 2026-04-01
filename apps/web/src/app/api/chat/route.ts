@@ -9,35 +9,39 @@ export async function POST(req: NextRequest) {
     try {
         const json = await req.json();
 
-        // Read the target backend URL.
-        // We try to use the direct URL if provided, otherwise fallback to local Node.js API
         const baseUrl = process.env.NEXT_PUBLIC_AI_DIRECT_URL || "http://localhost:3001/api/v1/ai";
-        const backendUrl = `${baseUrl}/chat`;
+        const backendUrl = `${baseUrl}/chat/stream`;
 
         const authorization = req.headers.get("Authorization");
-        const headers: Record<string, string> = {
-            "Content-Type": "application/json",
-        };
-        if (authorization) {
-            headers["Authorization"] = authorization;
-        }
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (authorization) headers["Authorization"] = authorization;
 
-        const response = await axios.post(backendUrl, json, {
+        const backendResponse = await fetch(backendUrl, {
+            method: "POST",
             headers,
-            timeout: 900_000,
-            validateStatus: () => true // Allow handling non-2xx status codes downstream
+            body: JSON.stringify(json),
         });
 
-        if (response.status >= 400) {
+        if (!backendResponse.ok || !backendResponse.body) {
+            const errorText = await backendResponse.text();
             return NextResponse.json(
-                { error: true, message: `Backend error: ${response.status}`, detail: typeof response.data === "string" ? response.data : JSON.stringify(response.data) },
-                { status: response.status }
+                { error: true, message: `Backend error: ${backendResponse.status}`, detail: errorText },
+                { status: backendResponse.status }
             );
         }
 
-        return NextResponse.json(response.data);
+        // Pipe the ReadableStream straight to the client
+        return new Response(backendResponse.body, {
+            status: 200,
+            headers: {
+                "Content-Type": "text/event-stream",
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",
+            },
+        });
     } catch (error: any) {
-        console.error("[Next.js Proxy API] Error in chat agent:", error);
+        console.error("[Next.js Proxy API] Error in chat stream:", error);
         return NextResponse.json(
             { error: true, message: "Internal Proxy Error", detail: error.message },
             { status: 500 }

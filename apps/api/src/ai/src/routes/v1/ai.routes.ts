@@ -22,6 +22,7 @@ import {
 } from "../../request-schemas.js";
 import {
   handleChat,
+  handleChatStream,
   handleAnalyze,
   handleDiagnose,
   handleAnalyzeSomatic,
@@ -46,6 +47,7 @@ export const aiRouter = Router();
 
 aiRouter.delete("/users/me", handleDeleteAccount);
 aiRouter.post("/chat", validate(ChatRequestSchema), handleChat);
+aiRouter.post("/chat/stream", validate(ChatRequestSchema), handleChatStream);
 aiRouter.get("/chat/history", handleGetChatHistory);
 aiRouter.delete("/chat/history", handleClearChatHistory);
 
