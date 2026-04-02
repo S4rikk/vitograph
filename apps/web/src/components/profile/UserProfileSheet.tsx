@@ -18,6 +18,7 @@ import {
     MapPin,
 } from "lucide-react";
 import SupplementChecklistWidget from "@/components/shared/SupplementChecklistWidget";
+import Logo from "@/components/ui/Logo";
 
 const COMMON_TIMEZONES = [
     "UTC",
@@ -824,6 +825,152 @@ export default function UserProfileSheet({
                                                         )}
                                                     </div>
                                                 </div>
+                                            </div>
+                                        </div>
+
+                                        {/* FAQ & About */}
+                                        <div className="mt-8 space-y-4">
+                                            <div className="bg-white rounded-2xl border border-divider shadow-sm overflow-hidden">
+                                                <details className="group">
+                                                    <summary className="flex items-center justify-between p-5 font-semibold text-ink-main cursor-pointer list-none hover:bg-surface-muted transition-colors [&::-webkit-details-marker]:hidden">
+                                                        <span>Часто задаваемые вопросы (FAQ)</span>
+                                                        <span className="transition group-open:-rotate-180">
+                                                            <svg className="w-5 h-5 text-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                            </svg>
+                                                        </span>
+                                                    </summary>
+                                                    <div className="p-5 pt-0 space-y-4 border-t border-divider mt-2">
+                                                        <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
+                                                            <div className="font-semibold text-ink-main flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[10px] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
+                                                                <span>В чем главная суперсила Vitograph?</span>
+                                                            </div>
+                                                            <div className="text-[14px] text-ink-muted leading-relaxed flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[10px] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
+                                                                <span>Vitograph — это не просто трекер калорий или папка для анализов. Это единый ИИ-мозг, который «видит» картину целиком. Приложение связывает то, что вы едите (Дневник), с тем, как вы себя чувствуете (Симптомы), и тем, что происходит внутри вашего организма (Анализы). На основе этих данных Ассистент выстраивает персональную стратегию здоровья.</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
+                                                            <div className="font-semibold text-ink-main flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[10px] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
+                                                                <span>Чем вкладка «Дневник» отличается от «Ассистента»?</span>
+                                                            </div>
+                                                            <div className="text-[14px] text-ink-muted leading-relaxed flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[10px] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
+                                                                <div className="space-y-2">
+                                                                    <p>Дневник — это ваш умный калькулятор питания. Сюда нужно писать (или скидывать фото) того, что вы съели. Например: "Яичница из 3 яиц с беконом и кофе". ИИ сам распознает блюдо, рассчитает скрытые КБЖУ и микронутриенты (витамины, минералы).</p>
+                                                                    <p>Ассистент (Айболит) — это ваш персональный коуч по здоровью. С ним можно советоваться, обсуждать ваши анализы, просить составить меню на день или жаловаться на звон в ушах. Он помнит ваш контекст и профиль.</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
+                                                            <div className="font-semibold text-ink-main flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[10px] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
+                                                                <span>Я загрузил анализы, но нормы отличаются от тех, что были на бланке Инвитро/Гемотеста. Почему?</span>
+                                                            </div>
+                                                            <div className="text-[14px] text-ink-muted leading-relaxed flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[10px] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
+                                                                <span>Референсные значения лабораторий показывают «среднюю температуру по больнице» — норму для людей всех возрастов и состояний от 18 до 99 лет. Vitograph использует динамические персонализированные нормы (оптимумы). Они рассчитываются индивидуально под ваш возраст, пол, текущие заболевания и цели. Поэтому показатель, который лаборатория считает «нормальным», у нас может подсвечиваться желтым как требующий внимания.</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
+                                                            <div className="font-semibold text-ink-main flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[10px] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
+                                                                <span>Как работает загрузка анализов?</span>
+                                                            </div>
+                                                            <div className="text-[14px] text-ink-muted leading-relaxed flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[10px] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
+                                                                <span>Вы можете перетащить PDF-файл или загрузить пачку фотографий ваших бланков (до 10 штук за раз). Важно: ИИ нужно время, чтобы внимательно «прочитать» каждое фото. Этот процесс может занять от 30 секунд до 2 минут. Вы увидите шкалу прогресса: просто подождите завершения анализа, и результаты превратятся в интерактивные карточки. Вы всегда сможете скорректировать цифру вручную, если ИИ ошибся.</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
+                                                            <div className="font-semibold text-ink-main flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[10px] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
+                                                                <span>Зачем нужны фото ногтей, кожи и языка во вкладке Анализов?</span>
+                                                            </div>
+                                                            <div className="text-[14px] text-ink-muted leading-relaxed flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[10px] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
+                                                                <span>Это соматическая диагностика. Наше тело часто подает визуальные сигналы о дефицитах витаминов или проблемах с ЖКТ еще до того, как они отразятся в биохимии крови. ИИ обучен распознавать паттерны (например, белые пятна на ногтях или налет на языке) и сопоставлять их с недостатком конкретных нутриентов.</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
+                                                            <div className="font-semibold text-ink-main flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[10px] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
+                                                                <span>Заменяет ли Vitograph поход к врачу?</span>
+                                                            </div>
+                                                            <div className="text-[14px] text-ink-muted leading-relaxed flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[10px] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
+                                                                <span>Нет. Vitograph — это мощный аналитический инструмент и ваш личный навигатор по здоровью, но он не ставит медицинские диагнозы и не назначает лечение. Все инсайты и AI-рекомендации созданы для того, чтобы вы могли предметно обсудить их со своим лечащим врачом.</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
+                                                            <div className="font-semibold text-ink-main flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[10px] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
+                                                                <span>Конфиденциальны ли мои данные?</span>
+                                                            </div>
+                                                            <div className="text-[14px] text-ink-muted leading-relaxed flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[10px] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
+                                                                <span>Да. Ваши медицинские данные, анализы и анкеты хранятся в защищенной базе. ИИ использует их исключительно для персонализации рекомендаций в рамках ваших защищенных сессий.</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </details>
+                                            </div>
+
+                                            <div className="bg-white rounded-2xl border border-divider shadow-sm overflow-hidden">
+                                                <details className="group">
+                                                    <summary className="flex items-center justify-between p-5 font-semibold text-ink-main cursor-pointer list-none hover:bg-surface-muted transition-colors [&::-webkit-details-marker]:hidden">
+                                                        <span>О приложении (About)</span>
+                                                        <span className="transition group-open:-rotate-180">
+                                                            <svg className="w-5 h-5 text-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                            </svg>
+                                                        </span>
+                                                    </summary>
+                                                    <div className="p-5 pt-0 text-[14px] text-ink-muted space-y-5 border-t border-divider mt-2">
+                                                        {/* Header banner */}
+                                                        <div className="text-center bg-surface-muted rounded-xl p-4 mt-2 flex flex-col items-center">
+                                                            <Logo size="lg" />
+                                                            <p className="text-primary-600 font-bold italic mt-1.5">Feed your cells, find balance.</p>
+                                                        </div>
+
+                                                        <div className="space-y-3 leading-relaxed">
+                                                            <p>Современная медицина привыкла лечить симптомы, когда механизм уже сломался. Мы в Vitograph верим в другой подход: <strong className="text-ink-main">здоровье начинается на клеточном уровне, задолго до появления болезней.</strong></p>
+                                                            <p>Vitograph — это ваш умный цифровой архитектор здоровья. Мы создали платформу, которая объединяет передовые ИИ-технологии с принципами доказательной медицины, нутрициологии и биохакинга.</p>
+                                                        </div>
+
+                                                        {/* How we do it list */}
+                                                        <div className="space-y-4">
+                                                            <h4 className="font-bold text-ink-main text-[16px] border-b border-divider pb-2">Как мы это делаем?</h4>
+                                                            <ul className="space-y-4">
+                                                                <li className="flex gap-4">
+                                                                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-[13px] shadow-sm">1</div>
+                                                                    <p className="leading-relaxed mt-1"><strong className="text-ink-main">Собираем пазл воедино.</strong> Ваши анализы крови, качество сна, уровень стресса и каждая съеденная тарелка еды — больше не разрозненные данные. Vitograph анализирует их в комплексе 24/7.</p>
+                                                                </li>
+                                                                <li className="flex gap-4">
+                                                                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-[13px] shadow-sm">2</div>
+                                                                    <p className="leading-relaxed mt-1"><strong className="text-ink-main">Ищем оптимум, а не "норму".</strong> Мы не опираемся на усредненные лабораторные референсы. Мы рассчитываем ваши идеальные показатели (динамические нормы) с учетом вашего возраста, профиля и генетических особенностей.</p>
+                                                                </li>
+                                                                <li className="flex gap-4">
+                                                                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-[13px] shadow-sm">3</div>
+                                                                    <p className="leading-relaxed mt-1"><strong className="text-ink-main">Действуем на опережение.</strong> ИИ-ассистент замечает скрытые дефициты и корреляции в вашем дневнике питания еще до того, как они превратятся в проблему, помогая корректировать состояние точечными изменениями в еде и добавках.</p>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                        
+                                                        {/* Disclaimer footer */}
+                                                        <div className="bg-blue-50 border border-blue-100 text-blue-800 rounded-xl p-4 mt-6 text-[13px] leading-relaxed font-medium">
+                                                            Мы не заменяем врачей. Мы даем вам инструмент, чтобы понимать свой организм, кормить свои клетки тем, что им действительно нужно, и находить свой идеальный баланс. Начните с профиля — и позвольте науке и данным работать на ваше долголетие.
+                                                        </div>
+                                                    </div>
+                                                </details>
                                             </div>
                                         </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Target, X, Loader2, Sparkles } from "lucide-react";
+import { Target, X, Loader2, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { createClient } from "@/lib/supabase/client";
 import type { HealthGoal } from "@/lib/types/profile";
@@ -11,6 +11,7 @@ export default function HealthGoalsWidget() {
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [supabase] = useState(() => createClient());
 
   const loadData = async (showLoading = false) => {
@@ -113,26 +114,32 @@ export default function HealthGoalsWidget() {
     );
   }
 
+  const displayedGoals = isExpanded ? goals : goals.slice(0, 1);
+  const hasMore = goals.length > 1;
+
   return (
-    <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none px-3 sm:px-6 pt-2 bg-gradient-to-b from-slate-50/50 to-transparent">
+    <div className="flex items-start gap-3 px-3 sm:px-6 pt-2 pb-2 bg-gradient-to-b from-slate-50/50 to-transparent">
       {/* Icon indicator */}
-      <div className="flex shrink-0 items-center justify-center bg-gradient-to-tr from-emerald-500 to-teal-400 text-white rounded-xl w-8 h-8 shadow-sm">
+      <div 
+        className={`flex shrink-0 items-center justify-center mt-0.5 bg-gradient-to-tr from-emerald-500 to-teal-400 text-white rounded-xl w-8 h-8 shadow-sm transition-all ${hasMore ? "cursor-pointer hover:shadow hover:scale-105" : ""}`}
+        onClick={() => hasMore && setIsExpanded(!isExpanded)}
+      >
         <Target className="w-4 h-4" />
       </div>
       
       {/* List of goals */}
-      <div className="flex items-center gap-2">
-        {goals.map((g) => (
+      <div className="flex flex-wrap items-center gap-2">
+        {displayedGoals.map((g) => (
           <div 
             key={g.id} 
-            className="group relative flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-200/50 bg-emerald-50/60 py-1 sm:py-1.5 pl-3 pr-1.5 text-sm font-semibold text-emerald-800 shadow-sm transition-all duration-300 hover:border-emerald-300 hover:bg-emerald-100 hover:shadow"
+            className="group relative flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-200/50 bg-emerald-50/60 py-1 sm:py-1.5 pl-3 pr-1.5 text-sm font-semibold text-emerald-800 shadow-sm transition-all duration-300 hover:border-emerald-300 hover:bg-emerald-100 hover:shadow animate-in fade-in zoom-in-95"
           >
             <Sparkles className="w-3 h-3 text-emerald-500 opacity-70" />
             <span className="truncate max-w-[220px] tracking-tight">{g.title}</span>
             <button 
               onClick={() => handleRemoveGoal(g.id)}
               disabled={isDeleting === g.id}
-              className="ml-1 flex h-5 w-5 items-center justify-center rounded-full text-emerald-500 opacity-50 transition-all hover:bg-white hover:text-emerald-700 hover:opacity-100 hover:shadow-sm disabled:opacity-30"
+              className="ml-1 flex h-5 w-5 items-center justify-center rounded-full text-emerald-500 opacity-50 transition-all hover:bg-white hover:text-emerald-700 hover:opacity-100 hover:shadow-sm disabled:opacity-30 cursor-pointer"
               title="Завершить цель"
             >
               {isDeleting === g.id ? (
@@ -143,6 +150,24 @@ export default function HealthGoalsWidget() {
             </button>
           </div>
         ))}
+
+        {!isExpanded && hasMore && (
+          <button 
+            onClick={() => setIsExpanded(true)}
+            className="flex shrink-0 items-center gap-1 rounded-full border border-slate-200 bg-white py-1 sm:py-1.5 px-2.5 text-[13px] font-semibold text-slate-500 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-700 cursor-pointer animate-in fade-in"
+          >
+            +{goals.length - 1} <ChevronDown className="w-3.5 h-3.5 opacity-70" />
+          </button>
+        )}
+        
+        {isExpanded && hasMore && (
+          <button 
+            onClick={() => setIsExpanded(false)}
+            className="flex shrink-0 items-center gap-1 rounded-full border border-slate-200 bg-white py-1 sm:py-1.5 px-2.5 text-[13px] font-semibold text-slate-500 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-700 cursor-pointer animate-in fade-in"
+          >
+            Свернуть <ChevronUp className="w-3.5 h-3.5 opacity-70" />
+          </button>
+        )}
       </div>
     </div>
   );
