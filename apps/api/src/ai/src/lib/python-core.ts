@@ -194,6 +194,47 @@ class PythonCoreClient {
       body: JSON.stringify({ biomarkers })
     }).then(res => res.markers);
   }
+
+  /**
+   * Initiate async batch OCR — returns job_id immediately
+   */
+  async parseImageBatchAsync(
+    files: Express.Multer.File[],
+    authToken: string
+  ): Promise<{ job_id: string; status: string }> {
+    const formData = new FormData();
+    for (const file of files) {
+      const mimeType = file.mimetype || "application/octet-stream";
+      const blob = new Blob([file.buffer], { type: mimeType });
+      formData.append("files", blob, file.originalname || "lab_report_photo.jpg");
+    }
+
+    return this.request<{ job_id: string; status: string }>(
+      "/parse-image-batch-async",
+      {
+        method: "POST",
+        body: formData,
+        headers: { "Authorization": `Bearer ${authToken}` },
+      },
+      15_000 // 15 sec — just creating a job, should be fast
+    );
+  }
+
+  /**
+   * Get job status (polling fallback)
+   */
+  async getLabScanStatus(jobId: string, authToken: string): Promise<any> {
+    return this.request<any>(
+      `/lab-scans/${jobId}`,
+      {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${authToken}`,
+        },
+      },
+      10_000
+    );
+  }
 }
 
 export const pythonCore = new PythonCoreClient(PYTHON_CORE_URL);

@@ -651,6 +651,37 @@ class AiApiClient {
     const json = await response.json();
     return (json.data || json) as LabReportExtraction;
   }
+
+  /**
+   * Initiates async batch OCR via Supabase Realtime pipeline.
+   * Returns job_id for tracking via useLabScanJob hook.
+   */
+  async uploadImageFilesAsync(imageBlobs: Blob[]): Promise<{ job_id: string; status: string }> {
+    const formData = new FormData();
+    imageBlobs.forEach((blob, index) => {
+      formData.append("files", blob, `lab_report_photo_${index}.jpg`);
+    });
+
+    const token = await getAuthToken();
+    const headers: HeadersInit = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const response = await fetch("/api/v1/integration/parse-image-batch-async", {
+      method: "POST",
+      headers,
+      body: formData,
+      signal: AbortSignal.timeout(30_000),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Async Upload Error: ${response.status}`);
+    }
+
+    const json = await response.json();
+    return json.data;
+  }
+
   /**
    * Uploads a food photo for AI recognition and nutritional analysis.
    */

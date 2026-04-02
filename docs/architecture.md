@@ -1,6 +1,6 @@
 # VITOGRAPH — Architecture: Database Schema & API Structure
 
-> **Последнее обновление:** 29 марта 2026
+> **Последнее обновление:** 2 апреля 2026 (Async OCR Pipeline — Этап 3 рефакторинга)
 >
 > Смотрите также: [API Reference](./api_reference.md) | [Frontend Components](./frontend_components.md) | [AI Pipeline](./ai_pipeline.md)
 
@@ -242,8 +242,25 @@
 | `ai_chat_messages`                 | Chat history persistence (user/assistant messages)            |
 | `feedback`                         | User feedback with anti-spam (`created_at` cooldown)          |
 | `active_condition_knowledge_bases` | Medical condition knowledge for norm adjustments (Phase 53f)  |
+| `lab_scans`                        | **[NEW]** Async OCR job tracking: `PENDING → PROCESSING → COMPLETED/FAILED` (Phase 3 Refactoring) |
 
 > `profiles` extended with: `lab_diagnostic_reports` (JSONB), `active_supplement_protocol` (JSONB), `active_nutrition_targets` (JSONB), `active_condition_knowledge_bases` FK
+
+#### `lab_scans` schema
+
+| Column       | Type          | Notes                                                            |
+| ------------ | ------------- | ---------------------------------------------------------------- |
+| `id`         | `uuid`        | PK, `gen_random_uuid()`                                          |
+| `user_id`    | `uuid`        | FK → `profiles(id)` ON DELETE CASCADE. **Indexed.**              |
+| `status`     | `text`        | CHECK: `PENDING`, `PROCESSING`, `COMPLETED`, `FAILED`            |
+| `file_count` | `integer`     | Количество файлов в batch                                        |
+| `result`     | `jsonb`       | `LabReportExtraction` (заполняется при COMPLETED)                |
+| `error`      | `text`        | Сообщение об ошибке (заполняется при FAILED, nullable)           |
+| `created_at` | `timestamptz` | Default `now()`                                                  |
+| `updated_at` | `timestamptz` | Автообновляется тригером `trg_lab_scans_updated_at`              |
+
+> **RLS Policy:** `SELECT` — только своя строка (`auth.uid() = user_id`). `INSERT/UPDATE` — только своя строка.
+> **Realtime:** Таблица добавлена в `supabase_realtime` publication → фронтенд получает `postgres_changes` события.
 
 ### 2.5 Future Tables (Post-MVP)
 
@@ -409,18 +426,22 @@ apps/api/
 | `GET`    | `/api/v1/supplements/today`                 | Today's supplement protocol + logs              |
 | `POST`   | `/api/v1/supplements/log`                   | Log supplement intake                           |
 | `POST`   | `/api/v1/integration/parse`                 | Parse PDF lab report + save to DB               |
-| `POST`   | `/api/v1/integration/parse-image`           | Parse lab report photo + save to DB             |
-| `POST`   | `/api/v1/integration/parse-image-batch`     | Parse batch of lab report photos (up to 10)     |
-| `POST`   | `/api/v1/integration/norms`                 | Calculate norms via Python Engine               |
+| `POST`   | `/api/v1/integration/parse-image`                | Parse lab report photo + save to DB (sync)                    |
+| `POST`   | `/api/v1/integration/parse-image-batch`          | Parse batch photos, sync fallback (up to 10)                  |
+| `POST`   | `/api/v1/integration/parse-image-batch-async` 🆕 | Initiate async batch OCR → returns `job_id` immediately       |
+| `GET`    | `/api/v1/integration/lab-scans/:jobId` 🆕        | Poll async OCR job status (fallback for Realtime)             |
+| `POST`   | `/api/v1/integration/norms`                      | Calculate norms via Python Engine                             |
 
 **Python Core API (port 8001):**
 
 | Method  | Endpoint                                           | Description                             |
 | ------- | -------------------------------------------------- | --------------------------------------- |
-| `POST`  | `/parse`                                           | Extract biomarkers from PDF/DOCX/TXT    |
-| `POST`  | `/parse-image`                                     | OCR lab report photo (GPT-4o Vision)    |
-| `POST`  | `/parse-image-batch`                               | Parse batch of lab report photos (up to 10) |
-| `POST`  | `/refresh-notes`                                   | Recalculate flags & generate AI clinical notes |
+| `POST`  | `/parse`                                           | Extract biomarkers from PDF/DOCX/TXT                          |
+| `POST`  | `/parse-image`                                     | OCR lab report photo (GPT-4o Vision)                          |
+| `POST`  | `/parse-image-batch`                               | Parse batch photos, sync fallback (up to 10)                  |
+| `POST`  | `/parse-image-batch-async` 🆕                      | Async batch OCR → creates `lab_scans` job, returns `job_id`   |
+| `GET`   | `/lab-scans/{job_id}` 🆕                           | Get async OCR job status (polling fallback)                    |
+| `POST`  | `/refresh-notes`                                   | Recalculate flags & generate AI clinical notes                |
 | `POST`  | `/calculate`                                       | Dynamic Norm calculation (MVP)          |
 | `GET`   | `/api/v1/profiles/{user_id}`                       | Get user profile                        |
 | `POST`  | `/api/v1/profiles`                                 | Create profile (onboarding)             |

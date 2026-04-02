@@ -1,6 +1,6 @@
 # VITOGRAPH — Frontend Component Map
 
-> **Дата актуальности:** 29 марта 2026
+> **Дата актуальности:** 2 апреля 2026 (Async OCR Pipeline)
 >
 > Карта UI-компонентов Next.js 14+ (App Router) с описанием ответственности и зависимостей.
 
@@ -53,7 +53,7 @@ layout.tsx (RootLayout)
 
 | Компонент                | Назначение                                                                            | API-зависимости                                                                                                                                                |
 | :----------------------- | :------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **MedicalResultsView**   | Оркестратор: загрузка PDF/фото, редактируемые карточки биомаркеров (Pause & Review), красная подсветка пустых полей, диагностический отчёт, соматика | `apiClient.uploadFile()`, `apiClient.uploadImageFile()`, `apiClient.uploadImageFiles()`, `apiClient.analyzeLabReport()`, `apiClient.getLabReportsHistory()`, `apiClient.getSomaticHistory()` |
+| **MedicalResultsView**   | Оркестратор: загрузка PDF/фото, редактируемые карточки биомаркеров (Pause & Review), красная подсветка пустых полей, диагностический отчёт, соматика. **[NEW]** Батч-загрузка использует `useLabScanJob` хук с async pipeline + Realtime progress bar (UPLOADING→PENDING→PROCESSING→COMPLETED). | `apiClient.uploadFile()`, `apiClient.uploadImageFile()`, **`useLabScanJob()`** → `/parse-image-batch-async`, `apiClient.analyzeLabReport()`, `apiClient.getLabReportsHistory()`, `apiClient.getSomaticHistory()` |
 | **UploadZone**           | Drag-n-drop зона для PDF/DOCX                                                         | `onFileSelect(file)`                                                                                                                                           |
 | **PhotoUploader**        | Кнопка камеры для фото анализов                                                       | `onCapture(base64)`                                                                                                                                            |
 | **ResultCard**           | Одиночная карточка биомаркера                                                         | `name`, `value`, `unit`, `flag`, `referenceRange`                                                                                                              |
@@ -163,3 +163,4 @@ graph LR
 | [`image-utils.ts`](file:///c:/project/VITOGRAPH/apps/web/src/lib/image-utils.ts)   | Сжатие изображений (canvas → blob, max 2048px для анализов, 1024px для еды)  |
 | [`health-core.ts`](file:///c:/project/VITOGRAPH/apps/web/src/types/health-core.ts) | Основные TypeScript-типы (Profile, Biomarker, MealLog, etc.)     |
 | [`middleware.ts`](file:///c:/project/VITOGRAPH/apps/web/src/middleware.ts)         | Next.js middleware для Supabase Auth (redirect неавторизованных) |
+| [`useLabScanJob.ts`](file:///c:/project/VITOGRAPH/apps/web/src/hooks/useLabScanJob.ts) 🆕 | **[NEW]** React-хук для async OCR pipeline. Управляет полным lifecycle задачи: запуск job → Supabase Realtime подписка → status tracking (`UPLOADING → PENDING → PROCESSING → COMPLETED/FAILED`) → fallback polling через 60 сек. |

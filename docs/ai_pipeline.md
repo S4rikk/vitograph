@@ -184,6 +184,42 @@ flowchart LR
 
 Файл: [`lab-report-analyzer.ts`](file:///c:/project/VITOGRAPH/apps/api/src/ai/src/graph/lab-report-analyzer.ts)
 
+#### Async OCR Pipeline (рекомендуемый путь для batch)
+
+```mermaid
+sequenceDiagram
+    participant FE as Frontend (Next.js)
+    participant NODE as Node.js (3001)
+    participant PY as Python FastAPI (8001)
+    participant DB as Supabase (lab_scans)
+    participant RT as Supabase Realtime
+
+    FE->>FE: subscribe to Realtime (before upload!)
+    FE->>NODE: POST /parse-image-batch-async
+    NODE->>PY: POST /parse-image-batch-async + JWT
+    PY->>DB: INSERT lab_scans (status=PENDING)
+    PY-->>NODE: { job_id }
+    NODE-->>FE: { job_id, status: PENDING }
+
+    Note over PY: BackgroundTask
+    PY->>PY: OCR via GPT-4o Vision x N
+    PY->>PY: enrich_biomarkers_with_insights()
+    PY->>DB: UPDATE lab_scans SET status=COMPLETED, result=jsonb
+
+    DB->>RT: postgres_changes (UPDATE event)
+    RT->>FE: WebSocket payload {status, result}
+    FE->>FE: Render biomarker cards
+```
+
+#### Последовательность статусов job:
+
+```
+PENDING → PROCESSING → COMPLETED (result заполнен)
+                     → FAILED (error заполнен)
+```
+
+#### Sync Flow (одиночное фото / fallback)
+
 ```mermaid
 flowchart LR
     INPUT["PDF / Фото анализов"] --> PYTHON["Python: OCR / GPT-4o Vision<br/>→ biomarkers[]"]

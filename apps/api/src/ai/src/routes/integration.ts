@@ -452,4 +452,67 @@ router.post(
   }
 );
 
+/**
+ * POST /api/v1/integration/parse-image-batch-async
+ * Initiate async batch OCR via Python BackgroundTasks
+ */
+router.post(
+  "/parse-image-batch-async",
+  upload.array("files", 10),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      console.log("[parse-image-batch-async] ①  Handler entered");
+      const files = req.files as Express.Multer.File[];
+
+      if (!files || files.length === 0) {
+        throw new AppError("No files uploaded", 400);
+      }
+      if (files.length > 10) {
+        throw new AppError("Max 10 files", 400);
+      }
+
+      for (const file of files) {
+        if (!file.mimetype?.startsWith("image/")) {
+          throw new AppError(`Expected image, got ${file.mimetype}`, 400);
+        }
+      }
+
+      // Extract auth token
+      const authToken = req.headers.authorization?.split(" ")[1];
+      if (!authToken) {
+        throw new AppError("Missing Authorization token", 401);
+      }
+
+      console.log(`[parse-image-batch-async] ②  Files: ${files.length}, forwarding to Python...`);
+      const result = await pythonCore.parseImageBatchAsync(files, authToken);
+      console.log(`[parse-image-batch-async] ③  Job created: ${result.job_id}`);
+
+      res.json({ success: true, data: result });
+    } catch (error) {
+      console.error("[parse-image-batch-async] ❌ CRASH:", error instanceof Error ? error.stack : error);
+      next(error);
+    }
+  }
+);
+
+/**
+ * GET /api/v1/integration/lab-scans/:jobId
+ * Polling fallback for async OCR job status
+ */
+router.get(
+  "/lab-scans/:jobId",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const authToken = req.headers.authorization?.split(" ")[1];
+      if (!authToken) {
+        throw new AppError("Missing Authorization token", 401);
+      }
+      const result = await pythonCore.getLabScanStatus(String(req.params.jobId), authToken);
+      res.json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 export const integrationRouter = router;

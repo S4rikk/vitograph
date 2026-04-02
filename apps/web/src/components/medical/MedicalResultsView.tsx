@@ -8,6 +8,7 @@ import DiagnosticReportCard from "./DiagnosticReportCard";
 import { apiClient, type BiomarkerResult, type LabReportExtraction, type StoredDiagnosticReport, type SomaticHistoryResponse, type SomaticHistoryItem } from "@/lib/api-client";
 import { compressImageToBlob } from "@/lib/image-utils";
 import SymptomTrackerWidget from "./SymptomTrackerWidget";
+import { useLabScanJob } from "@/hooks/useLabScanJob";
 
 /**
  * Medical Results view — orchestrates:
@@ -26,6 +27,8 @@ export default function MedicalResultsView() {
   const [isDirty, setIsDirty] = useState(false);
   const [dirtyIndexes, setDirtyIndexes] = useState<Set<number>>(new Set());
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const { startJob, status: jobStatus, result: jobResult, error: jobError, reset: resetJob } = useLabScanJob();
 
   const controlsRef = useRef<HTMLDivElement>(null);
 
@@ -133,6 +136,7 @@ export default function MedicalResultsView() {
     setErrorMessage(undefined);
     setResults(null);
     setDiagnosisError(undefined);
+    resetJob();
 
     try {
       let data: LabReportExtraction;
@@ -141,8 +145,12 @@ export default function MedicalResultsView() {
         const compressedBlobs = await Promise.all(
           files.map(f => compressImageToBlob(f, 2048))
         );
+
         if (compressedBlobs.length > 1) {
-          data = await apiClient.uploadImageFiles(compressedBlobs);
+          // Use ASYNC pipeline for batch uploads (>1 file)
+          await startJob(compressedBlobs);
+          // Status will be tracked via jobStatus — no data returned here
+          return; // Exit early — useEffect below will handle completion
         } else {
           data = await apiClient.uploadImageFile(compressedBlobs[0]);
         }
@@ -168,7 +176,21 @@ export default function MedicalResultsView() {
       setErrorMessage((error as Error).message || "Failed to parse files");
       setUploadState("error");
     }
-  }, [runDiagnosticAnalysis]);
+  }, [runDiagnosticAnalysis, startJob, resetJob]);
+
+  // Handle async job completion via Realtime
+  useEffect(() => {
+    if (jobStatus === "COMPLETED" && jobResult) {
+      setResults(jobResult);
+      setEditableBiomarkers(jobResult.biomarkers || null);
+      setUploadState("done");
+    } else if (jobStatus === "FAILED" && jobError) {
+      setErrorMessage(jobError);
+      setUploadState("error");
+    } else if (jobStatus === "UPLOADING" || jobStatus === "PENDING" || jobStatus === "PROCESSING") {
+      setUploadState("loading");
+    }
+  }, [jobStatus, jobResult, jobError]);
 
   const handleMarkerChange = (index: number, field: keyof BiomarkerResult | 'ref_text', value: any) => {
     if (!editableBiomarkers) return;
@@ -291,17 +313,40 @@ export default function MedicalResultsView() {
 
       {/* ── Loading Skeleton ─────────────────────────────── */}
       {uploadState === "loading" && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="animate-pulse rounded-xl border border-border bg-white p-5"
-            >
-              <div className="h-3 w-24 rounded bg-surface-hover" />
-              <div className="mt-3 h-7 w-16 rounded bg-surface-hover" />
-              <div className="mt-2 h-2 w-32 rounded bg-surface-hover" />
-            </div>
-          ))}
+        <div className="flex flex-col items-center gap-4 rounded-2xl border border-cyan-200 bg-gradient-to-br from-cyan-50 to-white p-8 shadow-sm">
+          <div className="relative h-12 w-12">
+            <div className="absolute inset-0 animate-spin rounded-full border-[3px] border-cyan-200 border-t-cyan-600" />
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-semibold text-cyan-800">
+              {jobStatus === "UPLOADING" && "Загружаем файлы..."}
+              {jobStatus === "PENDING" && "Запрос принят, ожидаем обработку..."}
+              {jobStatus === "PROCESSING" && "AI анализирует ваши анализы..."}
+              {!["UPLOADING", "PENDING", "PROCESSING"].includes(jobStatus) && "Обработка..."}
+            </p>
+            <p className="mt-1 text-xs text-cyan-600">
+              {jobStatus === "PROCESSING"
+                ? "GPT-4o Vision распознаёт показатели на фото"
+                : "Это может занять до 2 минут"}
+            </p>
+          </div>
+          {/* Progress steps */}
+          <div className="flex items-center gap-2 mt-2">
+            {["UPLOADING", "PENDING", "PROCESSING"].map((step, i) => (
+              <div key={step} className="flex items-center gap-2">
+                <div className={`h-2.5 w-2.5 rounded-full transition-all duration-500 ${
+                  ["UPLOADING", "PENDING", "PROCESSING"].indexOf(jobStatus) >= i
+                    ? "bg-cyan-500 scale-110"
+                    : "bg-slate-200"
+                }`} />
+                {i < 2 && <div className={`h-0.5 w-6 transition-all duration-500 ${
+                  ["UPLOADING", "PENDING", "PROCESSING"].indexOf(jobStatus) > i
+                    ? "bg-cyan-400"
+                    : "bg-slate-200"
+                }`} />}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

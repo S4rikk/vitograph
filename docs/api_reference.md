@@ -1,6 +1,6 @@
 # VITOGRAPH — API Reference
 
-> **Дата актуальности:** 2 Апреля 2026
+> **Дата актуальности:** 2 Апреля 2026 (обновлено: Async OCR Pipeline)
 >
 > Полный справочник всех API-эндпоинтов проекта. Документация сгенерирована из исходного кода.
 
@@ -314,10 +314,45 @@ Auth: `requireAuth`. Файл: [`integration.ts`](file:///c:/project/VITOGRAPH/a
 
 #### `POST /api/v1/integration/parse-image-batch`
 
+> ⚠️ **LEGACY / FALLBACK** — синхронный. Используй только для одиночных фото или при отключённом Realtime. Таймаут 5 мин.
+
 Парсинг НЕСКОЛЬКИХ ФОТО анализов крови (до 10 файлов). Каждая страница обрабатывается параллельно, результаты мержатся.
 
 **Content-Type:** `multipart/form-data`
 **Поле:** `files` — массив изображений (до 10 файлов)
+
+---
+
+#### `POST /api/v1/integration/parse-image-batch-async` 🆕
+
+**Рекомендуемый путь для batch-загрузки.** Принимает до 10 фото и немедленно возвращает `job_id`. OCR запускается в фоне (Python `BackgroundTasks`). Результат доставляется фронтенду через Supabase Realtime (WebSocket) или polling.
+
+**Content-Type:** `multipart/form-data`
+**Auth:** Bearer JWT обязателен
+**Поле:** `files` — массив изображений (до 10 файлов, суммарно ≤ 50MB)
+
+**Ответ:**
+```json
+{
+  "success": true,
+  "data": {
+    "job_id": "uuid",
+    "status": "PENDING"
+  }
+}
+```
+
+> 💡 **Realtime:** После получения `job_id` фронтенд подписывается на `postgres_changes` в таблице `lab_scans` с фильтром `id=eq.{job_id}`. При `status=COMPLETED` поле `result` содержит полный `LabReportExtraction`.
+
+---
+
+#### `GET /api/v1/integration/lab-scans/:jobId` 🆕
+
+Pollback fallback — проверка статуса async OCR job.
+
+**Auth:** Bearer JWT обязателен
+
+**Ответ:** объект `lab_scans` с полями `id`, `status`, `result`, `error`, `created_at`, `updated_at`.
 
 ---
 
@@ -353,10 +388,43 @@ Auth: `requireAuth`. Файл: [`integration.ts`](file:///c:/project/VITOGRAPH/a
 
 #### `POST /parse-image-batch`
 
-Пакетный парсинг фото анализов крови (до 10 файлов) → OCR через GPT-4o Vision.
+> ⚠️ **LEGACY / FALLBACK** — синхронный. Оставлен для обратной совместимости.
+
+Пакетный парсинг фото анализов крови (до 10 файлов) → OCR через GPT-4o Vision. Синхронно, до 40 секунд.
 
 **Content-Type:** `multipart/form-data`
 **Поле:** `files` — массив изображений
+
+---
+
+#### `POST /parse-image-batch-async` 🆕
+
+Асинхронный запуск batch OCR. Создаёт запись в `lab_scans` (`status=PENDING`), запускает `BackgroundTask` и немедленно возвращает `job_id`.
+
+**Auth:** требует `Authorization: Bearer <jwt>` заголовок (для RLS)
+**Content-Type:** `multipart/form-data`
+**Поле:** `files` — массив изображений (≤10 файлов, ≤50MB суммарно)
+
+**Ответ:**
+```json
+{ "job_id": "uuid", "status": "PENDING" }
+```
+
+**Жизненный цикл job:**
+```
+PENDING → PROCESSING → COMPLETED (result заполнен)
+                     → FAILED (error заполнен)
+```
+
+---
+
+#### `GET /lab-scans/{job_id}` 🆕
+
+Получение статуса конкретного async OCR job. Используется как fallback polling, если Realtime не доставил результат за 60 сек.
+
+**Auth:** требует `Authorization: Bearer <jwt>` заголовок
+
+**Ответ:** строка из таблицы `lab_scans`: `{ id, user_id, status, file_count, result, error, created_at, updated_at }`
 
 ---
 

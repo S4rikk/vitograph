@@ -10,7 +10,7 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, List, Optional
 
-from fastapi import FastAPI, File, HTTPException, UploadFile, status, Request
+from fastapi import FastAPI, File, HTTPException, UploadFile, status, Request, BackgroundTasks
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import logging
@@ -512,6 +512,163 @@ async def parse_lab_report_image_batch(files: List[UploadFile] = File(...)):
         raise
     except Exception as e:
         raise HTTPException(status_code=422, detail=f"Batch image parsing error: {str(e)}")
+
+
+# ── Async OCR Pipeline (Phase 3 Refactor) ────────────────────────────
+
+async def _process_ocr_job(
+    job_id: str,
+    user_id: str,
+    images_data: list[tuple[bytes, str]],
+    auth_token: str,
+) -> None:
+    """Background: run OCR on images, save result to lab_scans table.
+
+    Args:
+        job_id: UUID of the lab_scans row to update.
+        user_id: Authenticated user's UUID (for logging).
+        images_data: List of (raw_bytes, mime_type) tuples.
+        auth_token: Bearer JWT for scoped Supabase client (RLS-compatible).
+    """
+    from supabase import create_async_client, ClientOptions
+
+    # Create scoped client with user's JWT for RLS compatibility
+    options = ClientOptions(headers={"Authorization": f"Bearer {auth_token}"})
+    client = await create_async_client(
+        settings.supabase_url,
+        settings.supabase_key,
+        options=options,
+    )
+
+    try:
+        # Mark as PROCESSING
+        await client.table("lab_scans").update(
+            {"status": "PROCESSING"}
+        ).eq("id", job_id).execute()
+
+        # Run OCR (reuse existing function)
+        extraction = await extract_biomarkers_from_image_batch(images_data)
+
+        if not extraction.biomarkers:
+            await client.table("lab_scans").update({
+                "status": "FAILED",
+                "error": "Не удалось распознать показатели на фото.",
+            }).eq("id", job_id).execute()
+            return
+
+        # Enrich with AI clinical notes (reuse existing function)
+        enriched = await enrich_biomarkers_with_insights(extraction.biomarkers)
+        extraction.biomarkers = enriched
+
+        # Save COMPLETED result
+        await client.table("lab_scans").update({
+            "status": "COMPLETED",
+            "result": extraction.model_dump(mode="json"),
+        }).eq("id", job_id).execute()
+
+    except Exception as e:
+        logger.error("OCR job %s failed: %s", job_id, traceback.format_exc())
+        try:
+            await client.table("lab_scans").update({
+                "status": "FAILED",
+                "error": str(e)[:500],
+            }).eq("id", job_id).execute()
+        except Exception:
+            logger.error("Failed to update job %s status after error", job_id)
+
+
+@app.post("/parse-image-batch-async", tags=["file-parser"])
+async def parse_lab_report_image_batch_async(
+    request: Request,
+    files: List[UploadFile] = File(...),
+    background_tasks: BackgroundTasks = None,  # type: ignore[assignment]
+) -> dict:
+    """Initiate async batch OCR. Returns job_id immediately."""
+    if background_tasks is None:
+        background_tasks = BackgroundTasks()
+
+    if len(files) > 10:
+        raise HTTPException(status_code=400, detail="Max 10 images.")
+
+    # Extract user ID from Authorization header
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing Authorization header")
+
+    auth_token = auth_header.split(" ", 1)[1]
+
+    # Read all files into memory
+    images_data: list[tuple[bytes, str]] = []
+    total_size = 0
+    for file in files:
+        content_type = file.content_type or ""
+        if not content_type.startswith("image/"):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Expected image, got '{content_type}' for {file.filename}.",
+            )
+        content = await file.read()
+        total_size += len(content)
+        if total_size > 50 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="Total > 50MB.")
+        images_data.append((content, content_type))
+
+    # Create scoped Supabase client with user JWT
+    from supabase import create_async_client, ClientOptions
+    options = ClientOptions(headers={"Authorization": f"Bearer {auth_token}"})
+    client = await create_async_client(
+        settings.supabase_url,
+        settings.supabase_key,
+        options=options,
+    )
+
+    # Decode user_id from JWT (via Supabase auth)
+    user_resp = await client.auth.get_user(auth_token)
+    if not user_resp or not user_resp.user:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    user_id = str(user_resp.user.id)
+
+    # Create job record
+    job_resp = await client.table("lab_scans").insert({
+        "user_id": user_id,
+        "status": "PENDING",
+        "file_count": len(images_data),
+    }).execute()
+
+    if not job_resp.data or len(job_resp.data) == 0:
+        raise HTTPException(status_code=500, detail="Failed to create job")
+
+    job_id: str = job_resp.data[0]["id"]
+
+    # Schedule background processing
+    background_tasks.add_task(
+        _process_ocr_job, job_id, user_id, images_data, auth_token
+    )
+
+    return {"job_id": job_id, "status": "PENDING"}
+
+
+@app.get("/lab-scans/{job_id}", tags=["file-parser"])
+async def get_lab_scan_status(job_id: str, request: Request) -> dict:
+    """Polling fallback: check async OCR job status."""
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing Authorization")
+
+    auth_token = auth_header.split(" ", 1)[1]
+
+    from supabase import create_async_client, ClientOptions
+    options = ClientOptions(headers={"Authorization": f"Bearer {auth_token}"})
+    client = await create_async_client(
+        settings.supabase_url,
+        settings.supabase_key,
+        options=options,
+    )
+
+    resp = await client.table("lab_scans").select("*").eq("id", job_id).single().execute()
+    if not resp.data:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return resp.data
 
 
 @app.post("/calculate", response_model=NormResult, tags=["norm-engine"])
