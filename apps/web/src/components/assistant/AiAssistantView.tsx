@@ -158,6 +158,13 @@ const ActiveTypewriterNode = ({ content, speed }: { content: string; speed: numb
       if (!container) return;
       const target = targetScrollRef.current;
       const current = container.scrollTop;
+      const distanceFromBottom = container.scrollHeight - current - container.clientHeight;
+      
+      // Если пользователь скроллил наверх (>5px от дна), НЕ давим вниз
+      if (distanceFromBottom > 5) {
+        rAF = requestAnimationFrame(smoothLoop);
+        return;
+      }
       
       // Если есть разница между текущим и целевым скроллом, плавно догоняем (easing 15%)
       if (target > 0 && target - current > 0.5) {
@@ -226,6 +233,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const userHasScrolledUpRef = useRef(false);
   
   const [threadId, setThreadId] = useState<string>("");
 
@@ -316,20 +324,47 @@ export default function AiAssistantView({ userId }: { userId: string }) {
     const el = scrollRef.current;
     if (!el) return;
 
-    // Scroll to bottom
-    el.scrollTop = el.scrollHeight;
+    // Only auto-scroll if user hasn't scrolled up
+    if (!userHasScrolledUpRef.current) {
+      el.scrollTop = el.scrollHeight;
+    }
 
     // Also scroll when the container itself resizes (e.g. input expands)
     const resizeObserver = new ResizeObserver(() => {
-      el.scrollTop = el.scrollHeight;
+      if (!userHasScrolledUpRef.current) {
+        el.scrollTop = el.scrollHeight;
+      }
     });
 
     resizeObserver.observe(el);
     return () => resizeObserver.disconnect();
   }, [messages]);
 
+  // Detect when user manually scrolls up
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const handleScroll = () => {
+      const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+      // If user is more than 5px from bottom, they've scrolled up
+      if (distanceFromBottom > 5) {
+        userHasScrolledUpRef.current = true;
+      } else {
+        // User has scrolled back to bottom — resume auto-scroll
+        userHasScrolledUpRef.current = false;
+      }
+    };
+
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, []);
+
   // Handle the actual chat submission logic (separated so it can be called programmatically)
   const sendChatMessage = useCallback(async (content: string, thread: string, optionalImageUrl?: string, base64?: string) => {
+    // Reset scroll-lock: when user sends a new message, they want to see the response
+    userHasScrolledUpRef.current = false;
+
     const userMsg: Message = {
       id: Date.now().toString(),
       role: "user",
