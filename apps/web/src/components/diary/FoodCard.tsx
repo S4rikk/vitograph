@@ -177,14 +177,14 @@ export default function FoodCard({
               <div className="flex gap-1.5">
                   <button 
                       onClick={() => onEdit?.(mealId)}
-                      className="text-blue-500 hover:text-blue-600 transition-colors p-1 rounded-md hover:bg-blue-50 z-[50]"
+                      className="text-blue-500 hover:text-blue-600 transition-colors p-1 rounded-md hover:bg-blue-50"
                       title="Изменить вес"
                   >
                       <Pencil size={16} />
                   </button>
                   <button 
                       onClick={() => onDelete?.(mealId)}
-                      className="text-red-500 hover:text-red-600 transition-colors p-1 rounded-md hover:bg-red-50 z-[50]"
+                      className="text-red-500 hover:text-red-600 transition-colors p-1 rounded-md hover:bg-red-50"
                       title="Удалить"
                   >
                       <Trash2 size={16} />
