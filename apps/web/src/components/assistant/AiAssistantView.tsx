@@ -139,16 +139,38 @@ const AssistantMessageContent = ({ content }: { content: string }) => {
 // 1. Создаем выделенный компонент только для АКТИВНОЙ печати
 const ActiveTypewriterNode = ({ content, speed }: { content: string; speed: number }) => {
   const displayedText = useTypewriter(content, speed);
+  const targetScrollRef = useRef<number>(0);
   
-  // Автоскролл только здесь
+  // Обновляем целевую позицию при появлении каждого нового символа
   useEffect(() => {
     const container = document.getElementById("ai-chat-scroll-container");
     if (container) {
-      requestAnimationFrame(() => {
-        container.scrollTop = container.scrollHeight;
-      });
+      targetScrollRef.current = container.scrollHeight - container.clientHeight;
     }
   }, [displayedText]);
+
+  // Независимый 60 FPS цикл для идеальной плавности (Lerp) без сбросов
+  useEffect(() => {
+    let rAF: number;
+    const container = document.getElementById("ai-chat-scroll-container");
+    
+    const smoothLoop = () => {
+      if (!container) return;
+      const target = targetScrollRef.current;
+      const current = container.scrollTop;
+      
+      // Если есть разница между текущим и целевым скроллом, плавно догоняем (easing 15%)
+      if (target > 0 && target - current > 0.5) {
+        container.scrollTop = current + (target - current) * 0.15;
+      }
+      rAF = requestAnimationFrame(smoothLoop);
+    };
+    
+    smoothLoop();
+    return () => {
+      if (rAF) cancelAnimationFrame(rAF);
+    };
+  }, []);
 
   return <AssistantMessageContent content={displayedText} />;
 };
@@ -161,8 +183,8 @@ const TypewritingAssistantMessage = ({ content, isTyping }: { content: string; i
     return <AssistantMessageContent content={content} />;
   }
 
-  // Задержка 30мс (примерно 33 символа в секунду) дает комфортную скорость для чтения
-  return <ActiveTypewriterNode content={content} speed={30} />;
+  // Задержка 13мс (примерно 77 символов в секунду ~ 750 слов в минуту) дает мгновенное визуальное проявление
+  return <ActiveTypewriterNode content={content} speed={13} />;
 };
 
 const parseInline = (text: string) => {
