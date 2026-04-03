@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Target, X, Loader2, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { Target, X, Loader2, Sparkles, ChevronDown } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { createClient } from "@/lib/supabase/client";
 import type { HealthGoal } from "@/lib/types/profile";
@@ -114,60 +114,70 @@ export default function HealthGoalsWidget() {
     );
   }
 
-  const displayedGoals = isExpanded ? goals : goals.slice(0, 1);
-  const hasMore = goals.length > 1;
-
   return (
-    <div className="flex items-start gap-3 px-3 sm:px-6 pt-2 pb-2 bg-gradient-to-b from-slate-50/50 to-transparent">
-      {/* Icon indicator */}
-      <div 
-        className={`flex shrink-0 items-center justify-center mt-0.5 bg-gradient-to-tr from-emerald-500 to-teal-400 text-white rounded-xl w-8 h-8 shadow-sm transition-all ${hasMore ? "cursor-pointer hover:shadow hover:scale-105" : ""}`}
-        onClick={() => hasMore && setIsExpanded(!isExpanded)}
-      >
-        <Target className="w-4 h-4" />
-      </div>
-      
-      {/* List of goals */}
-      <div className="flex flex-wrap items-center gap-2">
-        {displayedGoals.map((g) => (
-          <div 
-            key={g.id} 
-            className="group relative flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-200/50 bg-emerald-50/60 py-1 sm:py-1.5 pl-3 pr-1.5 text-sm font-semibold text-emerald-800 shadow-sm transition-all duration-300 hover:border-emerald-300 hover:bg-emerald-100 hover:shadow animate-in fade-in zoom-in-95"
-          >
-            <Sparkles className="w-3 h-3 text-emerald-500 opacity-70" />
-            <span className="truncate max-w-[220px] tracking-tight">{g.title}</span>
-            <button 
-              onClick={() => handleRemoveGoal(g.id)}
-              disabled={isDeleting === g.id}
-              className="ml-1 flex h-5 w-5 items-center justify-center rounded-full text-emerald-500 opacity-50 transition-all hover:bg-white hover:text-emerald-700 hover:opacity-100 hover:shadow-sm disabled:opacity-30 cursor-pointer"
-              title="Завершить цель"
-            >
-              {isDeleting === g.id ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <X className="h-3 w-3 cursor-pointer" />
-              )}
-            </button>
+    <div className="mx-3 sm:mx-6 mt-2 mb-1 animate-in fade-in slide-in-from-top-1 duration-500">
+      <div className="rounded-2xl border border-emerald-200/60 bg-gradient-to-r from-emerald-50/80 to-teal-50/50 shadow-sm overflow-hidden transition-all duration-300">
+        {/* ── Clickable Header ──────────────────────────── */}
+        <button 
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full flex items-center gap-2.5 px-3.5 py-2.5 cursor-pointer hover:bg-emerald-50/50 transition-colors group"
+        >
+          {/* Icon */}
+          <div className="flex shrink-0 items-center justify-center bg-gradient-to-tr from-emerald-500 to-teal-400 text-white rounded-xl w-8 h-8 shadow-sm transition-transform group-hover:scale-105">
+            <Target className="w-4 h-4" />
           </div>
-        ))}
 
-        {!isExpanded && hasMore && (
-          <button 
-            onClick={() => setIsExpanded(true)}
-            className="flex shrink-0 items-center gap-1 rounded-full border border-slate-200 bg-white py-1 sm:py-1.5 px-2.5 text-[13px] font-semibold text-slate-500 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-700 cursor-pointer animate-in fade-in"
-          >
-            +{goals.length - 1} <ChevronDown className="w-3.5 h-3.5 opacity-70" />
-          </button>
-        )}
-        
-        {isExpanded && hasMore && (
-          <button 
-            onClick={() => setIsExpanded(false)}
-            className="flex shrink-0 items-center gap-1 rounded-full border border-slate-200 bg-white py-1 sm:py-1.5 px-2.5 text-[13px] font-semibold text-slate-500 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-700 cursor-pointer animate-in fade-in"
-          >
-            Свернуть <ChevronUp className="w-3.5 h-3.5 opacity-70" />
-          </button>
-        )}
+          {/* Title text */}
+          <div className="flex-1 text-left min-w-0">
+            {isExpanded ? (
+              <span className="text-sm font-semibold text-emerald-800">
+                {goals.length} {goals.length === 1 ? 'активная цель' : goals.length < 5 ? 'активные цели' : 'активных целей'}
+              </span>
+            ) : (
+              <span className="text-sm font-semibold text-emerald-800 block truncate">
+                {goals.length === 1 ? goals[0].title : `${goals.length} цели · ${goals[0].title}`}
+              </span>
+            )}
+          </div>
+
+          {/* Chevron with rotation animation */}
+          <ChevronDown className={`w-4 h-4 text-emerald-500 shrink-0 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+        </button>
+
+        {/* ── Expandable Goal List ──────────────────────── */}
+        <div className={`transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'} overflow-hidden`}>
+          <div className="border-t border-emerald-100/60">
+            {goals.map((g, index) => (
+              <div
+                key={g.id}
+                className={`flex items-start gap-2.5 px-4 py-3 transition-colors hover:bg-emerald-50/40 ${
+                  index < goals.length - 1 ? 'border-b border-emerald-100/40' : ''
+                } animate-in fade-in slide-in-from-top-1`}
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />
+                <span className="flex-1 text-sm font-medium text-emerald-900 leading-relaxed">
+                  {g.title}
+                </span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveGoal(g.id);
+                  }}
+                  disabled={isDeleting === g.id}
+                  className="shrink-0 flex items-center justify-center w-6 h-6 rounded-full text-emerald-400 hover:bg-emerald-100 hover:text-emerald-700 transition-all disabled:opacity-30"
+                  title="Завершить цель"
+                >
+                  {isDeleting === g.id ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <X className="h-3.5 w-3.5" />
+                  )}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

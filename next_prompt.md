@@ -1,196 +1,202 @@
-# TASK: Заблокировать кнопку «Сформировать отчёт» после генерации отчёта
+# TASK: Редизайн HealthGoalsWidget — разворачиваемая панель целей для мобильных экранов
 
 ## 1. REQUIRED SKILLS & ORDER
 
-1. Read `C:\store\ag_skills\skills\frontend-developer\SKILL.md` — React component state management
-
----
+1. Read `C:\store\ag_skills\skills\frontend-developer\SKILL.md` — React component patterns, responsive design
+2. Read `C:\store\ag_skills\skills\ui-ux-pro-max\SKILL.md` — mobile-first UI, micro-animations
 
 ## 2. КОНТЕКСТ
 
-**Файл для правки:** `apps/web/src/components/medical/MedicalResultsView.tsx`
+### Проблема (КРИТИЧЕСКАЯ UX)
+**Файл:** `apps/web/src/components/shared/HealthGoalsWidget.tsx`
 
-**Проблема:**
-Кнопка «Сформировать отчёт» (строка 471–481) снова становится активной (пульсирует фиолетовым) после того, как диагностический отчёт уже сформирован. Пользователь может нажать её повторно и создать дублирующий отчёт.
+На мобильных экранах (~375px) цели здоровья отображаются как горизонтальные "pills" с `truncate max-w-[220px]`, и текст обрезается: *«Снизить жировую массу и улу…»* — пользователь **не видит** полный текст своих целей. Даже при развёрнутом состоянии (`isExpanded=true`) каждый pill всё ещё обрезан — просто показываются 2+ обрезанных pill вместо одного.
 
-**Текущая логика disabled (строка 473):**
-```tsx
-disabled={isDirty || isDiagnosing || isRefreshing}
-```
-После завершения `runDiagnosticAnalysis` → `isDiagnosing` становится `false` → кнопка снова активна ❌
-
----
-
-## 3. ЗАДАЧА
-
-### Шаг 1: Добавить новый state-флаг
-
-Добавь в блок state-переменных **рядом с `isDiagnosing`** (строка 70):
-
-```tsx
-const [isDiagnosing, setIsDiagnosing] = useState(false);
-const [reportAlreadyGenerated, setReportAlreadyGenerated] = useState(false); // ← НОВОЕ
-const [diagnosisError, setDiagnosisError] = useState<string | undefined>();
-```
+### Цель
+Полностью переписать рендер-часть (JSX) компонента, сохранив всю бизнес-логику (state, effects, handlers). Новый дизайн — **единая разворачиваемая панель** в стиле карточки, где:
+- В свёрнутом виде — компактная строчка-сводка
+- В развёрнутом виде — полный список целей с переносом текста (без truncate!)
 
 ---
 
-### Шаг 2: Установить флаг при загрузке страницы
+## 3. ДИЗАЙН-СПЕЦИФИКАЦИЯ
 
-В `useEffect` для `fetchHistory` (строки 73–105), в блоке, где уже есть история (`reportHistory.length > 0`, строка 83), добавь установку флага:
+### Компоновка (Desktop + Mobile)
+
+```
+┌─────────────────────────────────────────────────┐
+│ 🎯  Снизить жировую массу и улучшить общ...  ▼ │  ← Свёрнуто (1 строка)
+└─────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────┐
+│ 🎯  2 активные цели                         ▲ │  ← Развёрнуто (заголовок)
+│─────────────────────────────────────────────────│
+│ ✨ Снизить жировую массу и улучшить общую      │
+│    физическую форму к лету                   ✕ │  ← Полный текст, X справа
+│─────────────────────────────────────────────────│
+│ ✨ Улучшить показатели крови (железо,           │
+│    витамин D)                                ✕ │  ← Перенос текста!
+└─────────────────────────────────────────────────┘
+```
+
+### Стилевые правила (выдержать общий стиль Vitograph)
+
+| Элемент | Стиль |
+|---------|-------|
+| Обёртка панели | `rounded-2xl border border-emerald-200/60 bg-gradient-to-r from-emerald-50/80 to-teal-50/50 shadow-sm` |
+| Заголовочная строка | `flex items-center gap-2.5 px-4 py-2.5 cursor-pointer` — кликабельна целиком |
+| Иконка (Target) | `bg-gradient-to-tr from-emerald-500 to-teal-400 text-white rounded-xl w-8 h-8` (как сейчас) |
+| Текст свёрнутого состояния | `text-sm font-semibold text-emerald-800 truncate flex-1` |
+| Chevron | `ChevronDown` / `ChevronUp`, `w-4 h-4 text-emerald-500 transition-transform duration-300` — поворот через `rotate-180` |
+| Разделитель целей | `border-t border-emerald-100/60` (тонкая линия между целями) |
+| Строка цели | `flex items-start gap-2.5 px-4 py-3` |
+| Текст цели | **`text-sm font-medium text-emerald-900 leading-relaxed flex-1` — БЕЗ truncate, текст переносится!** |
+| Sparkles icon | `w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0` |
+| Кнопка удаления (X) | `shrink-0 w-6 h-6 rounded-full hover:bg-emerald-100 text-emerald-400 hover:text-emerald-700 transition-colors` |
+
+---
+
+## 4. КОД
+
+### Полная перезапись return-блока (строки 120–173)
+
+Бизнес-логика НЕ МЕНЯЕТСЯ. Переменные `displayedGoals`, `hasMore`, `goals`, `isExpanded`, `setIsExpanded`, `isDeleting`, `handleRemoveGoal` — все остаются.
+
+**Удали строку 117:**
+```tsx
+const displayedGoals = isExpanded ? goals : goals.slice(0, 1);
+```
+Она больше не нужна — в новом дизайне мы показываем все цели или ни одной (кроме заголовка).
+
+**Новый return-блок:**
+
+```tsx
+return (
+  <div className="mx-3 sm:mx-6 mt-2 mb-1 animate-in fade-in slide-in-from-top-1 duration-500">
+    <div className="rounded-2xl border border-emerald-200/60 bg-gradient-to-r from-emerald-50/80 to-teal-50/50 shadow-sm overflow-hidden transition-all duration-300">
+      {/* ── Clickable Header ──────────────────────────── */}
+      <button 
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center gap-2.5 px-3.5 py-2.5 cursor-pointer hover:bg-emerald-50/50 transition-colors group"
+      >
+        {/* Icon */}
+        <div className="flex shrink-0 items-center justify-center bg-gradient-to-tr from-emerald-500 to-teal-400 text-white rounded-xl w-8 h-8 shadow-sm transition-transform group-hover:scale-105">
+          <Target className="w-4 h-4" />
+        </div>
+
+        {/* Title text */}
+        <div className="flex-1 text-left min-w-0">
+          {isExpanded ? (
+            <span className="text-sm font-semibold text-emerald-800">
+              {goals.length} {goals.length === 1 ? 'активная цель' : goals.length < 5 ? 'активные цели' : 'активных целей'}
+            </span>
+          ) : (
+            <span className="text-sm font-semibold text-emerald-800 block truncate">
+              {goals.length === 1 ? goals[0].title : `${goals.length} цели · ${goals[0].title}`}
+            </span>
+          )}
+        </div>
+
+        {/* Chevron with rotation animation */}
+        <ChevronDown className={`w-4 h-4 text-emerald-500 shrink-0 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+      </button>
+
+      {/* ── Expandable Goal List ──────────────────────── */}
+      <div className={`transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'} overflow-hidden`}>
+        <div className="border-t border-emerald-100/60">
+          {goals.map((g, index) => (
+            <div
+              key={g.id}
+              className={`flex items-start gap-2.5 px-4 py-3 transition-colors hover:bg-emerald-50/40 ${
+                index < goals.length - 1 ? 'border-b border-emerald-100/40' : ''
+              } animate-in fade-in slide-in-from-top-1`}
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />
+              <span className="flex-1 text-sm font-medium text-emerald-900 leading-relaxed">
+                {g.title}
+              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveGoal(g.id);
+                }}
+                disabled={isDeleting === g.id}
+                className="shrink-0 flex items-center justify-center w-6 h-6 rounded-full text-emerald-400 hover:bg-emerald-100 hover:text-emerald-700 transition-all disabled:opacity-30"
+                title="Завершить цель"
+              >
+                {isDeleting === g.id ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <X className="h-3.5 w-3.5" />
+                )}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+```
+
+---
+
+## 5. КЛЮЧЕВЫЕ ПРИНЦИПЫ (НЕ НАРУШАТЬ!)
+
+1. **`truncate` ЗАПРЕЩЁН в развёрнутом виде.** Текст цели ОБЯЗАН переноситься (`leading-relaxed`, no `truncate`, no `max-w-*`, no `whitespace-nowrap`).
+2. **По умолчанию `isExpanded` = `false`** — как сейчас (строка 14). Не меняй.
+3. **`hasMore` переменная больше не нужна** — удали её (строка 118). Панель работает одинаково для 1+ целей.
+4. **Animations:**
+   - Раскрытие через `max-h-0 → max-h-[500px]` + `opacity-0 → opacity-100` 
+   - `transition-all duration-300 ease-in-out`
+   - Каждая строка цели с `animationDelay` для cascade-эффекта
+5. **`ChevronDown` c `rotate-180`** вместо свитча `ChevronDown/ChevronUp` — меньше кода, плавнее анимация.
+
+---
+
+## 6. УДАЛИТЬ НЕИСПОЛЬЗУЕМЫЙ IMPORT
+
+Из строки 4 **убери `ChevronUp`** (он больше не нужен):
 
 **Было:**
 ```tsx
-setReportHistory(history || []);
-if (history && history.length > 0) {
-  setSelectedTimestamp(history[0].timestamp);
-  
-  // Restore biomarker cards from the latest report (if saved)
-  const latest = history[0];
-  if (latest.biomarkers && latest.biomarkers.length > 0) {
-    setEditableBiomarkers(latest.biomarkers);
-    setResults({ biomarkers: latest.biomarkers, general_recommendations: [] });
-    setUploadState("done");
-  }
-} else {
-  setSelectedTimestamp(null);
-}
+import { Target, X, Loader2, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 ```
 
 **Стало:**
 ```tsx
-setReportHistory(history || []);
-if (history && history.length > 0) {
-  setSelectedTimestamp(history[0].timestamp);
-  setReportAlreadyGenerated(true); // ← НОВОЕ: отчёт уже существует в БД
-
-  // Restore biomarker cards from the latest report (if saved)
-  const latest = history[0];
-  if (latest.biomarkers && latest.biomarkers.length > 0) {
-    setEditableBiomarkers(latest.biomarkers);
-    setResults({ biomarkers: latest.biomarkers, general_recommendations: [] });
-    setUploadState("done");
-  }
-} else {
-  setSelectedTimestamp(null);
-}
+import { Target, X, Loader2, Sparkles, ChevronDown } from "lucide-react";
 ```
 
 ---
 
-### Шаг 3: Установить флаг после успешной генерации
+## 7. ОГРАНИЧЕНИЯ (СТРОГИЕ)
 
-В функции `runDiagnosticAnalysis` (строки 111–132), после успешного получения истории, установи флаг:
-
-**Было:**
-```tsx
-    // Re-fetch history to get the true state from DB (prevents fake duplicates)
-    const history = await apiClient.getLabReportsHistory();
-    setReportHistory(history || []);
-    if (history && history.length > 0) {
-      setSelectedTimestamp(history[0].timestamp);
-    }
-```
-
-**Стало:**
-```tsx
-    // Re-fetch history to get the true state from DB (prevents fake duplicates)
-    const history = await apiClient.getLabReportsHistory();
-    setReportHistory(history || []);
-    if (history && history.length > 0) {
-      setSelectedTimestamp(history[0].timestamp);
-      setReportAlreadyGenerated(true); // ← НОВОЕ: заблокировать кнопку навсегда
-    }
-```
+1. **НЕ меняй** бизнес-логику: `loadData`, `handleRemoveGoal`, `useEffect`, Supabase-запросы — всё остаётся нетронутым.
+2. **НЕ меняй** скелетон (строки 88–94) и empty state (строки 97–114).
+3. **НЕ добавляй** новые npm-пакеты.
+4. **НЕ трогай** `AiAssistantView.tsx` — компонент `<HealthGoalsWidget />` используется без изменения API.
+5. Правки ТОЛЬКО в файле `HealthGoalsWidget.tsx`.
 
 ---
 
-### Шаг 4: Добавить флаг в условие disabled кнопки
-
-**Было (строка 473):**
-```tsx
-disabled={isDirty || isDiagnosing || isRefreshing}
-```
-
-**Стало:**
-```tsx
-disabled={isDirty || isDiagnosing || isRefreshing || reportAlreadyGenerated}
-```
-
----
-
-### Шаг 5: Обновить стиль кнопки
-
-**Было (строки 474–478):**
-```tsx
-className={`flex-1 sm:flex-none px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-  !isDirty && !isDiagnosing && !isRefreshing
-    ? "bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.6)] animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite] hover:bg-purple-700 hover:-translate-y-0.5 active:translate-y-0"
-    : "bg-slate-100 text-slate-400 cursor-not-allowed opacity-70"
-}`}
-```
-
-**Стало:**
-```tsx
-className={`flex-1 sm:flex-none px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-  !isDirty && !isDiagnosing && !isRefreshing && !reportAlreadyGenerated
-    ? "bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.6)] animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite] hover:bg-purple-700 hover:-translate-y-0.5 active:translate-y-0"
-    : "bg-slate-100 text-slate-400 cursor-not-allowed opacity-70"
-}`}
-```
-
----
-
-### Шаг 6: Сброс при новой загрузке файла
-
-В `handleFilesAccepted` (строка 134), в начале функции, добавь сброс флага, чтобы при загрузке **нового** анализа кнопка снова стала доступной:
-
-**Было:**
-```tsx
-  const handleFilesAccepted = useCallback(async (files: File[], type: "document" | "image") => {
-    setUploadState("loading");
-    setErrorMessage(undefined);
-    setResults(null);
-    setDiagnosisError(undefined);
-    resetJob();
-```
-
-**Стало:**
-```tsx
-  const handleFilesAccepted = useCallback(async (files: File[], type: "document" | "image") => {
-    setUploadState("loading");
-    setErrorMessage(undefined);
-    setResults(null);
-    setDiagnosisError(undefined);
-    setReportAlreadyGenerated(false); // ← НОВОЕ: новый файл — кнопка снова активна
-    resetJob();
-```
-
----
-
-## 4. ОГРАНИЧЕНИЯ
-
-1. **НЕ меняй** никакую другую логику, стили или функции — только указанные места.
-2. **НЕ удаляй** существующие условия `isDirty || isDiagnosing || isRefreshing` — они остаются.
-3. **НЕ создавай** новых компонентов и файлов.
-4. Правки строго только в `MedicalResultsView.tsx`.
-
----
-
-## 5. САМОПРОВЕРКА
+## 8. САМОПРОВЕРКА
 
 Перед финализацией убедись:
-- [ ] `reportAlreadyGenerated` инициализирован как `false`
-- [ ] Устанавливается в `true` в **двух** местах: после `fetchHistory` и после `runDiagnosticAnalysis`
-- [ ] Сбрасывается в `false` в `handleFilesAccepted` (при загрузке нового файла)
-- [ ] Добавлен во все 3 места в JSX: `disabled`, `className` кнопки
-- [ ] Кнопка становится серой (`bg-slate-100 text-slate-400 cursor-not-allowed`) после генерации
+- [ ] Текст цели переносится на мобиле (нет `truncate` в развёрнутом состоянии)
+- [ ] Свёрнутое состояние — одна компактная строка с `truncate` (это ОК для сводки)
+- [ ] `ChevronUp` удалён из импортов
+- [ ] `displayedGoals` и `hasMore` удалены
+- [ ] Анимация раскрытия работает плавно (max-h transition)
+- [ ] Кнопка X по-прежнему работает (не забыть `e.stopPropagation()`)
+- [ ] Empty state и loading skeleton не тронуты
 
 ---
 
-## 6. ОТЧЁТ
+## 9. ОТЧЁТ
 
 Запиши в `C:\project\kOSI\next_report.md`:
-1. Перечень изменённых строк.
-2. Проверил ли, что сброс флага происходит при новом upload.
+1. Что было изменено (перечень строк/блоков).
+2. Подтверди, что текст целей виден полностью при развёрнутом состоянии.
 3. Вердикт: `DONE` или `NEEDS FIXES`.
