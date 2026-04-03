@@ -40,6 +40,7 @@ import type {
 import { HumanMessage, SystemMessage, isAIMessageChunk } from "@langchain/core/messages";
 import { appGraph } from "./graph/builder.js";
 import { getOrFetchWeatherContext } from "./weather.service.js";
+import { fetchAdvancedMemoryContext } from "./services/memory.service.js";
 import { callLlmStructured, LLM_TIMEOUTS, LLM_RETRIES } from "./llm-client.js";
 import { z } from "zod";
 
@@ -1081,12 +1082,18 @@ export async function handleChat(
       }
 
       if (token) {
-        const dbContext = await fetchUserContext(token, req.user.id);
+        // Parallel fetch: user context + memory context (independent)
+        const [dbContext, [emotionalProfile, semanticMemories]] = await Promise.all([
+          fetchUserContext(token, req.user.id),
+          fetchAdvancedMemoryContext(req.user.id, body.message, token),
+        ]);
+
         if (dbContext) {
           const leanContext = getLeanUserContext(dbContext);
           const timezone = dbContext.profile?.timezone || 'UTC';
           
           let weatherAlert = "";
+          // weatherData depends on dbContext.profile — must stay sequential
           const weatherData = await getOrFetchWeatherContext(dbContext.profile, req.user.id);
           
           const userLocalStr = now.toLocaleString("en-US", { timeZone: timezone });
@@ -1156,6 +1163,8 @@ export async function handleChat(
               userDateStr,
               userTimeStr
             )
+            .withEmotionalContext(emotionalProfile)
+            .withSemanticMemory(semanticMemories)
             .withProfile(formatLeanProfile(dbContext.profile))
             .withDietaryRestrictions(formatDietaryRestrictions(dbContext.profile))
             .withHealthGoals(formatHealthGoals(dbContext.profile))
@@ -1353,12 +1362,18 @@ export async function handleChatStream(
       }
 
       if (token) {
-        const dbContext = await fetchUserContext(token, req.user.id);
+        // Parallel fetch: user context + memory context (independent)
+        const [dbContext, [emotionalProfile, semanticMemories]] = await Promise.all([
+          fetchUserContext(token, req.user.id),
+          fetchAdvancedMemoryContext(req.user.id, body.message, token),
+        ]);
+
         if (dbContext) {
           const leanContext = getLeanUserContext(dbContext);
           const timezone = dbContext.profile?.timezone || 'UTC';
           
           let weatherAlert = "";
+          // weatherData depends on dbContext.profile — must stay sequential
           const weatherData = await getOrFetchWeatherContext(dbContext.profile, req.user.id);
           
           const userLocalStr = now.toLocaleString("en-US", { timeZone: timezone });
@@ -1428,6 +1443,8 @@ export async function handleChatStream(
               userDateStr,
               userTimeStr
             )
+            .withEmotionalContext(emotionalProfile)
+            .withSemanticMemory(semanticMemories)
             .withProfile(formatLeanProfile(dbContext.profile))
             .withDietaryRestrictions(formatDietaryRestrictions(dbContext.profile))
             .withHealthGoals(formatHealthGoals(dbContext.profile))

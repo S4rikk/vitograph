@@ -26,6 +26,7 @@ import { supplementRouter } from "./routes/v1/supplement.routes.js";
 import { profilesRouter } from "./routes/v1/profiles.routes.js";
 import { integrationRouter } from "./routes/integration.js";
 import { errorHandler } from "./middleware/error-handler.js";
+import { initCheckpointer } from "./graph/checkpointer.js";
 
 // ── Configuration ───────────────────────────────────────────────────
 
@@ -80,18 +81,28 @@ app.use(errorHandler);
 
 // ── Start ───────────────────────────────────────────────────────────
 
-app.listen(PORT, () => {
-  const hasKey = Boolean(process.env["OPENAI_API_KEY"]);
-  console.log(`
+async function startServer() {
+  // Initialize persistent checkpointer (creates tables if needed)
+  await initCheckpointer();
+
+  app.listen(PORT, () => {
+    const hasKey = Boolean(process.env["OPENAI_API_KEY"]);
+    console.log(`
 ╔══════════════════════════════════════════╗
 ║  VITOGRAPH AI Engine v${VERSION}             ║
 ║  Port: ${PORT}                              ║
 ║  OpenAI: ${hasKey ? "✅ configured" : "❌ not set (fallbacks)"}        ║
 ╚══════════════════════════════════════════╝
-  `);
+    `);
 
-  // Keep the process alive explicitly 
-  process.stdin.resume();
+    // Keep the process alive explicitly 
+    process.stdin.resume();
+  });
+}
+
+startServer().catch((err) => {
+  console.error("Failed to start server:", err);
+  process.exit(1);
 });
 
 export { app };
