@@ -22,7 +22,7 @@
 | Auth       | Supabase Auth (JWT, RLS integration)           |
 | Storage    | Supabase Storage (blood test PDFs / images)    |
 | AI/ML      | pgvector for embeddings, external LLM services |
-| LLM        | Gemini 3.1 Pro Thinking (primary), GPT-4o (diary/vision), GPT-4o-mini (fallback) |
+| LLM        | `gpt-5.4-mini-2026-03-17` (assistant + diary), `gpt-4o` (vision/lab analyzers) |
 
 ---
 

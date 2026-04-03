@@ -68,6 +68,7 @@ export default function MedicalResultsView() {
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
   const [isDiagnosing, setIsDiagnosing] = useState(false);
+  const [reportAlreadyGenerated, setReportAlreadyGenerated] = useState(false); // ← НОВОЕ
   const [diagnosisError, setDiagnosisError] = useState<string | undefined>();
 
   useEffect(() => {
@@ -82,6 +83,7 @@ export default function MedicalResultsView() {
         setReportHistory(history || []);
         if (history && history.length > 0) {
           setSelectedTimestamp(history[0].timestamp);
+          setReportAlreadyGenerated(true); // ← НОВОЕ: отчёт уже существует в БД
           
           // Restore biomarker cards from the latest report (if saved)
           const latest = history[0];
@@ -122,6 +124,7 @@ export default function MedicalResultsView() {
       setReportHistory(history || []);
       if (history && history.length > 0) {
         setSelectedTimestamp(history[0].timestamp);
+        setReportAlreadyGenerated(true); // ← НОВОЕ: заблокировать кнопку навсегда
       }
     } catch (err) {
       console.error("[MedicalResults] Diagnostic analysis failed:", err);
@@ -136,6 +139,7 @@ export default function MedicalResultsView() {
     setErrorMessage(undefined);
     setResults(null);
     setDiagnosisError(undefined);
+    setReportAlreadyGenerated(false); // ← НОВОЕ: новый файл — кнопка снова активна
     resetJob();
 
     try {
@@ -470,9 +474,9 @@ export default function MedicalResultsView() {
             </button>
             <button
               onClick={() => editableBiomarkers && runDiagnosticAnalysis(editableBiomarkers)}
-              disabled={isDirty || isDiagnosing || isRefreshing}
+              disabled={isDirty || isDiagnosing || isRefreshing || reportAlreadyGenerated}
               className={`flex-1 sm:flex-none px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                !isDirty && !isDiagnosing && !isRefreshing
+                !isDirty && !isDiagnosing && !isRefreshing && !reportAlreadyGenerated
                   ? "bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.6)] animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite] hover:bg-purple-700 hover:-translate-y-0.5 active:translate-y-0"
                   : "bg-slate-100 text-slate-400 cursor-not-allowed opacity-70"
               }`}

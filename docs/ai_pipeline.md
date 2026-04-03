@@ -1,6 +1,6 @@
 # VITOGRAPH — AI Pipeline Documentation
 
-> **Дата актуальности:** 2 Апреля 2026
+> **Дата актуальности:** 3 Апреля 2026
 >
 > Документация AI/LLM пайплайна: LangGraph, GPT-4o, structured outputs, детерминированные нормы.
 
@@ -63,17 +63,16 @@ graph LR
     TOOLS --> AGENT
 ```
 
-**Модели (актуально на март 2026):**
+**Модели (актуально на апрель 2026):**
 
 | Роль | Модель | Temperature | Назначение |
 | :--- | :----- | :---------- | :--------- |
-| **Primary** | `gemini-3.1-pro-preview-thinking` | 0.2 | Режим `assistant` — через прокси `api.ourzhishi.top/v1`, env: `GEMINI_API` |
-| **Diary** | `gpt-4o` | 0 | Режим `diary` — логирование еды, tool-вызовы |
-| **Backup** | `gpt-4o-mini` | 0.2 | Fallback при отказе Primary |
+| **Primary (assistant)** | `gpt-5.4-mini-2026-03-17` | — *(reasoning, не поддерживает temperature)* | Режим `assistant` — основной чат-ассистент |
+| **Diary** | `gpt-5.4-mini-2026-03-17` | — | Режим `diary` — логирование еды, tool-вызовы |
 | **Vision / Lab** | `gpt-4o` | 0.2 | Standalone analyzers (food-vision, lab-report) |
 
-> 📌 Для assistant-режима используется цепочка: `primaryModel.withFallbacks([backupModel])`.
-> Для diary-режима — `diaryModel` напрямую (GPT-4o лучше работает с tool-вызовами).
+> 📌 **DEPRECATED (2026-03-29):** Внешний прокси-роутер `api.ourzhishi.top/v1` и модель `gemini-3.1-pro-preview-thinking` полностью удалены. Все LLM-вызовы идут напрямую через OpenAI API.
+> ⚠️ AI SDK выдаёт `Warning: temperature is not supported for reasoning models` — это ожидаемое поведение для `gpt-5.4-mini`, игнорируется.
 
 ### 2.2 Оптимизации в `callModel`
 
@@ -144,7 +143,13 @@ dummy: string? (пустой параметр для совместимости)
 
 Файл: [`checkpointer.ts`](file:///c:/project/VITOGRAPH/apps/api/src/ai/src/graph/checkpointer.ts)
 
-Используется `MemorySaver` для хранения состояния графа в памяти между запросами. `threadId` привязывает беседу к конкретному пользователю/сессии.
+**Режим:** `PostgresSaver` (persistent) — хранит checkpoints в Supabase PostgreSQL. `threadId` привязывает беседу к конкретному пользователю/сессии.
+
+- При наличии `SUPABASE_DB_URL` → `PostgresSaver` (persistent, checkpoints выживают перезапуск сервера)
+- При отсутствии → `MemorySaver` (fallback, in-memory, dev mode)
+- Pruning (weekly SQL): оставляет последние 50 checkpoints на thread
+
+См. подробности в [`docs/memory_architecture.md`](./memory_architecture.md).
 
 ---
 

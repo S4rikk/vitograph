@@ -1,8 +1,8 @@
 # VITOGRAPH — Prompt Architecture v1.0
 
-> **Дата:** 3 апреля 2026
+> **Дата:** 3 апреля 2026  
 > **Автор:** Maya (Lead Technical Architect)  
-> **Задача:** Рефакторинг слоя промптов для улучшения модульности, версионирования и качества ответов LLM.
+> **Статус:** Рефакторинг завершён, ChatPromptBuilder внедрён и E2E-протестирован.
 
 ---
 
@@ -109,6 +109,10 @@ class ChatPromptBuilder {
   withWeatherAlert(alert: string): this;
   withFoodZones(profile: any): this;
   
+  // Memory layers (Phase 4) — адаптивно, при наличии данных
+  withEmotionalContext(profile: EmotionalProfile | null): this;
+  withSemanticMemory(memories: SemanticMemory[] | null): this;
+  
   // Build final prompt
   build(): PromptBuildResult;
 }
@@ -118,9 +122,11 @@ class ChatPromptBuilder {
 
 | Приоритет | Секция | Режим | Бюджет (символов) |
 |-----------|--------|-------|-------------------|
-| P0 | Persona + Rules | Оба | ~3000 |
+| P0 | Persona + Rules | Оба | ~3500 |
 | P0 | Profile + Restrictions | Оба | ~500 |
 | P0 | Health Goals | Оба | ~300 |
+| P1 | **Emotional Context** (Layer 3, память) | Оба | ~300 |
+| P1 | **Semantic Memory** (Layer 2, память) | Оба | ~600 |
 | P1 | Nutrition Targets | Diary | ~800 |
 | P1 | Today Progress | Оба | ~600 |
 | P1 | Lab Report (Tier 1 / Deep) | Assistant | ~2000 |
