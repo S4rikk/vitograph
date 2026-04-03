@@ -1,153 +1,107 @@
-# TASK: Фикс бага — невозможно скроллить вверх во время печати ассистента
+# TASK: Prompt Layer Refactoring — Верификация и Тестирование
 
 ## 1. REQUIRED SKILLS & ORDER
-1. Read `C:\store\ag_skills\skills\react-best-practices\SKILL.md`
 
-## 2. ПРОБЛЕМА
+1. Read `C:\store\ag_skills\skills\nodejs-backend-patterns\SKILL.md`
 
-Когда ассистент пишет сообщение (streaming/typewriter), пользователь НЕ МОЖЕТ прокрутить чат наверх. Скролл поднимается на долю секунды и мгновенно возвращается вниз. Баг пропадает после перезагрузки страницы (т.к. стриминг уже не активен).
+## 2. КОНТЕКСТ ПРОЕКТА
 
-**Причина:** Два независимых механизма auto-scroll давят вниз одновременно, не проверяя намерения пользователя:
+Проект **VITOGRAPH** — это Turborepo monorepo. Бэкенд (API) находится в `apps/api/`.
 
-1. **`ActiveTypewriterNode` (строки 152-173):** `requestAnimationFrame` lerp-цикл (60 FPS), который на каждом кадре устанавливает `container.scrollTop` к `scrollHeight`. Он НИКОГДА не проверяет, хочет ли пользователь скроллить вверх.
+Maya (архитектор) выполнила рефакторинг слоя AI-промптов: вынесла inline системные промпты из файлов-обработчиков в отдельные модули с версионированием и добавила валидаторы ответов LLM.
 
-2. **`useEffect` auto-scroll (строки 315-329):** Вызывается на КАЖДОЕ изменение `messages`. Во время стриминга каждый токен — это изменение `messages` → срабатывает `el.scrollTop = el.scrollHeight` + `ResizeObserver` тоже ставит `scrollTop = scrollHeight`.
+### Что было сделано (НЕ трогай эти файлы):
 
-## 3. РЕШЕНИЕ
+**Созданы:**
+- `apps/api/src/ai/src/prompts/food-vision.prompt.ts` — промпт для анализа фото еды (v2.0.0, 3 few-shot примера)
+- `apps/api/src/ai/src/prompts/lab-diagnostic.prompt.ts` — промпт для анализа лабораторных анализов (v3.2.0)
+- `apps/api/src/ai/src/prompts/psychological.prompt.ts` — CBT-промпт для поддерживающих ответов (v1.1.0)
+- `apps/api/src/ai/src/prompts/chat-prompt-builder.ts` — класс ChatPromptBuilder для динамической сборки системного промпта чата (v1.0.0)
+- `apps/api/src/ai/src/prompts/index.ts` — центральный реестр экспортов
+- `apps/api/src/ai/src/validators/response-validator.ts` — 3 детерминированных валидатора (Chat, Lab, Food)
 
-**Концепция:** Добавить `userHasScrolledUp` ref-флаг. Если пользователь скроллнул вверх (расстояние от дна > порог), ВСЕ auto-scroll механизмы приостанавливаются. Флаг сбрасывается, когда пользователь сам доскроллит обратно до низа.
+**Модифицированы:**
+- `apps/api/src/ai/src/graph/food-vision-analyzer.ts` — inline промпт заменён на import из `prompts/`, добавлена пост-LLM валидация
+- `apps/api/src/ai/src/graph/lab-report-analyzer.ts` — inline промпт заменён на import из `prompts/`, добавлена пост-LLM валидация
+- `apps/api/src/ai/src/ai-triggers.ts` — inline PSYCHOLOGICAL_SYSTEM_PROMPT заменён на import из `prompts/`
+- `apps/api/src/ai/src/ai.controller.ts` — 150 строк inline-сборки системного промпта заменены на вызов ChatPromptBuilder (строки 1150-1207)
 
-## 4. ПОШАГОВЫЙ ПЛАН РЕАЛИЗАЦИИ
+> Для углублённого понимания архитектуры прочитай: `docs/prompt_architecture.md`
 
-> ⚠️ КРИТИЧЕСКИ ВАЖНО: Ничего не ломай в анимации! Typewriter скорость, Lerp-плавность, NutrPill рендеринг — всё должно работать как сейчас. Мы ТОЛЬКО добавляем проверку "пользователь скроллил наверх".
+## 3. ЗАДАЧИ
 
-**Файл:** `apps/web/src/components/assistant/AiAssistantView.tsx`
+### Шаг 0: Ориентация
 
-### Шаг 1: Добавь ref `userHasScrolledUp` (рядом с строкой 228)
+Прочитай `docs/prompt_architecture.md` для понимания что и зачем было сделано.
 
-После `const scrollRef = useRef<HTMLDivElement>(null);` добавь:
+### Шаг 1: Компиляция (TypeScript)
 
-```typescript
-const userHasScrolledUpRef = useRef(false);
+Из корня проекта (`C:\project\VITOGRAPH`) запусти:
+
+```bash
+npx tsc --project apps/api/tsconfig.json --noEmit
 ```
 
-### Шаг 2: Добавь scroll listener на контейнер чата
+**Ожидаемый результат:**
+- Возможны **PRE-EXISTING** ошибки типизации Supabase в `lab-report-analyzer.ts` (строки ~145, ~165). Они связаны с `from("biomarker_note_cache")` без typegen и были ДО рефакторинга. Их игнорируй.
+- **НОВЫХ ошибок** в файлах `prompts/`, `validators/`, `food-vision-analyzer.ts`, `lab-report-analyzer.ts`, `ai-triggers.ts`, `ai.controller.ts` быть НЕ должно.
 
-Добавь НОВЫЙ useEffect (ПОСЛЕ строки 329, т.е. после существующего auto-scroll effect):
+**Если есть НОВЫЕ ошибки:**
+- Если ошибка в **import-путях, типах, синтаксисе экспортов** → исправь самостоятельно.
+- Если ошибка в **тексте промпта** (содержание строк внутри template literals) → **ЭСКАЛАЦИЯ** (см. секцию 5).
 
-```typescript
-// Detect when user manually scrolls up
-useEffect(() => {
-  const el = scrollRef.current;
-  if (!el) return;
+### Шаг 2: Проверка запуска сервера
 
-  const handleScroll = () => {
-    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
-    // If user is more than 150px from bottom, they've scrolled up
-    if (distanceFromBottom > 150) {
-      userHasScrolledUpRef.current = true;
-    } else {
-      // User has scrolled back to bottom — resume auto-scroll
-      userHasScrolledUpRef.current = false;
-    }
-  };
-
-  el.addEventListener("scroll", handleScroll, { passive: true });
-  return () => el.removeEventListener("scroll", handleScroll);
-}, []);
+```bash
+cd apps/api && npm run dev
 ```
 
-### Шаг 3: Модифицируй `ActiveTypewriterNode` (строки 152-173)
+Убедись, что сервер стартует без ошибок в консоли. Ищи:
+- ✅ `[server] Listening on port ...` — сервер запустился
+- ❌ `Cannot find module './prompts/...'` — битый import-путь
+- ❌ `TypeError: ... is not a function` — неправильный экспорт
+- ❌ `ChatPromptBuilder is not a constructor` — проблема с dynamic import
 
-Внутри `smoothLoop` добавь проверку `userHasScrolledUpRef`. Нужно передать ref наружу. 
+Если сервер НЕ стартует из-за ошибки НОВОГО кода — исправь (соблюдая ограничения секции 4).
 
-**Проблема:** `ActiveTypewriterNode` — компонент вне `AiAssistantView`, он не имеет доступа к `userHasScrolledUpRef`. 
+### Шаг 3: Отчёт
 
-**Решение:** Вместо передачи ref через props (что усложнит код), используй тот же подход что и для scroll container — глобальный data-attribute. Добавь на scroll container атрибут, который `ActiveTypewriterNode` сможет читать.
+Запиши отчёт в `C:\project\kOSI\next_report.md`:
+```markdown
+# Отчёт: Verify Prompt Layer Refactoring
 
-**Альтернативное (лучшее) решение:** Внутри `ActiveTypewriterNode` САМОСТОЯТЕЛЬНО определять, скроллил ли пользователь вверх. Изменить `smoothLoop`:
+## Компиляция
+- Результат: [PASS/FAIL]
+- Новые ошибки: [список или "нет"]
+- Исправления: [что сделал или "не потребовались"]
 
-```typescript
-// Независимый 60 FPS цикл для идеальной плавности (Lerp) без сбросов
-useEffect(() => {
-  let rAF: number;
-  const container = document.getElementById("ai-chat-scroll-container");
-  
-  const smoothLoop = () => {
-    if (!container) return;
-    const target = targetScrollRef.current;
-    const current = container.scrollTop;
-    const distanceFromBottom = container.scrollHeight - current - container.clientHeight;
-    
-    // Если пользователь скроллил наверх (>150px от дна), НЕ давим вниз
-    if (distanceFromBottom > 150) {
-      rAF = requestAnimationFrame(smoothLoop);
-      return;
-    }
-    
-    // Если есть разница между текущим и целевым скроллом, плавно догоняем (easing 15%)
-    if (target > 0 && target - current > 0.5) {
-      container.scrollTop = current + (target - current) * 0.15;
-    }
-    rAF = requestAnimationFrame(smoothLoop);
-  };
-  
-  smoothLoop();
-  return () => {
-    if (rAF) cancelAnimationFrame(rAF);
-  };
-}, []);
+## Запуск сервера
+- Результат: [PASS/FAIL]
+- Ошибки: [список или "нет"]
+
+## Итог
+[READY / NEEDS ESCALATION]
 ```
 
-### Шаг 4: Модифицируй auto-scroll useEffect (строки 315-329)
+## 4. ОГРАНИЧЕНИЯ (СТРОГИЕ)
 
-Замени весь блок:
-
-```typescript
-// 3. Auto-scroll to bottom of chat when messages change or container resizes
-useEffect(() => {
-  const el = scrollRef.current;
-  if (!el) return;
-
-  // Only auto-scroll if user hasn't scrolled up
-  if (!userHasScrolledUpRef.current) {
-    el.scrollTop = el.scrollHeight;
-  }
-
-  // Also scroll when the container itself resizes (e.g. input expands)
-  const resizeObserver = new ResizeObserver(() => {
-    if (!userHasScrolledUpRef.current) {
-      el.scrollTop = el.scrollHeight;
-    }
-  });
-
-  resizeObserver.observe(el);
-  return () => resizeObserver.disconnect();
-}, [messages]);
-```
-
-### Шаг 5: Сбросить флаг при отправке НОВОГО сообщения
-
-В `sendChatMessage` (строка 343), ПЕРЕД `setMessages((prev) => [...prev, userMsg, placeholderMsg])`:
-
-```typescript
-// Reset scroll-lock: when user sends a new message, they want to see the response
-userHasScrolledUpRef.current = false;
-```
-
-## 5. ОГРАНИЧЕНИЯ
-
-1. **НЕ трогай** `useTypewriter` хук (`use-typewriter.ts`). Он работает идеально.
-2. **НЕ трогай** `TypewritingAssistantMessage`, `AssistantMessageContent`, `NutrPill`, `ScoreBadge`.  
-3. **НЕ меняй** таймеры и easing (`0.15`, `13ms`).
+1. **НЕ трогай СОДЕРЖАНИЕ** файлов в `prompts/` — текст промптов, few-shot примеры, правила поведения AI. Это зона ответственности Архитектора.
+2. **НЕ трогай** `validators/response-validator.ts` — написан Архитектором.
+3. **НЕ трогай** `format*()` функции в `ai.controller.ts` — они передают данные в builder.
 4. **НЕ добавляй** новые npm-пакеты.
-5. **НЕ трогай** CSS-классы и стили.
-6. Порог 150px подобран так, чтобы случайное покачивание пальцем не считалось за "скролл вверх".
+5. **НЕ трогай** фронтенд (`apps/web/`).
+6. **НЕ удаляй** существующий код, который НЕ был частью рефакторинга.
 
-## 6. ТЕСТИРОВАНИЕ
+**Ты МОЖЕШЬ исправлять:** import-пути (`.js` расширения), TypeScript-типы, синтаксис `export/import`, `tsconfig.json` если нужно добавить путь.
 
-1. Откройте Ассистента, задайте длинный вопрос (например, "Расскажи подробно про витамин D")
-2. Пока ассистент печатает ответ — попробуйте скроллить вверх. Ожидание: скролл остаётся наверху, печать продолжается.
-3. Доскрольте обратно до низа. Ожидание: auto-scroll возобновляется.
-4. Проверьте, что при отправке нового сообщения auto-scroll работает нормально (скролл вниз к ответу).
-5. Проверьте, что при загрузке страницы (история) auto-scroll работает (прокрутка к последнему сообщению).
+## 5. ПРОТОКОЛ ЭСКАЛАЦИИ (КРИТИЧЕСКИ ВАЖНО)
+
+Если проблема **в тексте промпта** (содержание `template` строк, few-shot примеры, правила AI, структура builder-методов):
+
+1. **ОСТАНОВИСЬ.** Не пытайся исправить.
+2. Запиши проблему в `C:\project\kOSI\next_report.md`:
+   - Какой файл
+   - Какая строка
+   - В чём ошибка
+   - **"ЭСКАЛАЦИЯ: Требуется вмешательство Архитектора (Maya)"**
+3. **НЕ продолжай** работу. Дождись исправления от Архитектора.

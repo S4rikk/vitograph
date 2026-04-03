@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import TabSwitcher from "@/components/ui/TabSwitcher";
 import MedicalResultsView from "@/components/medical/MedicalResultsView";
 import FoodDiaryView from "@/components/diary/FoodDiaryView";
@@ -61,6 +61,8 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
   const defaultTab = ["diary", "medical", "assistant"].includes(tabParam || "") ? tabParam! : "medical";
   const [activeTab, setActiveTab] = useState(defaultTab);
 
+  const router = useRouter();
+
   if (needsOnboarding) {
     return <OnboardingWizard userId={userId} />;
   }
@@ -79,7 +81,7 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
           activeTab={activeTab}
           onTabChange={(tabId) => {
             setActiveTab(tabId);
-            window.history.pushState(null, "", `?tab=${tabId}`);
+            router.replace(`?tab=${tabId}`, { scroll: false });
           }}
         />
       </div>
