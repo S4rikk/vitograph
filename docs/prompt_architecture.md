@@ -1,40 +1,38 @@
-# VITOGRAPH — Prompt Architecture v1.0
+# VITOGRAPH — Prompt Architecture v2.0
 
-> **Дата:** 3 апреля 2026  
+> **Дата:** 6 апреля 2026  
 > **Автор:** Maya (Lead Technical Architect)  
-> **Статус:** Рефакторинг завершён, ChatPromptBuilder внедрён и E2E-протестирован.
+> **Статус:** ✅ Production-Ready. ChatPromptBuilder v1.2.0 внедрён, E2E-протестирован, в продакшѝне.
 
 ---
 
 ## 1. Текущее состояние (AS-IS)
 
+ChatPromptBuilder — единственный источник истины для всех system-промптов. Все редактирования персоны, правил и форматирования делаются только здесь, не в `ai.controller.ts`.
+
 ```mermaid
 graph TB
-    subgraph "ai.controller.ts (2824 lines — GOD FILE)"
+    subgraph "prompts/ (Centralized Registry)"
+        CB["chat-prompt-builder.ts\nChatPromptBuilder v1.2.0"]
+        LP["lab-diagnostic.prompt (inline)"]
+        FP["food-vision.prompt (inline)"]
+    end
+    
+    subgraph "ai.controller.ts (Simplified)"
         FC[fetchUserContext]
-        FMT["10+ format*() helpers"]
-        INLINE_PROMPT["Inline System Prompt<br/>(L1150-1300, ~150 lines)"]
-        HANDLERS["handleChat, handleAnalyze,<br/>handleDiagnose, etc."]
+        HANDLERS["Handlers call builder.build()"]
     end
     
-    subgraph "Scattered Prompts"
-        LAB["lab-report-analyzer.ts<br/>LAB_DIAGNOSTIC_SYSTEM_PROMPT"]
-        FOOD["food-vision-analyzer.ts<br/>FOOD_VISION_SYSTEM_PROMPT"]
-        SOMATIC["vision-analyzer.ts<br/>SYSTEM_PROMPTS{}"]
-        TRIGGERS["ai-triggers.ts<br/>3x SYSTEM_PROMPT"]
+    subgraph "Services"
+        MS[memory.service.ts]
+        SS[skills.service.ts]
     end
-    
-    FC --> FMT
-    FMT --> INLINE_PROMPT
-    INLINE_PROMPT --> HANDLERS
-```
 
-**Проблемы:**
-- Chat system prompt собирается inline из 15+ `format*()` вызовов
-- Промпты вшиты в бизнес-логику (невозможно A/B тестировать)
-- 0 версионирования промптов
-- Мешанка русского и английского в инструкциях
-- Нет few-shot примеров в самых частотных промптах (Chat, Food Vision)
+    FC --> CB
+    MS --> CB
+    SS --> CB
+    CB --> HANDLERS
+```
 
 ---
 
@@ -72,33 +70,29 @@ graph TB
 
 ---
 
-## 3. ChatPromptBuilder — Ключевой новый модуль
+## 3. ChatPromptBuilder — Текущий модуль (AS-IS)
 
 ### 3.1 Интерфейс
 
 ```typescript
 interface PromptBuildResult {
   systemPrompt: string;
-  estimatedTokens: number;
   includedSections: string[];
-  version: string;
+  version: string; // текущая: "1.2.0"
 }
 
 class ChatPromptBuilder {
-  private sections: Map<string, { content: string; priority: number; tokens: number }>;
+  private sections: PromptSection[];
   
   constructor(private mode: "assistant" | "diary") {}
   
-  // Core persona — всегда включается
-  withPersona(profile: LeanProfile): this;
-  
-  // Rules — всегда включается  
-  withRules(): this;
+  // Core persona (XML-структурированный ToV) — всегда включается
+  withPersona(aiName: string, userDateStr: string, userTimeStr: string): this;
   
   // Context sections — адаптивно
   withProfile(profile: LeanProfile): this;
   withDietaryRestrictions(profile: any): this;
-  withHealthGoals(profile: any): this;
+  withHealthGoals(profile: any): this;  // читает из user_active_skills
   withNutritionTargets(profile: any, kbs: any[]): this;
   withTodayProgress(meals: any[], tz: string): this;
   withMealLogs(meals: any[], tz: string): this;
@@ -109,22 +103,50 @@ class ChatPromptBuilder {
   withWeatherAlert(alert: string): this;
   withFoodZones(profile: any): this;
   
-  // Memory layers (Phase 4) — адаптивно, при наличии данных
+  // Phase 4: Memory layers — при наличии данных
   withEmotionalContext(profile: EmotionalProfile | null): this;
   withSemanticMemory(memories: SemanticMemory[] | null): this;
   
-  // Build final prompt
+  // Phase 5: Skill Context — при наличии active_skills с документами
+  withSkillContext(skillDocument: string): this;
+  
+  // Build
   build(): PromptBuildResult;
 }
 ```
 
-### 3.2 Приоритеты секций
+### 3.2 Tone of Voice — XML-структура (v2.0)
+
+Блок `CORE PERSONA & TONE` использует явные XML-теги для управления вниманием LLM. Это исключает "Few-Shot Bias" и "White Monkey Effect" при задании тона.
+
+```xml
+<persona>
+Ты — Senior-ментор по здоровью. Стиль: прагматичная забота, высокий профессионализм и лёгкая тёплая ирония. Общение на равных.
+</persona>
+
+<metaphor_framework>
+Аналогии строятся ИСКЛЮЧИТЕЛЬНО на:
+- Инженерии и механике (износ деталей, нагрузки).
+- Физике и термодинамике (КПД, разрядка батареи).
+- Реальной логистике (навигация, планирование).
+Метафора должна вытекать из текущего контекста разговора.
+</metaphor_framework>
+
+<quality_constraints>
+- Freshness: каждая аналогия создаётся с нуля, клише запрещены.
+- Достоинство: юмор на точных наблюдениях, не на гиперболах.
+- Коррекция через иронию: отговаривай через здравый смысл, не через лекции.
+</quality_constraints>
+```
+
+### 3.3 Приоритеты секций
 
 | Приоритет | Секция | Режим | Бюджет (символов) |
 |-----------|--------|-------|-------------------|
 | P0 | Persona + Rules | Оба | ~3500 |
 | P0 | Profile + Restrictions | Оба | ~500 |
-| P0 | Health Goals | Оба | ~300 |
+| P0 | **Skill Context** (`withSkillContext`) | Оба | ~800 |
+| P1 | Health Goals | Оба | ~300 |
 | P1 | **Emotional Context** (Layer 3, память) | Оба | ~300 |
 | P1 | **Semantic Memory** (Layer 2, память) | Оба | ~600 |
 | P1 | Nutrition Targets | Diary | ~800 |

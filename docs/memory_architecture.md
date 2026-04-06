@@ -1,12 +1,13 @@
-# Архитектура Долговременной Памяти Ассистента — v3.0.0
+# Архитектура Долговременной Памяти Ассистента — v4.0.0
 
 > **Автор:** Maya (Architect)  
-> **Дата:** 2026-04-03  
-> **Статус:** ✅ Production-Ready (Phases 1–4 complete, tested E2E)  
+> **Дата:** 2026-04-06  
+> **Статус:** ✅ Production-Ready (Phases 1–5 complete, tested E2E)  
 > **Фаза 1:** ✅ PostgresSaver  
 > **Фаза 2:** ✅ Supabase Infrastructure (tables, triggers, cron)  
 > **Фаза 3:** ✅ Edge Functions (deployed)  
-> **Фаза 4:** ✅ API Integration (E2E tested)
+> **Фаза 4:** ✅ API Integration (E2E tested)  
+> **Фаза 5:** ✅ Skill Documents & Context Routing (`user_active_skills` → `match-skill-context`)
 
 ## 1. Обзор
 
@@ -50,10 +51,16 @@ CREATE TABLE user_memory_vectors (
 );
 
 ALTER TABLE user_memory_vectors ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can view own memories" ON user_memory_vectors
+
+-- Правила RLS (все пользователи, применено 2026-04-06)
+CREATE POLICY "Enable SELECT for users" ON user_memory_vectors
     FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Service role full access on memories" ON user_memory_vectors
-    FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Enable INSERT for users" ON user_memory_vectors
+    FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Enable UPDATE for users" ON user_memory_vectors
+    FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Enable DELETE for users" ON user_memory_vectors
+    FOR DELETE USING (auth.uid() = user_id);
 
 CREATE INDEX idx_memory_vectors_hnsw
     ON user_memory_vectors

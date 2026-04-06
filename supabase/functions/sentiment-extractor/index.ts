@@ -98,7 +98,10 @@ Deno.serve(async (req) => {
 
   try {
     // ── 1. Auth guard ───────────────────────────────────────────
-    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    // Uses custom secret SENTIMENT_AUTH_KEY (not SUPABASE_SERVICE_ROLE_KEY)
+    // because Supabase migrated auto-injected keys to sb_secret_* format,
+    // while _app_config / pg_net trigger still sends the legacy JWT key.
+    const serviceKey = Deno.env.get('SENTIMENT_AUTH_KEY') || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     const authHeader = req.headers.get('Authorization')
 
     if (!serviceKey || !authHeader || authHeader !== `Bearer ${serviceKey}`) {

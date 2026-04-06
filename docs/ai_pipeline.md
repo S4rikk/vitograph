@@ -1,8 +1,8 @@
 # VITOGRAPH — AI Pipeline Documentation
 
-> **Дата актуальности:** 3 Апреля 2026
+> **Дата актуальности:** 6 Апреля 2026
 >
-> Документация AI/LLM пайплайна: LangGraph, GPT-4o, structured outputs, детерминированные нормы.
+> Документация AI/LLM пайплайна: LangGraph (фазы 1–5), ChatPromptBuilder, skills-система, 3-уровневая память.
 
 ---
 
@@ -12,15 +12,20 @@
 graph TB
     subgraph "Node.js AI Engine (Port 3001)"
         AC[ai.controller.ts<br/>Контроллер]
-        RS[request-schemas.ts<br/>Zod валидация]
+        CPB[chat-prompt-builder.ts<br/>ChatPromptBuilder v1.2.0]
         LC[llm-client.ts<br/>callLlmStructured]
         AS[ai-schemas.ts<br/>Output Schemas]
 
         subgraph "LangGraph (graph/)"
             B[builder.ts<br/>ReAct Agent]
             S[state.ts<br/>GraphAnnotation]
-            T[tools.ts<br/>3 инструмента]
-            CP[checkpointer.ts<br/>Memory]
+            T[tools.ts<br/>5 инструментов]
+            CP[checkpointer.ts<br/>PostgresSaver]
+        end
+
+        subgraph "Services"
+            MS[memory.service.ts<br/>L2+L3 память]
+            SS[skills.service.ts<br/>Skill Context]
         end
 
         subgraph "Standalone Analyzers"
@@ -31,7 +36,10 @@ graph TB
         end
     end
 
-    AC --> B
+    AC --> CPB
+    MS --> CPB
+    SS --> CPB
+    CPB --> B
     AC --> FVA
     AC --> LRA
     AC --> NA
