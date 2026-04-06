@@ -2,6 +2,7 @@ import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
 import { pythonCore } from "../lib/python-core.js";
 import { createClient } from "@supabase/supabase-js";
+import { embeddings } from "../services/memory.service.js";
 
 /**
  * Tool for calculating dynamic biomarker norms.
@@ -382,18 +383,41 @@ export const get_today_diary_summary = new DynamicStructuredTool({
 
 export const manageHealthGoalsTool = new DynamicStructuredTool({
   name: "manage_health_goals",
-  description: "Добавляет, обновляет или завершает цель здоровья пользователя. Обязательно используй всегда, когда пользователь просит тебя поставить цель (например 'Хочу скинуть вес').",
+  description:
+    "Manages user health goal journeys (skills). Use this tool to: " +
+    "(1) ADD a new goal with a personalized step plan, " +
+    "(2) REMOVE/abandon a goal, " +
+    "(3) PAUSE or RESUME a goal, " +
+    "(4) ADVANCE to the next step after user confirms completion. " +
+    "ALWAYS use 'add_with_plan' (not 'add') when creating a new goal — generate 3-7 personalized steps.",
   schema: z.object({
-    action: z.enum(['add', 'remove']).describe("Действие: добавить или удалить/завершить цель"),
-    goal_title: z.string().describe("Краткое название цели (например 'Снизить вес до 70 кг', 'Пить больше воды')"),
-    category: z.string().describe("Категория (weight, nutrition, habit, fitness, etc)")
+    action: z.enum(["add", "add_with_plan", "remove", "pause", "resume", "advance_step"])
+      .describe("Action: add (simple), add_with_plan (with step plan), remove, pause, resume, advance_step"),
+    goal_title: z.string().optional().describe("Short goal title (e.g., 'Нормализация ферритина'). REQUIRED for add/add_with_plan. Optional for other actions."),
+    category: z.string().optional().describe("Category: iron_deficiency, weight, sleep, nutrition, fitness, habit, vitamin_d, etc."),
+    skill_id: z.string().optional().describe("UUID of the existing skill (REQUIRED for remove/pause/resume/advance_step)"),
+    diagnosis_basis: z.object({
+      source_type: z.string().optional().describe("Source: 'lab_report', 'manual', 'assistant'"),
+      pattern: z.string().optional().describe("Diagnosis pattern name (e.g., 'Железодефицитная анемия')"),
+      markers: z.array(z.object({
+        name: z.string(),
+        value: z.number(),
+        unit: z.string(),
+        status: z.string()
+      })).optional().describe("Relevant biomarkers from lab report")
+    }).optional().describe("Medical basis for this goal (use for add_with_plan)"),
+    steps: z.array(z.object({
+      order: z.number(),
+      title: z.string(),
+      description: z.string().optional()
+    })).optional().describe("Personalized step plan (3-7 steps). REQUIRED for add_with_plan.")
   }),
-  func: async ({ action, goal_title, category }, runManager, config) => {
+  func: async ({ action, goal_title, category, skill_id, diagnosis_basis, steps }, _runManager, config) => {
     const userId = config?.configurable?.user_id;
     const token = config?.configurable?.token;
 
     if (!userId || !token) {
-      return "Error: User context not available. Cannot manage health goals.";
+      return "Error: User context not available.";
     }
 
     const supabaseUrl = process.env.SUPABASE_URL;
@@ -404,41 +428,317 @@ export const manageHealthGoalsTool = new DynamicStructuredTool({
       global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
-    const { data: profile, error } = await supabase.from("profiles").select("health_goals").eq("id", userId).single();
-    if (error) return `Failed to fetch profile: ${error.message}`;
-
-    let goals = Array.isArray(profile?.health_goals) ? profile.health_goals : [];
-    
+    // ── ADD (simple, no plan) ─────────────────────────────────────
     if (action === "add") {
-      const newGoal = {
-        id: "goal-" + Date.now() + Math.random().toString(36).substring(2, 7),
+      // Guard: max 3 active skills
+      const { count } = await supabase
+        .from("user_active_skills")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("status", "active");
+
+      if ((count ?? 0) >= 3) {
+        return "Максимум 3 активных цели. Завершите или приостановите одну из текущих, прежде чем добавлять новую.";
+      }
+
+      if (!goal_title) return "Error: goal_title is required for add.";
+
+      const { data, error } = await supabase.from("user_active_skills").insert({
+        user_id: userId,
         title: goal_title,
-        category: category,
-        is_active: true,
-        created_at: new Date().toISOString()
-      };
-      goals = [...goals, newGoal];
-    } else if (action === "remove") {
-      let found = false;
-      goals = goals.map((g: any) => {
-        if (g.title.toLowerCase().includes(goal_title.toLowerCase()) && g.is_active) {
-          found = true;
-          return { ...g, is_active: false };
-        }
-        return g;
-      });
-      if (!found) return `Goal matching title '${goal_title}' not found or already inactive.`;
+        category: category || "general",
+        source: "manual",
+        steps: [],
+        status: "active",
+      }).select("id").single();
+
+      if (error) return `Failed to add goal: ${error.message}`;
+      return `Цель "${goal_title}" добавлена (id: ${data.id}). Но пока без пошагового плана.`;
     }
 
-    const { error: updateError } = await supabase.from("profiles").update({ health_goals: goals }).eq("id", userId);
-    if (updateError) return `Failed to update health goals: ${updateError.message}`;
+    // ── ADD WITH PLAN ─────────────────────────────────────────────
+    if (action === "add_with_plan") {
+      // Guard: max 3 active skills
+      const { count } = await supabase
+        .from("user_active_skills")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("status", "active");
 
-    return action === "add" ? `Успешно добавлена цель: ${goal_title}` : `Успешно завершена/удалена цель: ${goal_title}`;
-  }
+      if ((count ?? 0) >= 3) {
+        return "Максимум 3 активных цели. Завершите или приостановите одну из текущих.";
+      }
+
+      if (!goal_title) return "Error: goal_title is required for add_with_plan.";
+      if (!steps || steps.length === 0) {
+        return "Error: steps array is required for add_with_plan.";
+      }
+
+      // Format steps with status
+      const formattedSteps = steps.map((s, i) => ({
+        order: s.order || i + 1,
+        title: s.title,
+        description: s.description || "",
+        status: i === 0 ? "active" : "pending",
+        completed_at: null,
+      }));
+
+      const { data, error } = await supabase.from("user_active_skills").insert({
+        user_id: userId,
+        title: goal_title,
+        category: category || "general",
+        source: diagnosis_basis?.source_type || "assistant",
+        diagnosis_basis: diagnosis_basis || {},
+        steps: formattedSteps,
+        current_step_index: 0,
+        status: "active",
+      }).select("id").single();
+
+      if (error) return `Failed to create skill: ${error.message}`;
+
+      const stepList = formattedSteps.map(s => `${s.order}. ${s.title}`).join("; ");
+      return `Маршрут "${goal_title}" создан (id: ${data.id}). Шаги: ${stepList}. Текущий шаг: 1 — ${formattedSteps[0].title}`;
+    }
+
+    // ── REMOVE (abandon) ──────────────────────────────────────────
+    if (action === "remove") {
+      if (!skill_id) {
+        // Fallback: find by title match
+        const { data: match } = await supabase
+          .from("user_active_skills")
+          .select("id")
+          .eq("user_id", userId)
+          .eq("status", "active")
+          .ilike("title", `%${goal_title}%`)
+          .limit(1)
+          .single();
+
+        if (!match) return `Цель "${goal_title}" не найдена среди активных.`;
+        skill_id = match.id;
+      }
+
+      const { error } = await supabase
+        .from("user_active_skills")
+        .update({ status: "abandoned", updated_at: new Date().toISOString() })
+        .eq("id", skill_id)
+        .eq("user_id", userId);
+
+      if (error) return `Failed to remove goal: ${error.message}`;
+      return `Цель "${goal_title}" завершена/удалена.`;
+    }
+
+    // ── PAUSE ─────────────────────────────────────────────────────
+    if (action === "pause") {
+      if (!skill_id) return "Error: skill_id is required for pause.";
+
+      const { error } = await supabase
+        .from("user_active_skills")
+        .update({ status: "paused", updated_at: new Date().toISOString() })
+        .eq("id", skill_id)
+        .eq("user_id", userId);
+
+      if (error) return `Failed to pause goal: ${error.message}`;
+      return `Цель "${goal_title}" поставлена на паузу.`;
+    }
+
+    // ── RESUME ────────────────────────────────────────────────────
+    if (action === "resume") {
+      if (!skill_id) return "Error: skill_id is required for resume.";
+
+      // Guard: max 3 active skills
+      const { count } = await supabase
+        .from("user_active_skills")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("status", "active");
+
+      if ((count ?? 0) >= 3) {
+        return "Максимум 3 активных цели. Завершите или приостановите одну, прежде чем возобновлять.";
+      }
+
+      const { error } = await supabase
+        .from("user_active_skills")
+        .update({ status: "active", updated_at: new Date().toISOString() })
+        .eq("id", skill_id)
+        .eq("user_id", userId);
+
+      if (error) return `Failed to resume goal: ${error.message}`;
+      return `Цель "${goal_title}" снова активна.`;
+    }
+
+    // ── ADVANCE STEP ──────────────────────────────────────────────
+    if (action === "advance_step") {
+      if (!skill_id) return "Error: skill_id is required for advance_step.";
+
+      // Fetch current skill
+      const { data: skill, error: fetchErr } = await supabase
+        .from("user_active_skills")
+        .select("steps, current_step_index, title")
+        .eq("id", skill_id)
+        .eq("user_id", userId)
+        .single();
+
+      if (fetchErr || !skill) return `Skill not found: ${fetchErr?.message || "unknown"}`;
+
+      const currentSteps = Array.isArray(skill.steps) ? [...skill.steps] : [];
+      const idx = skill.current_step_index ?? 0;
+
+      // Mark current step as completed
+      if (currentSteps[idx]) {
+        currentSteps[idx] = {
+          ...currentSteps[idx],
+          status: "completed",
+          completed_at: new Date().toISOString(),
+        };
+      }
+
+      const nextIdx = idx + 1;
+      const isLastStep = nextIdx >= currentSteps.length;
+
+      if (isLastStep) {
+        // All steps done — mark skill as completed
+        const { error } = await supabase
+          .from("user_active_skills")
+          .update({
+            steps: currentSteps,
+            current_step_index: nextIdx,
+            status: "completed",
+            completed_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", skill_id)
+          .eq("user_id", userId);
+
+        if (error) return `Failed to complete skill: ${error.message}`;
+        return `🎉 Поздравляю! Все шаги маршрута "${skill.title}" выполнены! Цель завершена!`;
+      } else {
+        // Activate next step
+        if (currentSteps[nextIdx]) {
+          currentSteps[nextIdx] = { ...currentSteps[nextIdx], status: "active" };
+        }
+
+        const { error } = await supabase
+          .from("user_active_skills")
+          .update({
+            steps: currentSteps,
+            current_step_index: nextIdx,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", skill_id)
+          .eq("user_id", userId);
+
+        if (error) return `Failed to advance step: ${error.message}`;
+        return `Шаг ${idx + 1} выполнен! Переходим к шагу ${nextIdx + 1}: "${currentSteps[nextIdx]?.title}".`;
+      }
+    }
+
+    return "Unknown action.";
+  },
 });
 
-export const assistantTools = [calculateNormsTool, updateProfileTool, get_today_diary_summary, manageHealthGoalsTool];
-export const diaryTools = [calculateNormsTool, updateProfileTool, logMealTool, log_supplement_intake_tool, get_today_diary_summary];
+export const logAssistantActionTool = new DynamicStructuredTool({
+  name: "log_assistant_action",
+  description:
+    "INTERNAL: Logs your own medical recommendation or action for future reference. " +
+    "Use ONLY when you give a SPECIFIC medical recommendation: prescribing a test, changing a diet plan, " +
+    "assigning/modifying a supplement, or creating a step-by-step action plan. " +
+    "DO NOT use for greetings, general chat, acknowledgments, or trivial interactions.",
+  schema: z.object({
+    action_summary: z
+      .string()
+      .describe(
+        "A concise 1-sentence summary of the recommendation (e.g., 'Рекомендовал сдать ферритин при подозрении на дефицит железа')"
+      ),
+    linked_goal_id: z
+      .string()
+      .uuid()
+      .optional()
+      .describe(
+        "The UUID of the active health goal this action relates to (for Phase 2 integration). Omit if not goal-related."
+      ),
+  }),
+  func: async ({ action_summary, linked_goal_id }, _runManager, config) => {
+    const userId = config?.configurable?.user_id;
+    const token = config?.configurable?.token;
+
+    if (!userId || !token) {
+      console.warn("[Tool:log_assistant_action] No user context, skipping.");
+      return "logged";
+    }
+
+    try {
+      const supabaseUrl = process.env.SUPABASE_URL;
+      const supabaseKey = process.env.SUPABASE_ANON_KEY;
+      if (!supabaseUrl || !supabaseKey) {
+        console.warn("[Tool:log_assistant_action] Missing env vars, skipping.");
+        return "logged";
+      }
+
+      const supabase = createClient(supabaseUrl, supabaseKey, {
+        global: { headers: { Authorization: `Bearer ${token}` } },
+      });
+
+      // 1. Generate embedding
+      const actionEmbedding = await embeddings.embedQuery(action_summary);
+
+      // 2. Dedup check: cosine search for existing similar action (threshold 0.85)
+      const { data: existing } = await supabase.rpc("match_user_memories", {
+        p_user_id: userId,
+        query_embedding: actionEmbedding,
+        match_count: 1,
+        similarity_threshold: 0.85,
+        filter_type: "assistant_action",
+      });
+
+      if (existing && existing.length > 0) {
+        // Duplicate found — update timestamp and access_count instead of inserting
+        const dupId = existing[0].id;
+        await supabase
+          .from("user_memory_vectors")
+          .update({
+            updated_at: new Date().toISOString(),
+            access_count: (existing[0].access_count || 0) + 1,
+          })
+          .eq("id", dupId);
+        console.log(
+          `[Tool:log_assistant_action] Dedup hit (id=${dupId}), updated timestamp.`
+        );
+        return "logged";
+      }
+
+      // 3. No duplicate — INSERT new record
+      const metadata: Record<string, unknown> = {};
+      if (linked_goal_id) {
+        metadata.linked_goal_id = linked_goal_id;
+      }
+
+      const { error } = await supabase.from("user_memory_vectors").insert({
+        user_id: userId,
+        content: action_summary,
+        memory_type: "assistant_action",
+        importance: 0.7,
+        embedding: actionEmbedding,
+        metadata,
+      });
+
+      if (error) {
+        console.error("[Tool:log_assistant_action] INSERT error:", error.message);
+      } else {
+        console.log(
+          `[Tool:log_assistant_action] ✅ Saved: "${action_summary.substring(0, 50)}..."`
+        );
+      }
+
+      return "logged";
+    } catch (err) {
+      console.error("[Tool:log_assistant_action] Unexpected error:", err);
+      return "logged"; // Never fail — graceful degradation
+    }
+  },
+});
+
+export const assistantTools = [calculateNormsTool, updateProfileTool, get_today_diary_summary, manageHealthGoalsTool, logAssistantActionTool];
+export const diaryTools = [calculateNormsTool, updateProfileTool, logMealTool, log_supplement_intake_tool, get_today_diary_summary, logAssistantActionTool];
 
 // We can export an array of all available tools for easy binding to ToolNode
 export const agentTools = [
@@ -447,7 +747,6 @@ export const agentTools = [
   logMealTool, 
   log_supplement_intake_tool, 
   get_today_diary_summary, 
-  manageHealthGoalsTool
+  manageHealthGoalsTool,
+  logAssistantActionTool,
 ];
-
-

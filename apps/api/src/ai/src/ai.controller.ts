@@ -41,6 +41,7 @@ import { HumanMessage, SystemMessage, isAIMessageChunk } from "@langchain/core/m
 import { appGraph } from "./graph/builder.js";
 import { getOrFetchWeatherContext } from "./weather.service.js";
 import { fetchAdvancedMemoryContext } from "./services/memory.service.js";
+import { fetchActiveSkills, fetchMatchingSkillDocument } from "./services/skills.service.js";
 import { callLlmStructured, LLM_TIMEOUTS, LLM_RETRIES } from "./llm-client.js";
 import { z } from "zod";
 
@@ -1053,12 +1054,7 @@ export async function handleDeleteMealLog(req: Request, res: Response, next: Nex
  * Handles the conversational chat endpoint using LangGraph.
  * Maintains memory via threadId and can call tools like calculateNorms.
  */
-function formatHealthGoals(profile: any): string {
-  if (!profile?.health_goals || !Array.isArray(profile.health_goals)) return "";
-  const activeGoals = profile.health_goals.filter((g: any) => g.is_active !== false);
-  if (activeGoals.length === 0) return "";
-  return `\n#### 🎯 ACTIVE HEALTH GOALS\nПользователь поставил следующие цели:\n${activeGoals.map((g: any) => `- [${g.category || 'Focus'}] ${g.title}`).join('\n')}\nУчитывай эти цели во всех своих ответах и рекомендациях. Хвали пользователя за шаги к их достижению и мягко корректируй, если он от них отклоняется.`;
-}
+
 
 export async function handleChat(
   req: Request,
@@ -1083,9 +1079,11 @@ export async function handleChat(
 
       if (token) {
         // Parallel fetch: user context + memory context (independent)
-        const [dbContext, [emotionalProfile, semanticMemories]] = await Promise.all([
+        const [dbContext, [emotionalProfile, semanticMemories, pastActions], activeSkills, matchedSkillDoc] = await Promise.all([
           fetchUserContext(token, req.user.id),
           fetchAdvancedMemoryContext(req.user.id, body.message, token),
+          fetchActiveSkills(req.user.id, token),
+          fetchMatchingSkillDocument(req.user.id, body.message),
         ]);
 
         if (dbContext) {
@@ -1120,6 +1118,8 @@ export async function handleChat(
             .eq('user_id', req.user.id)
             .gte('created_at', startOfDay5AM_UTC.toISOString())
             .limit(1);
+
+          const isFirstMessageOfDay = !!(earlyMsg && earlyMsg.length === 0);
 
           if (earlyMsg && earlyMsg.length === 0) {
             const todayStr = new Date(userLocalTime).toLocaleDateString("en-CA");
@@ -1165,9 +1165,10 @@ export async function handleChat(
             )
             .withEmotionalContext(emotionalProfile)
             .withSemanticMemory(semanticMemories)
+            .withPastActions(pastActions)
+            .withActiveSkills(activeSkills)
             .withProfile(formatLeanProfile(dbContext.profile))
             .withDietaryRestrictions(formatDietaryRestrictions(dbContext.profile))
-            .withHealthGoals(formatHealthGoals(dbContext.profile))
             .withGoalManagement();
 
           if (chatMode === "diary") {
@@ -1207,9 +1208,15 @@ export async function handleChat(
               .withKnowledgeBases(formatActiveKnowledgeBases(dbContext.activeKnowledgeBases))
               .withSupplementProtocol(formatActiveSupplementProtocol(dbContext.profile))
               .withTodaySupplements(formatTodaySupplements(dbContext.todaySupplements, timezone))
-              .withDeficitAwareRule();
+              .withDeficitAwareRule()
+              .withCoachingMode(activeSkills, isFirstMessageOfDay)
+              .withSkillDocument(matchedSkillDoc);
           }
 
+          // Merge weather alert + skill check-in instruction if both present on first message of day
+          if (isFirstMessageOfDay && activeSkills && activeSkills.length > 0 && weatherAlert) {
+            weatherAlert += `\n[MERGE_ALERTS]: У тебя есть и weather alert, и skill check-in. Объедини их в ОДИН естественный абзац, не два отдельных блока. Пример: "Доброе утро! Сегодня небольшая магнитная буря — береги себя. Кстати, как продвигается [текущий шаг]?"`;
+          }
           builder.withWeatherAlert(weatherAlert);
 
           const { systemPrompt } = builder.build();
@@ -1363,9 +1370,11 @@ export async function handleChatStream(
 
       if (token) {
         // Parallel fetch: user context + memory context (independent)
-        const [dbContext, [emotionalProfile, semanticMemories]] = await Promise.all([
+        const [dbContext, [emotionalProfile, semanticMemories, pastActions], activeSkills, matchedSkillDoc] = await Promise.all([
           fetchUserContext(token, req.user.id),
           fetchAdvancedMemoryContext(req.user.id, body.message, token),
+          fetchActiveSkills(req.user.id, token),
+          fetchMatchingSkillDocument(req.user.id, body.message),
         ]);
 
         if (dbContext) {
@@ -1400,6 +1409,8 @@ export async function handleChatStream(
             .eq('user_id', req.user.id)
             .gte('created_at', startOfDay5AM_UTC.toISOString())
             .limit(1);
+
+          const isFirstMessageOfDay = !!(earlyMsg && earlyMsg.length === 0);
 
           if (earlyMsg && earlyMsg.length === 0) {
             const todayStr = new Date(userLocalTime).toLocaleDateString("en-CA");
@@ -1445,9 +1456,10 @@ export async function handleChatStream(
             )
             .withEmotionalContext(emotionalProfile)
             .withSemanticMemory(semanticMemories)
+            .withPastActions(pastActions)
+            .withActiveSkills(activeSkills)
             .withProfile(formatLeanProfile(dbContext.profile))
             .withDietaryRestrictions(formatDietaryRestrictions(dbContext.profile))
-            .withHealthGoals(formatHealthGoals(dbContext.profile))
             .withGoalManagement();
 
           if (chatMode === "diary") {
@@ -1485,9 +1497,15 @@ export async function handleChatStream(
               .withKnowledgeBases(formatActiveKnowledgeBases(dbContext.activeKnowledgeBases))
               .withSupplementProtocol(formatActiveSupplementProtocol(dbContext.profile))
               .withTodaySupplements(formatTodaySupplements(dbContext.todaySupplements, timezone))
-              .withDeficitAwareRule();
+              .withDeficitAwareRule()
+              .withCoachingMode(activeSkills, isFirstMessageOfDay)
+              .withSkillDocument(matchedSkillDoc);
           }
 
+          // Merge weather alert + skill check-in instruction if both present on first message of day
+          if (isFirstMessageOfDay && activeSkills && activeSkills.length > 0 && weatherAlert) {
+            weatherAlert += `\n[MERGE_ALERTS]: У тебя есть и weather alert, и skill check-in. Объедини их в ОДИН естественный абзац, не два отдельных блока. Пример: "Доброе утро! Сегодня небольшая магнитная буря — береги себя. Кстати, как продвигается [текущий шаг]?"`;
+          }
           builder.withWeatherAlert(weatherAlert);
 
           const { systemPrompt } = builder.build();

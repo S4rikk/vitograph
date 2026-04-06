@@ -39,7 +39,7 @@ CREATE TABLE user_memory_vectors (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     content TEXT NOT NULL,
-    memory_type TEXT NOT NULL CHECK (memory_type IN ('fact', 'preference', 'experience', 'goal', 'fear')),
+    memory_type TEXT NOT NULL CHECK (memory_type IN ('fact', 'preference', 'experience', 'goal', 'fear', 'assistant_action')),
     importance FLOAT DEFAULT 0.5 CHECK (importance >= 0.0 AND importance <= 1.0),
     access_count INT DEFAULT 0,
     last_accessed_at TIMESTAMPTZ,
@@ -213,11 +213,11 @@ export async function fetchAdvancedMemoryContext(
   userId: string,
   userMessage: string,
   token: string
-): Promise<[EmotionalProfile | null, SemanticMemory[] | null]>
+): Promise<[EmotionalProfile | null, SemanticMemory[] | null, SemanticMemory[] | null]>
 ```
 
-- **Singleton** `OpenAIEmbeddings` из `@langchain/openai` (model: text-embedding-3-small, 384d)
-- **Promise.all** внутри: `fetchEmotionalProfile` || `fetchSemanticMemories`
+- **Singleton** `OpenAIEmbeddings` из `@langchain/openai` (model: text-embedding-3-small, 384d) — **exported** for reuse in `log_assistant_action` tool
+- **Promise.all** внутри: `fetchEmotionalProfile` || `fetchSemanticMemories` || `fetchPastActions`
 - **Graceful degradation**: все ошибки → try/catch → null (чат не падает)
 - **PGRST116** (no row found) — обрабатывается тихо (нормально для новых пользователей)
 
@@ -229,6 +229,9 @@ export async function fetchAdvancedMemoryContext(
 withSemanticMemory(memories: Array<{ content: string; memory_type: string }> | null): this
 // → Секция "### LONG-TERM MEMORY (CRITICAL CONTEXT)" | priority: 1
 
+withPastActions(actions: Array<{ content: string }> | null): this
+// → Секция "### YOUR PAST ACTIONS & RECOMMENDATIONS (ANTI-REPETITION)" | priority: 1
+
 withEmotionalContext(profile: { current_mood: string; mood_trend: string; trust_level: number } | null): this
 // → Секция "### EMOTIONAL CONTEXT" | priority: 1
 ```
@@ -239,7 +242,7 @@ withEmotionalContext(profile: { current_mood: string; mood_trend: string; trust_
 
 ```typescript
 // Parallel fetch (fetchUserContext не зависит от fetchAdvancedMemoryContext)
-const [dbContext, [emotionalProfile, semanticMemories]] = await Promise.all([
+const [dbContext, [emotionalProfile, semanticMemories, pastActions]] = await Promise.all([
   fetchUserContext(token, req.user.id),
   fetchAdvancedMemoryContext(req.user.id, body.message, token),
 ]);
@@ -252,11 +255,61 @@ const builder = new ChatPromptBuilder(...)
   .withPersona(...)
   .withEmotionalContext(emotionalProfile)   // Layer 3
   .withSemanticMemory(semanticMemories)     // Layer 2
+  .withPastActions(pastActions)             // Episodic (anti-repetition)
   .withProfile(...)
   // ...
 ```
 
-## 10. Data Flow (Complete)
+### 9.1 Past Actions Retrieval (Episodic Memory)
+
+Alongside user facts, the system now retrieves the assistant's own past actions:
+
+```typescript
+// In fetchAdvancedMemoryContext — 3rd parallel query
+fetchPastActions(supabase, userId, userMessage)
+  → RPC match_user_memories(filter_type='assistant_action', match_count=3, threshold=0.25)
+```
+
+These are injected into the prompt via `ChatPromptBuilder.withPastActions()` as a separate section with anti-repetition rules.
+
+**Tool:** `log_assistant_action` (internal, invisible to user)
+- Triggers: medical recommendations, test prescriptions, supplement assignments, diet changes
+- Dedup: cosine similarity threshold 0.85 (prevents duplicate entries)
+- Importance: 0.7 (higher than default 0.5 for user facts)
+- Future: `metadata.linked_goal_id` prepared for Phase 2 goal state machines
+
+## 10. User Active Skills (Goal Journeys)
+
+### Table: `user_active_skills`
+
+Each health goal is stored as an "active skill" with:
+- FSM lifecycle: `active → paused → completed → abandoned`
+- Ordered step plan (JSONB array)
+- Medical diagnosis basis
+- Max 3 active skills per user
+
+### Step Schema (JSONB)
+```json
+[
+  { "order": 1, "title": "...", "status": "active|pending|completed|skipped" }
+]
+```
+
+### Tool: `manage_health_goals`
+Actions: `add`, `add_with_plan`, `remove`, `pause`, `resume`, `advance_step`
+
+### Service: `skills.service.ts`
+`fetchActiveSkills(userId, token)` — returns top-3 active skills ordered by priority.
+Called in parallel alongside `fetchUserContext()` and `fetchAdvancedMemoryContext()`.
+
+### Prompt Integration
+`ChatPromptBuilder.withActiveSkills()` injects ONLY the current step of each active skill (~200 tokens).
+Replaces the old `withHealthGoals()` (which read from `profiles.health_goals` JSONB).
+
+### Cascade Cleanup
+SQL trigger `cleanup_skill_memories` removes `linked_goal_id` from episodic memories when a skill is abandoned or completed.
+
+## 11. Data Flow (Complete)
 
 ```
 User Message
@@ -264,37 +317,48 @@ User Message
     ├──► [parallel] fetchUserContext (profile, meals, labs, supplements)
     ├──► [parallel] fetchAdvancedMemoryContext
     │       ├──► [parallel] SELECT user_emotional_profile
-    │       └──► [parallel] OpenAI embedQuery(message) → RPC match_user_memories (top-5, threshold=0.25)
+    │       ├──► [parallel] OpenAI embedQuery(message) → RPC match_user_memories (top-5, threshold=0.25)
+    │       └──► [parallel] fetchPastActions → RPC match_user_memories (filter_type='assistant_action', top-3)
+    ├──► [parallel] fetchActiveSkills → SELECT user_active_skills (status='active', limit 3)
     │
     ├──► [sequential] getOrFetchWeatherContext (depends on profile)
     │
     ▼
 ChatPromptBuilder
-    .withPersona()
-    .withEmotionalContext()     ← Layer 3 (mood, trend, trust)
-    .withSemanticMemory()       ← Layer 2 (relevant facts from past)
+    .withPersona()               ← includes EPISODIC MEMORY LOGGING rule
+    .withEmotionalContext()      ← Layer 3 (mood, trend, trust)
+    .withSemanticMemory()        ← Layer 2 (relevant facts from past)
+    .withPastActions()           ← Episodic (anti-repetition)
+    .withActiveSkills()          ← Goal Journeys (FSM, current step only)
     .withProfile()
+    .withGoalManagement()        ← FSM step plan rules
+    .withCoachingMode()          ← MI coaching + specialist context (assistant mode only)
+    .withSkillDocument()         ← Personalized medical protocol (if context matches)
     .withDiaryMode() / .withAssistantMode()
     .build()
     │
     ▼
-LangGraph (PostgresSaver)       ← Layer 1
+LangGraph (PostgresSaver)        ← Layer 1
     │
     ├──► Response to user (sync)
+    ├──► [parallel] log_assistant_action tool → INSERT/DEDUP user_memory_vectors (memory_type='assistant_action')
+    ├──► [parallel] manage_health_goals tool → CRUD user_active_skills (FSM transitions)
     └──► INSERT ai_chat_messages
            └──► [async] Pipeline A: DB Trigger → sentiment-extractor
 ```
 
-## 11. Файловая структура
+## 12. Файловая структура
 
 ```
 apps/api/src/ai/src/
 ├── services/
-│   └── memory.service.ts          ← NEW: fetchAdvancedMemoryContext
+│   ├── memory.service.ts          ← MODIFIED: +fetchPastActions, +export embeddings
+│   └── skills.service.ts          ← NEW: fetchActiveSkills (Phase 2)
 ├── prompts/
-│   └── chat-prompt-builder.ts     ← MODIFIED: +withSemanticMemory, +withEmotionalContext
-├── ai.controller.ts               ← MODIFIED: Promise.all integration
+│   └── chat-prompt-builder.ts     ← MODIFIED: +withActiveSkills, +withPastActions, new goal rules
+├── ai.controller.ts               ← MODIFIED: +fetchActiveSkills parallel, +withActiveSkills, -withHealthGoals
 └── graph/
+    ├── tools.ts                   ← MODIFIED: FSM manageHealthGoalsTool (6 actions), +logAssistantActionTool
     └── checkpointer.ts            ← PostgresSaver (Phase 1)
 
 supabase/
@@ -313,7 +377,7 @@ supabase/
     └── 20260403_044_app_settings_and_verification.sql
 ```
 
-## 12. Переменные окружения
+## 13. Переменные окружения
 
 | Variable | Где используется | Источник |
 |:---|:---|:---|
@@ -322,3 +386,60 @@ supabase/
 | `SUPABASE_ANON_KEY` | memory.service.ts (with user token) | `.env` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Edge Functions only | Auto in Edge Functions |
 | `SUPABASE_DB_URL` | checkpointer.ts (PostgresSaver) | `.env` |
+
+## 14. AI Coaching Mode (Phase 3)
+
+### Strategy: Pure Prompt Engineering
+No new tables, services, or endpoints. All coaching behavior is driven by prompt injection.
+
+### Method: `ChatPromptBuilder.withCoachingMode(activeSkills, isFirstMessageOfDay)`
+- Injected ONLY in assistant mode (not diary).
+- Contains Motivational Interviewing (MI) rules.
+- Builds specialist context from `diagnosis_basis.pattern` (LLM synthesis; will be replaced by KB/RAG later).
+- On first message of day: adds `[PROACTIVE_SKILL_CHECK_IN]` instruction.
+
+### Emotional Coaching Adaptation
+`withEmotionalContext()` includes coaching-specific tone rules:
+- stressed → reduce pressure
+- motivated → leverage momentum with micro-tasks
+- declining → prioritize emotional support
+
+### Alert Merging
+When both weather alert and skill check-in fire on first message of day, a `[MERGE_ALERTS]` instruction ensures they're combined into one natural paragraph.
+
+### Future: Knowledge Base Integration
+Currently uses LLM synthesis for specialist context. When KB is ready:
+- Replace `specialistLines` in `withCoachingMode()` with RAG retrieval from `active_condition_knowledge_bases`.
+- Add condition-specific protocols (dosage, timing, contraindications).
+
+## 15. Supabase-Native Skill Documents (Phase 3.5)
+
+### Architecture: Maximum Supabase Offload
+
+| Component | Where | What |
+|-----------|-------|------|
+| Document storage | DB: `user_active_skills.skill_document` | Full medical protocol (~800 words) |
+| Document generation | Edge Function: `generate-skill-document` | OpenAI gpt-4o-mini + Supabase.ai embedding |
+| Auto-trigger | DB Webhook: `ON INSERT` | Automatically invokes Edge Function |
+| Context routing | Edge Function: `match-skill-context` | gte-small embedding + pgvector RPC |
+| Similarity search | RPC: `match_skill_by_context` | pgvector cosine similarity (threshold 0.6) |
+
+### Document Generation Flow
+1. `manage_health_goals(add_with_plan)` → INSERT into `user_active_skills`
+2. Database Webhook → Edge Function `generate-skill-document`
+3. Edge Function → OpenAI (generate protocol) + Supabase.ai (generate embedding)
+4. UPDATE skill with `skill_document`, `skill_embedding`, `document_status = 'ready'`
+
+### Context Routing Flow
+1. User sends message → Node.js calls Edge Function `match-skill-context`
+2. Edge Function → Supabase.ai (embed message) → RPC (pgvector search)
+3. Returns matching `skill_document` (if similarity > 0.6)
+4. `ChatPromptBuilder.withSkillDocument()` injects protocol into system prompt
+
+### Embedding Strategy
+- **Skill documents:** gte-small (384d) via Supabase.ai — FREE
+- **Episodic memory:** text-embedding-3-small (1536d) via OpenAI — precision-critical
+- **Context routing:** gte-small (384d) via Supabase.ai — FREE
+
+### Fallback
+If `document_status ≠ 'ready'` → fallback to `withActiveSkills()` (step list from Phase 2).

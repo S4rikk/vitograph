@@ -2,40 +2,41 @@ import { OpenAIEmbeddings } from "@langchain/openai";
 import { createClient } from "@supabase/supabase-js";
 
 // Singleton embeddings model (reuse across requests)
-const embeddings = new OpenAIEmbeddings({
+export const embeddings = new OpenAIEmbeddings({
   modelName: "text-embedding-3-small",
   dimensions: 384,
 });
 
 /**
- * Fetch emotional profile and semantic memories for the current user.
- * Returns a tuple: [emotionalProfile, semanticMemories]
+ * Fetch emotional profile, semantic memories, and past assistant actions.
+ * Returns a 3-tuple: [emotionalProfile, semanticMemories, pastActions]
  * Designed to be called via Promise.all alongside other async operations.
  * 
  * IMPORTANT: All errors are swallowed internally. If anything fails,
- * the function returns [null, null] so the chat still works.
+ * the function returns [null, null, null] so the chat still works.
  */
 export async function fetchAdvancedMemoryContext(
   userId: string,
   userMessage: string,
   token: string
-): Promise<[EmotionalProfile | null, SemanticMemory[] | null]> {
+): Promise<[EmotionalProfile | null, SemanticMemory[] | null, SemanticMemory[] | null]> {
   const supabaseUrl = process.env.SUPABASE_URL!;
   const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY!;
   const supabase = createClient(supabaseUrl, supabaseKey, {
     global: { headers: { Authorization: `Bearer ${token}` } }
   });
 
-  // Run both queries in parallel
-  const [emotionalProfile, semanticMemories] = await Promise.all([
+  // Run all three queries in parallel
+  const [emotionalProfile, semanticMemories, pastActions] = await Promise.all([
     fetchEmotionalProfile(supabase, userId),
-    fetchSemanticMemories(supabase, userId, userMessage)
+    fetchSemanticMemories(supabase, userId, userMessage),
+    fetchPastActions(supabase, userId, userMessage),
   ]);
 
   // Production log: compact summary
-  console.log(`[MemoryService] emotional=${emotionalProfile?.current_mood ?? 'none'} | memories=${semanticMemories?.length ?? 0}`);
+  console.log(`[MemoryService] emotional=${emotionalProfile?.current_mood ?? 'none'} | memories=${semanticMemories?.length ?? 0} | past_actions=${pastActions?.length ?? 0}`);
 
-  return [emotionalProfile, semanticMemories];
+  return [emotionalProfile, semanticMemories, pastActions];
 }
 
 // ── Types ──────────────────────────────────────────────────────────
@@ -109,6 +110,36 @@ async function fetchSemanticMemories(
     return data && data.length > 0 ? (data as SemanticMemory[]) : null;
   } catch (err) {
     console.error('[MemoryService] Unexpected error fetching semantic memories:', err);
+    return null;
+  }
+}
+
+/**
+ * Fetches past assistant actions (memory_type = 'assistant_action') via
+ * cosine similarity search. Returns top-3 most relevant past actions.
+ */
+async function fetchPastActions(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  message: string
+): Promise<SemanticMemory[] | null> {
+  if (!message || message.trim().length === 0) return null;
+  try {
+    const queryEmbedding = await embeddings.embedQuery(message);
+    const { data, error } = await supabase.rpc('match_user_memories', {
+      p_user_id: userId,
+      query_embedding: queryEmbedding,
+      match_count: 3,
+      similarity_threshold: 0.25,
+      filter_type: 'assistant_action',
+    });
+    if (error) {
+      console.warn('[MemoryService] RPC match_user_memories (actions) error:', error.message);
+      return null;
+    }
+    return data && data.length > 0 ? (data as SemanticMemory[]) : null;
+  } catch (err) {
+    console.error('[MemoryService] Error fetching past actions:', err);
     return null;
   }
 }

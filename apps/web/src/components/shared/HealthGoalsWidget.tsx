@@ -4,10 +4,14 @@ import React, { useEffect, useState } from "react";
 import { Target, X, Loader2, Sparkles, ChevronDown } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { createClient } from "@/lib/supabase/client";
-import type { HealthGoal } from "@/lib/types/profile";
+
+interface ActiveSkill {
+  id: string;
+  title: string;
+}
 
 export default function HealthGoalsWidget() {
-  const [goals, setGoals] = useState<HealthGoal[]>([]);
+  const [goals, setGoals] = useState<ActiveSkill[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
@@ -23,19 +27,16 @@ export default function HealthGoalsWidget() {
         return;
       }
       setUserId(user.id);
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("health_goals")
-        .eq("id", user.id)
-        .single();
+      
+      const { data: activeSkills, error } = await supabase
+        .from("user_active_skills")
+        .select("id, title")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .order("created_at", { ascending: false });
         
       if (error) throw error;
-
-      if (profile?.health_goals && Array.isArray(profile.health_goals)) {
-        setGoals(profile.health_goals.filter((g: HealthGoal) => g.is_active !== false));
-      } else {
-        setGoals([]);
-      }
+      setGoals(activeSkills || []);
     } catch (e) {
       console.error("Failed to load health goals", e);
     } finally {
@@ -56,27 +57,14 @@ export default function HealthGoalsWidget() {
     
     setIsDeleting(goalId);
     try {
-      // Fetch full profile again to avoid overwriting other potential updates
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("health_goals")
-        .eq("id", userId)
-        .single();
-        
-      let allGoals = profile?.health_goals || [];
-      
-      // Mark as inactive instead of deleting completely for history
-      const updatedGoals = allGoals.map((g: HealthGoal) => 
-        g.id === goalId ? { ...g, is_active: false } : g
-      );
-      
       const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ health_goals: updatedGoals })
-        .eq("id", userId);
+        .from("user_active_skills")
+        .update({ status: 'abandoned' })
+        .eq("id", goalId);
         
       if (updateError) throw updateError;
-      setGoals(updatedGoals.filter((g: HealthGoal) => g.is_active !== false));
+      
+      setGoals(prev => prev.filter(g => g.id !== goalId));
       window.dispatchEvent(new Event("refresh-health-goals"));
     } catch (e) {
       console.error("Failed to remove goal", e);
