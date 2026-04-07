@@ -13,8 +13,8 @@
 export const LAB_DIAGNOSTIC_PROMPT = {
   version: "3.2.0",
   model: "gpt-5.4-mini",
-  temperature: 0.2,
-  maxOutputTokens: 10000,
+  temperature: undefined,
+  maxOutputTokens: 100_000,
   language: "ru" as const,
 
   template: `Ты — клинический аналитик уровня функциональной медицины.

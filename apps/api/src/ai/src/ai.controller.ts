@@ -1953,6 +1953,20 @@ export async function handleAnalyzeLabReport(
       res.status(500).json({ success: false, error: "Failed to fetch user context" });
     }
   } catch (error: unknown) {
+    const err = error as any;
+    if (err.message?.startsWith("LAB_ANALYSIS_FAILED")) {
+      const count = err.biomarkersCount || 0;
+      res.status(422).json({
+        success: false,
+        error: "LAB_ANALYSIS_FAILED",
+        message: count > 50
+          ? `Слишком много показателей (${count}). Попробуйте загрузить не более 3 страниц анализов за раз.`
+          : "Не удалось сформировать отчёт. Попробуйте ещё раз.",
+        biomarkersCount: count,
+        suggestion: "Попробуйте загрузить анализы частями — сначала первые 3 страницы, затем остальные.",
+      });
+      return;
+    }
     next(error);
   }
 }

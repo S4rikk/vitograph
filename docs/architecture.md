@@ -1,6 +1,6 @@
 # VITOGRAPH — Architecture: Database Schema & API Structure
 
-> **Последнее обновление:** 2 апреля 2026 (Async OCR Pipeline — Этап 3 рефакторинга)
+> **Последнее обновление:** 7 апреля 2026
 >
 > Смотрите также: [API Reference](./api_reference.md) | [Frontend Components](./frontend_components.md) | [AI Pipeline](./ai_pipeline.md)
 
@@ -232,17 +232,23 @@
 
 ---
 
-### 2.4 Implemented Tables (Phase 32-53f)
+### 2.4 Дополнительные таблицы
 
-| Table                              | Purpose                                                       |
-| ---------------------------------- | ------------------------------------------------------------- |
-| `meal_logs`                        | Food diary entries with `micronutrients` JSONB (Phase 33)     |
-| `meal_items`                       | Individual food items within a meal                           |
-| `supplement_logs`                  | BAD intake tracking with `taken_at`, `was_on_time` (Phase 34) |
-| `ai_chat_messages`                 | Chat history persistence (user/assistant messages)            |
-| `feedback`                         | User feedback with anti-spam (`created_at` cooldown)          |
-| `active_condition_knowledge_bases` | Medical condition knowledge for norm adjustments (Phase 53f)  |
-| `lab_scans`                        | **[NEW]** Async OCR job tracking: `PENDING → PROCESSING → COMPLETED/FAILED` (Phase 3 Refactoring) |
+| Table | Purpose |
+|---|---|
+| `meal_logs` | Food diary entries with `micronutrients` JSONB |
+| `meal_items` | Individual food items within a meal |
+| `supplement_logs` | BAD intake tracking with `taken_at`, `was_on_time` |
+| `ai_chat_messages` | Chat history persistence (user/assistant messages) |
+| `feedback` | User feedback with anti-spam (`created_at` cooldown) |
+| `active_condition_knowledge_bases` | Medical condition knowledge for norm adjustments |
+| `lab_scans` | Async OCR job tracking: `PENDING → PROCESSING → COMPLETED/FAILED` |
+| `user_memory_vectors` | Семантическая память: факты, предпочтения, действия ассистента. pgvector embedding (384d, HNSW). См. [memory_architecture.md](./memory_architecture.md) |
+| `user_emotional_profile` | Эмпатическая память: настроение, тренд, уровень доверия. Обновляется асинхронно через Edge Function |
+| `memory_consolidation_log` | Лог ежедневной консолидации (pending → success/failed) |
+| `user_active_skills` | Health goal journeys: FSM lifecycle, step plan, skill document + embedding для контекстного роутинга |
+| `_app_config` | Internal config: edge_function_url, service_role_key для pg_net trigger'ов |
+| `biomarker_note_cache` | Семантический кэш AI-описаний биомаркеров (slug + flag → description) |
 
 > `profiles` extended with: `lab_diagnostic_reports` (JSONB), `active_supplement_protocol` (JSONB), `active_nutrition_targets` (JSONB), `active_condition_knowledge_bases` FK
 
@@ -262,13 +268,12 @@
 > **RLS Policy:** `SELECT` — только своя строка (`auth.uid() = user_id`). `INSERT/UPDATE` — только своя строка.
 > **Realtime:** Таблица добавлена в `supabase_realtime` publication → фронтенд получает `postgres_changes` события.
 
-### 2.5 Future Tables (Post-MVP)
+### 2.5 Future Tables
 
 | Table                  | Purpose                                                                                    |
 | ---------------------- | ------------------------------------------------------------------------------------------ |
 | `biomarker_embeddings` | pgvector `vector(1536)` column for semantic search over biomarker descriptions and aliases |
 | `ai_recommendations`   | AI-generated personalized supplement / food recommendations                                |
-| `user_goals`           | User-defined health goals (e.g. "optimize energy")                                         |
 | `notifications`        | Alerts for re-testing, new recommendations, etc.                                           |
 
 ---
@@ -388,14 +393,20 @@ apps/api/
 └── src/ai/                     # Node.js AI Engine
     └── src/
         ├── server.ts            # Express server
-        ├── ai.controller.ts     # Main controller (1495 lines)
-        ├── ai-schemas.ts        # Zod output schemas (436 lines)
+        ├── ai.controller.ts     # Main controller, context formatters
+        ├── ai-schemas.ts        # Zod output schemas
         ├── llm-client.ts        # callLlmStructured wrapper
         ├── request-schemas.ts   # Zod input validation
+        ├── services/
+        │   ├── memory.service.ts # L2+L3 memory fetch, embedding singleton
+        │   └── skills.service.ts# fetchActiveSkills for goal journeys
+        ├── prompts/
+        │   └── chat-prompt-builder.ts # Centralized prompt builder (26 methods)
         ├── graph/               # LangGraph ReAct Agent
         │   ├── builder.ts       # Graph definition + dedup interceptor + sanitizeMessages()
         │   ├── state.ts         # GraphAnnotation (messages + medicalContext)
-        │   ├── tools.ts         # 5 tools: calculate_norms, update_profile, log_meal, log_supplement, diary_summary
+        │   ├── tools.ts         # 7 tools (see ai_pipeline.md for details)
+        │   ├── checkpointer.ts  # PostgresSaver (persistent memory L1)
         │   ├── food-vision-analyzer.ts
         │   ├── lab-report-analyzer.ts
         │   ├── nutrition-analyzer.ts
@@ -506,15 +517,19 @@ flowchart LR
 
 ---
 
-## 6. pgvector Integration (Future)
+## 6. pgvector Integration
 
 > **Extension:** `CREATE EXTENSION vector;`
 
-Planned usage:
+Активно используется в production:
 
-- **Biomarker semantic search:** Embed biomarker descriptions + aliases → `vector(1536)` column in `biomarker_embeddings` table. Allows fuzzy matching from OCR-extracted text to known biomarkers.
-- **AI recommendations RAG:** Embed medical knowledge → retrieve relevant context for LLM-based analysis.
-- **Index type:** HNSW for low-latency approximate nearest neighbor search.
+- **Семантическая память:** `user_memory_vectors.embedding vector(384)` — HNSW index, `text-embedding-3-small` (OpenAI). Поиск через RPC `match_user_memories()`.
+- **Skill Documents:** `user_active_skills.skill_embedding vector(384)` — `gte-small` (Supabase.ai, бесплатно). Контекстный роутинг через `match_skill_by_context()`.
+
+Планируется:
+
+- **Biomarker semantic search:** Embed biomarker descriptions + aliases → `vector(1536)` column in `biomarker_embeddings` table.
+- **Knowledge Base RAG:** Embed medical knowledge для condition-specific protocols.
 
 ---
 

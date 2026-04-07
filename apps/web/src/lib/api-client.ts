@@ -711,12 +711,14 @@ class AiApiClient {
       method: "POST",
       headers,
       body: JSON.stringify({ biomarkers }),
-      signal: AbortSignal.timeout(180_000), // 3-minute timeout for GPT-5.4 analysis
+      signal: AbortSignal.timeout(600_000), // 10-minute timeout (backend timeout is 8 min)
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `API Error: ${response.status}`);
+      const error: any = new Error(errorData.message || `API Error: ${response.status}`);
+      error.data = errorData;
+      throw error;
     }
 
     const json = await response.json();

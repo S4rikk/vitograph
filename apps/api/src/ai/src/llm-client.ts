@@ -118,7 +118,7 @@ export async function callLlmStructured<T extends AnyZodObject>(
       ...(options.messages ? { messages: options.messages as any } : { prompt: options.userMessage as string }),
       maxRetries: options.maxRetries,
       abortSignal: AbortSignal.timeout(options.timeoutMs),
-      temperature: options.temperature ?? 0.7,
+      ...(options.temperature !== undefined ? { temperature: options.temperature } : {}),
       maxOutputTokens: options.maxOutputTokens,
     });
 

@@ -31,11 +31,15 @@ interface BiomarkerInput {
 
 // ── Constants ───────────────────────────────────────────────────────
 
-/** Timeout for GPT-5.4 analysis (2 minutes — for stable medical analysis). */
-const LAB_ANALYSIS_TIMEOUT_MS = 120_000;
+/** Timeout for GPT-5.4 analysis (8 minutes — for 90+ biomarker reports the model needs more time). */
+const LAB_ANALYSIS_TIMEOUT_MS = 480_000;
 
-/** Temperature for clinical precision. */
-const LAB_ANALYSIS_TEMPERATURE = 0.2;
+/**
+ * Temperature for LLM call.
+ * gpt-5.4-mini is a reasoning model — temperature is NOT supported.
+ * Setting to undefined so llm-client omits the parameter entirely.
+ */
+const LAB_ANALYSIS_TEMPERATURE: number | undefined = undefined;
 
 /** Model for premium diagnostics. */
 const LAB_ANALYSIS_MODEL = "gpt-5.4-mini"; // Switched from router to official OpenAI 2026-03-29
@@ -288,7 +292,7 @@ SUPPLEMENTS: ${JSON.stringify(supps ? supps : [])}
         model: LAB_ANALYSIS_MODEL,
         temperature: LAB_ANALYSIS_TEMPERATURE,
         timeoutMs: LAB_ANALYSIS_TIMEOUT_MS,
-        maxOutputTokens: 10000,
+        maxOutputTokens: 100_000,
         maxRetries: LLM_RETRIES.async,
         fallback: LAB_DIAGNOSTIC_FALLBACK,
     });
@@ -296,8 +300,13 @@ SUPPLEMENTS: ${JSON.stringify(supps ? supps : [])}
     console.log(`[LabAnalyzer] Tokens used: ${result.usage?.totalTokens ?? "n/a"}`);
 
     if (result.source === "fallback") {
-        console.warn("[AI:LabAnalyzer] Using fallback — LLM unavailable");
-        return result.data;
+        console.error(
+            `[AI:LabAnalyzer] ❌ FALLBACK triggered | biomarkers: ${biomarkerResults.length} | error: ${result.errorMessage}`,
+        );
+        const error = new Error(`LAB_ANALYSIS_FAILED: ${result.errorMessage}`);
+        (error as any).biomarkersCount = biomarkerResults.length;
+        (error as any).isFallback = true;
+        throw error;
     }
 
     // ── Merge cached + LLM assessments ──────────────────────────────

@@ -126,9 +126,17 @@ export default function MedicalResultsView() {
         setSelectedTimestamp(history[0].timestamp);
         setReportAlreadyGenerated(true); // ← НОВОЕ: заблокировать кнопку навсегда
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("[MedicalResults] Diagnostic analysis failed:", err);
-      setDiagnosisError((err as Error).message || "Ошибка диагностического анализа");
+
+      const errorData = err?.data;
+      if (errorData?.error === "LAB_ANALYSIS_FAILED") {
+        setDiagnosisError(
+          `${errorData.message}\n\n💡 ${errorData.suggestion}`
+        );
+      } else {
+        setDiagnosisError(err?.message || "Ошибка диагностического анализа");
+      }
     } finally {
       setIsDiagnosing(false);
     }
@@ -546,14 +554,30 @@ export default function MedicalResultsView() {
             Готовим диагностический отчёт (GPT-5.4)…
           </p>
           <p className="text-xs text-purple-500">
-            Глубокий анализ займёт до 2 минут
+            Глубокий анализ может занять до 8 минут для большого количества показателей
           </p>
         </div>
       )}
 
       {diagnosisError && !isDiagnosing && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-center">
-          <p className="text-sm text-red-700">{diagnosisError}</p>
+        <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-6 shadow-sm">
+          <div className="flex items-start gap-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-amber-900 mb-1">Не удалось сформировать отчёт</h3>
+              <p className="text-sm text-amber-800 whitespace-pre-line">{diagnosisError}</p>
+              <button
+                onClick={() => { setDiagnosisError(undefined); setReportAlreadyGenerated(false); }}
+                className="mt-4 px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 transition-colors"
+              >
+                Попробовать снова
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
