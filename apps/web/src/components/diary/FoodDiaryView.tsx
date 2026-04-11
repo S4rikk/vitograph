@@ -216,7 +216,7 @@ export default function FoodDiaryView() {
     // Call AI API via LangGraph integration
     apiClient
       .chat(textPayload, threadId, undefined, "diary", undefined, nutritionalContext)
-      .then((payload) => {
+      .then(async (payload) => {
         const aiMsg: Message = {
           id: nextId.current++,
           variant: "system",
@@ -227,25 +227,19 @@ export default function FoodDiaryView() {
         const match = payload.response.match(/<meal_id id="([^"]+)"\s*\/>/);
         if (match && match[1]) {
           const mId = match[1];
-          supabase.from("meal_logs").select("micronutrients").eq("id", mId).single()
-            .then(({ data }) => {
-               if (data && data.micronutrients) {
-                 aiMsg.mealMicros = data.micronutrients;
-               }
-               setMessages((prev) => [...prev, aiMsg]);
-               fetchMacrosForDate(selectedDate);
-               window.dispatchEvent(new Event("refresh-health-goals"));
-            })
-            .catch(() => {
-               setMessages((prev) => [...prev, aiMsg]);
-               fetchMacrosForDate(selectedDate);
-               window.dispatchEvent(new Event("refresh-health-goals"));
-            });
-        } else {
-          setMessages((prev) => [...prev, aiMsg]);
-          fetchMacrosForDate(selectedDate);
-          window.dispatchEvent(new Event("refresh-health-goals"));
+          try {
+            const { data } = await supabase.from("meal_logs").select("micronutrients").eq("id", mId).single();
+            if (data && data.micronutrients) {
+              aiMsg.mealMicros = data.micronutrients as Record<string, number>;
+            }
+          } catch (e) {
+            console.error("[Diary] Failed to fetch instant micros:", e);
+          }
         }
+
+        setMessages((prev) => [...prev, aiMsg]);
+        fetchMacrosForDate(selectedDate);
+        window.dispatchEvent(new Event("refresh-health-goals"));
       })
       .catch((err) => {
         const errorMsg: Message = {
