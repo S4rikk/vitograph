@@ -21,11 +21,41 @@
 import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
 import type { z } from "zod";
+import { unstable_cache } from "next/cache";
+import { createClient } from "@supabase/supabase-js";
 
 // ── Configuration ───────────────────────────────────────────────────
 
-/** Default model for all LLM calls. */
-const DEFAULT_MODEL = "gpt-5.4-mini";
+/**
+ * Fetches the default diary model from the database, cached for 5 minutes.
+ * Uses graceful degradation to fall back to the built-in mini model.
+ */
+const getDiaryLlmModel = unstable_cache(
+  async (): Promise<string> => {
+    try {
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+      const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (!url || !key) return "gpt-5.4-mini";
+
+      const supabase = createClient(url, key);
+      const { data, error } = await supabase
+        .from("_app_config")
+        .select("value")
+        .eq("key", "diary_llm")
+        .single();
+        
+      if (error || !data) return "gpt-5.4-mini";
+      return data.value;
+    } catch {
+      return "gpt-5.4-mini";
+    }
+  },
+  ['global_app_config_diary_llm'],
+  { revalidate: 300 } // 5 minutes TTL
+);
+
+/** Default fallback model if database fetch fails. */
+const FALLBACK_DEFAULT_MODEL = "gpt-5.4-mini";
 
 /** Timeout presets: sync (user-facing) vs async (background). */
 export const LLM_TIMEOUTS = {
@@ -104,7 +134,7 @@ export async function callLlmStructured<T extends z.ZodType>(
   options: LlmCallOptions<T>,
 ): Promise<LlmCallResult<z.infer<T>>> {
   const startTime = Date.now();
-  const modelId = options.model ?? DEFAULT_MODEL;
+  const modelId = options.model ?? await getDiaryLlmModel();
 
   try {
     const result = await generateObject({

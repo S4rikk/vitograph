@@ -13,6 +13,7 @@ type ChatMessageProps = {
   time: string;
   onDelete?: (id: string) => void;
   onEdit?: (id: string) => void;
+  mealMicros?: Record<string, number>;
 };
 
 // Logic moved to food-log-parser.ts
@@ -92,12 +93,24 @@ export default function ChatMessage({
   time,
   onDelete,
   onEdit,
+  mealMicros,
 }: ChatMessageProps) {
   const isUser = variant === "user";
 
   if (!isUser) {
     const parsed = detectAndParseFoodLog(text, time);
     if (parsed) {
+      if (mealMicros && (!parsed.cardProps.micros || parsed.cardProps.micros.length < 2)) {
+        parsed.cardProps.micros = Object.entries(mealMicros).map(([key, val]) => {
+          const name = key.replace(/\s*\([^)]*\)\s*$/, '');
+          const unit = key.match(/\(([^)]+)\)/)?.[1] || '';
+          return {
+            name,
+            value: `${Number(val).toFixed(1)}${unit}`,
+            type: 'micro'
+          };
+        });
+      }
       console.log("[ChatMessage] CardProps:", parsed.cardProps);
       return (
         <div className="flex flex-col gap-2 w-full">

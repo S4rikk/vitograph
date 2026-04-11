@@ -7,7 +7,7 @@
  * Pattern: follows vision-analyzer.ts architecture.
  */
 
-import { callLlmStructured, LLM_RETRIES } from "../llm-client.js";
+import { callLlmStructured, LLM_RETRIES, getConfigLlmModel } from "../llm-client.js";
 import {
     LabDiagnosticReportSchema,
     type LabDiagnosticReport,
@@ -41,8 +41,8 @@ const LAB_ANALYSIS_TIMEOUT_MS = 480_000;
  */
 const LAB_ANALYSIS_TEMPERATURE: number | undefined = undefined;
 
-/** Model for premium diagnostics. */
-const LAB_ANALYSIS_MODEL = "gpt-5.4-mini"; // Switched from router to official OpenAI 2026-03-29
+/** Default fallback model for premium diagnostics. */
+const FALLBACK_LAB_ANALYSIS_MODEL = "gpt-5.4-mini";
 
 // ── System Prompt (imported from prompts registry) ──────────────────
 // See: prompts/lab-diagnostic.prompt.ts for the full 7-stage CoT prompt.
@@ -283,13 +283,16 @@ SUPPLEMENTS: ${JSON.stringify(supps ? supps : [])}
         `${uncachedBiomarkers.length} misses out of ${biomarkerResults.length} total`,
     );
 
+    // ── Fetch dynamic model configuration ────────────────────────────
+    const labAnalysisModel = await getConfigLlmModel("analysis_llm", FALLBACK_LAB_ANALYSIS_MODEL);
+
     // ── Run LLM Analysis ─────────────────────────────────────────────
     const result = await callLlmStructured({
         schema: LabDiagnosticReportSchema,
         schemaName: "lab_diagnostic_report",
         systemPrompt: LAB_DIAGNOSTIC_PROMPT.template.replace("{userContext}", userContext),
         userMessage,
-        model: LAB_ANALYSIS_MODEL,
+        model: labAnalysisModel,
         temperature: LAB_ANALYSIS_TEMPERATURE,
         timeoutMs: LAB_ANALYSIS_TIMEOUT_MS,
         maxOutputTokens: 100_000,

@@ -483,6 +483,41 @@ PROTOCOL RULES:
     return this;
   }
 
+  // ── P2: Global Knowledge Base Context (NEW) ───────────────────────
+
+  /**
+   * Injects relevant global knowledge base context into the system prompt.
+   * This is DIFFERENT from withKnowledgeBases() which injects per-user
+   * condition data from active_condition_knowledge_bases.
+   * This injects evidence-based medical protocols from the global KB.
+   * Priority: P2 (after supplements, before weather).
+   *
+   * @param results - KB search results from hybrid_search_kb RPC
+   */
+  withKnowledgeBase(results: Array<{
+    content: string;
+    section_heading: string | null;
+    document_title: string;
+    category: string;
+    rrf_score: number;
+  }> | null): this {
+    if (!results || results.length === 0) return this;
+
+    let section = `### 📚 KNOWLEDGE BASE CONTEXT (Доказательная база)\n`;
+    section += `Ниже приведены релевантные материалы из медицинской базы знаний.\n`;
+    section += `Используй эту информацию для обоснования своих рекомендаций. Ссылайся на источники.\n\n`;
+
+    for (const r of results) {
+      section += `**[${r.document_title}]`;
+      if (r.section_heading) section += ` — ${r.section_heading}`;
+      section += `** (relevance: ${r.rrf_score.toFixed(2)})\n`;
+      section += r.content + '\n\n';
+    }
+
+    this.sections.push({ key: "global_knowledge_base", content: section, priority: 2 });
+    return this;
+  }
+
   withTodaySupplements(supplementsText: string): this {
     if (supplementsText) {
       const complianceBlock = `#### 💊 ВЫПИТЫЕ СЕГОДНЯ БАДЫ (Compliance)

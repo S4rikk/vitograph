@@ -91,6 +91,35 @@ Deno.serve(async (req) => {
       }
     });
 
+    // ── KB Context Lookup (evidence-based grounding) ────────────────
+    let kbContext = "";
+    try {
+      const kbQueryText = `${title} ${category} ${diagnosis_basis?.pattern || ""}`;
+      const kbEmbedding = await model.run(kbQueryText, { mean_pool: true, normalize: true });
+
+      const { data: kbResults } = await supabase.rpc('hybrid_search_kb', {
+        p_query_text: kbQueryText,
+        p_query_embedding: JSON.stringify(kbEmbedding),
+        p_top_k: 3,
+        p_category: null,
+      });
+
+      if (kbResults && kbResults.length > 0) {
+        kbContext = "\n\n### МЕДИЦИНСКАЯ БАЗА ЗНАНИЙ (доказательная база)\nИспользуй следующие проверенные данные как основу для протокола:\n\n";
+        kbResults.forEach((r: any) => {
+          kbContext += `**[${r.document_title}]`;
+          if (r.section_heading) kbContext += ` — ${r.section_heading}`;
+          kbContext += `**\n${r.content}\n\n`;
+        });
+        kbContext += "СТРОГО СЛЕДУЙ дозировкам и схемам из базы знаний. НЕ придумывай из общих знаний, если данные есть выше.\n";
+        console.log(`[generate-skill-document] KB context found: ${kbResults.length} chunks`);
+      } else {
+        console.log(`[generate-skill-document] No KB context found for "${title}"`);
+      }
+    } catch (kbErr) {
+      console.warn(`[generate-skill-document] KB lookup failed (non-fatal):`, kbErr);
+    }
+
     // Generate skill document via OpenAI
     const openaiKey = Deno.env.get("OPENAI_API_KEY");
     if (!openaiKey) {
@@ -106,7 +135,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
-          { role: "system", content: SKILL_GENERATION_PROMPT },
+          { role: "system", content: SKILL_GENERATION_PROMPT + kbContext },
           { role: "user", content: userContext }
         ],
         temperature: 0.3,

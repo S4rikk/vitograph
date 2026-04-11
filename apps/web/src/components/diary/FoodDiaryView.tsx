@@ -19,6 +19,7 @@ type Message = {
   variant: "user" | "system";
   text: string;
   time: string;
+  mealMicros?: Record<string, number>;
 };
 
 const INITIAL_MESSAGES: Message[] = [
@@ -116,6 +117,7 @@ export default function FoodDiaryView() {
               variant: m.role === "assistant" ? "system" : "user",
               text: m.content,
               time: `${dateStr.getHours().toString().padStart(2, "0")}:${dateStr.getMinutes().toString().padStart(2, "0")}`,
+              mealMicros: m.mealMicros || undefined,
             };
           });
           setMessages([...INITIAL_MESSAGES, ...mapped]);
@@ -221,9 +223,29 @@ export default function FoodDiaryView() {
           text: payload.response,
           time,
         };
-        setMessages((prev) => [...prev, aiMsg]);
-        fetchMacrosForDate(selectedDate); // Re-fetch to update progress bars
-        window.dispatchEvent(new Event("refresh-health-goals"));
+        
+        const match = payload.response.match(/<meal_id id="([^"]+)"\s*\/>/);
+        if (match && match[1]) {
+          const mId = match[1];
+          supabase.from("meal_logs").select("micronutrients").eq("id", mId).single()
+            .then(({ data }) => {
+               if (data && data.micronutrients) {
+                 aiMsg.mealMicros = data.micronutrients;
+               }
+               setMessages((prev) => [...prev, aiMsg]);
+               fetchMacrosForDate(selectedDate);
+               window.dispatchEvent(new Event("refresh-health-goals"));
+            })
+            .catch(() => {
+               setMessages((prev) => [...prev, aiMsg]);
+               fetchMacrosForDate(selectedDate);
+               window.dispatchEvent(new Event("refresh-health-goals"));
+            });
+        } else {
+          setMessages((prev) => [...prev, aiMsg]);
+          fetchMacrosForDate(selectedDate);
+          window.dispatchEvent(new Event("refresh-health-goals"));
+        }
       })
       .catch((err) => {
         const errorMsg: Message = {
@@ -367,6 +389,7 @@ export default function FoodDiaryView() {
               variant={msg.variant}
               text={msg.text}
               time={msg.time}
+              mealMicros={msg.mealMicros}
               onDelete={handleDeleteMeal}
               onEdit={handleStartEdit}
             />

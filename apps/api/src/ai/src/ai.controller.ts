@@ -42,6 +42,7 @@ import { appGraph } from "./graph/builder.js";
 import { getOrFetchWeatherContext } from "./weather.service.js";
 import { fetchAdvancedMemoryContext } from "./services/memory.service.js";
 import { fetchActiveSkills, fetchMatchingSkillDocument } from "./services/skills.service.js";
+import { fetchKnowledgeBaseContext } from "./services/kb.service.js";
 import { callLlmStructured, LLM_TIMEOUTS, LLM_RETRIES } from "./llm-client.js";
 import { z } from "zod";
 
@@ -80,12 +81,28 @@ const BACKEND_SEVERITY_MULT: Record<string, number> = {
 function computeDeterministicMicros(
   profile: any,
   activeKnowledgeBases: any[] | null,
+  somaticData?: any
 ): { micros: Record<string, number>; rationale: string } {
   const micros = { ...BACKEND_BASE_MICRO_TARGETS };
   const factors: string[] = [];
+  let currentChanges: string[] = [];
 
   const applyMod = (key: string, mult: number) => {
-    if (micros[key] !== undefined && mult !== 1) micros[key] *= mult;
+    if (micros[key] !== undefined && mult !== 1) {
+      micros[key] *= mult;
+      const pct = Math.round((mult - 1) * 100);
+      const sign = pct > 0 ? "↑" : "↓";
+      currentChanges.push(`${key} ${sign}${Math.abs(pct)}%`);
+    }
+  };
+
+  const commitFactor = (reasonName: string) => {
+    if (currentChanges.length > 0) {
+      factors.push(`${reasonName} (${currentChanges.join(', ')})`);
+      currentChanges = []; // reset for the next factor
+    } else {
+      factors.push(reasonName);
+    }
   };
 
   if (!profile) return { micros, rationale: 'Профиль не загружен.' };
@@ -105,17 +122,17 @@ function computeDeterministicMicros(
       const kb = diag.knowledge_data;
       if (!kb) return;
       const sevMult = BACKEND_SEVERITY_MULT[diag.severity] || 1.15;
-      const boosted: string[] = [];
       if (Array.isArray(kb.cofactors)) {
         kb.cofactors.forEach((c: string) => {
           const nk = BACKEND_COFACTOR_MAP[c];
           if (nk && micros[nk] !== undefined) {
-            micros[nk] *= sevMult;
-            if (!boosted.includes(nk)) boosted.push(nk);
+            applyMod(nk, sevMult);
           }
         });
       }
-      if (boosted.length > 0) factors.push(`⚕️ ${diag.condition_name} [${diag.severity}] (+${boosted.join(', ')})`);
+      if (currentChanges.length > 0) {
+        commitFactor(`⚕️ ${diag.condition_name} [${diag.severity}]`);
+      }
     });
   }
 
@@ -126,16 +143,70 @@ function computeDeterministicMicros(
       const anomalous = latest.report.biomarker_assessments.filter(
         (b: any) => b.status === 'low' || b.status === 'critical_low'
       );
-      const labBoosted: string[] = [];
       anomalous.forEach((bm: any) => {
         const nk = BACKEND_COFACTOR_MAP[bm.name];
         if (nk && micros[nk] !== undefined) {
           const mult = bm.status === 'critical_low' ? 1.50 : 1.25;
-          micros[nk] *= mult;
-          labBoosted.push(nk);
+          applyMod(nk, mult);
         }
       });
-      if (labBoosted.length > 0) factors.push(`🔬 Дефицит по анализам (+${labBoosted.join(', ')})`);
+      if (currentChanges.length > 0) {
+        commitFactor(`🔬 Дефицит по анализам`);
+      }
+    }
+  }
+
+  // LAYER 0c: Соматические Маркеры
+  if (somaticData) {
+    if (Array.isArray(somaticData.nails)) {
+      somaticData.nails.forEach((marker: string) => {
+        if (marker.includes("Koilonychia") || marker.includes("Pale nail bed") || marker.includes("Terry's nails")) {
+          applyMod('Железо', 1.25);
+          commitFactor("💅 Ногти: дефицит железа");
+        } else if (marker.includes("Leukonychia")) {
+          applyMod('Цинк', 1.20);
+          commitFactor("💅 Ногти: дефицит цинка");
+        } else if (marker.includes("Longitudinal striations")) {
+          applyMod('Железо', 1.20);
+          applyMod('Витамин B12', 1.20);
+          commitFactor("💅 Ногти: дефицит железа/B12");
+        } else if (marker.includes("Onychorrhexis")) {
+          applyMod('Кальций', 1.15);
+          commitFactor("💅 Ногти: дефицит кальция");
+        }
+      });
+    }
+
+    if (Array.isArray(somaticData.tongue)) {
+      somaticData.tongue.forEach((marker: string) => {
+        if (marker.includes("Отпечатки зубов по краям")) {
+          applyMod('Йод', 1.15);
+          commitFactor("👅 Язык: дефицит йода");
+        } else if (marker.includes("Трещины/бороздки")) {
+          applyMod('Витамин B12', 1.20);
+          applyMod('Витамин B6', 1.20);
+          commitFactor("👅 Язык: дефицит B-витаминов");
+        } else if (marker.includes("Бледность")) {
+          applyMod('Железо', 1.25);
+          commitFactor("👅 Язык: дефицит железа");
+        }
+      });
+    }
+
+    if (Array.isArray(somaticData.skin)) {
+      somaticData.skin.forEach((marker: string) => {
+        if (marker.includes("Акне/высыпания")) {
+          applyMod('Цинк', 1.20);
+          applyMod('Витамин A', 1.20);
+          commitFactor("✨ Кожа: дефицит цинка/вит А");
+        } else if (marker.includes("Бледность")) {
+          applyMod('Железо', 1.20);
+          commitFactor("✨ Кожа: дефицит железа");
+        } else if (marker.includes("Сухость/шелушение")) {
+          applyMod('Омега-3', 1.30);
+          commitFactor("✨ Кожа: дефицит омега-3");
+        }
+      });
     }
   }
 
@@ -144,83 +215,89 @@ function computeDeterministicMicros(
     applyMod('Железо', 1.80); applyMod('Витамин B12', 2.00); applyMod('Цинк', 1.50);
     applyMod('Кальций', 1.20); applyMod('Витамин D', 1.30); applyMod('Омега-3', 1.50);
     applyMod('Витамин A', 1.40); applyMod('Йод', 1.20);
-    factors.push('Веган');
+    commitFactor('Веган');
   } else if (profile.diet_type === 'vegetarian') {
     applyMod('Железо', 1.50); applyMod('Витамин B12', 1.50); applyMod('Цинк', 1.25);
     applyMod('Кальций', 1.10); applyMod('Витамин D', 1.20); applyMod('Омега-3', 1.30);
-    factors.push('Вегетарианец');
+    commitFactor('Вегетарианец');
   } else if (profile.diet_type === 'keto') {
     applyMod('Витамин C', 1.30); applyMod('Натрий', 1.40);
-    factors.push('Кето');
+    commitFactor('Кето');
   }
 
   if (profile.activity_level === 'moderate') {
     applyMod('Магний', 1.10); applyMod('Калий', 1.10); applyMod('Витамин B6', 1.10);
     applyMod('Железо', 1.05); applyMod('Натрий', 1.10);
+    currentChanges = [];
   } else if (profile.activity_level === 'active') {
     applyMod('Магний', 1.15); applyMod('Калий', 1.15); applyMod('Витамин B6', 1.15);
     applyMod('Железо', 1.10); applyMod('Натрий', 1.15);
-    factors.push('Высокая активность');
+    commitFactor('Высокая активность');
   } else if (profile.activity_level === 'very_active') {
     applyMod('Магний', 1.25); applyMod('Калий', 1.25); applyMod('Витамин B6', 1.20);
     applyMod('Железо', 1.15); applyMod('Натрий', 1.20); applyMod('Витамин E', 1.10);
-    factors.push('Очень высокая активность');
+    commitFactor('Очень высокая активность');
   }
 
   if (profile.stress_level === 'moderate') {
     applyMod('Витамин C', 1.10); applyMod('Магний', 1.10);
+    currentChanges = [];
   } else if (profile.stress_level === 'high') {
     applyMod('Витамин C', 1.30); applyMod('Магний', 1.20); applyMod('Витамин B6', 1.15);
     applyMod('Витамин B12', 1.10);
-    factors.push('Высокий стресс');
+    commitFactor('Высокий стресс');
   } else if (profile.stress_level === 'very_high') {
     applyMod('Витамин C', 1.50); applyMod('Магний', 1.30); applyMod('Витамин B6', 1.25);
     applyMod('Витамин B12', 1.20);
-    factors.push('Очень высокий стресс');
+    commitFactor('Очень высокий стресс');
   }
 
   if (profile.sun_exposure === 'minimal') {
-    applyMod('Витамин D', 1.60); factors.push('Мало солнца');
+    applyMod('Витамин D', 1.60); commitFactor('Мало солнца');
   } else if (profile.sun_exposure === 'moderate') {
     applyMod('Витамин D', 1.20);
+    currentChanges = [];
   }
 
   if (profile.climate_zone === 'polar') {
     applyMod('Витамин D', 1.50); applyMod('Витамин C', 1.20); applyMod('Йод', 1.10);
-    factors.push('Полярный климат');
+    commitFactor('Полярный климат');
   } else if (profile.climate_zone === 'continental') {
     applyMod('Витамин D', 1.30); applyMod('Витамин C', 1.10);
+    currentChanges = [];
   } else if (profile.climate_zone === 'temperate') {
     applyMod('Витамин D', 1.20);
+    currentChanges = [];
   }
 
   if (profile.is_smoker) {
     applyMod('Витамин C', 1.80); applyMod('Витамин E', 1.30);
     applyMod('Селен', 1.20); applyMod('Фолиевая кислота', 1.25);
-    factors.push('Курение');
+    commitFactor('Курение');
   }
 
   if (profile.alcohol_frequency === 'moderate') {
     applyMod('Витамин B12', 1.15); applyMod('Фолиевая кислота', 1.15);
     applyMod('Магний', 1.10); applyMod('Цинк', 1.10);
+    currentChanges = [];
   } else if (profile.alcohol_frequency === 'heavy') {
     applyMod('Витамин B12', 1.30); applyMod('Фолиевая кислота', 1.30);
     applyMod('Магний', 1.20); applyMod('Цинк', 1.20);
-    factors.push('Частый алкоголь');
+    commitFactor('Частый алкоголь');
   }
 
   if (profile.pregnancy_status === 'pregnant') {
     applyMod('Фолиевая кислота', 1.50); applyMod('Железо', 1.80); applyMod('Кальций', 1.30);
     applyMod('Витамин D', 1.30); applyMod('Йод', 1.50); applyMod('Омега-3', 1.50);
-    factors.push('Беременность');
+    commitFactor('Беременность');
   } else if (profile.pregnancy_status === 'breastfeeding') {
     applyMod('Фолиевая кислота', 1.25); applyMod('Железо', 1.20); applyMod('Кальций', 1.20);
     applyMod('Витамин D', 1.20); applyMod('Йод', 1.60); applyMod('Омега-3', 1.30);
-    factors.push('Грудное вскармливание');
+    commitFactor('Грудное вскармливание');
   }
 
   if (profile.biological_sex === 'female') {
-    applyMod('Железо', 1.20); factors.push('Жен. пол');
+    applyMod('Железо', 1.20); commitFactor('Жен. пол');
   }
 
   for (const key of Object.keys(micros)) micros[key] = Number(micros[key].toFixed(1));
@@ -332,6 +409,7 @@ async function fetchUserContext(token: string, userId: string) {
       recentMeals: mealsRes.data,
       activeKnowledgeBases: kbRes.data,
       todaySupplements: suppLogsRes.data,
+      somaticData: profileRes.data?.lifestyle_markers?.somatic_data || null,
     };
 
     const debugInfo = `
@@ -520,8 +598,8 @@ export function getLeanUserContext(dbContext: any) {
  * Formats deterministic nutrition targets for the system prompt.
  * Uses computeDeterministicMicros instead of stale active_nutrition_targets.
  */
-function formatNutritionTargets(profile: any, activeKnowledgeBases: any[] | null): string {
-  const { micros, rationale } = computeDeterministicMicros(profile, activeKnowledgeBases);
+function formatNutritionTargets(profile: any, activeKnowledgeBases: any[] | null, somaticData?: any): string {
+  const { micros, rationale } = computeDeterministicMicros(profile, activeKnowledgeBases, somaticData);
 
   let text = `${rationale}\n`;
 
@@ -1079,11 +1157,12 @@ export async function handleChat(
 
       if (token) {
         // Parallel fetch: user context + memory context (independent)
-        const [dbContext, [emotionalProfile, semanticMemories, pastActions], activeSkills, matchedSkillDoc] = await Promise.all([
+        const [dbContext, [emotionalProfile, semanticMemories, pastActions], activeSkills, matchedSkillDoc, kbContext] = await Promise.all([
           fetchUserContext(token, req.user.id),
           fetchAdvancedMemoryContext(req.user.id, body.message, token),
           fetchActiveSkills(req.user.id, token),
           fetchMatchingSkillDocument(req.user.id, body.message),
+          fetchKnowledgeBaseContext(body.message, token),
         ]);
 
         if (dbContext) {
@@ -1175,7 +1254,7 @@ export async function handleChat(
             builder
               .withDiaryMode()
               .withFoodZones(formatFoodContraindicationZones(dbContext.profile))
-              .withNutritionTargets(formatNutritionTargets(dbContext.profile, dbContext.activeKnowledgeBases))
+              .withNutritionTargets(formatNutritionTargets(dbContext.profile, dbContext.activeKnowledgeBases, dbContext.somaticData))
               .withTodayProgress(formatTodayProgress(dbContext.recentMeals, timezone), "#### 🍽️ СЪЕДЕНО СЕГОДНЯ (ДНЕВНИК)")
               .withMealLogs(formatMealLogs(dbContext.recentMeals, timezone))
               .withSupplementProtocol(formatActiveSupplementProtocol(dbContext.profile))
@@ -1196,7 +1275,7 @@ export async function handleChat(
               .withChronicConditions(formatChronicConditions(dbContext.profile))
               .withHistorySynopsis(formatHistorySynopsis(dbContext.profile, timezone))
               .withTestResults(formatTestResults(dbContext.recentTests, timezone, dbContext.profile))
-              .withNutritionTargets(formatNutritionTargets(dbContext.profile, dbContext.activeKnowledgeBases))
+              .withNutritionTargets(formatNutritionTargets(dbContext.profile, dbContext.activeKnowledgeBases, dbContext.somaticData))
               .withTodayProgress(formatTodayProgress(dbContext.recentMeals, timezone), "#### 🍽️ RECENT MEALS (LAST 24H)")
               .withMealLogs(
                 isDietDeepDive
@@ -1210,7 +1289,8 @@ export async function handleChat(
               .withTodaySupplements(formatTodaySupplements(dbContext.todaySupplements, timezone))
               .withDeficitAwareRule()
               .withCoachingMode(activeSkills, isFirstMessageOfDay)
-              .withSkillDocument(matchedSkillDoc);
+              .withSkillDocument(matchedSkillDoc)
+              .withKnowledgeBase(kbContext);
           }
 
           // Merge weather alert + skill check-in instruction if both present on first message of day
@@ -1370,11 +1450,12 @@ export async function handleChatStream(
 
       if (token) {
         // Parallel fetch: user context + memory context (independent)
-        const [dbContext, [emotionalProfile, semanticMemories, pastActions], activeSkills, matchedSkillDoc] = await Promise.all([
+        const [dbContext, [emotionalProfile, semanticMemories, pastActions], activeSkills, matchedSkillDoc, kbContext] = await Promise.all([
           fetchUserContext(token, req.user.id),
           fetchAdvancedMemoryContext(req.user.id, body.message, token),
           fetchActiveSkills(req.user.id, token),
           fetchMatchingSkillDocument(req.user.id, body.message),
+          fetchKnowledgeBaseContext(body.message, token),
         ]);
 
         if (dbContext) {
@@ -1466,7 +1547,7 @@ export async function handleChatStream(
             builder
               .withDiaryMode()
               .withFoodZones(formatFoodContraindicationZones(dbContext.profile))
-              .withNutritionTargets(formatNutritionTargets(dbContext.profile, dbContext.activeKnowledgeBases))
+              .withNutritionTargets(formatNutritionTargets(dbContext.profile, dbContext.activeKnowledgeBases, dbContext.somaticData))
               .withTodayProgress(formatTodayProgress(dbContext.recentMeals, timezone), "#### 🍽️ СЪЕДЕНО СЕГОДНЯ (ДНЕВНИК)")
               .withMealLogs(formatMealLogs(dbContext.recentMeals, timezone))
               .withSupplementProtocol(formatActiveSupplementProtocol(dbContext.profile))
@@ -1485,7 +1566,7 @@ export async function handleChatStream(
               .withChronicConditions(formatChronicConditions(dbContext.profile))
               .withHistorySynopsis(formatHistorySynopsis(dbContext.profile, timezone))
               .withTestResults(formatTestResults(dbContext.recentTests, timezone, dbContext.profile))
-              .withNutritionTargets(formatNutritionTargets(dbContext.profile, dbContext.activeKnowledgeBases))
+              .withNutritionTargets(formatNutritionTargets(dbContext.profile, dbContext.activeKnowledgeBases, dbContext.somaticData))
               .withTodayProgress(formatTodayProgress(dbContext.recentMeals, timezone), "#### 🍽️ RECENT MEALS (LAST 24H)")
               .withMealLogs(
                 isDietDeepDive
@@ -1499,7 +1580,8 @@ export async function handleChatStream(
               .withTodaySupplements(formatTodaySupplements(dbContext.todaySupplements, timezone))
               .withDeficitAwareRule()
               .withCoachingMode(activeSkills, isFirstMessageOfDay)
-              .withSkillDocument(matchedSkillDoc);
+              .withSkillDocument(matchedSkillDoc)
+              .withKnowledgeBase(kbContext);
           }
 
           // Merge weather alert + skill check-in instruction if both present on first message of day
@@ -1792,13 +1874,51 @@ export async function handleGetChatHistory(
       throw error;
     }
 
-    const history = (messages || []).map(msg => ({
-      id: msg.id,
-      role: msg.role,
-      content: msg.content,
-      imageUrl: msg.image_url || undefined,
-      createdAt: msg.created_at,
-    }));
+    const mealIdsToFetch = new Set<string>();
+    const mealIdRegex = /<meal_id id="([^"]+)"\s*\/>/;
+
+    (messages || []).forEach(msg => {
+      if (msg.role === "assistant") {
+        const match = mealIdRegex.exec(msg.content);
+        if (match && match[1]) {
+          mealIdsToFetch.add(match[1]);
+        }
+      }
+    });
+
+    const mealMicrosMap: Record<string, any> = {};
+    if (mealIdsToFetch.size > 0) {
+      const { data: logMicros, error: msError } = await supabase
+        .from("meal_logs")
+        .select("id, micronutrients")
+        .in("id", Array.from(mealIdsToFetch));
+        
+      if (!msError && logMicros) {
+        logMicros.forEach(log => {
+          if (log.micronutrients) {
+            mealMicrosMap[log.id] = log.micronutrients;
+          }
+        });
+      }
+    }
+
+    const history = (messages || []).map(msg => {
+      let mealMicros = undefined;
+      if (msg.role === "assistant") {
+        const match = mealIdRegex.exec(msg.content);
+        if (match && match[1] && mealMicrosMap[match[1]]) {
+          mealMicros = mealMicrosMap[match[1]];
+        }
+      }
+      return {
+        id: msg.id,
+        role: msg.role,
+        content: msg.content,
+        imageUrl: msg.image_url || undefined,
+        createdAt: msg.created_at,
+        mealMicros: mealMicros,
+      };
+    });
 
     res.json({
       success: true,
@@ -2211,7 +2331,7 @@ export async function handleGetNutritionTargets(
     const macros = computeDeterministicMacros(profile);
 
     // Micro deterministic compute
-    const { micros, rationale } = computeDeterministicMicros(profile, activeKnowledgeBases);
+    const { micros, rationale } = computeDeterministicMicros(profile, activeKnowledgeBases, dbContext.somaticData);
 
     res.json({
       success: true,

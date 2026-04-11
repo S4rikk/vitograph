@@ -21,10 +21,56 @@ import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
 
+import { createClient } from "@supabase/supabase-js";
+
 // ── Configuration ───────────────────────────────────────────────────
 
-/** Default model for all LLM calls. */
-const DEFAULT_MODEL = "gpt-5.4-mini";
+/** Default fallback model if database fetch fails. */
+const FALLBACK_DEFAULT_MODEL = "gpt-5.4-mini";
+
+// ── Config Cache ────────────────────────────────────────────────────
+interface CacheEntry {
+  value: string;
+  expiresAt: number;
+}
+const _configCache = new Map<string, CacheEntry>();
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+export async function getConfigLlmModel(configKey: string, fallback: string): Promise<string> {
+  const now = Date.now();
+  const cached = _configCache.get(configKey);
+
+  if (cached && cached.expiresAt > now) {
+    return cached.value;
+  }
+
+  try {
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !key) return fallback;
+
+    const supabase = createClient(url, key);
+    const { data, error } = await supabase
+      .from("_app_config")
+      .select("value")
+      .eq("key", configKey)
+      .single();
+
+    if (error || !data) {
+      console.warn(`[ConfigCache] Failed to fetch ${configKey}, using fallback. ${error?.message}`);
+      return fallback;
+    }
+
+    _configCache.set(configKey, {
+      value: data.value,
+      expiresAt: now + CACHE_TTL_MS,
+    });
+    return data.value;
+  } catch (err) {
+    console.warn(`[ConfigCache] Exception fetching ${configKey}, using fallback:`, err);
+    return fallback;
+  }
+}
 
 /** Timeout presets: sync (user-facing) vs async (background). */
 export const LLM_TIMEOUTS = {
@@ -105,7 +151,8 @@ export async function callLlmStructured<T extends AnyZodObject>(
   options: LlmCallOptions<T>,
 ): Promise<LlmCallResult<z.infer<T>>> {
   const startTime = Date.now();
-  const model = options.model ?? DEFAULT_MODEL;
+  // Fetch 'agent_llm' if no specific model was provided via options
+  const model = options.model ?? await getConfigLlmModel("agent_llm", FALLBACK_DEFAULT_MODEL);
 
   try {
     // @ts-ignore - maxOutputTokens is supported in AI SDK 6.x but types might be outdated

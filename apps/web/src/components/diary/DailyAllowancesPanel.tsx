@@ -422,30 +422,20 @@ export default function DailyAllowancesPanel({
                         Индивидуальные корректировки:
                     </div>
                     {rationale ? (
-                      <ul className="flex flex-col gap-2">
-                         {/* Parse the rationale string, splitting primarily by '),' to capture full medical reasoning without breaking internal parentheses */}
-                        {rationale.split('),').map((item, i, arr) => {
-                          const cleanItem = item.trim() + (i !== arr.length - 1 ? ')' : '');
-                          if (!cleanItem || cleanItem.includes('Базовая норма')) return null;
-                          
-                          // Optional: Extract the medical condition vs the vitamin mapping
-                          // Format: Condition [severity] (+Vitamins)
-                          const parts = cleanItem.split(' (+');
-                          const condition = parts[0].replace('⚕️', '').trim();
-                          const vitamins = parts[1] ? parts[1].replace(')', '').trim() : '';
-
-                          return (
-                            <li key={i} className="flex items-start gap-2 text-[11px] leading-tight">
-                              <span className="text-primary-400 mt-0.5 shrink-0 text-[10px]">⚕️</span>
-                              <div>
-                                <span className="text-white/90 block">{condition}</span>
-                                {vitamins && <span className="text-primary-300 font-bold block mt-0.5 text-[10px]">+{vitamins}</span>}
-                              </div>
-                            </li>
-                          );
-                        })}
-                        {rationale.includes('Базовая норма') && (
-                           <li className="text-white/70 text-[10px]">Базовая норма (отклонений из анализов не найдено).</li>
+                      <ul className="flex flex-col gap-2.5">
+                        {rationale.includes('Базовая норма') ? (
+                          <li className="text-white/70 text-[10px] leading-relaxed">Базовая норма (отклонений из анализов не найдено).</li>
+                        ) : (
+                          (() => {
+                            const factorsStr = rationale.replace(/^Индивидуальные нормы \(/, '').replace(/\)\.$|\)$/, '');
+                            const factors = factorsStr.split(/,\s*(?![^()]*\))/).filter(Boolean);
+                            return factors.map((factor, i) => (
+                              <li key={i} className="flex items-start gap-1.5 text-[11px] leading-tight">
+                                <span className="text-primary-400 shrink-0 text-[12px] opacity-60 font-bold leading-none mt-[1px]">•</span>
+                                <span className="text-white/90 block leading-snug">{factor.trim()}</span>
+                              </li>
+                            ));
+                          })()
                         )}
                       </ul>
                     ) : (
