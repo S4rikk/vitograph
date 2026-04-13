@@ -201,7 +201,7 @@ export async function runLabReportAnalyzer(
 
         const { data: profile } = await supabase
             .from("profiles")
-            .select("lab_diagnostic_reports, food_contraindication_zones, active_supplement_protocol")
+            .select("lab_diagnostic_reports, food_contraindication_zones")
             .eq("id", userId)
             .single();
 
@@ -226,7 +226,7 @@ export async function runLabReportAnalyzer(
                 green: zones.green?.map((z: any) => z.substance) || [],
             };
 
-            const supps = (profile as any).active_supplement_protocol?.items;
+            const supps: any[] = []; // Column removed from DB
 
             const stateContext = `
 --- CURRENT_CONSTRAINTS (Existing state to MERGE with) ---
@@ -403,13 +403,8 @@ SUPPLEMENTS: ${JSON.stringify(supps ? supps : [])}
         }
 
         // ── Phase 50: Persist Supplement Protocol ────────────
-        if (result.data.supplement_protocol && result.data.supplement_protocol.items && result.data.supplement_protocol.items.length > 0) {
-            await supabase
-                .from("profiles")
-                // @ts-ignore
-                .update({ active_supplement_protocol: result.data.supplement_protocol })
-                .eq("id", userId);
-        }
+        // Removed: active_supplement_protocol column no longer exists.
+        // It's still stored inside lab_diagnostic_reports JSONB.
 
         if (updateError) {
             console.error("[LabAnalyzer] Failed to save report:", updateError);

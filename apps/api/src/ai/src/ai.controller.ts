@@ -750,9 +750,13 @@ function formatActiveKnowledgeBases(kbs: any[] | null): string {
  * Formats the active supplement protocol for the AI context.
  */
 function formatActiveSupplementProtocol(profile: any): string {
-  if (!profile || !profile.active_supplement_protocol || Object.keys(profile.active_supplement_protocol).length === 0) return "";
-
-  const proto = profile.active_supplement_protocol;
+  // active_supplement_protocol column removed from DB.
+  // Protocol is now stored INSIDE lab_diagnostic_reports JSONB.
+  // Read from the latest report instead.
+  const reports = Array.isArray(profile?.lab_diagnostic_reports) ? profile.lab_diagnostic_reports : [];
+  const latestReport = reports.length > 0 ? reports[reports.length - 1]?.report : null;
+  if (!latestReport?.supplement_protocol?.items?.length) return "";
+  const proto = latestReport.supplement_protocol;
   let protoContext = `\n--- АКТИВНЫЙ ПРОТОКОЛ ДОБАВОК И ВИТАМИНОВ (Phase 50) ---\n`;
   protoContext += `Пользователю назначен следующий протокол компенсации дефицитов. НАПОМИНАЙ ему о времени приема и совместимости:\n\n`;
   protoContext += `Название: ${proto.title}\n`;
@@ -2240,7 +2244,6 @@ export async function handleDeleteLabReport(
         .from("profiles")
         .update({
           food_contraindication_zones: {},
-          active_supplement_protocol: {},
           chronic_conditions: []
         })
         .eq("id", userId);
