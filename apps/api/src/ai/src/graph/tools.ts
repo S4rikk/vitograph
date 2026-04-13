@@ -393,7 +393,7 @@ export const manageHealthGoalsTool = new DynamicStructuredTool({
   schema: z.object({
     action: z.enum(["add", "add_with_plan", "remove", "pause", "resume", "advance_step"])
       .describe("Action: add (simple), add_with_plan (with step plan), remove, pause, resume, advance_step"),
-    goal_title: z.string().optional().describe("Short goal title (e.g., 'Нормализация ферритина'). REQUIRED for add/add_with_plan. Optional for other actions."),
+    goal_title: z.string().optional().describe("Short goal title (e.g., 'Нормализация ферритина'). REQUIRED for add/add_with_plan. Optional for other actions. CRITICAL: Must be strictly UNIQUE. If the user already has a similar active goal in context, do NOT create a duplicate."),
     category: z.string().optional().describe("Category: iron_deficiency, weight, sleep, nutrition, fitness, habit, vitamin_d, etc."),
     skill_id: z.string().optional().describe("UUID of the existing skill (REQUIRED for remove/pause/resume/advance_step)"),
     diagnosis_basis: z.object({
@@ -428,6 +428,24 @@ export const manageHealthGoalsTool = new DynamicStructuredTool({
       global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
+    if (action === "add" || action === "add_with_plan") {
+      if (!goal_title) return `Error: goal_title is required for ${action}.`;
+
+      const normalizedTitle = goal_title.trim();
+      const { data: existingGoal } = await supabase
+        .from("user_active_skills")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("status", "active")
+        .ilike("title", normalizedTitle)
+        .limit(1)
+        .maybeSingle();
+
+      if (existingGoal) {
+        return `Action rejected: An active health goal with the exact title "${normalizedTitle}" already exists (ID: ${existingGoal.id}). Please refer to the existing goal or create a NEW goal with a distinctly different title.`;
+      }
+    }
+
     // ── ADD (simple, no plan) ─────────────────────────────────────
     if (action === "add") {
       // Guard: max 3 active skills
@@ -440,8 +458,6 @@ export const manageHealthGoalsTool = new DynamicStructuredTool({
       if ((count ?? 0) >= 3) {
         return "Максимум 3 активных цели. Завершите или приостановите одну из текущих, прежде чем добавлять новую.";
       }
-
-      if (!goal_title) return "Error: goal_title is required for add.";
 
       const { data, error } = await supabase.from("user_active_skills").insert({
         user_id: userId,
@@ -468,8 +484,6 @@ export const manageHealthGoalsTool = new DynamicStructuredTool({
       if ((count ?? 0) >= 3) {
         return "Максимум 3 активных цели. Завершите или приостановите одну из текущих.";
       }
-
-      if (!goal_title) return "Error: goal_title is required for add_with_plan.";
       if (!steps || steps.length === 0) {
         return "Error: steps array is required for add_with_plan.";
       }
