@@ -263,17 +263,35 @@ export default function FoodDiaryView() {
     try {
       await apiClient.deleteMealLog(id);
       
-      // Optimistic UI: remove the message containing this card
-      setMessages(prev => prev.filter(m => {
+      // Optimistic UI: remove BOTH the assistant FoodCard message AND the preceding user message
+      setMessages(prev => {
+        // 1. Find the index of the assistant message containing this mealId
+        const assistantIdx = prev.findIndex(m => {
           const parsed = detectAndParseFoodLog(m.text, m.time);
-          return parsed?.cardProps.mealId !== id;
-      }));
+          return parsed?.cardProps.mealId === id;
+        });
+
+        if (assistantIdx === -1) return prev;
+
+        // 2. Build a set of indices to remove
+        const removeIndices = new Set<number>([assistantIdx]);
+
+        // 3. Find the closest preceding user message (the input that triggered this meal)
+        for (let i = assistantIdx - 1; i >= 0; i--) {
+          if (prev[i].variant === "user") {
+            removeIndices.add(i);
+            break;
+          }
+        }
+
+        // 4. Filter out the marked messages
+        return prev.filter((_, idx) => !removeIndices.has(idx));
+      });
 
       // Refresh bars
       fetchMacrosForDate(selectedDate);
     } catch (err) {
       console.error("Failed to delete meal:", err);
-      // alert("Не удалось удалить приём пищи");
     }
   }, [apiClient, fetchMacrosForDate, selectedDate]);
 

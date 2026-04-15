@@ -1101,15 +1101,47 @@ export async function handleDeleteMealLog(req: Request, res: Response, next: Nex
       throw itemDeleteError;
     }
 
-    // Step 2: Delete from ai_chat_messages (Bypass RLS via Admin)
-    const { error: msgDeleteError } = await supabaseAdmin
+    // Step 2: Delete assistant message AND its paired user message from ai_chat_messages
+    // First, find the assistant message to get its created_at timestamp
+    const { data: assistantMsg, error: msgFetchError } = await supabaseAdmin
       .from("ai_chat_messages")
-      .delete()
+      .select("id, created_at, thread_id")
       .eq("user_id", userId)
-      .ilike("content", `%<meal_id id="${mealLogId}"%`);
+      .ilike("content", `%<meal_id id="${mealLogId}"%`)
+      .limit(1)
+      .maybeSingle();
 
-    if (msgDeleteError) {
-      console.error("[handleDeleteMealLog] Message Delete Error:", msgDeleteError);
+    if (msgFetchError) {
+      console.error("[handleDeleteMealLog] Message Fetch Error:", msgFetchError);
+    }
+
+    if (assistantMsg) {
+      // Find the closest preceding user message (same thread, created_at < assistant's)
+      const { data: userMsg } = await supabaseAdmin
+        .from("ai_chat_messages")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("thread_id", assistantMsg.thread_id)
+        .eq("role", "user")
+        .lt("created_at", assistantMsg.created_at)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      // Delete both messages
+      const idsToDelete = [assistantMsg.id];
+      if (userMsg) idsToDelete.push(userMsg.id);
+
+      const { error: msgDeleteError } = await supabaseAdmin
+        .from("ai_chat_messages")
+        .delete()
+        .in("id", idsToDelete);
+
+      if (msgDeleteError) {
+        console.error("[handleDeleteMealLog] Message Delete Error:", msgDeleteError);
+      } else {
+        console.log(`[handleDeleteMealLog] Deleted ${idsToDelete.length} messages (assistant + user pair).`);
+      }
     }
 
     // Step 3: Delete from meal_logs (User credentials for ownership check)
