@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import AddUserModal from "./AddUserModal";
 import UserActions from "./UserActions";
+import CopyEmail from "./CopyEmail";
 import { Users, ShieldAlert, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -89,10 +90,8 @@ export default async function UsersPage() {
                       </td>
 
                       {/* Email */}
-                      <td className="px-6 py-4 font-medium text-slate-200 max-w-[180px]">
-                        <span className="truncate block" title={user.email}>
-                          {user.email}
-                        </span>
+                      <td className="px-6 py-4 max-w-[200px]">
+                        <CopyEmail email={user.email ?? ""} />
                       </td>
 
                       {/* Display name */}
