@@ -9,6 +9,11 @@ export const metadata: Metadata = {
   title: "VITOGRAPH — Feed your cells, find balance",
   description:
     "Personal health tracker: medical results analysis and food diary.",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+  },
 };
 
 export default async function RootLayout({
