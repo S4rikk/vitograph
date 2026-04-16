@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { createUser } from "./actions";
 import { UserPlus, X, Loader2, AlertCircle } from "lucide-react";
 
@@ -14,6 +15,11 @@ export default function AddUserModal() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleClose = () => {
     if (isPending) return;
@@ -48,8 +54,8 @@ export default function AddUserModal() {
         Добавить пользователя
       </button>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {mounted && isOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
             onClick={handleClose}
@@ -138,7 +144,8 @@ export default function AddUserModal() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
