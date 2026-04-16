@@ -9,13 +9,17 @@ import {
   LayoutDashboard, 
   ChevronLeft,
   Menu,
-  X
+  X,
+  MessageSquareWarning,
+  Users
 } from "lucide-react";
 import clsx from "clsx";
 
 const navItems = [
   { name: "Overview", href: "/admin", icon: LayoutDashboard },
+  { name: "Users", href: "/admin/users", icon: Users },
   { name: "Knowledge Base", href: "/admin/knowledge", icon: Database },
+  { name: "Feedback", href: "/admin/feedback", icon: MessageSquareWarning },
   { name: "AI Settings", href: "/admin/ai-settings", icon: Settings },
 ];
 
