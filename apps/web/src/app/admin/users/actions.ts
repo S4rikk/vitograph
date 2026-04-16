@@ -60,6 +60,28 @@ export async function unbanUser(userId: string): Promise<void> {
 }
 
 /**
+ * Updates the email address of a user via Auth Admin API.
+ * Bypasses email confirmation — takes effect immediately.
+ *
+ * @param userId - The UUID of the user.
+ * @param newEmail - New email address.
+ */
+export async function updateUserEmail(
+  userId: string,
+  newEmail: string,
+): Promise<void> {
+  const supabase = createAdminClient();
+
+  const { error } = await supabase.auth.admin.updateUserById(userId, {
+    email: newEmail,
+    email_confirm: true,
+  });
+
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/users");
+}
+
+/**
  * Permanently deletes a user and all their associated data.
  *
  * @param userId - The UUID of the user to delete.

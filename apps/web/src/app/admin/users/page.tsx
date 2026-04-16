@@ -52,6 +52,7 @@ export default async function UsersPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-950/50 border-b border-white/10 text-xs uppercase tracking-wider text-slate-400">
+                <th className="px-4 py-4 font-medium w-10 text-center">#</th>
                 <th className="px-6 py-4 font-medium">Email</th>
                 <th className="px-6 py-4 font-medium hidden sm:table-cell">
                   Имя
@@ -71,7 +72,7 @@ export default async function UsersPage() {
             </thead>
             <tbody className="divide-y divide-white/5 text-sm text-slate-300">
               {users.length > 0 ? (
-                users.map((user) => {
+                users.map((user, idx) => {
                   const role = (user.app_metadata?.role as string) ?? "user";
                   const isAdmin = role === "admin";
                   const banned = isBanned(user.banned_until);
@@ -82,6 +83,11 @@ export default async function UsersPage() {
                       key={user.id}
                       className="hover:bg-white/[0.02] transition-colors"
                     >
+                      {/* Sequential number */}
+                      <td className="px-4 py-4 text-center text-slate-600 text-xs font-mono w-10">
+                        {idx + 1}
+                      </td>
+
                       {/* Email */}
                       <td className="px-6 py-4 font-medium text-slate-200 max-w-[180px]">
                         <span className="truncate block" title={user.email}>
@@ -142,6 +148,7 @@ export default async function UsersPage() {
                       <td className="px-6 py-4 text-right">
                         <UserActions
                           userId={user.id}
+                          currentEmail={user.email ?? ""}
                           isBanned={banned}
                           isAdmin={isAdmin}
                         />
@@ -151,7 +158,7 @@ export default async function UsersPage() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-6 py-16 text-center text-slate-500">
+                  <td colSpan={8} className="px-6 py-16 text-center text-slate-500">
                     <Users className="w-8 h-8 opacity-20 mx-auto mb-3" />
                     Пользователи не найдены.
                   </td>
