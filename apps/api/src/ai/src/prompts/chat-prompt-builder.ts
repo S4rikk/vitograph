@@ -182,11 +182,12 @@ RULES:
     title: string;
     category: string;
     status: string;
-    steps: Array<{ order: number; title: string; description?: string; status: string }>;
+    steps: Array<{ order: number; title: string; description?: string; status: string; completed_at?: string | null }>;
     current_step_index: number;
     diagnosis_basis?: any;
     priority: number;
-  }> | null): this {
+    created_at?: string;
+  }> | null, userDateStr?: string): this {
     if (!skills || skills.length === 0) return this;
 
     const items = skills.map(s => {
@@ -201,7 +202,57 @@ RULES:
         if (currentStep.description) {
           line += ` — ${currentStep.description}`;
         }
+        
+        // ── ТЕМПОРАЛЬНЫЙ КОНТЕКСТ (timezone-aware) ──
+        const lastCompleted = s.steps
+          ?.filter(st => st.status === 'completed' && st.completed_at)
+          .sort((a, b) => new Date(b.completed_at!).getTime() - new Date(a.completed_at!).getTime())[0];
+        
+        const stepStartDate = lastCompleted?.completed_at || s.created_at;
+        if (stepStartDate) {
+          // Считаем дни по дате пользователя (с учётом timezone), а НЕ по UTC
+          let stepActiveDays: number;
+          if (userDateStr) {
+            // userDateStr = "17.04.2026" (ru-RU format from controller)
+            const parts = userDateStr.split('.');
+            const todayMs = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T00:00:00Z`).getTime();
+            const startMs = new Date(new Date(stepStartDate).toISOString().split('T')[0] + 'T00:00:00Z').getTime();
+            stepActiveDays = Math.max(0, Math.floor((todayMs - startMs) / (1000 * 60 * 60 * 24)));
+          } else {
+            stepActiveDays = Math.floor((Date.now() - new Date(stepStartDate).getTime()) / (1000 * 60 * 60 * 24));
+          }
+          
+          const startDateStr = new Date(stepStartDate).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+          line += `\n  ⏱️ Шаг активен: ${stepActiveDays} дн. (с ${startDateStr})`;
+          
+          // ── АВТОМАТИЧЕСКИЙ ПРЕДРАСЧЁТ "День X из Y" ──
+          // Извлекаем период из текста шага регуляркой (сервер делает за LLM)
+          const stepText = (currentStep.title || '') + ' ' + (currentStep.description || '');
+          const timePeriodMatch = stepText.match(/(\d+)\s*(дн|день|дней|суток|недел)/i);
+          if (timePeriodMatch) {
+            const totalDays = timePeriodMatch[2]?.toLowerCase().startsWith('недел')
+              ? parseInt(timePeriodMatch[1]) * 7
+              : parseInt(timePeriodMatch[1]);
+            const currentDay = Math.min(stepActiveDays + 1, totalDays + 1);
+            if (stepActiveDays >= totalDays) {
+              line += `\n  📅 День ${currentDay} — СРОК ВЫПОЛНЕН (из ${totalDays} дн.) ⚠️ Пора завершить шаг (advance_step)`;
+            } else {
+              line += `\n  📅 День ${currentDay} из ${totalDays}`;
+            }
+          }
+        }
       }
+      
+      // Показываем завершённые шаги с датами
+      const completedWithDates = s.steps?.filter(st => st.status === 'completed' && st.completed_at) || [];
+      if (completedWithDates.length > 0) {
+        const doneList = completedWithDates.map(cs => {
+          const doneDate = new Date(cs.completed_at!).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+          return `${cs.order}. "${cs.title}" (${doneDate})`;
+        }).join(', ');
+        line += `\n  ✅ Завершённые: ${doneList}`;
+      }
+      
       if (s.diagnosis_basis?.pattern) {
         line += `\n  🏥 Основание: ${s.diagnosis_basis.pattern}`;
       }
@@ -219,7 +270,15 @@ SKILL JOURNEY RULES:
 2. When the user reports completing the current step, call manage_health_goals(advance_step, skill_id="...").
 3. If skills have conflicting goals (e.g., weight loss + muscle gain), WARN the user and ask to prioritize.
 4. Reference the diagnosis_basis when giving advice (mention specific markers and patterns).
-5. When logging an assistant_action related to a skill, include linked_goal_id = skill.id.`,
+5. When logging an assistant_action related to a skill, include linked_goal_id = skill.id.
+6. ⏱️ TIME-AWARE RULE (CRITICAL): Если рядом с шагом есть строка 📅 "День X из Y":
+   - Используй ИМЕННО эти числа. Не пересчитывай самостоятельно.
+   - Если написано "СРОК ВЫПОЛНЕН" → немедленно предложи завершить шаг и вызови advance_step.
+   - Если Day < Total → скажи пользователю "Это день X из Y, продолжаем отслеживать."
+   - НИКОГДА не перезапускай временной шаг с Дня 1, если 📅 показывает другой день.
+7. 🧠 ANTI-AMNESIA RULE (CRITICAL): Ты ОБЯЗАН доверять данным ⏱️ и 📅 больше, чем своей памяти из чата.
+   Если ⏱️ показывает "Шаг активен: 2 дн.", значит пользователь УЖЕ работал над этим шагом 2 дня,
+   даже если в последних сообщениях чата об этом ничего нет (окно чата ограничено).`,
       priority: 0,
     });
     return this;

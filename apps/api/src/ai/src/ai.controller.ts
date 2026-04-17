@@ -1283,7 +1283,7 @@ export async function handleChat(
             .withEmotionalContext(emotionalProfile)
             .withSemanticMemory(semanticMemories)
             .withPastActions(pastActions)
-            .withActiveSkills(activeSkills)
+            .withActiveSkills(activeSkills, userDateStr)
             .withProfile(formatLeanProfile(dbContext.profile))
             .withDietaryRestrictions(formatDietaryRestrictions(dbContext.profile))
             .withGoalManagement();
@@ -1579,7 +1579,7 @@ export async function handleChatStream(
             .withEmotionalContext(emotionalProfile)
             .withSemanticMemory(semanticMemories)
             .withPastActions(pastActions)
-            .withActiveSkills(activeSkills)
+            .withActiveSkills(activeSkills, userDateStr)
             .withProfile(formatLeanProfile(dbContext.profile))
             .withDietaryRestrictions(formatDietaryRestrictions(dbContext.profile))
             .withGoalManagement();

@@ -9,6 +9,7 @@ export interface ActiveSkill {
   current_step_index: number;
   diagnosis_basis: any;
   priority: number;
+  created_at: string;
 }
 
 export interface SkillStep {
@@ -38,7 +39,7 @@ export async function fetchActiveSkills(
 
     const { data, error } = await supabase
       .from("user_active_skills")
-      .select("id, title, category, status, steps, current_step_index, diagnosis_basis, priority")
+      .select("id, title, category, status, steps, current_step_index, diagnosis_basis, priority, created_at")
       .eq("user_id", userId)
       .eq("status", "active")
       .order("priority", { ascending: true })
