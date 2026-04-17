@@ -1,6 +1,6 @@
 # VITOGRAPH — Architecture: Database Schema & API Structure
 
-> **Последнее обновление:** 7 апреля 2026
+> **Последнее обновление:** 17 апреля 2026
 >
 > Смотрите также: [API Reference](./api_reference.md) | [Frontend Components](./frontend_components.md) | [AI Pipeline](./ai_pipeline.md)
 
@@ -398,17 +398,19 @@ apps/api/
         ├── llm-client.ts        # callLlmStructured wrapper
         ├── request-schemas.ts   # Zod input validation
         ├── services/
-        │   ├── memory.service.ts # L2+L3 memory fetch, embedding singleton
-        │   └── skills.service.ts# fetchActiveSkills for goal journeys
+        │   ├── memory.service.ts   # L2+L3 memory fetch, embedding singleton
+        │   ├── skills.service.ts   # fetchActiveSkills, fetchMatchingSkillDocument
+        │   └── kb.service.ts       # Hybrid KB search (semantic + lexical, RRF)
         ├── prompts/
-        │   └── chat-prompt-builder.ts # Centralized prompt builder (26 methods)
+        │   └── chat-prompt-builder.ts # Centralized prompt builder
         ├── graph/               # LangGraph ReAct Agent
         │   ├── builder.ts       # Graph definition + dedup interceptor + sanitizeMessages()
         │   ├── state.ts         # GraphAnnotation (messages + medicalContext)
-        │   ├── tools.ts         # 7 tools (see ai_pipeline.md for details)
+        │   ├── tools.ts         # 6 tools (log_meal, log_supplement, save_memory_fact, ...)
         │   ├── checkpointer.ts  # PostgresSaver (persistent memory L1)
         │   ├── food-vision-analyzer.ts
         │   ├── lab-report-analyzer.ts
+        │   ├── label-scanner.ts  # Анализ этикеток / состава (E-коды, вердикт)
         │   ├── nutrition-analyzer.ts
         │   └── vision-analyzer.ts
         ├── supplement/          # Supplement tracking
@@ -424,24 +426,26 @@ apps/api/
 | Method   | Endpoint                                    | Description                                     |
 | -------- | ------------------------------------------- | ----------------------------------------------- |
 | `POST`   | `/api/v1/ai/chat`                           | AI chat (LangGraph, diary/assistant modes)      |
+| `POST`   | `/api/v1/ai/chat/stream`                    | AI chat SSE streaming (typewriter UI)           |
 | `GET`    | `/api/v1/ai/chat/history`                   | Chat history                                    |
 | `POST`   | `/api/v1/ai/analyze`                        | Symptom-food correlation analysis               |
 | `POST`   | `/api/v1/ai/diagnose`                       | Diagnostic hypothesis generation                |
 | `POST`   | `/api/v1/ai/analyze-somatic`                | Nail/tongue/skin photo analysis (GPT-4o Vision) |
-| `POST`   | `/api/v1/ai/analyze-food`                   | Food photo recognition (GPT-4o Vision)          |
+| `POST`   | `/api/v1/ai/analyze-food`                   | Food photo recognition (GPT-Vision)             |
+| `POST`   | `/api/v1/ai/analyze-label`                  | Food label / ingredient analysis (E-коды, вердикт) |
 | `POST`   | `/api/v1/ai/analyze-lab-report`             | Premium blood test diagnostics                  |
 | `GET`    | `/api/v1/ai/lab-reports/history`            | Lab report history                              |
 | `DELETE` | `/api/v1/ai/lab-reports/history/:timestamp` | Delete a lab report                             |
 | `GET`    | `/api/v1/ai/somatic-history`                | Somatic analysis history                        |
-| `GET`    | `/api/v1/ai/nutrition-targets`              | Deterministic nutrition norms (Phase 53f)       |
+| `GET`    | `/api/v1/ai/nutrition-targets`              | Deterministic nutrition norms                   |
 | `GET`    | `/api/v1/supplements/today`                 | Today's supplement protocol + logs              |
 | `POST`   | `/api/v1/supplements/log`                   | Log supplement intake                           |
 | `POST`   | `/api/v1/integration/parse`                 | Parse PDF lab report + save to DB               |
-| `POST`   | `/api/v1/integration/parse-image`                | Parse lab report photo + save to DB (sync)                    |
-| `POST`   | `/api/v1/integration/parse-image-batch`          | Parse batch photos, sync fallback (up to 10)                  |
-| `POST`   | `/api/v1/integration/parse-image-batch-async` 🆕 | Initiate async batch OCR → returns `job_id` immediately       |
-| `GET`    | `/api/v1/integration/lab-scans/:jobId` 🆕        | Poll async OCR job status (fallback for Realtime)             |
-| `POST`   | `/api/v1/integration/norms`                      | Calculate norms via Python Engine                             |
+| `POST`   | `/api/v1/integration/parse-image`           | Parse lab report photo + save to DB (sync)      |
+| `POST`   | `/api/v1/integration/parse-image-batch`     | Parse batch photos, sync fallback (up to 10)    |
+| `POST`   | `/api/v1/integration/parse-image-batch-async` | Initiate async batch OCR → returns `job_id`   |
+| `GET`    | `/api/v1/integration/lab-scans/:jobId`      | Poll async OCR job status                       |
+| `POST`   | `/api/v1/integration/norms`                 | Calculate norms via Python Engine               |
 
 **Python Core API (port 8001):**
 
@@ -523,13 +527,10 @@ flowchart LR
 
 Активно используется в production:
 
-- **Семантическая память:** `user_memory_vectors.embedding vector(384)` — HNSW index, `text-embedding-3-small` (OpenAI). Поиск через RPC `match_user_memories()`.
-- **Skill Documents:** `user_active_skills.skill_embedding vector(384)` — `gte-small` (Supabase.ai, бесплатно). Контекстный роутинг через `match_skill_by_context()`.
-
-Планируется:
-
-- **Biomarker semantic search:** Embed biomarker descriptions + aliases → `vector(1536)` column in `biomarker_embeddings` table.
-- **Knowledge Base RAG:** Embed medical knowledge для condition-specific protocols.
+- **Семантическая память:** `user_memory_vectors.embedding vector(384)` — HNSW index, `text-embedding-3-small` (OpenAI). Поиск через RPC `match_user_memories()` (threshold=0.25).
+- **Skill Documents:** `user_active_skills.skill_embedding vector(384)` — `gte-small` (Supabase.ai). Контекстный роутинг через `match-skill-context` Edge Function.
+- **Knowledge Base:** `kb_chunks.embedding vector(384)` — hybrid search (semantic + lexical) через RPC `hybrid_search_kb()` (RRF fusion).
+- **Biomarker Semantic Cache:** `biomarker_note_cache` — slug+flag lookup, ускоряет генерацию lab report на 1000–2000 токенов.
 
 ---
 

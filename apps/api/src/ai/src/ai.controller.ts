@@ -1181,6 +1181,7 @@ export async function handleChat(
     const chatMode = body.chatMode || 'default';
 
     let finalImageUrl = body.imageUrl;
+    let userTimezone = 'UTC';
 
     const messagesToInvoke: any[] = [];
 
@@ -1204,6 +1205,7 @@ export async function handleChat(
         if (dbContext) {
           const leanContext = getLeanUserContext(dbContext);
           const timezone = dbContext.profile?.timezone || 'UTC';
+          userTimezone = timezone;
           
           let weatherAlert = "";
           // weatherData depends on dbContext.profile — must stay sequential
@@ -1372,7 +1374,8 @@ export async function handleChat(
           token: req.headers.authorization?.split(" ")[1],
           chatMode: chatMode,
           nutritionalContext: body.nutritionalContext,
-          imageUrl: finalImageUrl
+          imageUrl: finalImageUrl,
+          timezone: userTimezone
         }
       }
     );
@@ -1475,6 +1478,7 @@ export async function handleChatStream(
     const chatMode = body.chatMode || 'default';
 
     let finalImageUrl = body.imageUrl;
+    let userTimezone = 'UTC';
     const messagesToInvoke: any[] = [];
 
     // ── Reuse handleChat's setup logic (auth, context, system prompt) ──
@@ -1497,6 +1501,7 @@ export async function handleChatStream(
         if (dbContext) {
           const leanContext = getLeanUserContext(dbContext);
           const timezone = dbContext.profile?.timezone || 'UTC';
+          userTimezone = timezone;
           
           let weatherAlert = "";
           // weatherData depends on dbContext.profile — must stay sequential
@@ -1668,7 +1673,8 @@ export async function handleChatStream(
           token: req.headers.authorization?.split(" ")[1],
           chatMode: chatMode,
           nutritionalContext: body.nutritionalContext,
-          imageUrl: finalImageUrl
+          imageUrl: finalImageUrl,
+          timezone: userTimezone
         },
         streamMode: "messages",
       }

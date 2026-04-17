@@ -332,19 +332,32 @@ export const get_today_diary_summary = new DynamicStructuredTool({
       global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
-    // Compute start of day in UTC roughly
+    const timezone = config?.configurable?.timezone || 'UTC';
+
     const now = new Date();
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const startOfTodayISO = startOfToday.toISOString();
+    const userLocalStr = now.toLocaleString("en-US", { timeZone: timezone });
+    const userLocalTime = new Date(userLocalStr);
+    const offsetMs = new Date(userLocalStr).getTime() - now.getTime();
+
+    const startOf5AMLocal = new Date(userLocalTime);
+    startOf5AMLocal.setHours(5, 0, 0, 0);
+
+    if (userLocalTime.getHours() < 5) {
+      startOf5AMLocal.setDate(startOf5AMLocal.getDate() - 1);
+    }
+
+    const startOf5AM_UTC = new Date(startOf5AMLocal.getTime() - offsetMs);
+    const startISO = startOf5AM_UTC.toISOString();
 
     const { data: logs, error } = await supabase
       .from("meal_logs")
       .select(`
-        id, created_at, meal_type, total_calories, total_protein, total_fat, total_carbs,
+        id, logged_at, meal_type, total_calories, total_protein, total_fat, total_carbs,
         meal_items ( food_name, weight_g, calories )
       `)
       .eq("user_id", userId)
-      .gte("created_at", startOfTodayISO);
+      .gte("logged_at", startISO)
+      .order("logged_at", { ascending: true });
 
     if (error) return `Failed to fetch diary: ${error.message}`;
 
@@ -364,14 +377,14 @@ export const get_today_diary_summary = new DynamicStructuredTool({
       dailyCarbs += log.total_carbs || 0;
       return {
         meal_type: log.meal_type,
-        time: log.created_at,
+        time: log.logged_at,
         calories: log.total_calories,
         items: log.meal_items?.map((item: any) => `${item.food_name} (${item.weight_g}g, ${item.calories}kcal)`) || []
       };
     });
 
     return JSON.stringify({
-      summary_date: startOfTodayISO,
+      summary_date: startISO,
       total_calories_today: dailyCalories,
       total_protein_today: dailyProtein,
       total_fat_today: dailyFat,

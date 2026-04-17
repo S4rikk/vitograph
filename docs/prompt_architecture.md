@@ -1,194 +1,89 @@
 # VITOGRAPH — Prompt Architecture
 
-> **Дата актуальности:** 7 апреля 2026
-> **Статус:** Production. ChatPromptBuilder — единственный источник истины для всех system-промптов.
+> **Дата актуальности:** 17 апреля 2026
 
 ---
 
-## 1. Архитектура
+## 1. Обзор
 
-ChatPromptBuilder — единственный источник истины для всех system-промптов. Все редактирования персоны, правил и форматирования делаются только здесь, не в `ai.controller.ts`.
+System prompt для чата собирается через **ChatPromptBuilder** — fluent builder с приоритетными секциями.
+
+Файл: `apps/api/src/ai/src/prompts/chat-prompt-builder.ts`
 
 ```mermaid
-graph TB
-    subgraph "prompts/"
-        CB["chat-prompt-builder.ts<br/>ChatPromptBuilder"]
-    end
-    
+graph LR
     subgraph "ai.controller.ts"
-        FC[fetchUserContext]
-        FMT["Context Formatters"]
-        HANDLERS["handleChat / handleChatStream"]
-    end
-    
-    subgraph "Services"
-        MS[memory.service.ts]
-        SS[skills.service.ts]
+        CTX["Параллельный сбор контекста\n(fetchUserContext, memory, skills, KB, weather)"]
     end
 
-    FC --> FMT
-    FMT --> CB
-    MS --> CB
-    SS --> CB
-    CB --> HANDLERS
+    subgraph "ChatPromptBuilder"
+        P0["P0: Persona + Rules"]
+        P0b["P0: Profile + Goals"]
+        P1["P1: Memory (Emotional + Semantic)"]
+        P1b["P1: Skills + Knowledge Base"]
+        P1c["P1: Nutrition Targets + Today Progress"]
+        P1d["P1: Lab Report"]
+        P2["P2: Meal Logs + KB + Supplements"]
+        P3["P3: Weather"]
+    end
+
+    CTX --> P0 --> P0b --> P1 --> P1b --> P1c --> P1d --> P2 --> P3
+    P3 --> PROMPT["systemPrompt: string"]
 ```
 
 ---
 
-## 2. ChatPromptBuilder — Интерфейс
+## 2. Секции и приоритеты
+
+| Метод | Приоритет | Режим | Объём |
+|:------|:----------|:------|:------|
+| `withPersona(aiName, date, time)` | P0 | Оба | ~3500 символов |
+| `withProfile(profile)` | P0 | Оба | ~500 символов |
+| `withEmotionalContext(profile)` | P1 | Оба | ~300 символов |
+| `withSemanticMemory(memories)` | P1 | Оба | ~600 символов |
+| `withActiveSkills(skills)` | P1 | Оба | ~800 символов |
+| `withKnowledgeBaseContext(results)` | P1 | Оба | ~1500 символов |
+| `withNutritionTargets(targets)` | P1 | Diary | ~800 символов |
+| `withTodayProgress(meals, tz)` | P1 | Оба | ~600 символов |
+| `withLabReport(profile, isDeepDive)` | P1 | Assistant | ~2000 символов |
+| `withMealLogs(meals, tz)` | P2 | Diary | ~1500 символов |
+| `withKnowledgeBases(kbs)` | P2 | Оба | ~800 символов |
+| `withSupplementProtocol(profile)` | P2 | Оба | ~600 символов |
+| `withTodaySupplements(logs, tz)` | P2 | Оба | ~300 символов |
+| `withWeatherAlert(alert)` | P3 | Оба | ~200 символов |
+
+---
+
+## 3. Ключевые правила персоны (withPersona)
+
+Встроены прямо в промпт как константные инструкции:
+
+- **CORE PERSONA & TONE:** строгий, заботливый ментор с юмором, эмоциями и характером
+- **БОГАТСТВО ЯЗЫКА:** широкий спектр идиом, поговорок, метафор — активно используется
+- **АНТИПОВТОР (STRICT):** нельзя повторять одну и ту же метафору дважды в диалоге; встроен стоп-лист слов-костылей с альтернативами
+- **MICRONUTRIENT SPAM RULE:** в тексте ответа — только макросы (КБЖУ). Микронутриенты — исключительно в `<nutr type="micro">` тегах в TECHNICAL BLOCK
+- **FLUIDITY:** запрещён любой markdown в ответах (нет `###`, `**`, `-`, `1.`); только русский текст + `<nutr>` / `<meal_score>` теги
+- **APP BOUNDARIES:** запрещено ссылаться на внешние ресурсы, сайты, приложения
+- **NAME BOUNDARIES:** запрещено представляться по имени
+
+---
+
+## 4. Режимы работы
+
+| Режим | Активные секции | Активные инструменты |
+|:------|:----------------|:--------------------|
+| `assistant` | Persona, Profile, Memory, Skills, KB, Lab Report, KB Articles, Supplements, Weather | `calculate_biomarker_norms`, `update_user_profile`, `save_memory_fact` |
+| `diary` | Persona, Profile, Memory, Nutrition Targets, Today Progress, Meal Logs, Supplements | `log_meal`, `log_supplement_intake`, `get_today_diary_summary`, `save_memory_fact` |
+
+---
+
+## 5. Result format
 
 ```typescript
 interface PromptBuildResult {
   systemPrompt: string;
+  estimatedTokens: number;
   includedSections: string[];
   version: string;
 }
-
-class ChatPromptBuilder {
-  constructor(private mode: "assistant" | "diary") {}
-  
-  // ─── Core Persona (включается всегда) ───────────────────
-  withPersona(aiName: string, userDateStr: string, userTimeStr: string): this;
-  
-  // ─── Memory Layers ──────────────────────────────────────
-  withEmotionalContext(profile: {
-    current_mood: string; mood_trend: string; trust_level: number;
-  } | null): this;
-  withSemanticMemory(memories: Array<{
-    content: string; memory_type: string;
-  }> | null): this;
-  withPastActions(actions: Array<{ content: string }> | null): this;
-  
-  // ─── Goals & Skills ─────────────────────────────────────
-  withActiveSkills(skills: Array<{
-    skill_name: string; current_step: object; status: string;
-  }>): this;
-  withHealthGoals(goalsText: string): this;
-  withGoalManagement(): this;
-  withCoachingMode(
-    activeSkills: Array<any>,
-    isFirstMessageOfDay: boolean
-  ): this;
-  withSkillDocument(matchedSkill: {
-    skill_name: string; skill_document: string;
-  }): this;
-  
-  // ─── User Context ───────────────────────────────────────
-  withProfile(profileText: string): this;
-  withDietaryRestrictions(restrictionsText: string): this;
-  withChronicConditions(conditionsText: string): this;
-  withHistorySynopsis(synopsisText: string): this;
-  withTestResults(testsText: string): this;
-  withNutritionTargets(targetsText: string): this;
-  withTodayProgress(progressText: string, sectionTitle?: string): this;
-  withMealLogs(logsText: string): this;
-  withFoodZones(zonesText: string): this;
-  withLabReport(reportText: string): this;
-  withKnowledgeBases(kbText: string): this;
-  withSupplementProtocol(protocolText: string): this;
-  withTodaySupplements(supplementsText: string): this;
-  withWeatherAlert(alertText: string): this;
-  
-  // ─── Mode-Specific ─────────────────────────────────────
-  withDiaryMode(): this;
-  withDiarySecurityRule(): this;
-  withAssistantMode(): this;
-  withDeficitAwareRule(): this;
-  
-  // ─── Build ──────────────────────────────────────────────
-  build(): PromptBuildResult;
-}
 ```
-
----
-
-## 3. Tone of Voice — XML-структура
-
-Блок `CORE PERSONA & TONE` использует явные XML-теги для управления вниманием LLM. Это исключает «Few-Shot Bias» и «White Monkey Effect» при задании тона.
-
-```xml
-<persona>
-Ты — Senior-ментор по здоровью. Стиль: прагматичная забота, высокий 
-профессионализм и лёгкая тёплая ирония. Общение на равных.
-</persona>
-
-<metaphor_framework>
-Аналогии строятся ИСКЛЮЧИТЕЛЬНО на:
-- Инженерии и механике (износ деталей, нагрузки).
-- Физике и термодинамике (КПД, разрядка батареи).
-- Реальной логистике (навигация, планирование).
-Метафора должна вытекать из текущего контекста разговора.
-</metaphor_framework>
-
-<quality_constraints>
-- Freshness: каждая аналогия создаётся с нуля, клише запрещены.
-- Достоинство: юмор на точных наблюдениях, не на гиперболах.
-- Коррекция через иронию: отговаривай через здравый смысл, не через лекции.
-</quality_constraints>
-```
-
----
-
-## 4. Приоритеты секций
-
-| Приоритет | Секция | Режим | Примечание |
-|-----------|--------|-------|------------|
-| P0 | Persona + Rules | Оба | ~3500 символов |
-| P0 | Profile + Restrictions | Оба | ~500 |
-| P0 | Skill Document (`withSkillDocument`) | Оба | ~800, персонализированный протокол |
-| P1 | Active Skills (current step) | Оба | ~200, FSM goal journeys |
-| P1 | Goal Management rules | Assistant | FSM transition rules |
-| P1 | Coaching Mode (MI) | Assistant | Motivational Interviewing |
-| P1 | Emotional Context (Layer 3) | Оба | mood, trend, trust |
-| P1 | Semantic Memory (Layer 2) | Оба | ~600, relevant facts |
-| P1 | Past Actions (anti-repetition) | Оба | ~300, episodic memory |
-| P1 | Nutrition Targets | Diary | ~800, детерминированные нормы |
-| P1 | Today Progress | Оба | ~600 |
-| P1 | Lab Report (Tier 1 / Deep) | Assistant | ~2000 |
-| P2 | Meal Logs (detailed) | Diary + Diet intent | ~1500 |
-| P2 | Knowledge Bases | Оба | ~800 |
-| P2 | Supplement Protocol | Оба | ~600 |
-| P2 | Today Supplements | Оба | ~300 |
-| P2 | Chronic Conditions | Оба | ~300 |
-| P3 | Weather Alert | Оба | ~200 |
-| P3 | Food Zones | Diary + Diet intent | ~800 |
-
----
-
-## 5. Context Formatters (ai.controller.ts)
-
-| Функция | Что форматирует |
-|:---|:---|
-| `formatTestResults()` | Последние анализы крови для системного промпта |
-| `formatMealLogs()` | Сегодняшние приёмы пищи |
-| `formatNutritionTargets()` | Детерминированные нормы КБЖУ + микро |
-| `formatTodayProgress()` | Суммарное потребление нутриентов за сегодня |
-| `formatDietaryRestrictions()` | Диетические ограничения из `lifestyle_markers` |
-| `formatActiveKnowledgeBases()` | Активные медицинские базы знаний (диагнозы) |
-| `formatActiveSupplementProtocol()` | Текущий протокол БАДов |
-| `formatTodaySupplements()` | Логи приёма БАДов за сегодня |
-| `formatLabDiagnosticReport()` | Последний диагностический отчёт |
-
----
-
-## 6. Planned Improvements
-
-### 6.1 Prompt Registry
-Вынести все специализированные промпты (lab-diagnostic, food-vision, psychological) в отдельные `.prompt.ts` файлы с единым registry (`prompts/index.ts`).
-
-### 6.2 Response Validators
-Post-LLM проверки для каждого типа ответа:
-
-```typescript
-// Chat — no markdown headers, no bullet points, closed <nutr> tags
-function validateChatResponse(text: string): ValidationResult;
-
-// Lab Report — all biomarkers covered, food_zones non-empty
-function validateLabReport(report, inputCount: number): ValidationResult;
-
-// Food Vision — items or supplements present, calories >= 0
-function validateFoodVision(result): ValidationResult;
-```
-
-### 6.3 Formatters Extraction
-Вынести context formatters из `ai.controller.ts` в отдельный `formatters/` каталог для чистоты архитектуры.

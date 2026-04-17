@@ -1,6 +1,6 @@
 # VITOGRAPH — Testing Infrastructure
 
-> **Дата актуальности:** 29 марта 2026
+> **Дата актуальности:** 17 апреля 2026
 >
 > Документация по системе тестирования: Vitest (unit/integration) + Playwright (E2E).
 
@@ -160,7 +160,7 @@ run_tests.bat
 
 | Контекст | Таймаут | Обоснование |
 |:---------|:--------|:------------|
-| Playwright global | 600,000ms | Gemini 3.1 Thinking может «думать» до 6 минут |
+| Playwright global | 600,000ms | LLM reasoning может занимать несколько минут |
 | AI Assistant ответ | 300,000ms | Ожидание исчезновения `.animate-bounce` |
 | UI элементы | 10,000-15,000ms | Загрузка панели / рендер компонентов |
 | Vitest | default | Unit-тесты без сети |
