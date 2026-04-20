@@ -39,6 +39,7 @@ import type {
 
 import { HumanMessage, SystemMessage, isAIMessageChunk } from "@langchain/core/messages";
 import { appGraph } from "./graph/builder.js";
+import { checkpointer } from "./graph/checkpointer.js";
 import { getOrFetchWeatherContext } from "./weather.service.js";
 import { fetchAdvancedMemoryContext } from "./services/memory.service.js";
 import { fetchActiveSkills, fetchMatchingSkillDocument } from "./services/skills.service.js";
@@ -472,17 +473,12 @@ function formatMealLogs(meals: any[] | null, timezone: string = "UTC"): string {
     });
 
     let text = `- [${dayLabel}, ${time}]`;
-    let mTotalCal = 0, mTotalP = 0, mTotalF = 0, mTotalC = 0;
 
     if (m.meal_items && Array.isArray(m.meal_items) && m.meal_items.length > 0) {
       const itemsText = m.meal_items.map((i: any) => {
-        mTotalCal += i.calories || 0;
-        mTotalP += i.protein_g || 0;
-        mTotalF += i.fat_g || 0;
-        mTotalC += i.carbs_g || 0;
         return `${i.food_name || 'Неизвестное блюдо'} (${i.weight_g}г)`;
       }).join(', ');
-      text += ` ${itemsText}: ${Math.round(mTotalCal)} ккал, Б${Math.round(mTotalP)}г, Ж${Math.round(mTotalF)}г, У${Math.round(mTotalC)}г`;
+      text += ` ${itemsText}`;
     } else {
       text += ` Приём пищи (без деталей)`;
     }
@@ -603,8 +599,8 @@ function formatNutritionTargets(profile: any, activeKnowledgeBases: any[] | null
 
   let text = `${rationale}\n`;
 
-  const macros = computeDeterministicMacros(profile);
-  text += `Макросы: Ккал=${macros.calories}, Белки=${macros.protein}г, Жиры=${macros.fat}г, Углеводы=${macros.carbs}г\n`;
+  // NOTE: Macros (КБЖУ) intentionally omitted from LLM prompt — Zero КБЖУ Policy.
+  // computeDeterministicMacros() is still available but NOT exposed to the LLM.
 
   const microEntries = Object.entries(micros).map(([k, v]) => `${k}: ${v}`).join(", ");
   text += `Микронутриенты: ${microEntries}\n`;
@@ -649,8 +645,8 @@ function formatTodayProgress(meals: any[] | null, timezone: string = "UTC"): str
     }
   }
 
-  let text = `Макросы: ${Math.round(totalCal)} ккал, Белки ${Math.round(totalP)}г, Жиры ${Math.round(totalF)}г, Углеводы ${Math.round(totalC)}г\n`;
-  text += `Приёмов пищи: ${todayMeals.length}\n`;
+  // NOTE: Macros (КБЖУ) intentionally omitted from LLM prompt — Zero КБЖУ Policy.
+  let text = `Приёмов пищи сегодня: ${todayMeals.length}\n`;
 
   if (Object.keys(microTotals).length > 0) {
     const entries = Object.entries(microTotals).map(([k, v]) => `${k}: ${Number(v).toFixed(1)}`).join(", ");
@@ -1006,12 +1002,12 @@ export async function handleUpdateMealLog(req: Request, res: Response, next: Nex
       for (const msg of messages) {
         let newContent = msg.content;
 
-        // 5a. Atomic Reconstruction of the Macro Line
+        // 5a. Atomic Reconstruction of the Summary Line (Zero КБЖУ Policy — no macros shown)
         const foodName = items[0]?.food_name || 'Блюдо';
-        const newMacroLine = `Записал ${Math.round(new_weight_g)}г ${foodName}: ${Math.round(updatedMacros.total_calories)} ккал, ${updatedMacros.total_protein.toFixed(1)}г белков, ${updatedMacros.total_fat.toFixed(1)}г жиров, ${updatedMacros.total_carbs.toFixed(1)}г углеводов`;
+        const newSummaryLine = `Записал ${Math.round(new_weight_g)}г ${foodName} (вес обновлён)`;
 
-        // Replace the entire block from "Записал" to "углеводов"
-        newContent = newContent.replace(/Записал[\s\S]*?углеводов/g, newMacroLine);
+        // Replace the entire block from "Записал" to "углеводов" (legacy) or end of line
+        newContent = newContent.replace(/Записал[\s\S]*?углеводов/g, newSummaryLine);
 
         // 5b. Atomic Reconstruction of Micros
         // Remove old micro tags first to avoid duplicates or orphans
@@ -1261,12 +1257,12 @@ export async function handleChat(
             weatherAlert += `\n\n[ENVIRONMENT_ALERT: Внимание! Сегодня магнитная буря (Kp-индекс: ${weatherData.max_kp_index}) и/или резкий перепад давления (Падение: ${weatherData.pressure_drop_max_hpa} гПа). Учитывай это в анализе симптомов пользователя (может болеть голова, слабость, мигрень, скачки давления).]`;
           }
 
-          const userTimeStr = now.toLocaleTimeString('ru-RU', {
+          const userTimeStr = body.localTimeStr || now.toLocaleTimeString('ru-RU', {
             hour: '2-digit',
             minute: '2-digit',
             timeZone: timezone
           });
-          const userDateStr = now.toLocaleDateString('ru-RU', {
+          const userDateStr = body.localDateStr || now.toLocaleDateString('ru-RU', {
             day: '2-digit', month: '2-digit', year: 'numeric',
             timeZone: timezone
           });
@@ -1297,7 +1293,7 @@ export async function handleChat(
               .withMealLogs(formatMealLogs(dbContext.recentMeals, timezone))
               .withSupplementProtocol(formatActiveSupplementProtocol(dbContext.profile))
               .withTodaySupplements(formatTodaySupplements(dbContext.todaySupplements, timezone))
-              .withDeficitAwareRule()
+              .withGlycemicAwareRule()
               .withDiarySecurityRule();
           } else {
             // Adaptive Lab Context: detect if user is asking about lab results
@@ -1325,7 +1321,7 @@ export async function handleChat(
               .withKnowledgeBases(formatActiveKnowledgeBases(dbContext.activeKnowledgeBases))
               .withSupplementProtocol(formatActiveSupplementProtocol(dbContext.profile))
               .withTodaySupplements(formatTodaySupplements(dbContext.todaySupplements, timezone))
-              .withDeficitAwareRule()
+              .withGlycemicAwareRule()
               .withCoachingMode(activeSkills, isFirstMessageOfDay)
               .withSkillDocument(matchedSkillDoc)
               .withKnowledgeBase(kbContext);
@@ -1337,7 +1333,11 @@ export async function handleChat(
           }
           builder.withWeatherAlert(weatherAlert);
 
-          const { systemPrompt } = builder.build();
+          const { systemPrompt, includedSections } = builder.build();
+          console.log('[DEBUG PROMPT] Sections:', includedSections.join(', '));
+          console.log('[DEBUG PROMPT] Has GLYCEMIC SURFING:', systemPrompt.includes('GLYCEMIC SURFING PROTOCOL'));
+          console.log('[DEBUG PROMPT] Has RED ZONE:', systemPrompt.includes('RED ZONE'));
+          console.log('[DEBUG PROMPT] Total length:', systemPrompt.length);
           messagesToInvoke.push(new SystemMessage(systemPrompt));
         }
       }
@@ -1375,7 +1375,8 @@ export async function handleChat(
           chatMode: chatMode,
           nutritionalContext: body.nutritionalContext,
           imageUrl: finalImageUrl,
-          timezone: userTimezone
+          timezone: userTimezone,
+          redZoneConfirm: body.redZoneConfirm
         }
       }
     );
@@ -1400,6 +1401,17 @@ export async function handleChat(
 
 
 
+
+    // ── RED ZONE: Server-side tag injection ──────────────────────────
+    const toolMsgs = finalMessages.filter((m: any) => m._getType?.() === 'tool' || m.constructor?.name === 'ToolMessage');
+    const rzToolMsg = toolMsgs.find((m: any) => (typeof m.content === 'string' ? m.content : '').includes('RED ZONE BLOCKED'));
+    if (rzToolMsg) {
+      const rzC = typeof rzToolMsg.content === 'string' ? rzToolMsg.content : '';
+      const fM = rzC.match(/food="([^"]*)"/);
+      const wM = rzC.match(/weight="([^"]*)"/);
+      finalContent = finalContent.replace(/<red_zone_confirm[^>]*\/?>/g, '').trim();
+      finalContent += `\n<red_zone_confirm food="${fM?.[1] || 'блюдо'}" weight="${wM?.[1] || '0'}"/>`;
+    }
 
     // --- Save messages to ai_chat_messages ---
     if (req.user?.id) {
@@ -1557,12 +1569,12 @@ export async function handleChatStream(
             weatherAlert += `\n\n[ENVIRONMENT_ALERT: Внимание! Сегодня магнитная буря (Kp-индекс: ${weatherData.max_kp_index}) и/или резкий перепад давления (Падение: ${weatherData.pressure_drop_max_hpa} гПа). Учитывай это в анализе симптомов пользователя (может болеть голова, слабость, мигрень, скачки давления).]`;
           }
 
-          const userTimeStr = now.toLocaleTimeString('ru-RU', {
+          const userTimeStr = body.localTimeStr || now.toLocaleTimeString('ru-RU', {
             hour: '2-digit',
             minute: '2-digit',
             timeZone: timezone
           });
-          const userDateStr = now.toLocaleDateString('ru-RU', {
+          const userDateStr = body.localDateStr || now.toLocaleDateString('ru-RU', {
             day: '2-digit', month: '2-digit', year: 'numeric',
             timeZone: timezone
           });
@@ -1593,7 +1605,7 @@ export async function handleChatStream(
               .withMealLogs(formatMealLogs(dbContext.recentMeals, timezone))
               .withSupplementProtocol(formatActiveSupplementProtocol(dbContext.profile))
               .withTodaySupplements(formatTodaySupplements(dbContext.todaySupplements, timezone))
-              .withDeficitAwareRule()
+              .withGlycemicAwareRule()
               .withDiarySecurityRule();
           } else {
             const LAB_INTENT_REGEX = /анализ|кровь|результат|показател|маркер|биохим|гемоглобин|ферритин|холестер|глюкоз|лейкоцит|эритроцит|тромбоцит|нейтрофил|лимфоцит|гематокрит|билирубин|креатинин|мочев|АЛТ|АСТ|ТТГ|Т[34]\b|тиреотроп|инсулин|кортизол|тестостер|эстрад|прогестер|пролактин|витамин\s*[dдDД]|железо\b|кальци|ферр|трансферр|гомоцистеин|цинк|магни|селен|фолат|фолиев/i;
@@ -1619,7 +1631,7 @@ export async function handleChatStream(
               .withKnowledgeBases(formatActiveKnowledgeBases(dbContext.activeKnowledgeBases))
               .withSupplementProtocol(formatActiveSupplementProtocol(dbContext.profile))
               .withTodaySupplements(formatTodaySupplements(dbContext.todaySupplements, timezone))
-              .withDeficitAwareRule()
+              .withGlycemicAwareRule()
               .withCoachingMode(activeSkills, isFirstMessageOfDay)
               .withSkillDocument(matchedSkillDoc)
               .withKnowledgeBase(kbContext);
@@ -1631,7 +1643,10 @@ export async function handleChatStream(
           }
           builder.withWeatherAlert(weatherAlert);
 
-          const { systemPrompt } = builder.build();
+          const { systemPrompt, includedSections } = builder.build();
+          console.log('[DEBUG STREAM PROMPT] Sections:', includedSections.join(', '));
+          console.log('[DEBUG STREAM PROMPT] Has GLYCEMIC SURFING:', systemPrompt.includes('GLYCEMIC SURFING PROTOCOL'));
+          console.log('[DEBUG STREAM PROMPT] Has RED ZONE:', systemPrompt.includes('RED ZONE'));
           messagesToInvoke.push(new SystemMessage(systemPrompt));
         }
       }
@@ -1674,14 +1689,31 @@ export async function handleChatStream(
           chatMode: chatMode,
           nutritionalContext: body.nutritionalContext,
           imageUrl: finalImageUrl,
-          timezone: userTimezone
+          timezone: userTimezone,
+          redZoneConfirm: body.redZoneConfirm
         },
         streamMode: "messages",
       }
     );
 
     let fullContent = "";
+    let redZoneFood = "";
+    let redZoneWeight = "";
+    let hasRedZone = false;
+
     for await (const [message, _metadata] of stream) {
+      // Capture RED ZONE tool messages 
+      if (message._getType?.() === 'tool' || message.constructor?.name === 'ToolMessage') {
+        const tc = typeof message.content === 'string' ? message.content : '';
+        if (tc.includes('RED ZONE BLOCKED')) {
+          hasRedZone = true;
+          const fM = tc.match(/food="([^"]*)"/);
+          const wM = tc.match(/weight="([^"]*)"/);
+          redZoneFood = fM?.[1] || 'блюдо';
+          redZoneWeight = wM?.[1] || '0';
+        }
+      }
+
       if (
         isAIMessageChunk(message) &&
         message.content &&
@@ -1698,6 +1730,13 @@ export async function handleChatStream(
         fullContent += message.content;
         res.write(message.content);
       }
+    }
+
+    // ── RED ZONE: Inject confirm tag at the end of stream ──
+    if (hasRedZone) {
+      const rzTag = `\n<red_zone_confirm food="${redZoneFood}" weight="${redZoneWeight}"/>`;
+      res.write(rzTag);
+      fullContent += rzTag;
     }
 
     // ── Post-stream: sanitize accumulated content ──
@@ -2436,28 +2475,16 @@ export async function handleClearChatHistory(
       throw dbError;
     }
 
-    // 2. Reset LangGraph Memory State explicitly
-    // Since MemorySaver is used, we use updateState with RemoveMessage for all messages
-    // or simply overwrite the state if the reducer allows.
-    // However, a many reducers allow removing by sending specialized objects.
-    // For now, we utilize LangGraph's updateState to clear the messages array.
+    // 2. Delete LangGraph checkpoint thread (clears checkpoints, blobs, and writes)
     try {
-      const { RemoveMessage } = await import("@langchain/core/messages");
-
-      // Get current state to find message IDs to remove
-      const currentState = await appGraph.getState({ configurable: { thread_id: actualThreadId } });
-
-      if (currentState.values.messages && currentState.values.messages.length > 0) {
-        const removeMessages = currentState.values.messages.map((m: any) => new RemoveMessage({ id: m.id }));
-        await appGraph.updateState(
-          { configurable: { thread_id: actualThreadId } },
-          { messages: removeMessages }
-        );
-        console.log(`[handleClearChatHistory] LangGraph state cleared for thread ${actualThreadId}`);
+      if ('deleteThread' in checkpointer) {
+        await (checkpointer as { deleteThread: (id: string) => Promise<void> }).deleteThread(actualThreadId);
+        console.log(`[handleClearChatHistory] ✅ Checkpoints deleted for thread ${actualThreadId}`);
+      } else {
+        console.log(`[handleClearChatHistory] ⚠️ MemorySaver in use — no persistent checkpoints to delete`);
       }
     } catch (lgError) {
-      console.warn("[handleClearChatHistory] Failed to clear LangGraph state (non-critical):", lgError);
-      // We continue since DB is cleared, so new messages won't see history if UI resets too.
+      console.warn("[handleClearChatHistory] Failed to delete checkpoints (non-critical):", lgError);
     }
 
     res.json({
@@ -2541,6 +2568,18 @@ export async function handleDeleteAccount(
       throw new Error(`Failed to delete user profile: ${dbError.message}`);
     }
     console.log(`[handleDeleteAccount] Deleted profile and cascaded records for ${userId}`);
+
+    // 2.5 Delete LangGraph checkpoint threads (diary + assistant)
+    try {
+      if ('deleteThread' in checkpointer) {
+        const deleteThread = (checkpointer as { deleteThread: (id: string) => Promise<void> }).deleteThread.bind(checkpointer);
+        await deleteThread(`${userId}-diary`);
+        await deleteThread(`${userId}-assistant`);
+        console.log(`[handleDeleteAccount] ✅ Checkpoints deleted for user ${userId}`);
+      }
+    } catch (lgErr) {
+      console.warn(`[handleDeleteAccount] Failed to delete checkpoints (non-critical):`, lgErr);
+    }
 
     // 3. Supabase Auth Deletion
     const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId);
@@ -2839,5 +2878,213 @@ export async function handleAnalyzeLabel(
   } catch (error: unknown) {
     console.error("[handleAnalyzeLabel] Error:", error);
     next(error);
+  }
+}
+
+// ── GET /api/v1/ai/glycemic-timeline ──────────────────────────────
+/**
+ * Generates a predicted glycemic response curve for a given day.
+ * Uses gamma-like superposition model based on logged meals and their GI data.
+ * Query params: startDate, endDate (ISO strings from frontend)
+ */
+export async function handleGetGlycemicTimeline(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const userId = req.user?.id;
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!userId || !token) {
+      res.status(401).json({ success: false, error: "Unauthorized" });
+      return;
+    }
+
+    const startDate = req.query.startDate as string;
+    const endDate = req.query.endDate as string;
+
+    if (!startDate || !endDate) {
+      res.status(400).json({ success: false, error: "Missing startDate or endDate query params" });
+      return;
+    }
+
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error("Supabase credentials missing");
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
+
+    // 1. Get user's glycemic sensitivity from profile
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("lifestyle_markers")
+      .eq("id", userId)
+      .single();
+
+    const markers = (profile?.lifestyle_markers as Record<string, any>) || {};
+    const sensitivity: string = markers.glycemic_sensitivity || "normal";
+    const fastingGlucose: number = markers.fasting_glucose_mg_dl || 90;
+    const sensitivityFactor: Record<string, number> = {
+      normal: 1.0, elevated: 1.3, prediabetic: 1.6, diabetic: 2.0
+    };
+    const factor = sensitivityFactor[sensitivity] || 1.0;
+    const baseline = fastingGlucose || 90;
+
+    // 2. Get all meal_logs for the date range (with GI data from meal_items)
+    const { data: meals } = await supabase
+      .from("meal_logs")
+      .select("id, logged_at, total_calories, total_carbs, glycemic_load_total, response_type, meal_items(food_name, glycemic_index, glycemic_load, response_type, peak_time_min, energy_duration_hours, carbs_g)")
+      .eq("user_id", userId)
+      .gte("logged_at", startDate)
+      .lte("logged_at", endDate)
+      .order("logged_at", { ascending: true });
+    // 3. Preprocess meals into Meal Sessions (cluster meals within 60 mins to simulate stomach buffering)
+    const SESSION_WINDOW_MINUTES = 60;
+    const typeValue: Record<string, number> = { flat: 1, moderate: 2, spike: 3 };
+    const valueType: Record<number, string> = { 1: 'flat', 2: 'moderate', 3: 'spike' };
+    
+    interface MealSession {
+      timeMinute: number;
+      glTotal: number;
+      respType: string;
+    }
+    const sessions: MealSession[] = [];
+
+    if (meals && meals.length > 0) {
+      let currentSession: { timeMinute: number; glTotal: number; scoreSum: number; count: number } | null = null;
+      
+      for (const meal of meals) {
+        const mealTime = new Date(meal.logged_at);
+        const mealMinute = mealTime.getHours() * 60 + mealTime.getMinutes();
+        const items = (meal as any).meal_items || [];
+        const firstItem = items[0];
+        const gi = firstItem?.glycemic_index || 50;
+        const gl = meal.glycemic_load_total || (gi * (meal.total_carbs || 0) / 100);
+        const rType = meal.response_type || firstItem?.response_type || 'moderate';
+        const rScore = typeValue[rType] || 2;
+
+        if (!currentSession) {
+          currentSession = { timeMinute: mealMinute, glTotal: gl, scoreSum: rScore, count: 1 };
+        } else {
+          // If within the gastric mixing window, buffer the meals together
+          if (mealMinute - currentSession.timeMinute <= SESSION_WINDOW_MINUTES) {
+            currentSession.glTotal += gl;
+            currentSession.scoreSum += rScore;
+            currentSession.count += 1;
+          } else {
+            const avgScore = Math.round(currentSession.scoreSum / currentSession.count);
+            sessions.push({
+              timeMinute: currentSession.timeMinute,
+              glTotal: currentSession.glTotal,
+              respType: valueType[avgScore] || 'moderate'
+            });
+            currentSession = { timeMinute: mealMinute, glTotal: gl, scoreSum: rScore, count: 1 };
+          }
+        }
+      }
+      if (currentSession) {
+        const avgScore = Math.round(currentSession.scoreSum / currentSession.count);
+        sessions.push({
+          timeMinute: currentSession.timeMinute,
+          glTotal: currentSession.glTotal,
+          respType: valueType[avgScore] || 'moderate'
+        });
+      }
+    }
+
+    // 4. Generate timeline (288 points = every 5 min for 24h)
+    const MINUTES_IN_DAY = 1440;
+    const STEP = 5;
+    const MAX_EFFECT_MINUTES = 360; // Buffered meals can affect curve for up to 6 hours
+    const timeline: Array<{ time_min: number; glucose_mg_dl: number; zone: string }> = [];
+
+    for (let t = 0; t < MINUTES_IN_DAY; t += STEP) {
+      let glucose = baseline;
+
+      for (const session of sessions) {
+        const dt = t - session.timeMinute;
+        if (dt < 0 || dt > MAX_EFFECT_MINUTES) continue;
+
+        // Peak and decay by physiological response type
+        const decayRate: Record<string, number> = { flat: 0.02, moderate: 0.04, spike: 0.08 };
+        const b = decayRate[session.respType] || 0.04;
+        const t_peak = 2 / b; // flat = 100min peak, mod = 50min peak, spike = 25min peak
+        
+        // Dampening factor: Fibers/proteins spread the absorption over time, lowering the max peak
+        const dampening: Record<string, number> = { flat: 0.4, moderate: 0.7, spike: 1.0 };
+        const d = dampening[session.respType] || 0.7;
+
+        const maxAmplitude = Math.min(session.glTotal * 0.8 * factor * d, 120); 
+
+        // Normalized Gamma Curve: R(t) = A * (t/tp)^2 * exp( 2*(1 - t/tp) )
+        // Guarantee: exactly reaches A at t = tp
+        const normalizedT = dt / t_peak;
+        if (normalizedT > 0) {
+          const response = maxAmplitude * Math.pow(normalizedT, 2) * Math.exp(2 * (1 - normalizedT));
+          glucose += response;
+        }
+      }
+
+      // Final glucose clamp to physiologically plausible range
+      glucose = Math.min(Math.max(glucose, 40), 350);
+      glucose = Math.round(glucose * 10) / 10;
+      const zone = glucose < 70 ? "blue" : glucose <= 110 ? "green" : glucose <= 140 ? "yellow" : "red";
+      timeline.push({ time_min: t, glucose_mg_dl: glucose, zone });
+    }
+
+    // 4. Calculate stats
+    // Only calculate averages and zone hours up to the *current lived time* of the day.
+    // Do not spread into the future unknown baseline.
+    const elapsedMs = Date.now() - new Date(startDate).getTime();
+    let livedMinutes = Math.floor(elapsedMs / 60000);
+    if (livedMinutes < 0) livedMinutes = 0;
+    if (livedMinutes > MINUTES_IN_DAY) livedMinutes = MINUTES_IN_DAY;
+
+    const statsTimeline = timeline.filter(p => p.time_min <= livedMinutes);
+
+    const greenCount = statsTimeline.filter(p => p.zone === "green").length;
+    const yellowCount = statsTimeline.filter(p => p.zone === "yellow").length;
+    const redCount = statsTimeline.filter(p => p.zone === "red").length;
+    const blueCount = statsTimeline.filter(p => p.zone === "blue").length;
+    
+    // Max spike can look ahead into the predicted curve for today
+    const maxSpike = Math.max(...timeline.map(p => p.glucose_mg_dl));
+    
+    // Average only on lived timeline
+    let avgGlucose = baseline;
+    if (statsTimeline.length > 0) {
+      avgGlucose = Math.round((statsTimeline.reduce((sum, p) => sum + p.glucose_mg_dl, 0) / statsTimeline.length) * 10) / 10;
+    }
+
+    res.json({
+      success: true,
+      data: {
+        timeline,
+        meals: (meals || []).map((m: any) => ({
+          time_iso: m.logged_at,
+          food_name: m.meal_items?.[0]?.food_name || "Unknown",
+          gl: m.glycemic_load_total,
+          response: m.response_type,
+        })),
+        stats: {
+          hours_in_green: Math.round((greenCount * STEP / 60) * 10) / 10,
+          hours_in_yellow: Math.round((yellowCount * STEP / 60) * 10) / 10,
+          hours_in_red: Math.round((redCount * STEP / 60) * 10) / 10,
+          hours_in_blue: Math.round((blueCount * STEP / 60) * 10) / 10,
+          max_spike_mg_dl: maxSpike,
+          average_glucose_mg_dl: avgGlucose,
+        },
+        user_sensitivity: sensitivity,
+        baseline_mg_dl: baseline,
+      }
+    });
+  } catch (err) {
+    console.error("[handleGetGlycemicTimeline] Error:", err);
+    next(err);
   }
 }

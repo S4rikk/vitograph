@@ -1,20 +1,26 @@
 import React from "react";
 import { Pencil, Trash2 } from "lucide-react";
-import { nutrientColors, getMicronutrientColor } from "@/lib/food-diary/nutrient-colors";
+import { getMicronutrientColor } from "@/lib/food-diary/nutrient-colors";
 
 interface FoodCardProps {
-  name: string;        // "мёда" (или "Мёд", как вытащишь)
-  emoji: string;       // "🍽️" (хардкод или простая генерация, бэкенд не присылает эмодзи)
-  weight: number;      // 20
-  calories: number;    // 61
-  protein: number;     // 0.1
-  fat: number;         // 0
-  carbs: number;       // 17
-  score: number;       // 40
-  scoreReason?: string; // "Оценка" (опционально, для тултипа или логов)
-  micros?: { name: string; value: string; type: string }[]; // Парсится из <nutr>
-  time: string;        // "14:54"
-  mealId?: string;     // UUID из БД
+  name: string;
+  emoji: string;
+  weight: number;
+  // GI fields (new — from parser)
+  gi: number | null;
+  responseType: "flat" | "moderate" | "spike" | null;
+  energyHours: number | null;
+  // Legacy (kept for backward compat, NOT displayed)
+  calories: number;
+  protein: number;
+  fat: number;
+  carbs: number;
+  // Existing
+  score: number;
+  scoreReason?: string;
+  micros?: { name: string; value: string; type: string }[];
+  time: string;
+  mealId?: string;
   onDelete?: (id: string) => void;
   onEdit?: (id: string) => void;
 }
@@ -50,8 +56,18 @@ export function getEmojiForFood(foodName: string): string {
     if (lower.includes('зелен') || lower.includes('салат') || lower.includes('шпинат') || lower.includes('руккол')) return '🥬';
     if (lower.includes('овощ') || lower.includes('веган')) return '🥗';
     if (lower.includes('авокадо')) return '🥑';
+    if (lower.includes('гриб')) return '🍄';
+    if (lower.includes('кукуруз')) return '🌽';
+    if (lower.includes('перец') || lower.includes('паприк')) return '🫑';
+    if (lower.includes('баклажан')) return '🍆';
     
     // Фрукты и ягоды
+    if (lower.includes('груш')) return '🍐';
+    if (lower.includes('персик') || lower.includes('нектарин')) return '🍑';
+    if (lower.includes('арбуз')) return '🍉';
+    if (lower.includes('дын')) return '🍈';
+    if (lower.includes('кокос')) return '🥥';
+    if (lower.includes('черешн')) return '🍒';
     if (lower.includes('яблок')) return '🍎';
     if (lower.includes('бан')) return '🍌';
     if (lower.includes('апел') || lower.includes('мандар') || lower.includes('цитрус')) return '🍊';
@@ -78,9 +94,12 @@ export function getEmojiForFood(foodName: string): string {
     if (lower.includes('морожен') || lower.includes('пломбир')) return '🍦';
     if (lower.includes('торт') || lower.includes('десерт') || lower.includes('пирожн') || lower.includes('слад')) return '🍰';
     
+    // Супы
+    if (lower.includes('суп') || lower.includes('борщ') || lower.includes('щи') || lower.includes('бульон') || lower.includes('солянк')) return '🍲';
+    
     // Напитки
     if (lower.includes('коф') || lower.includes('капучин') || lower.includes('латте') || lower.includes('эспрессо')) return '☕';
-    if (lower.includes('ча') || lower.includes('матча')) return '🍵';
+    if (lower.includes('чай') || lower.includes('матча')) return '🍵';
     if (lower.includes('сок') || lower.includes('фреш') || lower.includes('напит') || lower.includes('лимонад')) return '🧃';
     if (lower.includes('вод') || lower.includes('минерал')) return '💧';
     if (lower.includes('вино')) return '🍷';
@@ -96,11 +115,59 @@ function getHealthScoreStyle(score: number) {
     return "bg-[linear-gradient(135deg,#D1FAE5,#A7F3D0)] text-[#27AE60]";
 }
 
+/** Maps response type to visual badge */
+function getResponseBadge(type: string | null) {
+  switch (type) {
+    case 'flat':
+      return { 
+        label: 'Плавная волна', 
+        icon: (
+          <svg width="20" height="16" viewBox="0 0 20 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M2 12 Q 6 9, 10 12 T 18 12" />
+          </svg>
+        ), 
+        bg: 'bg-[#ECFDF5]', text: 'text-[#059669]', border: 'border-[#A7F3D0]' 
+      };
+    case 'spike':
+      return { 
+        label: 'Сахарная игла', 
+        icon: (
+          <svg width="20" height="16" viewBox="0 0 20 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M2 12 L 8 4 L 13 10 L 18 11" />
+          </svg>
+        ), 
+        bg: 'bg-[#FEF2F2]', text: 'text-[#DC2626]', border: 'border-[#FECACA]' 
+      };
+    case 'moderate':
+    default:
+      return { 
+        label: 'Умеренный отклик', 
+        icon: (
+          <svg width="20" height="16" viewBox="0 0 20 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M2 12 Q 7 5, 12 9 T 18 11" />
+          </svg>
+        ), 
+        bg: 'bg-[#FFFBEB]', text: 'text-[#D97706]', border: 'border-[#FDE68A]' 
+      };
+  }
+}
+
+/** Maps GI value to color */
+function getGIColor(gi: number | null) {
+  if (gi === null) return { bg: 'bg-[#F1F5F9]', text: 'text-[#64748B]', label: '?', emoji: '⚪' };
+  if (gi <= 55) return { bg: 'bg-[#ECFDF5]', text: 'text-[#059669]', label: 'Низкий', emoji: '🟢' };
+  if (gi <= 69) return { bg: 'bg-[#FFFBEB]', text: 'text-[#D97706]', label: 'Средний', emoji: '🟡' };
+  return { bg: 'bg-[#FEF2F2]', text: 'text-[#DC2626]', label: 'Высокий', emoji: '🔴' };
+}
+
 
 export default function FoodCard({
   name,
   emoji,
   weight,
+  gi,
+  responseType,
+  energyHours,
   calories,
   protein,
   fat,
@@ -133,24 +200,36 @@ export default function FoodCard({
         </div>
       </div>
 
-      {/* Macros */}
+      {/* ── Glycemic Response (3 pills) ── */}
       <div className="flex gap-1.5 mb-2 justify-between">
-        <div className={`flex-1 flex flex-col items-center ${nutrientColors.calories.bg} border ${nutrientColors.calories.border} rounded-xl py-1 px-0.5`}>
-            <span className={`text-[9px] font-semibold ${nutrientColors.calories.text} uppercase tracking-wider`}>ККАЛ</span>
-            <span className={`font-bold text-[13px] ${nutrientColors.calories.label} leading-none mt-0.5`}>{calories}</span>
+        {/* GI Value */}
+        <div className={`flex-1 flex flex-col items-center justify-center ${getGIColor(gi).bg} border border-border/40 rounded-xl py-1.5 px-1 min-w-0`}>
+          <span className={`font-[800] text-[18px] ${getGIColor(gi).text} leading-none mb-1`}>{gi ?? '?'}</span>
+          <span className={`text-[9px] ${getGIColor(gi).text} opacity-80 flex items-center gap-0.5`}>
+            ГИ <span className="text-[10px] mx-0.5 leading-none">{getGIColor(gi).emoji}</span> {getGIColor(gi).label}
+          </span>
         </div>
-        <div className={`flex-1 flex flex-col items-center ${nutrientColors.protein.bg} border ${nutrientColors.protein.border} rounded-xl py-1 px-0.5`}>
-            <span className={`text-[9px] font-semibold ${nutrientColors.protein.text} uppercase tracking-wider`}>БЕЛКИ</span>
-            <span className={`font-bold text-[13px] ${nutrientColors.protein.label} leading-none mt-0.5`}>{protein}г</span>
-        </div>
-        <div className={`flex-1 flex flex-col items-center ${nutrientColors.fat.bg} border ${nutrientColors.fat.border} rounded-xl py-1 px-0.5`}>
-            <span className={`text-[9px] font-semibold ${nutrientColors.fat.text} uppercase tracking-wider`}>ЖИРЫ</span>
-            <span className={`font-bold text-[13px] ${nutrientColors.fat.label} leading-none mt-0.5`}>{fat}г</span>
-        </div>
-        <div className={`flex-1 flex flex-col items-center ${nutrientColors.carbs.bg} border ${nutrientColors.carbs.border} rounded-xl py-1 px-0.5`}>
-            <span className={`text-[9px] font-semibold ${nutrientColors.carbs.text} uppercase tracking-wider`}>УГЛЕВОДЫ</span>
-            <span className={`font-bold text-[13px] ${nutrientColors.carbs.label} leading-none mt-0.5`}>{carbs}г</span>
-        </div>
+
+        {/* Response Type */}
+        {responseType && (() => {
+          const badge = getResponseBadge(responseType);
+          return (
+            <div className={`flex-1 flex flex-col items-center justify-center ${badge.bg} border ${badge.border} rounded-xl py-1.5 px-1 min-w-0 text-center`}>
+              <div className={`mb-1 ${badge.text}`}>{badge.icon}</div>
+              <span className={`text-[9px] font-bold ${badge.text} leading-tight text-center`}>{badge.label}</span>
+            </div>
+          );
+        })()}
+
+        {/* Energy Duration */}
+        {energyHours && (
+          <div className="flex-1 flex flex-col items-center justify-center bg-[#EFF6FF] border border-[#BFDBFE] rounded-xl py-1.5 px-1 min-w-0">
+            <span className="font-[800] text-[17px] text-[#2563EB] leading-none mb-1 flex items-baseline justify-center whitespace-nowrap">
+              {energyHours}<span className="text-[12px] font-bold ml-[1px]">ч</span>
+            </span>
+            <span className="text-[9px] text-[#2563EB] opacity-70 whitespace-nowrap">энергии</span>
+          </div>
+        )}
       </div>
 
       {/* Micros */}

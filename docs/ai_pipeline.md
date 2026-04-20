@@ -1,6 +1,6 @@
 # VITOGRAPH — AI Pipeline
 
-> **Дата актуальности:** 17 апреля 2026
+> **Дата актуальности:** 19 апреля 2026
 >
 > Документация AI/LLM пайплайна: LangGraph, модели, сервисы, инструменты.
 
@@ -114,15 +114,16 @@ __start__ → agent (callModel) → shouldContinue?
 | :--------- | :------- | :-------------- |
 | `calculate_biomarker_norms` | Персонализированные нормы биомаркера через Python Core API | — (прокси к Python) |
 | `update_user_profile` | Обновление `lifestyle_markers` в JSONB | `profiles.lifestyle_markers` |
-| `log_meal` | Логирование еды: КБЖУ + 13 микронутриентов + quality score + `<meal_id/>` tag | `meal_logs`, `meal_items` |
+| `log_meal` | Логирование еды: GI + GL + response_type + 13 микронутриентов + quality score + `<meal_id/>` tag | `meal_logs`, `meal_items` |
 | `log_supplement_intake` | Логирование БАДа из протокола | `supplement_logs` |
-| `get_today_diary_summary` | Сводка дневника за сегодня (калории, макросы, список блюд) | `meal_logs` (read-only) |
-| `save_memory_fact` | Сохранение факта о пользователе в `user_memory_vectors` (pgvector) | `user_memory_vectors` |
+| `get_today_diary_summary` | Сводка дневника за сегодня (комбинированный гликемический отклик, список блюд) | `meal_logs` (read-only) |
+| `manage_health_goals` | FSM-управление целями здоровья: add, add_with_plan, remove, pause, resume, advance_step. Max 3 active. Dedup по title. | `user_active_skills` |
+| `log_assistant_action` | Внутренний (invisible): сохранение рекомендаций ассистента с dedup (cosine 0.85) | `user_memory_vectors` (type=assistant_action) |
 
 Tools экспортируются в трёх наборах:
-- `agentTools` — полный набор
-- `assistantTools` — без `log_meal`, `log_supplement_intake`
-- `diaryTools` — с `log_meal`, `log_supplement_intake`
+- `agentTools` — полный набор (7 tools)
+- `assistantTools` — `calculate_biomarker_norms`, `update_user_profile`, `get_today_diary_summary`, `manage_health_goals`, `log_assistant_action`
+- `diaryTools` — `calculate_biomarker_norms`, `update_user_profile`, `log_meal`, `log_supplement_intake`, `get_today_diary_summary`, `log_assistant_action`
 
 ---
 
@@ -204,11 +205,15 @@ Fluent builder, собирающий system prompt из секций с прио
 |:----------|:-------|:------|:----------------|
 | P0 | `withPersona()` — core persona + правила + стоп-лист | Оба | ~3500 символов |
 | P0 | `withProfile()` — профиль, ограничения, цели | Оба | ~500 символов |
+| P0 | `withActiveSkills()` — goal journeys + **темпоральный предрасчёт** (📅 День X из Y) | Оба | ~800+ символов |
+| P0 | `withGoalManagement()` — правила FSM маршрутов | Оба | ~800 символов |
+| P0 | `withCoachingMode()` — MI coaching + specialist context | Assistant | ~600 символов |
+| P0 | `withSkillDocument()` — персональный протокол (skill_document) | Оба | ~1200 символов |
+| P0 | `withDiaryMode()` / `withAssistantMode()` — правила режима | По режиму | ~300 символов |
 | P1 | `withEmotionalContext()` — Layer 3 памяти | Оба | ~300 символов |
 | P1 | `withSemanticMemory()` — Layer 2 памяти (факты) | Оба | ~600 символов |
-| P1 | `withActiveSkills()` — активные скиллы пользователя | Оба | ~800 символов |
-| P1 | `withKnowledgeBaseContext()` — релевантные статьи KB | Оба | ~1500 символов |
-| P1 | `withNutritionTargets()` — детерминированные нормы КБЖУ | Diary | ~800 символов |
+| P1 | `withPastActions()` — анти-повторы рекомендаций | Оба | ~400 символов |
+| P1 | `withGlycemicTimeline()` — Инсулиновый Сёрфинг и гликемическая зона | Diary | ~800 символов |
 | P1 | `withTodayProgress()` — сводка потребления за сегодня | Оба | ~600 символов |
 | P1 | `withLabReport()` — диагностический отчёт | Assistant | ~2000 символов |
 | P2 | `withMealLogs()` — детальный лог приёмов пищи | Diary | ~1500 символов |
@@ -224,7 +229,7 @@ Fluent builder, собирающий system prompt из секций с прио
 ### 7.1 Food Vision Analyzer
 Файл: `graph/food-vision-analyzer.ts`
 
-Фото еды → `items[]` (КБЖУ, микронутриенты, вес) + `supplements[]` + `health_reaction`.
+Фото еды → `items[]` (GI, GL, вес, макро для вычислений, 13 микронутриентов) + `supplements[]` + `health_reaction`.
 Модель: `gpt-5.4-mini` (vision). Schema: `FoodRecognitionOutputSchema`.
 
 ### 7.2 Lab Report Analyzer

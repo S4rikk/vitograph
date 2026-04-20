@@ -2,7 +2,7 @@ import React from "react";
 import { MealScoreBadge } from "./MealScoreBadge";
 import FoodCard from "./FoodCard";
 import { detectAndParseFoodLog } from "./food-log-parser";
-import { nutrientColors, getMicronutrientColor } from "@/lib/food-diary/nutrient-colors";
+import { getMicronutrientColor } from "@/lib/food-diary/nutrient-colors";
 
 type ChatMessageProps = {
   /** "user" for right-aligned, "system" for left-aligned. */
@@ -14,6 +14,10 @@ type ChatMessageProps = {
   onDelete?: (id: string) => void;
   onEdit?: (id: string) => void;
   mealMicros?: Record<string, number>;
+  /** Called when user confirms RED ZONE meal */
+  onRedZoneConfirm?: (food: string, weight: string) => void;
+  /** Called when user declines RED ZONE meal */
+  onRedZoneReject?: () => void;
 };
 
 // Logic moved to food-log-parser.ts
@@ -33,23 +37,19 @@ function parseNutrientTags(text: string) {
 
     if (match[1]) {
       // It's a <nutr> tag
-      const type = match[2];
+      const typeStr = (match[2] || "").toLowerCase();
       const content = match[3];
 
       let colorClass = "";
-
-      // 1. Check for macros
-      const lower = content.toLowerCase();
-      if (lower.includes("белок") || lower.includes("белк")) {
-        colorClass = nutrientColors.protein.text;
-      } else if (lower.includes("жир")) {
-        colorClass = nutrientColors.fat.text;
-      } else if (lower.includes("углевод")) {
-        colorClass = nutrientColors.carbs.text;
-      } else if (lower.includes("калори") || lower.includes("ккал")) {
-        colorClass = nutrientColors.calories.text;
+      if (typeStr === "red" || typeStr === "high" || typeStr === "bad") {
+        colorClass = "text-red-500 font-semibold";
+      } else if (typeStr === "yellow" || typeStr === "medium" || typeStr === "warning") {
+        colorClass = "text-yellow-600 font-semibold";
+      } else if (typeStr === "green" || typeStr === "low" || typeStr === "good") {
+        colorClass = "text-emerald-500 font-semibold";
       } else {
-        // 2. Otherwise it's a micro-nutrient — use getMicronutrientColor (same as FoodCard)
+        // Zero КБЖУ Policy: macro tags no longer expected from LLM.
+        // All other nutrient tags use micro-specific colors by content.
         const microColor = getMicronutrientColor(content);
         colorClass = microColor.text;
       }
@@ -94,8 +94,14 @@ export default function ChatMessage({
   onDelete,
   onEdit,
   mealMicros,
+  onRedZoneConfirm,
+  onRedZoneReject,
 }: ChatMessageProps) {
   const isUser = variant === "user";
+
+  // ── Detect RED ZONE confirm tag ──
+  const redZoneMatch = !isUser ? text.match(/<red_zone_confirm\s+food="([^"]*)"\s+weight="([^"]*)"\s*\/?>/) : null;
+  const cleanedText = redZoneMatch ? text.replace(/<red_zone_confirm[^>]*\/?>/g, '').trim() : text;
 
   if (!isUser) {
     const parsed = detectAndParseFoodLog(text, time);
@@ -143,7 +149,23 @@ export default function ChatMessage({
           }
         `}
       >
-        <div className="text-sm leading-relaxed whitespace-pre-wrap">{parseNutrientTags(text)}</div>
+        <div className="text-sm leading-relaxed whitespace-pre-wrap">{parseNutrientTags(cleanedText)}</div>
+        {redZoneMatch && (
+          <div className="flex gap-2 mt-3 pt-3 border-t border-border/50">
+            <button
+              onClick={() => onRedZoneConfirm?.(redZoneMatch[1], redZoneMatch[2])}
+              className="flex-1 px-3 py-2 rounded-xl bg-red-50 text-red-700 text-xs font-semibold border border-red-200 hover:bg-red-100 transition-colors"
+            >
+              🍽️ Добавить {redZoneMatch[1]}
+            </button>
+            <button
+              onClick={() => onRedZoneReject?.()}
+              className="flex-1 px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200 hover:bg-emerald-100 transition-colors"
+            >
+              💚 Подумать
+            </button>
+          </div>
+        )}
         <p
           className={`
             mt-1 text-[10px] text-right

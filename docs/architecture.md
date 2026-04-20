@@ -192,18 +192,20 @@
 
 > Stores nutritional information for various food items per 100g. 
 
-| Column        | Type              | Constraints / Notes                                                              |
-| ------------- | ----------------- | -------------------------------------------------------------------------------- |
-| `id`          | `bigint identity` | PK                                                                               |
-| `name`        | `text`            | Name of the food item (e.g., "Овсянка", "Яблоко")                                |
-| `calories`    | `numeric(6,2)`    | Calories per 100g                                                                |
-| `proteins`    | `numeric(6,2)`    | Proteins (g) per 100g                                                            |
-| `fats`        | `numeric(6,2)`    | Fats (g) per 100g                                                                |
-| `carbs`       | `numeric(6,2)`    | Carbohydrates (g) per 100g                                                       |
-| `fiber`       | `numeric(6,2)`    | Fiber (g) per 100g                                                               |
-| `micros`      | `jsonb`           | Object containing vitamins/minerals per 100g (e.g., `{"iron": 1.2, "calc": 50}`) |
-| `is_verified` | `boolean`         | Default `false` (until verified by admin/nutrition DB)                           |
-| `created_at`  | `timestamptz`     | Default `now()`                                                                  |
+| Column          | Type              | Constraints / Notes                                                              |
+| --------------- | ----------------- | -------------------------------------------------------------------------------- |
+| `id`            | `bigint identity` | PK                                                                               |
+| `name`          | `text`            | Name of the food item (e.g., "Овсянка", "Яблоко")                                |
+| `glycemic_index`| `int`             | Glycemic Index (0-100), PRIMARY METRIC for Insulin Surfing                       |
+| `glycemic_load` | `numeric(6,1)`    | Computed Glycemic Load                                                           |
+| `calories`      | `numeric(6,2)`    | (Legacy/Computational context) Calories per 100g                                 |
+| `proteins`      | `numeric(6,2)`    | (Legacy/Computational context) Proteins (g) per 100g                             |
+| `fats`          | `numeric(6,2)`    | (Legacy/Computational context) Fats (g) per 100g                                 |
+| `carbs`         | `numeric(6,2)`    | (Legacy/Computational context) Carbohydrates (g) per 100g                        |
+| `fiber`         | `numeric(6,2)`    | Fiber (g) per 100g, crucial for GI buffering math                                |
+| `micros`        | `jsonb`           | Object containing vitamins/minerals per 100g (e.g., `{"iron": 1.2, "calc": 50}`) |
+| `is_verified`   | `boolean`         | Default `false` (until verified by admin/nutrition DB)                           |
+| `created_at`    | `timestamptz`     | Default `now()`                                                                  |
 
 > **Indexes:** Trigram index on `name` for fast text search.
 
@@ -220,8 +222,9 @@
 | `food_item_id`      | `bigint`          | FK → `food_items(id)`. Nullable (if custom text entry). |
 | `raw_text`          | `text`            | Original text/audio input (e.g., "съела 200г овсянки")  |
 | `weight_g`          | `numeric(6,1)`    | Weight in grams                                         |
-| `calories_computed` | `numeric(6,1)`    | Total calories calculated for this log                  |
-| `macros_computed`   | `jsonb`           | Total macros calculated `{"p": 10, "f": 5, "c": 30}`    |
+| `glycemic_response` | `jsonb`           | AI computed glycemic reaction (zone, baseline_shift)    |
+| `calories_computed` | `numeric(6,1)`    | (Hidden context) Total calories calculated              |
+| `macros_computed`   | `jsonb`           | (Hidden context) Total macros calculated                |
 | `micros_computed`   | `jsonb`           | Total micros calculated based on weight                 |
 | `logged_at`         | `timestamptz`     | When the food was eaten                                 |
 | `created_at`        | `timestamptz`     | Default `now()`                                         |
@@ -406,7 +409,7 @@ apps/api/
         ├── graph/               # LangGraph ReAct Agent
         │   ├── builder.ts       # Graph definition + dedup interceptor + sanitizeMessages()
         │   ├── state.ts         # GraphAnnotation (messages + medicalContext)
-        │   ├── tools.ts         # 6 tools (log_meal, log_supplement, save_memory_fact, ...)
+        │   ├── tools.ts         # 7 tools (log_meal, log_supplement, manage_health_goals, log_assistant_action, ...)
         │   ├── checkpointer.ts  # PostgresSaver (persistent memory L1)
         │   ├── food-vision-analyzer.ts
         │   ├── lab-report-analyzer.ts
@@ -432,14 +435,21 @@ apps/api/
 | `POST`   | `/api/v1/ai/diagnose`                       | Diagnostic hypothesis generation                |
 | `POST`   | `/api/v1/ai/analyze-somatic`                | Nail/tongue/skin photo analysis (GPT-4o Vision) |
 | `POST`   | `/api/v1/ai/analyze-food`                   | Food photo recognition (GPT-Vision)             |
-| `POST`   | `/api/v1/ai/analyze-label`                  | Food label / ingredient analysis (E-коды, вердикт) |
+| `POST`   | `/api/v1/ai/vision/label`                   | Food label / ingredient analysis (E-коды, вердикт) |
 | `POST`   | `/api/v1/ai/analyze-lab-report`             | Premium blood test diagnostics                  |
 | `GET`    | `/api/v1/ai/lab-reports/history`            | Lab report history                              |
 | `DELETE` | `/api/v1/ai/lab-reports/history/:timestamp` | Delete a lab report                             |
 | `GET`    | `/api/v1/ai/somatic-history`                | Somatic analysis history                        |
 | `GET`    | `/api/v1/ai/nutrition-targets`              | Deterministic nutrition norms                   |
+| `GET`    | `/api/v1/ai/diary-macros`                   | Aggregated macros for a specific day            |
+| `PATCH`  | `/api/v1/ai/meal-log/:id`                   | Update meal log entry                           |
+| `DELETE` | `/api/v1/ai/meal-log/:id`                   | Delete meal log entry                           |
+| `POST`   | `/api/v1/ai/analytics/correlate-symptoms`   | Symptom-food correlation analytics              |
+| `DELETE` | `/api/v1/ai/users/me`                       | Delete user account                             |
+| `DELETE` | `/api/v1/ai/chat/history`                   | Clear chat history                              |
 | `GET`    | `/api/v1/supplements/today`                 | Today's supplement protocol + logs              |
 | `POST`   | `/api/v1/supplements/log`                   | Log supplement intake                           |
+| `DELETE` | `/api/v1/supplements/log/:id`               | Delete supplement log entry                     |
 | `POST`   | `/api/v1/integration/parse`                 | Parse PDF lab report + save to DB               |
 | `POST`   | `/api/v1/integration/parse-image`           | Parse lab report photo + save to DB (sync)      |
 | `POST`   | `/api/v1/integration/parse-image-batch`     | Parse batch photos, sync fallback (up to 10)    |

@@ -1,6 +1,6 @@
 # VITOGRAPH — Frontend Component Map
 
-> **Дата актуальности:** 6 апреля 2026 (Skill Documents & Health Goals Refactoring)
+> **Дата актуальности:** 19 апреля 2026 (обновлено: Admin Panel, Health Goals)
 >
 > Карта UI-компонентов Next.js 14+ (App Router) с описанием ответственности и зависимостей.
 
@@ -32,11 +32,11 @@ layout.tsx (RootLayout)
 | **FoodDiaryView**        | Главный экран дневника. Чат-интерфейс для логирования еды  | `messages[]`, `threadId`, `macros`, `dynamicTarget`, `dynamicMicros`        | `apiClient.chat()`, `apiClient.getNutritionTargets()`, `apiClient.getChatHistory()` |
 | **FoodInputForm**        | Поле ввода + кнопка фото + кнопка отправки                 | `onSend(text, imageBase64?)`                                                | Нет (чисто UI)                                                                      |
 | **ChatMessage**          | Рендер одного сообщения (user / system)                    | `variant`, `text`, `time`                                                   | Нет                                                                                 |
-| **DailyAllowancesPanel** | Прогресс-бары КБЖУ + раскрывающийся список микронутриентов | `consumed`, `dynamicTarget`, `dynamicMicros`, `consumedMicros`, `rationale` | Нет (презентационный, Phase 53f)                                                    |
+| **GlycemicSurfPanel**    | Интерактивная кривая, средний показатель глюкозы, пики и цветные зоны   | `timeline`, `baseline`, `zones`                                             | Нет (вычисляет графики на основе AI данных)                                         |
 | **DatePaginator**        | Переключение дат (← Сегодня →)                             | `selectedDate`, `onDateChange`                                              | Нет                                                                                 |
 | **WaterTracker**         | Трекер потребления воды                                    | `glasses`, `onAdd`, `onRemove`                                              | Supabase прямой запрос                                                              |
 | **MealScoreBadge**       | Бейдж качества приёма пищи (0-100)                         | `score`, `reason`                                                           | Нет                                                                                 |
-| **FoodCard**             | Карточка приёма пищи в чате (pills для макро, chips для микро) | `mealData`, `mealScore`, `mealReason`                                       | Нет (презентационный)                                                              |
+| **FoodCard**             | Карточка приёма пищи в чате (GI Badge, chips для микронутриентов) | `mealData`, `mealScore`, `mealReason`                                       | Нет (презентационный)                                                              |
 | **FeedbackButton**       | Кнопка отправки фидбека                                    | —                                                                           | `apiClient.submitFeedback()`                                                        |
 
 ---
@@ -120,6 +120,51 @@ layout.tsx (RootLayout)
 
 ---
 
+### 2.9 `admin/` — Админ-панель
+
+> **Доступ:** `app_metadata.role === "admin"`. Проверяется в `admin/layout.tsx`. Dark mode forced.
+
+| Компонент | Назначение | Родитель | API-зависимости |
+|:---|:---|:---|:---|
+| **AdminSidebar** | Боковое меню навигации (обзор, пользователи, фидбэк, KB, AI настройки) | `admin/layout.tsx` | Нет |
+
+#### `admin/users/` — Управление пользователями
+
+| Компонент | Назначение |
+|:---|:---|
+| **page.tsx** | Таблица пользователей (Server Component). Supabase Admin API. |
+| **UserActions** | Кнопки ban/unban, удаления, смены роли. Client component с try-catch. |
+| **AddUserModal** | Модальное окно создания пользователя. |
+| **CopyEmail** | Click-to-copy email с визуальным подтверждением. |
+| **actions.ts** | Server Actions: createUser, banUser, unbanUser, deleteUser, updateRole. |
+
+#### `admin/feedback/` — Обратная связь
+
+| Компонент | Назначение |
+|:---|:---|
+| **page.tsx** | Таблица фидбэка с фильтрацией по статусу. |
+| **StatusSelect** | Dropdown смены статуса (new/reviewed/resolved). |
+| **actions.ts** | Server Action: updateFeedbackStatus. |
+
+#### `admin/knowledge/` — База знаний (KB)
+
+| Компонент | Назначение |
+|:---|:---|
+| **page.tsx** | Список KB-документов (slug, category, статус ингестии). |
+| **AddDocumentModal** | Добавление нового документа в KB (заголовок, категория, Markdown). |
+| **DeleteDocumentButton** | Кнопка удаления с подтверждением. |
+| **actions.ts** | Server Actions: addKBDocument, deleteKBDocument. |
+
+#### `admin/ai-settings/` — Настройки AI
+
+| Компонент | Назначение |
+|:---|:---|
+| **page.tsx** | Страница настроек AI-модели. |
+| **AiSettingsForm** | Форма редактирования параметров AI (модель, temperature, имя). |
+| **actions.ts** | Server Action: updateAiSettings. |
+
+---
+
 ## 3. Граф зависимостей (Component → API)
 
 ```mermaid
@@ -130,6 +175,7 @@ graph LR
         MRV[MedicalResultsView]
         OBW[OnboardingWizard]
         DAP[DailyAllowancesPanel]
+        ADM[Admin Panel]
     end
 
     subgraph "Node.js AI (3001)"
@@ -140,6 +186,7 @@ graph LR
         NT["/ai/nutrition-targets"]
         SUPP["/supplements/today"]
         INT_PARSE["/integration/parse"]
+        LABEL["/ai/vision/label"]
     end
 
     FDV --> CHAT
@@ -150,6 +197,8 @@ graph LR
     MRV --> LAB
     MRV --> SOM
     FDV --> DAP
+    FDV --> LABEL
+    ADM --> |Supabase Admin API| ADM
 ```
 
 ---

@@ -7,7 +7,7 @@ import { detectAndParseFoodLog } from "./food-log-parser";
 import { nutrientColors } from "@/lib/food-diary/nutrient-colors";
 import FoodInputForm from "./FoodInputForm";
 import { FeedbackButton } from "./FeedbackButton";
-import DailyAllowancesPanel from "./DailyAllowancesPanel";
+import GlycemicSurfPanel from "./GlycemicSurfPanel";
 import DatePaginator from "./DatePaginator";
 import WaterTracker from "./WaterTracker";
 import { apiClient } from "@/lib/api-client";
@@ -49,11 +49,8 @@ export default function FoodDiaryView() {
   const [supabase] = useState(() => createClient());
   const [threadId] = useState("diary"); // Backend ignores this for DB but uses mode
 
-  const [consumed, setConsumed] = useState({ calories: 0, protein: 0, fat: 0, carbs: 0 });
   const [consumedMicros, setConsumedMicros] = useState<Record<string, number>>({});
-  const [dynamicTarget, setDynamicTarget] = useState({ calories: 2000, protein: 120, fat: 60, carbs: 250 });
   const [dynamicMicros, setDynamicMicros] = useState<Record<string, number>>({});
-  const [rationale, setRationale] = useState<string>("Базовая норма");
 
   // 1. Мгновенная инициализация на клиенте (Разблокирует рендер и загрузку историй!)
   useEffect(() => {
@@ -67,9 +64,7 @@ export default function FoodDiaryView() {
   const fetchGlobalNutritionTargets = useCallback(async () => {
     try {
       const aiTargets = await apiClient.getNutritionTargets();
-      if (aiTargets?.macros) setDynamicTarget(aiTargets.macros);
       if (aiTargets?.micros) setDynamicMicros(aiTargets.micros);
-      if (aiTargets?.rationale) setRationale(aiTargets.rationale);
     } catch (err) {
       console.error("Failed to load nutrition targets:", err);
     }
@@ -132,19 +127,17 @@ export default function FoodDiaryView() {
     loadHistory();
   }, [selectedDate, userTimezone]);
 
-  // Fetch macros based on the selected date
-  const fetchMacrosForDate = useCallback(async (date: Date) => {
+  // Fetch micros based on the selected date
+  const fetchDailyMicros = useCallback(async (date: Date) => {
     if (!userTimezone) return;
     try {
       const { startIso, endIso } = getTzDayBoundaries(date, userTimezone);
       console.info('[Diary] Querying macro boundaries:', { startIso, endIso });
 
       const data = await apiClient.getDiaryDailyMacros(startIso, endIso);
-      if (data && data.macros) {
-        setConsumed(data.macros);
-        setConsumedMicros(data.microsMap || {});
+      if (data && data.microsMap) {
+        setConsumedMicros(data.microsMap);
       } else {
-        setConsumed({ calories: 0, protein: 0, fat: 0, carbs: 0 });
         setConsumedMicros({});
       }
     } catch (e) {
@@ -154,13 +147,13 @@ export default function FoodDiaryView() {
 
   useEffect(() => {
     if (!isMounted || !userTimezone) return;
-    fetchMacrosForDate(selectedDate);
-  }, [selectedDate, userTimezone, isMounted, fetchMacrosForDate]);
+    fetchDailyMicros(selectedDate);
+  }, [selectedDate, userTimezone, isMounted, fetchDailyMicros]);
 
   // Re-fetch norms when profile is saved from UserProfileSheet
   useEffect(() => {
     const handler = () => {
-      fetchMacrosForDate(selectedDate);
+      fetchDailyMicros(selectedDate);
       fetchGlobalNutritionTargets(); // КРИТИЧЕСКИ ВАЖНО ДЛЯ РЕАКТИВНОСТИ
       
       // Also refresh timezone
@@ -175,7 +168,7 @@ export default function FoodDiaryView() {
     };
     window.addEventListener("profile-updated", handler);
     return () => window.removeEventListener("profile-updated", handler);
-  }, [fetchMacrosForDate, fetchGlobalNutritionTargets, selectedDate, supabase]);
+  }, [fetchDailyMicros, fetchGlobalNutritionTargets, selectedDate, supabase]);
 
   /* Auto scroll to bottom when new messages arrive or container resizes (e.g. input expands) */
   useEffect(() => {
@@ -238,7 +231,7 @@ export default function FoodDiaryView() {
         }
 
         setMessages((prev) => [...prev, aiMsg]);
-        fetchMacrosForDate(selectedDate);
+        fetchDailyMicros(selectedDate);
         window.dispatchEvent(new Event("refresh-health-goals"));
       })
       .catch((err) => {
@@ -253,8 +246,54 @@ export default function FoodDiaryView() {
       .finally(() => {
         setIsThinking(false);
       });
-  }, [threadId, fetchMacrosForDate, selectedDate]);
+  }, [threadId, fetchDailyMicros, selectedDate]);
 
+  // ── RED ZONE Handlers ─────────────────────────────────────────────
+
+  const handleRedZoneConfirm = useCallback((food: string, weight: string) => {
+    const now = new Date();
+    const time = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+    const textPayload = `Да, записывай ${food} — ${weight}г`;
+    const userMsg: Message = { id: nextId.current++, variant: "user", text: textPayload, time };
+    setMessages((prev) => [...prev, userMsg]);
+    setIsThinking(true);
+    apiClient
+      .chat(textPayload, threadId, undefined, "diary", undefined, undefined, undefined, undefined, true)
+      .then(async (payload) => {
+        const aiMsg: Message = { id: nextId.current++, variant: "system", text: payload.response, time };
+        const match = payload.response.match(/<meal_id id="([^"]+)"\s*\/>/);
+        if (match?.[1]) {
+          try {
+            const { data } = await supabase.from("meal_logs").select("micronutrients").eq("id", match[1]).single();
+            if (data?.micronutrients) aiMsg.mealMicros = data.micronutrients as Record<string, number>;
+          } catch (e) { console.error("[Diary] micros fetch error:", e); }
+        }
+        setMessages((prev) => [...prev, aiMsg]);
+        fetchDailyMicros(selectedDate);
+      })
+      .catch((err) => {
+        setMessages((prev) => [...prev, { id: nextId.current++, variant: "system", text: `⚠️ Ошибка: ${(err as Error).message}`, time }]);
+      })
+      .finally(() => setIsThinking(false));
+  }, [threadId, fetchDailyMicros, selectedDate, supabase]);
+
+  const handleRedZoneReject = useCallback(() => {
+    const now = new Date();
+    const time = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+    const textPayload = "Нет, не надо. Подберёшь здоровую альтернативу?";
+    const userMsg: Message = { id: nextId.current++, variant: "user", text: textPayload, time };
+    setMessages((prev) => [...prev, userMsg]);
+    setIsThinking(true);
+    apiClient
+      .chat(textPayload, threadId, undefined, "diary")
+      .then((payload) => {
+        setMessages((prev) => [...prev, { id: nextId.current++, variant: "system", text: payload.response, time }]);
+      })
+      .catch((err) => {
+        setMessages((prev) => [...prev, { id: nextId.current++, variant: "system", text: `⚠️ Ошибка: ${(err as Error).message}`, time }]);
+      })
+      .finally(() => setIsThinking(false));
+  }, [threadId]);
   // ── Meal Actions ──────────────────────────────────────────────────
 
   const handleDeleteMeal = useCallback(async (id: string) => {
@@ -289,11 +328,11 @@ export default function FoodDiaryView() {
       });
 
       // Refresh bars
-      fetchMacrosForDate(selectedDate);
+      fetchDailyMicros(selectedDate);
     } catch (err) {
       console.error("Failed to delete meal:", err);
     }
-  }, [apiClient, fetchMacrosForDate, selectedDate]);
+  }, [apiClient, fetchDailyMicros, selectedDate]);
 
   const handleStartEdit = useCallback((id: string) => {
     // Find current weight from messages
@@ -332,7 +371,7 @@ export default function FoodDiaryView() {
       await apiClient.updateMealLog(editingMealId, editWeight);
       
       // Phase 56 v8: STOP manual string scaling. Just refresh from the source of truth.
-      await fetchMacrosForDate(selectedDate);
+      await fetchDailyMicros(selectedDate);
       
       if (!userTimezone) return;
 
@@ -382,14 +421,11 @@ export default function FoodDiaryView() {
           className="flex-1 overflow-y-auto bg-surface-subtle flex flex-col"
         >
           <div className="shrink-0 bg-white flex flex-col pt-0">
-            <DailyAllowancesPanel 
-              consumed={consumed} 
-              consumedMicros={consumedMicros} 
-              dynamicTarget={dynamicTarget} 
-              dynamicMicros={dynamicMicros} 
-              rationale={rationale} 
+            <GlycemicSurfPanel 
               startIso={getTzDayBoundaries(selectedDate, userTimezone || "UTC").startIso}
               endIso={getTzDayBoundaries(selectedDate, userTimezone || "UTC").endIso}
+              dynamicMicros={dynamicMicros}
+              consumedMicros={consumedMicros}
             />
           </div>
 
@@ -404,6 +440,8 @@ export default function FoodDiaryView() {
               mealMicros={msg.mealMicros}
               onDelete={handleDeleteMeal}
               onEdit={handleStartEdit}
+              onRedZoneConfirm={handleRedZoneConfirm}
+              onRedZoneReject={handleRedZoneReject}
             />
           ))}
           {isThinking && (

@@ -40,6 +40,7 @@ import {
   handleUpdateMealLog,
   handleDeleteMealLog,
   handleCorrelateSymptoms,
+  handleGetGlycemicTimeline,
 } from "../../ai.controller.js";
 
 /** AI engine router — mount at /api/v1/ai */
@@ -62,6 +63,7 @@ aiRouter.delete("/lab-reports/history/:timestamp", handleDeleteLabReport);
 aiRouter.get("/somatic-history", handleGetSomaticHistory);
 aiRouter.get("/nutrition-targets", handleGetNutritionTargets);
 aiRouter.get("/diary-macros", handleGetDiaryMacros);
+aiRouter.get("/glycemic-timeline", handleGetGlycemicTimeline);
 aiRouter.post("/analytics/correlate-symptoms", handleCorrelateSymptoms);
 
 aiRouter.patch("/meal-log/:id", validate(UpdateMealLogSchema), handleUpdateMealLog);

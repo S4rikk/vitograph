@@ -131,6 +131,37 @@ export interface SomaticHistoryItem {
 
 export type SomaticHistoryResponse = Record<string, SomaticHistoryItem[]>;
 
+// ── Glycemic Timeline Types ──
+export interface GlycemicTimelinePoint {
+  time_min: number;
+  glucose_mg_dl: number;
+  zone: "green" | "yellow" | "red" | "blue";
+}
+
+export interface GlycemicMealMarker {
+  time_iso: string;
+  food_name: string;
+  gl: number | null;
+  response: string | null;
+}
+
+export interface GlycemicStats {
+  hours_in_green: number;
+  hours_in_yellow: number;
+  hours_in_red: number;
+  hours_in_blue: number;
+  max_spike_mg_dl: number;
+  average_glucose_mg_dl: number;
+}
+
+export interface GlycemicTimelineData {
+  timeline: GlycemicTimelinePoint[];
+  meals: GlycemicMealMarker[];
+  stats: GlycemicStats;
+  user_sensitivity: string;
+  baseline_mg_dl: number;
+}
+
 export interface LabelScannerOutput {
   product_name: string;
   verdict: "GREEN" | "YELLOW" | "RED";
@@ -254,6 +285,7 @@ class AiApiClient {
     nutritionalContext?: any,
     imageBase64?: string,
     onToken?: (token: string) => void,
+    redZoneConfirm?: boolean
   ): Promise<{ response: string }> {
     // Generate a default session thread if one isn't provided
     const sessionThread = threadId || `session-${Math.random().toString(36).substring(7)}`;
@@ -272,6 +304,9 @@ class AiApiClient {
       imageUrl,
       nutritionalContext,
       imageBase64,
+      redZoneConfirm,
+      localTimeStr: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+      localDateStr: new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })
     };
 
     const response = await fetch(directUrl, {
@@ -462,6 +497,14 @@ class AiApiClient {
   async getDiaryDailyMacros(startIso: string, endIso: string): Promise<any> {
     const endpoint = `/diary-macros?startDate=${encodeURIComponent(startIso)}&endDate=${encodeURIComponent(endIso)}`;
     return this.get<any>(endpoint, {});
+  }
+
+  /**
+   * Fetches the predicted glycemic response timeline for a given date range.
+   */
+  async getGlycemicTimeline(startIso: string, endIso: string): Promise<GlycemicTimelineData> {
+    const endpoint = `/glycemic-timeline?startDate=${encodeURIComponent(startIso)}&endDate=${encodeURIComponent(endIso)}`;
+    return this.get<GlycemicTimelineData>(endpoint, {});
   }
 
   /**

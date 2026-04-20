@@ -860,7 +860,7 @@ export default function UserProfileSheet({
                                                             <div className="text-[14px] text-ink-muted leading-relaxed flex gap-2 items-start">
                                                                 <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[10px] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
                                                                 <div className="space-y-2">
-                                                                    <p>Дневник — это ваш умный калькулятор питания. Сюда нужно писать (или скидывать фото) того, что вы съели. Например: "Яичница из 3 яиц с беконом и кофе". ИИ сам распознает блюдо, рассчитает скрытые КБЖУ и микронутриенты (витамины, минералы).</p>
+                                                                    <p>Дневник — это ваш умный калькулятор питания. Сюда нужно писать (или скидывать фото) того, что вы съели. Например: "Яичница из 3 яиц с беконом и кофе". ИИ сам распознает блюдо, просчитает гликемический отклик и микронутриенты (витамины, минералы).</p>
                                                                     <p>Ассистент (Айболит) — это ваш персональный коуч по здоровью. С ним можно советоваться, обсуждать ваши анализы, просить составить меню на день или жаловаться на звон в ушах. Он помнит ваш контекст и профиль.</p>
                                                                 </div>
                                                             </div>
@@ -927,7 +927,10 @@ export default function UserProfileSheet({
                                             <div className="bg-white rounded-2xl border border-divider shadow-sm overflow-hidden">
                                                 <details className="group">
                                                     <summary className="flex items-center justify-between p-5 font-semibold text-ink-main cursor-pointer list-none hover:bg-surface-muted transition-colors [&::-webkit-details-marker]:hidden">
-                                                        <span>О приложении (About)</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span>О приложении (About)</span>
+                                                            <span className="px-2 py-0.5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold uppercase tracking-widest border border-primary-200/50">v2.0</span>
+                                                        </div>
                                                         <span className="transition group-open:-rotate-180">
                                                             <svg className="w-5 h-5 text-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

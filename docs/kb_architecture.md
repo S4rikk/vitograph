@@ -1,7 +1,7 @@
 # VITOGRAPH — Knowledge Base Architecture (Health Skills)
 
-> **Дата актуальности:** 8 апреля 2026
-> **Статус:** Approved, pending implementation
+> **Дата актуальности:** 19 апреля 2026
+> **Статус:** Production ✅ (Node.js `kb.service.ts` реализован, `ChatPromptBuilder.withKnowledgeBase()` активен)
 
 ---
 

@@ -200,7 +200,7 @@ export async function createMealLog(
           create: {
             foodItemId: food.id,
             foodName: input.dishName.trim(),
-            portionGrams: input.weightGrams,
+            weightG: input.weightGrams,
             calories: totalCalories,
           },
         },

@@ -4,6 +4,15 @@ import { pythonCore } from "../lib/python-core.js";
 import { createClient } from "@supabase/supabase-js";
 import { embeddings } from "../services/memory.service.js";
 
+// ── Singleton admin Supabase client (for GI cache writes, bypasses RLS) ──
+const supabaseAdmin = (() => {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (url && key) return createClient(url, key);
+  console.warn('[tools.ts] SUPABASE_SERVICE_ROLE_KEY not set — GI cache disabled');
+  return null;
+})();
+
 /**
  * Tool for calculating dynamic biomarker norms.
  * Binds our internal pythonCore HTTP client to a LangChain tool.
@@ -83,7 +92,7 @@ export const updateProfileTool = new DynamicStructuredTool({
 
 export const logMealTool = new DynamicStructuredTool({
   name: "log_meal",
-  description: "Logs a food item into the user's daily meal diary. You MUST estimate the calories, macros, and micronutrients. You MUST ALSO evaluate the overall healthiness of the meal and provide a `meal_quality_score` (0-100) and `meal_quality_reason` based on the system instructions. NEVER leave micronutrients empty if the food contains them. After successful logging, you MUST preserve the <meal_id/> tag provided in the tool output at the end of your response.",
+  description: "Logs a food item into the user's daily meal diary. You MUST estimate calories, macros, micronutrients, AND glycemic data (glycemic_index, response_type, peak_time_min, energy_duration_hours). Evaluate meal healthiness with meal_quality_score (0-100). After successful logging, preserve the <meal_id/> tag. GLYCEMIC DATA IS CRITICAL — always provide glycemic_index and response_type for every food item.",
   schema: z.object({
     meal_type: z.enum(["breakfast", "lunch", "dinner", "snack", "drink"]).describe("The category of the meal"),
     food_name: z.string().describe("The name of the food eaten (e.g. 'Oatmeal', 'Chicken Breast')"),
@@ -95,6 +104,30 @@ export const logMealTool = new DynamicStructuredTool({
     meal_quality_score: z.number().optional().describe("REQUIRED. A score from 0-100 indicating the nutritional quality/healthiness of the meal."),
     meal_quality_reason: z.string().optional().describe("REQUIRED. A short explanation of the meal quality score in Russian."),
     source: z.string().optional().describe("Source of the log (e.g., 'photo', 'manual')"),
+    glycemic_index: z.number().min(0).max(100).optional().describe(
+      "ALWAYS PROVIDE. Estimated Glycemic Index of the food (0-100). Low: 0-55, Medium: 56-69, High: 70+. " +
+      "Use standard GI tables. For mixed meals, estimate weighted average by carb content. This field is critical for the glycemic surfing feature."
+    ),
+    insulin_index: z.number().min(0).max(150).optional().describe(
+      "Insulin Index (0-150). Only specify if significantly different from GI (e.g., dairy products have high II ~90-100 but low GI ~30). Otherwise omit."
+    ),
+    response_type: z.enum(["flat", "moderate", "spike"]).optional().describe(
+      "ALWAYS PROVIDE. Insulin response type. flat: GI < 40 (slow glucose release, steady energy). moderate: GI 40-69. spike: GI 70+ (rapid glucose surge, 'sugar needle')."
+    ),
+    peak_time_min: z.number().min(5).max(180).optional().describe(
+      "ALWAYS PROVIDE. Minutes until predicted glucose peak after eating. Typical: 15-30 for spike, 30-60 for moderate, 45-90 for flat."
+    ),
+    energy_duration_hours: z.number().min(0.5).max(8).optional().describe(
+      "ALWAYS PROVIDE. How long the food provides sustained energy in hours. High-GI: 0.5-1.5h, Low-GI: 3-6h, Protein+Fat rich: 4-8h."
+    ),
+    cooking_method: z.enum([
+      "raw", "boiled", "steamed", "fried", "grilled",
+      "baked", "deep_fried", "microwaved", "stewed", "unknown"
+    ]).optional().describe(
+      "How the food was prepared. CRITICAL for GI accuracy. " +
+      "Boiled potato GI=78, fried=95, baked=85. Al dente pasta GI=45, overcooked=65. " +
+      "Raw vegetables GI is lower than cooked. If user didn't specify, use 'unknown'."
+    ),
     micronutrients: z.object({
       vitamin_a_mcg: z.number().optional().describe("Vitamin A (mcg). DO NOT translate key."),
       vitamin_c_mg: z.number().optional().describe("Vitamin C (mg). DO NOT translate key."),
@@ -111,13 +144,35 @@ export const logMealTool = new DynamicStructuredTool({
       sodium_mg: z.number().optional().describe("Sodium (mg). DO NOT translate key.")
     }).optional().describe("Estimated vitamins and minerals based on weight. Provide absolute values. NEVER leave empty if food contains them. DO NOT TRANSLATE JSON KEYS INTO RUSSIAN.")
   }),
-  func: async ({ meal_type, food_name, weight_g, calories, protein_g, fat_g, carbs_g, micronutrients, meal_quality_score, meal_quality_reason, source }, runManager, config) => {
+  func: async ({ meal_type, food_name, weight_g, calories, protein_g, fat_g, carbs_g, micronutrients, meal_quality_score, meal_quality_reason, source, glycemic_index, insulin_index, response_type, peak_time_min, energy_duration_hours, cooking_method }, runManager, config) => {
     const userId = config?.configurable?.user_id;
     const token = config?.configurable?.token;
     const ctx = config?.configurable?.nutritionalContext;
 
     if (!userId || !token) {
       return "Error: User context not available. Cannot log meal without user auth.";
+    }
+
+    // ── RED ZONE GUARD (code-level guarantee) ──────────────────────────
+    // If meal_quality_score ≤ 40, REJECT the log and force the LLM to
+    // explain risks and ask for user confirmation first.
+    // The redZoneConfirm flag is generated by the frontend UI, NOT the LLM.
+    const isRedZoneConfirmed = config?.configurable?.redZoneConfirm === true;
+    if (meal_quality_score != null && meal_quality_score <= 40 && !isRedZoneConfirmed) {
+      const reasons = [];
+      if (glycemic_index && glycemic_index >= 70) reasons.push('high GI (sugar spike)');
+      if (cooking_method === 'deep_fried' || cooking_method === 'fried') reasons.push('fried food (trans fats, LDL cholesterol risk)');
+      if (meal_quality_reason) reasons.push(meal_quality_reason);
+      
+      return `⚠️ RED ZONE BLOCKED (score: ${meal_quality_score}/100). This meal was NOT logged yet. `
+        + `Detected risks: ${reasons.join('; ') || 'low nutritional quality'}. `
+        + `You MUST now explain to the user IN RUSSIAN why this food is harmful using vivid, accessible language. `
+        + `Describe the specific health risks (e.g., trans fats from frying damage blood vessels, high GI causes energy crash). `
+        + `Then conclude by saying: "Уверен? Если хочешь обсудить варианты замены — задай вопрос Ассистенту в соседней вкладке." Do NOT ask open-ended questions like "What do you want instead?" because this Diary mode does not support branching dialogues. `
+        + `At the END of your message, you MUST append this exact tag (replacing values): <red_zone_confirm food="${food_name}" weight="${weight_g}"/> `
+        + `If the user confirms, the system will handle the override explicitly. `
+        + `Do NOT suggest smoothing tips — that becomes an excuse for junk food. `
+        + `After logging, recommend what to eat NEXT to balance today's intake.`;
     }
 
     const supabaseUrl = process.env.SUPABASE_URL;
@@ -220,6 +275,8 @@ export const logMealTool = new DynamicStructuredTool({
       total_carbs: Number(finalCarbs.toFixed(1)),
       micronutrients: finalMicros,
       meal_quality_score: finalScore,
+      glycemic_load_total: (glycemic_index != null && finalCarbs > 0) ? Number(((glycemic_index * finalCarbs) / 100).toFixed(1)) : null,
+      response_type: response_type ?? null,
     }).select("id");
     
     if (logError || !log || log.length === 0) {
@@ -237,9 +294,34 @@ export const logMealTool = new DynamicStructuredTool({
       protein_g: Number(finalProtein.toFixed(1)),
       fat_g: Number(finalFat.toFixed(1)),
       carbs_g: Number(finalCarbs.toFixed(1)),
+      glycemic_index: glycemic_index ?? null,
+      glycemic_load: (glycemic_index != null && finalCarbs > 0) ? Number(((glycemic_index * finalCarbs) / 100).toFixed(1)) : null,
+      insulin_index: insulin_index ?? null,
+      response_type: response_type ?? null,
+      peak_time_min: peak_time_min ?? null,
+      energy_duration_hours: energy_duration_hours ?? null,
+      cooking_method: cooking_method ?? null,
     });
 
     if (itemError) return `Failed to add meal item: ${itemError.message}`;
+
+    // ── GI Cache: Save for future lookups (non-blocking) ──
+    if (glycemic_index != null && supabaseAdmin) {
+      const normalizedKey = food_name.toLowerCase().trim();
+      supabaseAdmin.from("food_glycemic_cache").upsert({
+        food_name_key: normalizedKey,
+        glycemic_index,
+        insulin_index: insulin_index ?? null,
+        response_type: response_type ?? 'moderate',
+        peak_time_min: peak_time_min ?? 30,
+        energy_duration_hours: energy_duration_hours ?? 2.0,
+        source: 'llm',
+        confidence: 0.7,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'food_name_key' })
+        .then(() => console.log(`[Tool:log_meal] GI cached for: ${normalizedKey}`))
+        .catch((err: any) => console.warn('[Tool:log_meal] GI cache write failed (non-blocking):', err));
+    }
 
     const mappingUnits: Record<string, string> = {
       "Витамин A (мкг)": "мкг", "Витамин C (мг)": "мг", "Витамин D (мкг)": "мкг",
@@ -253,7 +335,15 @@ export const logMealTool = new DynamicStructuredTool({
       return `${k} (${v.toFixed(1)}${unit})`;
     }).join(', ');
 
-    let baseResponse = `Successfully logged ${weight_g}g of ${food_name} (${finalCalories.toFixed(0)} kcal) for ${meal_type}.`;
+    const giLabel = response_type === 'spike' ? '▲ Spike' : response_type === 'flat' ? '▬ Flat' : '↗ Moderate';
+    const responseWord = response_type === 'spike' ? 'spike' : response_type === 'flat' ? 'flat' : 'moderate';
+    const energyLabel = energy_duration_hours ? `${energy_duration_hours}h energy` : '';
+
+    // ── Technical parseable line (CRITICAL for FoodCard rendering) ──
+    // Frontend parser relies on this EXACT format: "Записал [вес]г [название] | GI:[число] | [flat/moderate/spike] | [часы]ч энергии"
+    const technicalLine = `Записал ${weight_g}г ${food_name} | GI:${glycemic_index ?? '?'} | ${responseWord} | ${energy_duration_hours ?? '?'}ч энергии`;
+
+    let baseResponse = `Successfully logged ${weight_g}g of ${food_name} (GI: ${glycemic_index ?? '?'}, Response: ${giLabel}${energyLabel ? ', ' + energyLabel : ''}) for ${meal_type}. AI INSTRUCTION: Do NOT mention calories, КБЖУ, or macros (protein/fat/carbs) to the user. Focus ONLY on glycemic impact, response type, and energy duration. CRITICAL: You MUST include this EXACT technical line at the END of your response (after your human text): ${technicalLine}`;
 
     if (microsList.length > 0) {
       baseResponse += ` Micronutrients found: ${microsList}. AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker.`;
@@ -264,6 +354,11 @@ export const logMealTool = new DynamicStructuredTool({
     if (finalScore !== undefined && finalScore !== null) {
       baseResponse += ` AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="${finalScore}" reason="${finalReason || ''}" />`;
     }
+
+    // ── Post-log impact note (for direct logs where preview was skipped) ──
+    const peakEstimate = peak_time_min ?? 30;
+    const scoreVal = finalScore ?? 50;
+    baseResponse += ` AI INSTRUCTION (POST-LOG IMPACT): In your response, include a brief glycemic impact note in 1-2 natural sentences: predicted peak in ~${peakEstimate} minutes. ${scoreVal > 40 ? 'You may suggest ONE brief smoothing tip if GI is elevated. ' : 'This meal scored ' + scoreVal + '/100 (red zone). Do NOT suggest smoothing for THIS meal — instead briefly recommend what to eat NEXT to help balance today\'s intake. '}Do NOT use lists or markdown. Keep it conversational.`;
 
     baseResponse += ` <meal_id id="${logId}" />`;
 
@@ -312,7 +407,7 @@ export const log_supplement_intake_tool = new DynamicStructuredTool({
 
 export const get_today_diary_summary = new DynamicStructuredTool({
   name: "get_today_diary_summary",
-  description: "Fetches the user's food diary for today. Includes all meal logs, total calories eaten, macros, and micronutrients. ALWAYS call this tool when the user asks about their diet, calories, or what they ate today.",
+  description: "Fetches the user's food diary for today. Includes all meal logs and glycemic data. ALWAYS call this tool when the user asks about their diet or what they ate today. NEVER mention calories, КБЖУ, or macros to the user — focus on glycemic impact, response type, and energy duration.",
   schema: z.object({
     dummy: z.string().optional().describe("Optional dummy parameter to prevent empty schema errors.")
   }),
@@ -352,8 +447,8 @@ export const get_today_diary_summary = new DynamicStructuredTool({
     const { data: logs, error } = await supabase
       .from("meal_logs")
       .select(`
-        id, logged_at, meal_type, total_calories, total_protein, total_fat, total_carbs,
-        meal_items ( food_name, weight_g, calories )
+        id, logged_at, meal_type, total_carbs, glycemic_load_total, response_type,
+        meal_items ( food_name, weight_g, glycemic_index, response_type, peak_time_min, energy_duration_hours )
       `)
       .eq("user_id", userId)
       .gte("logged_at", startISO)
@@ -362,34 +457,30 @@ export const get_today_diary_summary = new DynamicStructuredTool({
     if (error) return `Failed to fetch diary: ${error.message}`;
 
     if (!logs || logs.length === 0) {
-      return JSON.stringify({ message: "You haven't logged any meals today yet.", total_calories_today: 0 });
+      return JSON.stringify({ message: "You haven't logged any meals today yet.", total_meals: 0 });
     }
 
-    let dailyCalories = 0;
-    let dailyProtein = 0;
-    let dailyFat = 0;
     let dailyCarbs = 0;
+    let dailyGL = 0;
 
     const summary = logs.map(log => {
-      dailyCalories += log.total_calories || 0;
-      dailyProtein += log.total_protein || 0;
-      dailyFat += log.total_fat || 0;
       dailyCarbs += log.total_carbs || 0;
+      dailyGL += log.glycemic_load_total || 0;
       return {
         meal_type: log.meal_type,
         time: log.logged_at,
-        calories: log.total_calories,
-        items: log.meal_items?.map((item: any) => `${item.food_name} (${item.weight_g}g, ${item.calories}kcal)`) || []
+        glycemic_load: log.glycemic_load_total,
+        response_type: log.response_type,
+        items: log.meal_items?.map((item: any) => `${item.food_name} (${item.weight_g}g, GI:${item.glycemic_index ?? '?'}, ${item.response_type ?? 'moderate'}, ${item.energy_duration_hours ?? '?'}h energy)`) || []
       };
     });
 
     return JSON.stringify({
       summary_date: startISO,
-      total_calories_today: dailyCalories,
-      total_protein_today: dailyProtein,
-      total_fat_today: dailyFat,
-      total_carbs_today: dailyCarbs,
-      meals: summary
+      total_glycemic_load_today: Math.round(dailyGL * 10) / 10,
+      total_meals: logs.length,
+      meals: summary,
+      ai_instruction: "NEVER mention calories, КБЖУ, or macros (protein/fat/carbs) to the user. Report on glycemic load, response types, and energy duration only."
     });
   }
 });
