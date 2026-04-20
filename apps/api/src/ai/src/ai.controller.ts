@@ -377,7 +377,7 @@ async function fetchUserContext(token: string, userId: string) {
   try {
     const lookbackTime = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-    const [profileRes, resultsRes, mealsRes, kbRes, suppLogsRes] = await Promise.all([
+    const [profileRes, resultsRes, mealsRes, kbRes, suppLogsRes, waterRes] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", userId).single(),
       supabase
         .from("test_results")
@@ -401,7 +401,14 @@ async function fetchUserContext(token: string, userId: string) {
         .select("*")
         .eq("user_id", userId)
         .gte("taken_at", lookbackTime.toISOString())
-        .order("taken_at", { ascending: true })
+        .order("taken_at", { ascending: true }),
+      supabase
+        .from("water_logs")
+        .select("amount_glasses")
+        .eq("user_id", userId)
+        .gte("logged_at", lookbackTime.toISOString())
+        .order("logged_at", { ascending: false })
+        .limit(1)
     ]);
 
     const result = {
@@ -410,6 +417,7 @@ async function fetchUserContext(token: string, userId: string) {
       recentMeals: mealsRes.data,
       activeKnowledgeBases: kbRes.data,
       todaySupplements: suppLogsRes.data,
+      todayWaterLogs: waterRes?.data,
       somaticData: profileRes.data?.lifestyle_markers?.somatic_data || null,
     };
 
@@ -1270,7 +1278,12 @@ export async function handleChat(
           // ── Build System Prompt via ChatPromptBuilder ─────────────
           const { ChatPromptBuilder } = await import("./prompts/chat-prompt-builder.js");
 
+          const conditions = dbContext.profile?.chronic_conditions || [];
+          const hasWaterContraindications = conditions.some((c: string) => c.toLowerCase().includes('поч') || c.toLowerCase().includes('серд') || c.toLowerCase().includes('kidney') || c.toLowerCase().includes('heart'));
+          const todayWater = dbContext?.todayWaterLogs && dbContext.todayWaterLogs.length > 0 ? dbContext.todayWaterLogs[0].amount_glasses : 0;
+
           const builder = new ChatPromptBuilder(chatMode === "diary" ? "diary" : "assistant")
+            .withWaterContext(todayWater, hasWaterContraindications)
             .withPersona(
               dbContext.profile.ai_name || 'Maya',
               userDateStr,
@@ -1582,7 +1595,12 @@ export async function handleChatStream(
           // ── Build System Prompt via ChatPromptBuilder ─────────────
           const { ChatPromptBuilder } = await import("./prompts/chat-prompt-builder.js");
 
+          const conditions = dbContext.profile?.chronic_conditions || [];
+          const hasWaterContraindications = conditions.some((c: string) => c.toLowerCase().includes('поч') || c.toLowerCase().includes('серд') || c.toLowerCase().includes('kidney') || c.toLowerCase().includes('heart'));
+          const todayWater = dbContext?.todayWaterLogs && dbContext.todayWaterLogs.length > 0 ? dbContext.todayWaterLogs[0].amount_glasses : 0;
+
           const builder = new ChatPromptBuilder(chatMode === "diary" ? "diary" : "assistant")
+            .withWaterContext(todayWater, hasWaterContraindications)
             .withPersona(
               dbContext.profile.ai_name || 'Maya',
               userDateStr,
