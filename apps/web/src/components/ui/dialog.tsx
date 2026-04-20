@@ -24,11 +24,13 @@ export function Dialog({ open, onOpenChange, children }: { open?: boolean; onOpe
 export function DialogContent({
     children,
     onPointerDownOutside,
-    onClose
+    onClose,
+    className
 }: {
     children: React.ReactNode;
     onPointerDownOutside?: (e: React.PointerEvent) => void;
     onClose?: () => void;
+    className?: string;
 }) {
 
     // Close on Escape unless prevented
@@ -55,7 +57,7 @@ export function DialogContent({
                     onClose?.();
                 }}
             />
-            <div className="relative z-[52] w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95">
+            <div className={`relative z-[52] w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95 ${className || ""}`}>
                 <button
                     onClick={() => onClose?.()}
                     className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"

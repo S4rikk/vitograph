@@ -431,14 +431,14 @@ export default function GlycemicSurfPanel({
       </div>
       {/* ── Glycemic Surfing Info Modal ──────────────────────────── */}
       <Dialog open={showInfo} onOpenChange={setShowInfo}>
-        <DialogContent onClose={() => setShowInfo(false)}>
+        <DialogContent onClose={() => setShowInfo(false)} className="sm:max-w-[600px]">
           <DialogHeader className="mb-4">
             <DialogTitle className="flex items-center gap-2 text-ink">
               <Activity className="w-5 h-5 text-blue-500" />
               Что такое Инсулиновый Сёрфинг?
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 text-sm text-ink leading-relaxed">
+          <div className="space-y-4 text-sm text-ink leading-relaxed max-h-[70vh] overflow-y-auto pr-2">
             <p>
               <strong>Инсулиновый сёрфинг</strong> — это метафоричное название для контроля уровней глюкозы и инсулина в крови. Наша цель — гладко скользить по плавным «волнам», избегая опасных сахарных цунами и резких провалов, вызванных высокоуглеводной едой.
             </p>
