@@ -251,7 +251,7 @@ export default function FoodCard({
       )}
 
       {/* Footer */}
-      <div className="flex justify-end items-center mt-auto pt-0 gap-2.5">
+      <div className="flex justify-end items-center mt-auto pt-0 gap-2.5 pr-6 sm:pr-0">
           {mealId && (
               <div className="flex gap-1.5">
                   <button 

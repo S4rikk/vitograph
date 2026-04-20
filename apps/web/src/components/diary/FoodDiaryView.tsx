@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Info } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Info, ChevronUp } from "lucide-react";
 import ChatMessage from "./ChatMessage";
 import { detectAndParseFoodLog } from "./food-log-parser";
 import { nutrientColors } from "@/lib/food-diary/nutrient-colors";
@@ -40,6 +40,7 @@ export default function FoodDiaryView() {
   const [editWeight, setEditWeight] = useState<number>(0);
   const [isUpdating, setIsUpdating] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const nextId = useRef(1000); // Start high to avoid collision with mapped history IDs
 
   // Date State for Time Machine feature
@@ -186,6 +187,18 @@ export default function FoodDiaryView() {
     resizeObserver.observe(el);
     return () => resizeObserver.disconnect();
   }, [messages]);
+
+  const handleScroll = useCallback(() => {
+    if (scrollRef.current) {
+      setShowScrollTop(scrollRef.current.scrollTop > 400);
+    }
+  }, []);
+
+  const scrollToTop = useCallback(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, []);
 
   const handleSubmit = useCallback((name: string, weight: number, nutritionalContext?: any) => {
     const now = new Date();
@@ -409,7 +422,7 @@ export default function FoodDiaryView() {
   return (
     <>
       <FeedbackButton className="z-30" />
-      <div className="flex flex-col h-[100dvh] sm:h-[85vh] sm:max-h-[1000px] sm:min-h-[750px] sm:rounded-2xl border-x sm:border border-border bg-white overflow-hidden shadow-sm">
+      <div className="relative flex flex-col h-[100dvh] sm:h-[85vh] sm:max-h-[1000px] sm:min-h-[750px] sm:rounded-2xl border-x sm:border border-border bg-white overflow-hidden shadow-sm">
         {/* ── Header & Time Machine ──────────────────────── */}
         <div className="flex flex-col bg-surface-muted px-5 pt-0 sm:pt-5 pb-2 shrink-0 z-10 border-b border-border/50">
           <DatePaginator selectedDate={selectedDate} onChange={setSelectedDate} userTimezone={userTimezone} />
@@ -418,6 +431,7 @@ export default function FoodDiaryView() {
         {/* ── Scrollable Content (Panels + Chat) ──────────────────────── */}
         <div
           ref={scrollRef}
+          onScroll={handleScroll}
           className="flex-1 overflow-y-auto bg-surface-subtle flex flex-col"
         >
           <div className="shrink-0 bg-white flex flex-col pt-0">
@@ -463,6 +477,17 @@ export default function FoodDiaryView() {
             <FoodInputForm onSubmit={handleSubmit} />
           </div>
         </div>
+
+        {/* ── Scroll to Top Button ── */}
+        {showScrollTop && (
+          <button
+            onClick={scrollToTop}
+            className="absolute bottom-[210px] sm:bottom-64 right-0.5 sm:right-4 z-40 p-2 sm:p-3 bg-white border border-border shadow-md sm:shadow-xl rounded-full text-ink-muted hover:text-primary-500 hover:bg-surface-muted transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
+            aria-label="Наверх к графику"
+          >
+            <ChevronUp className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
+        )}
       </div>
 
       {/* ── Weight Modal ── */}

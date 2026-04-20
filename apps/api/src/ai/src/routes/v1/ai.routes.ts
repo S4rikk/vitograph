@@ -41,6 +41,9 @@ import {
   handleDeleteMealLog,
   handleCorrelateSymptoms,
   handleGetGlycemicTimeline,
+  handlePushSubscribe,
+  handleWaterCronPush,
+  handlePushUnsubscribe,
 } from "../../ai.controller.js";
 
 /** AI engine router — mount at /api/v1/ai */
@@ -51,6 +54,10 @@ aiRouter.post("/chat", validate(ChatRequestSchema), handleChat);
 aiRouter.post("/chat/stream", validate(ChatRequestSchema), handleChatStream);
 aiRouter.get("/chat/history", handleGetChatHistory);
 aiRouter.delete("/chat/history", handleClearChatHistory);
+
+aiRouter.post("/push/subscribe", handlePushSubscribe);
+aiRouter.post("/push/unsubscribe", handlePushUnsubscribe);
+aiRouter.get("/cron/water-push", handleWaterCronPush);
 
 aiRouter.post("/analyze", validate(AnalyzeRequestSchema), handleAnalyze);
 aiRouter.post("/diagnose", validate(DiagnoseRequestSchema), handleDiagnose);

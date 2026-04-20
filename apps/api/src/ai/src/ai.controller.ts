@@ -3106,3 +3106,265 @@ export async function handleGetGlycemicTimeline(
     next(err);
   }
 }
+
+/**
+ * Handle PWA Web Push Subscription Registration
+ */
+export async function handlePushSubscribe(req: Request, res: Response, next: NextFunction) {
+  try {
+    // req.user is populated by requireAuth middleware
+    // @ts-ignore
+    const user = req.user;
+    if (!user || !user.id) {
+       return res.status(401).json({ success: false, error: "Unauthorized" });
+    }
+    
+    const { endpoint, keys } = req.body;
+    if (!endpoint || !keys || !keys.p256dh || !keys.auth) {
+       return res.status(400).json({ success: false, error: "Missing subscription data" });
+    }
+
+    const supabase = createClient(
+      process.env.SUPABASE_URL || "",
+      process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+      { auth: { persistSession: false } }
+    );
+
+    const { error } = await supabase.from('push_subscriptions').upsert({
+      user_id: user.id,
+      endpoint,
+      p256dh: keys.p256dh,
+      auth: keys.auth,
+    }, { onConflict: 'endpoint' });
+
+    if (error) {
+       console.error("[handlePushSubscribe] Upsert Error:", error);
+       return res.status(500).json({ success: false, error: error.message });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("[handlePushSubscribe] Catch Error:", err);
+    next(err);
+  }
+}
+
+/**
+ * Cron Endpoint for Water Push Notifications
+ * GET /api/v1/ai/cron/water-push
+ */
+export async function handleWaterCronPush(req: Request, res: Response, next: NextFunction) {
+  try {
+    const cronSecret = process.env.CRON_SECRET;
+    if (cronSecret && req.headers.authorization !== `Bearer ${cronSecret}`) {
+      return res.status(401).json({ error: "Unauthorized cron execution" });
+    }
+
+    const { createClient } = await import("@supabase/supabase-js");
+    const supabase = createClient(
+      process.env.SUPABASE_URL || "",
+      process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+      { auth: { persistSession: false } }
+    );
+
+    // Helper for timezone formatting
+    const getLocalTimeInfoForDate = (dateObjOrString: Date | string, timezone: string) => {
+      try {
+        const formatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: timezone,
+          hour12: false,
+          year: 'numeric', month: '2-digit', day: '2-digit',
+          hour: '2-digit'
+        });
+        const parts = formatter.formatToParts(new Date(dateObjOrString));
+        const df: any = {};
+        for (const p of parts) { df[p.type] = p.value; }
+        return { isoDate: `${df.year}-${df.month}-${df.day}`, hour: parseInt(df.hour, 10) || 0 };
+      } catch(e) {
+        const d = new Date(dateObjOrString);
+        return { isoDate: d.toISOString().split('T')[0], hour: d.getUTCHours() };
+      }
+    };
+
+    // 1. Fetch active push subscriptions & join timezone from profiles
+    const { data: subscriptions } = await supabase
+      .from('push_subscriptions')
+      .select('user_id, endpoint, p256dh, auth, water_retry_level, water_last_reminded_at, water_last_glasses_count, profiles(timezone, chronic_conditions)');
+      
+    if (!subscriptions || subscriptions.length === 0) {
+      return res.json({ ok: true, sent: 0, reason: "No active subscriptions" });
+    }
+
+    // Prepare webpush
+    const webpush = (await import('web-push')).default;
+    webpush.setVapidDetails(
+      'mailto:support@vitograph.com',
+      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '',
+      process.env.VAPID_PRIVATE_KEY || ''
+    );
+    const payload = JSON.stringify({ 
+      title: 'Время пить воду! 💧', 
+      body: 'Пора промочить горло, стакан воды ждет!' 
+    });
+
+    // 2. Fetch past 48 hours of water logs to guarantee timezone overlap coverage
+    const userIds = [...new Set(subscriptions.map((s: any) => s.user_id))];
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setUTCDate(twoDaysAgo.getUTCDate() - 2);
+    const { data: logs } = await supabase
+      .from('water_logs')
+      .select('user_id, amount_glasses, logged_at')
+      .in('user_id', userIds)
+      .gte('logged_at', twoDaysAgo.toISOString())
+      .order('logged_at', { ascending: false });
+
+    let sentCount = 0;
+    const now = Date.now();
+
+    for (const sub of subscriptions) {
+      const tz = (sub.profiles as any)?.timezone || 'UTC';
+      const local = getLocalTimeInfoForDate(new Date(), tz);
+
+      // 1. Local Time Guard
+      if (local.hour < 6 || local.hour >= 22) continue;
+
+      // Filter contraindications
+      const skipKeywords = ['поч', 'серд', 'kidney', 'heart'];
+      const conditions = (sub.profiles as any)?.chronic_conditions || [];
+      const hasContra = conditions.some((c: string) => 
+        skipKeywords.some(kw => c.toLowerCase().includes(kw))
+      );
+      if (hasContra) continue;
+
+      // 2. Get today's logs for this specific user in local timezone
+      const userLogs = (logs || []).filter((l: any) => 
+        l.user_id === sub.user_id && getLocalTimeInfoForDate(l.logged_at, tz).isoDate === local.isoDate
+      );
+      const latestLog = userLogs[0];
+      const todayGlasses = latestLog?.amount_glasses || 0;
+
+      let lastCount = sub.water_last_glasses_count || 0;
+      let retryLvl = sub.water_retry_level || 0;
+      let lastReminded = sub.water_last_reminded_at ? new Date(sub.water_last_reminded_at).getTime() : 0;
+
+      // 3. State Reset logic
+      let isReset = false;
+      if (todayGlasses > lastCount || (todayGlasses === 0 && lastCount > 0)) {
+        retryLvl = 0;
+        lastReminded = 0;
+        lastCount = todayGlasses;
+        isReset = true;
+      }
+
+      if (todayGlasses >= 8) {
+        if (isReset) {
+          await supabase.from('push_subscriptions').update({ water_retry_level: 0, water_last_glasses_count: todayGlasses }).eq('endpoint', sub.endpoint);
+        }
+        continue;
+      }
+
+      // 4. Calculated Target Time
+      let isTargetReached = false;
+      if (todayGlasses === 0) {
+        isTargetReached = local.hour >= 6;
+      } else {
+        const logTime = new Date(latestLog.logged_at).getTime();
+        isTargetReached = now >= logTime + 120 * 60000;
+      }
+
+      if (!isTargetReached) {
+        if (isReset) {
+          await supabase.from('push_subscriptions').update({ water_retry_level: 0, water_last_glasses_count: todayGlasses }).eq('endpoint', sub.endpoint);
+        }
+        continue;
+      }
+
+      // 5. Escalation Trigger
+      let shouldSend = false;
+      let nextLvl = retryLvl;
+
+      if (retryLvl === 0) {
+         shouldSend = true;
+         nextLvl = 1;
+      } else if (retryLvl === 1 && now >= lastReminded + 10 * 60000) {
+         shouldSend = true;
+         nextLvl = 2;
+      } else if (retryLvl === 2 && now >= lastReminded + 8 * 60000) {
+         shouldSend = true;
+         nextLvl = 3;
+      } else if (retryLvl >= 3 && now >= lastReminded + 6 * 60000) {
+         shouldSend = true;
+         nextLvl = 3;
+      }
+
+      // 6. Execute & Save State
+      if (shouldSend) {
+         try {
+           await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload);
+           sentCount++;
+           
+           await supabase.from('push_subscriptions').update({
+              water_retry_level: nextLvl,
+              water_last_reminded_at: new Date().toISOString(),
+              water_last_glasses_count: todayGlasses
+           }).eq('endpoint', sub.endpoint);
+         } catch (e: any) {
+           if (e.statusCode === 410 || e.statusCode === 404) {
+              await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+           } else {
+              console.error("[WaterPush] Send Error:", e);
+           }
+         }
+      } else if (isReset) {
+        await supabase.from('push_subscriptions').update({ water_retry_level: 0, water_last_glasses_count: todayGlasses }).eq('endpoint', sub.endpoint);
+      }
+    }
+
+    res.json({ ok: true, sent: sentCount });
+  } catch (err) {
+    console.error("[handleWaterCronPush] Error:", err);
+    next(err);
+  }
+}
+
+/**
+ * Handle PWA Web Push Subscription Removal
+ */
+export async function handlePushUnsubscribe(req: Request, res: Response, next: NextFunction) {
+  try {
+    // req.user is populated by requireAuth middleware
+    // @ts-ignore
+    const user = req.user;
+    if (!user || !user.id) {
+       return res.status(401).json({ success: false, error: "Unauthorized" });
+    }
+    
+    const { endpoint } = req.body;
+    if (!endpoint) {
+       return res.status(400).json({ success: false, error: "Missing endpoint" });
+    }
+
+    const { createClient } = await import("@supabase/supabase-js");
+    const supabase = createClient(
+      process.env.SUPABASE_URL || "",
+      process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+      { auth: { persistSession: false } }
+    );
+
+    const { error } = await supabase
+      .from('push_subscriptions')
+      .delete()
+      .eq('endpoint', endpoint)
+      .eq('user_id', user.id);
+
+    if (error) {
+       console.error("[handlePushUnsubscribe] Delete Error:", error);
+       return res.status(500).json({ success: false, error: error.message });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("[handlePushUnsubscribe] Catch Error:", err);
+    next(err);
+  }
+}
