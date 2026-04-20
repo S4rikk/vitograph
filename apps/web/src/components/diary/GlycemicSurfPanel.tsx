@@ -167,11 +167,13 @@ export default function GlycemicSurfPanel({
           <div className="flex items-center gap-2.5">
             <span className="text-2xl">🏄</span>
             <div>
-              <div className="flex items-center gap-1.5">
-                <h4 className="text-sm font-bold text-ink leading-tight">Инсулиновый сёрфинг</h4>
-                <button onClick={() => setShowInfo(true)} className="p-0.5 rounded-full hover:bg-surface-subtle transition-colors text-ink-faint hover:text-ink">
-                  <Info className="w-3.5 h-3.5" />
-                </button>
+              <div className="mb-0.5">
+                <h4 className="text-sm font-bold text-ink leading-tight">
+                  <span className="align-middle">Инсулиновый сёрфинг</span>
+                  <button onClick={() => setShowInfo(true)} className="inline-flex align-middle ml-1.5 p-0.5 rounded-full text-blue-500 bg-blue-50 hover:bg-blue-100 transition-colors shadow-sm">
+                    <Info className="w-3.5 h-3.5" strokeWidth={2.5} />
+                  </button>
+                </h4>
               </div>
               <p className="text-[10px] text-ink-faint">Гликемический отклик за день</p>
             </div>
