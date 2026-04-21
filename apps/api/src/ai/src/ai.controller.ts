@@ -3318,6 +3318,8 @@ export async function handleWaterCronPush(req: Request, res: Response, next: Nex
            await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload);
            sentCount++;
            
+           console.log(`[WaterPush] 🌊 Sent successfully to user ${sub.user_id.split('-')[0]} | retryLvl: ${nextLvl} | glasses: ${todayGlasses}`);
+
            await supabase.from('push_subscriptions').update({
               water_retry_level: nextLvl,
               water_last_reminded_at: new Date().toISOString(),
