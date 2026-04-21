@@ -192,6 +192,21 @@ export default function GlycemicSurfPanel({
         {/* ZoneStatsBar */}
         {stats && (
           <div className="mx-5 mb-4">
+            <div className="flex justify-between flex-row-reverse mb-1.5">
+              <div className="relative group flex items-center cursor-help">
+                <Info className="w-3.5 h-3.5 text-ink-muted opacity-80" />
+                <div className="absolute right-0 top-full mt-1 w-56 p-2.5 bg-gray-900 text-white text-[11px] leading-normal rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none text-left">
+                  <div className="font-bold mb-1.5">Ваши индивидуальные границы:</div>
+                  <div className="flex gap-1.5"><span className="text-emerald-400">🟢</span> Оптимально: &lt; {thresholds.greenMax} мг/дл</div>
+                  <div className="flex gap-1.5"><span className="text-amber-400">🟡</span> Повышено: до {thresholds.yellowMax} мг/дл</div>
+                  {thresholds.greenMax < 110 && (
+                    <div className="mt-1.5 pt-1.5 border-t border-gray-700/60 font-medium text-blue-300">
+                      Границы усилены вашей целью!
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
             <div className="flex h-7 rounded-full overflow-hidden border border-border/50 shadow-inner">
               {([
                 { key: "green" as const, hours: stats.hours_in_green, emoji: "🟢" },
