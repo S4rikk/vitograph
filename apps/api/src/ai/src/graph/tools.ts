@@ -106,7 +106,7 @@ export const logMealTool = new DynamicStructuredTool({
     source: z.string().optional().describe("Source of the log (e.g., 'photo', 'manual')"),
     glycemic_index: z.number().min(0).max(100).optional().describe(
       "ALWAYS PROVIDE. Estimated Glycemic Index of the food (0-100). Low: 0-55, Medium: 56-69, High: 70+. " +
-      "Use standard GI tables. For mixed meals, estimate weighted average by carb content. This field is critical for the glycemic surfing feature."
+      "Use standard GI tables. IMPORTANT: Apply biochemical modifiers! If starchy food (potato, rice, pasta) is cold/cooled, lower GI by ~25-30 down to moderate (Resistant Starch). If acid/vinegar is present, lower GI by ~15-20%. If large amounts of fat/fiber are present, lower GI by ~10%."
     ),
     insulin_index: z.number().min(0).max(150).optional().describe(
       "Insulin Index (0-150). Only specify if significantly different from GI (e.g., dairy products have high II ~90-100 but low GI ~30). Otherwise omit."
