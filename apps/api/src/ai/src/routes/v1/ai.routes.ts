@@ -57,7 +57,6 @@ aiRouter.delete("/chat/history", handleClearChatHistory);
 
 aiRouter.post("/push/subscribe", handlePushSubscribe);
 aiRouter.post("/push/unsubscribe", handlePushUnsubscribe);
-aiRouter.get("/cron/water-push", handleWaterCronPush);
 
 aiRouter.post("/analyze", validate(AnalyzeRequestSchema), handleAnalyze);
 aiRouter.post("/diagnose", validate(DiagnoseRequestSchema), handleDiagnose);

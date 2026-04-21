@@ -100,7 +100,7 @@ export function usePushNotifications(token?: string) {
       return true;
     } catch (error) {
       console.error("Error subscribing to push notifications:", error);
-      window.alert("❌ Произошла ошибка при подписке.");
+      window.alert(`❌ Ошибка подписки. Подробнее: ${error instanceof Error ? error.message : String(error)}`);
       return false;
     } finally {
       setIsPushLoading(false);

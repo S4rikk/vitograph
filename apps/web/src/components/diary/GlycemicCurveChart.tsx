@@ -8,6 +8,7 @@ interface GlycemicCurveChartProps {
   timeline: GlycemicTimelinePoint[];
   meals: GlycemicMealMarker[];
   baseline: number;
+  zoneThresholds: { greenMax: number; yellowMax: number };
 }
 
 const Y_MIN = 40;
@@ -20,18 +21,17 @@ const MIN_WINDOW_MINUTES = 360;
 const toY = (glucose: number): number =>
   SVG_H - ((Math.min(Math.max(glucose, Y_MIN), Y_MAX) - Y_MIN) / (Y_MAX - Y_MIN)) * SVG_H;
 
-/** Zone background rect configs */
-const ZONE_BANDS = [
-  { yStart: Y_MIN, yEnd: 70, fill: "rgba(59, 130, 246, 0.06)" },   // blue: hypo
-  { yStart: 70, yEnd: 110, fill: "rgba(16, 185, 129, 0.08)" },      // green: optimal
-  { yStart: 110, yEnd: 140, fill: "rgba(245, 158, 11, 0.06)" },     // yellow: elevated
-  { yStart: 140, yEnd: Y_MAX, fill: "rgba(239, 68, 68, 0.06)" },    // red: spike
-];
-
-export default function GlycemicCurveChart({ timeline, meals, baseline }: GlycemicCurveChartProps) {
+export default function GlycemicCurveChart({ timeline, meals, baseline, zoneThresholds }: GlycemicCurveChartProps) {
   const pathRef = useRef<SVGPathElement>(null);
   const areaRef = useRef<SVGPathElement>(null);
   const [isAnimated, setIsAnimated] = useState(false);
+
+  const zoneBands = useMemo(() => [
+    { yStart: Y_MIN, yEnd: 70, fill: "rgba(59, 130, 246, 0.06)" },
+    { yStart: 70, yEnd: zoneThresholds.greenMax, fill: "rgba(16, 185, 129, 0.08)" },
+    { yStart: zoneThresholds.greenMax, yEnd: zoneThresholds.yellowMax, fill: "rgba(245, 158, 11, 0.06)" },
+    { yStart: zoneThresholds.yellowMax, yEnd: Y_MAX, fill: "rgba(239, 68, 68, 0.06)" },
+  ], [zoneThresholds]);
 
   // Dynamic X-Axis scaling
   const { xMin, xMax } = useMemo(() => {
@@ -163,12 +163,12 @@ export default function GlycemicCurveChart({ timeline, meals, baseline }: Glycem
           {/* Dynamic color gradient along the curve */}
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2={SVG_H} gradientUnits="userSpaceOnUse">
             <stop offset="0" stopColor="#EF4444" />
-            <stop offset={toY(145) / SVG_H} stopColor="#EF4444" />
+            <stop offset={toY(zoneThresholds.yellowMax + 5) / SVG_H} stopColor="#EF4444" />
             
-            <stop offset={toY(135) / SVG_H} stopColor="#F59E0B" />
-            <stop offset={toY(115) / SVG_H} stopColor="#F59E0B" />
+            <stop offset={toY(zoneThresholds.yellowMax - 5) / SVG_H} stopColor="#F59E0B" />
+            <stop offset={toY(zoneThresholds.greenMax + 5) / SVG_H} stopColor="#F59E0B" />
             
-            <stop offset={toY(105) / SVG_H} stopColor="#10B981" />
+            <stop offset={toY(zoneThresholds.greenMax - 5) / SVG_H} stopColor="#10B981" />
             <stop offset={toY(75) / SVG_H} stopColor="#10B981" />
             
             <stop offset={toY(65) / SVG_H} stopColor="#3B82F6" />
@@ -199,14 +199,14 @@ export default function GlycemicCurveChart({ timeline, meals, baseline }: Glycem
           </mask>
           
           <linearGradient id="mask-gradient" x1="0" y1="0" x2="0" y2={SVG_H} gradientUnits="userSpaceOnUse">
-            <stop offset={toY(145) / SVG_H} stopColor="white" />
-            <stop offset={toY(130) / SVG_H} stopColor="black" />
+            <stop offset={toY(zoneThresholds.yellowMax + 5) / SVG_H} stopColor="white" />
+            <stop offset={toY(zoneThresholds.yellowMax - 10) / SVG_H} stopColor="black" />
             <stop offset="1" stopColor="black" />
           </linearGradient>
         </defs>
 
         {/* Zone background bands */}
-        {ZONE_BANDS.map((band, i) => {
+        {zoneBands.map((band, i) => {
           const y1 = toY(band.yEnd);
           const y2 = toY(band.yStart);
           return (

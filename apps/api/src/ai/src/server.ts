@@ -61,6 +61,11 @@ app.get("/health", (_req, res) => {
 
 // ── API Routes ──────────────────────────────────────────────────────
 
+import { handleWaterCronPush } from "./ai.controller.js";
+
+// Mount CRON jobs outside of requireAuth
+app.get("/api/v1/ai/cron/water-push", handleWaterCronPush);
+
 app.use("/api/v1/ai", requireAuth, aiRouter);
 app.use("/api/v1/supplements", requireAuth, supplementRouter);
 app.use("/api/v1/profiles", requireAuth, profilesRouter);

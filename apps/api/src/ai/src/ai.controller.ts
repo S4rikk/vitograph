@@ -2937,12 +2937,24 @@ export async function handleGetGlycemicTimeline(
       global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
-    // 1. Get user's glycemic sensitivity from profile
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("lifestyle_markers")
-      .eq("id", userId)
-      .single();
+    // 1. Fetch Profile, Meals, and Active Goals in parallel
+    const [profileResult, mealsResult, goalsResult] = await Promise.all([
+      supabase.from("profiles").select("lifestyle_markers").eq("id", userId).single(),
+      supabase.from("meal_logs")
+        .select("id, logged_at, total_calories, total_carbs, glycemic_load_total, response_type, meal_items(food_name, glycemic_index, glycemic_load, response_type, peak_time_min, energy_duration_hours, carbs_g)")
+        .eq("user_id", userId)
+        .gte("logged_at", startDate)
+        .lte("logged_at", endDate)
+        .order("logged_at", { ascending: true }),
+      supabase.from("user_active_skills")
+        .select("title, category")
+        .eq("user_id", userId)
+        .eq("status", "active")
+    ]);
+
+    const profile = profileResult.data;
+    const meals = mealsResult.data;
+    const activeGoals = goalsResult.data || [];
 
     const markers = (profile?.lifestyle_markers as Record<string, any>) || {};
     const sensitivity: string = markers.glycemic_sensitivity || "normal";
@@ -2953,19 +2965,25 @@ export async function handleGetGlycemicTimeline(
     const factor = sensitivityFactor[sensitivity] || 1.0;
     const baseline = fastingGlucose || 90;
 
-    // 2. Get all meal_logs for the date range (with GI data from meal_items)
-    const { data: meals } = await supabase
-      .from("meal_logs")
-      .select("id, logged_at, total_calories, total_carbs, glycemic_load_total, response_type, meal_items(food_name, glycemic_index, glycemic_load, response_type, peak_time_min, energy_duration_hours, carbs_g)")
-      .eq("user_id", userId)
-      .gte("logged_at", startDate)
-      .lte("logged_at", endDate)
-      .order("logged_at", { ascending: true });
-    // 3. Preprocess meals into Meal Sessions (cluster meals within 60 mins to simulate stomach buffering)
-    const SESSION_WINDOW_MINUTES = 60;
+    // --- Dynamic Zone Thresholds ---
+    const GLYCEMIC_KEYWORDS = /инсулин|глюкоз|сахар|гликем|диабет|insulin|glucose|sugar|glycem/i;
+    const hasGlycemicGoal = activeGoals.some(
+      (g: any) => GLYCEMIC_KEYWORDS.test(g.title || '') || GLYCEMIC_KEYWORDS.test(g.category || '')
+    );
+
+    let limitGreen = 110;
+    let limitYellow = 140;
+
+    if (hasGlycemicGoal) {
+      limitGreen = 100;
+      limitYellow = 125;
+    } else if (sensitivity === 'prediabetic') {
+      limitGreen = 105;
+      limitYellow = 135;
+    }
     const typeValue: Record<string, number> = { flat: 1, moderate: 2, spike: 3 };
     const valueType: Record<number, string> = { 1: 'flat', 2: 'moderate', 3: 'spike' };
-    
+
     interface MealSession {
       timeMinute: number;
       glTotal: number;
@@ -2974,45 +2992,39 @@ export async function handleGetGlycemicTimeline(
     const sessions: MealSession[] = [];
 
     if (meals && meals.length > 0) {
-      let currentSession: { timeMinute: number; glTotal: number; scoreSum: number; count: number } | null = null;
-      
       const dayStartEpoch = new Date(startDate).getTime();
       
       for (const meal of meals) {
         const mealTimeEpoch = new Date(meal.logged_at).getTime();
         const mealMinute = Math.floor((mealTimeEpoch - dayStartEpoch) / 60000);
+        
+        // Sum properties from meal items if available
+        let glSum = 0;
+        let rScoreSum = 0;
+        let headcount = 0;
+        
         const items = (meal as any).meal_items || [];
-        const firstItem = items[0];
-        const gi = firstItem?.glycemic_index || 50;
-        const gl = meal.glycemic_load_total || (gi * (meal.total_carbs || 0) / 100);
-        const rType = meal.response_type || firstItem?.response_type || 'moderate';
-        const rScore = typeValue[rType] || 2;
-
-        if (!currentSession) {
-          currentSession = { timeMinute: mealMinute, glTotal: gl, scoreSum: rScore, count: 1 };
-        } else {
-          // If within the gastric mixing window, buffer the meals together
-          if (mealMinute - currentSession.timeMinute <= SESSION_WINDOW_MINUTES) {
-            currentSession.glTotal += gl;
-            currentSession.scoreSum += rScore;
-            currentSession.count += 1;
-          } else {
-            const avgScore = Math.round(currentSession.scoreSum / currentSession.count);
-            sessions.push({
-              timeMinute: currentSession.timeMinute,
-              glTotal: currentSession.glTotal,
-              respType: valueType[avgScore] || 'moderate'
-            });
-            currentSession = { timeMinute: mealMinute, glTotal: gl, scoreSum: rScore, count: 1 };
-          }
+        for (const item of items) {
+           const gi = item.glycemic_index || 50;
+           // Default to 15g carbs if completely missing to ensure visual feedback
+           const carbs = item.carbs_g || ((meal as any).total_carbs ? (meal as any).total_carbs / Math.max(1, items.length) : 15);
+           const itemGl = item.glycemic_load || (gi * carbs / 100);
+           glSum += itemGl;
+           
+           const rType = item.response_type || 'moderate';
+           rScoreSum += typeValue[rType] || 2;
+           headcount += 1;
         }
-      }
-      if (currentSession) {
-        const avgScore = Math.round(currentSession.scoreSum / currentSession.count);
+        
+        // Final fallback chain
+        const finalGl = (meal as any).glycemic_load_total || glSum || 10;
+        const avgScore = headcount > 0 ? Math.round(rScoreSum / headcount) : 2;
+        const finalRespType = (meal as any).response_type || valueType[avgScore] || 'moderate';
+
         sessions.push({
-          timeMinute: currentSession.timeMinute,
-          glTotal: currentSession.glTotal,
-          respType: valueType[avgScore] || 'moderate'
+          timeMinute: mealMinute,
+          glTotal: finalGl,
+          respType: finalRespType
         });
       }
     }
@@ -3053,7 +3065,7 @@ export async function handleGetGlycemicTimeline(
       // Final glucose clamp to physiologically plausible range
       glucose = Math.min(Math.max(glucose, 40), 350);
       glucose = Math.round(glucose * 10) / 10;
-      const zone = glucose < 70 ? "blue" : glucose <= 110 ? "green" : glucose <= 140 ? "yellow" : "red";
+      const zone = glucose < 70 ? "blue" : glucose <= limitGreen ? "green" : glucose <= limitYellow ? "yellow" : "red";
       timeline.push({ time_min: t, glucose_mg_dl: glucose, zone });
     }
 
@@ -3101,6 +3113,7 @@ export async function handleGetGlycemicTimeline(
         },
         user_sensitivity: sensitivity,
         baseline_mg_dl: baseline,
+        zoneThresholds: { greenMax: limitGreen, yellowMax: limitYellow },
       }
     });
   } catch (err) {

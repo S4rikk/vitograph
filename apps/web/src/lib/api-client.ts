@@ -160,6 +160,7 @@ export interface GlycemicTimelineData {
   stats: GlycemicStats;
   user_sensitivity: string;
   baseline_mg_dl: number;
+  zoneThresholds?: { greenMax: number; yellowMax: number };
 }
 
 export interface LabelScannerOutput {

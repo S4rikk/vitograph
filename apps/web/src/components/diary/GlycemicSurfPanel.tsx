@@ -151,10 +151,12 @@ export default function GlycemicSurfPanel({
   const stats = timelineData?.stats;
   const hasData = timelineData && timelineData.timeline.length > 0 && timelineData.meals.length > 0;
 
+  const thresholds = timelineData?.zoneThresholds ?? { greenMax: 110, yellowMax: 140 };
+
   // Determine spike zone color for max stat
   const getSpikeZone = (mg: number) => {
-    if (mg <= 110) return ZONE_COLORS.green;
-    if (mg <= 140) return ZONE_COLORS.yellow;
+    if (mg <= thresholds.greenMax) return ZONE_COLORS.green;
+    if (mg <= thresholds.yellowMax) return ZONE_COLORS.yellow;
     return ZONE_COLORS.red;
   };
 
@@ -238,6 +240,7 @@ export default function GlycemicSurfPanel({
               timeline={timelineData!.timeline}
               meals={timelineData!.meals}
               baseline={timelineData!.baseline_mg_dl}
+              zoneThresholds={thresholds}
             />
           )}
         </div>

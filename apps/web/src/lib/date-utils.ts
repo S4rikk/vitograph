@@ -32,7 +32,13 @@ export function getTzDayBoundaries(date: Date, timeZone: string) {
  */
 export function getTzToday(timeZone: string): Date {
   const now = new Date();
-  // Note: This is purely for day/month/year comparisons in the UI.
-  // Do not use for precise GMT calculations.
-  return new Date(now.toLocaleString('en-US', { timeZone }));
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone, year: 'numeric', month: 'numeric', day: 'numeric'
+  }).formatToParts(now);
+  
+  const p: Record<string, string> = {};
+  parts.forEach(({type, value}) => p[type] = value);
+  
+  // Create a local date stripped of timezone info, solely to hold the Y/M/D values
+  return new Date(Number(p.year), Number(p.month) - 1, Number(p.day));
 }
