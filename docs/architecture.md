@@ -1,6 +1,6 @@
 # VITOGRAPH — Architecture: Database Schema & API Structure
 
-> **Последнее обновление:** 17 апреля 2026
+> **Последнее обновление:** 20 апреля 2026
 >
 > Смотрите также: [API Reference](./api_reference.md) | [Frontend Components](./frontend_components.md) | [AI Pipeline](./ai_pipeline.md)
 
@@ -241,11 +241,13 @@
 |---|---|
 | `meal_logs` | Food diary entries with `micronutrients` JSONB |
 | `meal_items` | Individual food items within a meal |
+| `water_logs` | Трекер потребления воды: `user_id`, `amount_glasses`, `logged_at`. Timezone-aware (через `getTzDayBoundaries`) |
 | `supplement_logs` | BAD intake tracking with `taken_at`, `was_on_time` |
 | `ai_chat_messages` | Chat history persistence (user/assistant messages) |
 | `feedback` | User feedback with anti-spam (`created_at` cooldown) |
 | `active_condition_knowledge_bases` | Medical condition knowledge for norm adjustments |
 | `lab_scans` | Async OCR job tracking: `PENDING → PROCESSING → COMPLETED/FAILED` |
+| `push_subscriptions` | Web Push подписки (VAPID). Хранит `endpoint`, `keys` (p256dh, auth), `user_id`, + state для адаптивных напоминаний: `water_retry_level` (0-3), `water_last_reminded_at`, `water_last_glasses_count` |
 | `user_memory_vectors` | Семантическая память: факты, предпочтения, действия ассистента. pgvector embedding (384d, HNSW). См. [memory_architecture.md](./memory_architecture.md) |
 | `user_emotional_profile` | Эмпатическая память: настроение, тренд, уровень доверия. Обновляется асинхронно через Edge Function |
 | `memory_consolidation_log` | Лог ежедневной консолидации (pending → success/failed) |
@@ -277,7 +279,8 @@
 | ---------------------- | ------------------------------------------------------------------------------------------ |
 | `biomarker_embeddings` | pgvector `vector(1536)` column for semantic search over biomarker descriptions and aliases |
 | `ai_recommendations`   | AI-generated personalized supplement / food recommendations                                |
-| `notifications`        | Alerts for re-testing, new recommendations, etc.                                           |
+
+> **Примечание:** `notifications` ранее был в Future — теперь реализован как `push_subscriptions` (Web Push VAPID) с адаптивными напоминаниями о воде.
 
 ---
 
@@ -359,7 +362,7 @@ erDiagram
 - **Role:** AI Orchestration, Chat, Food Vision, Lab Diagnostics, Somatic Analysis, Nutrition Targets.
 - **Stack:** Express, LangGraph, Vercel AI SDK, Zod.
 - **Port:** `3001`.
-- **Entry:** `server.ts` → `ai.routes.ts`, `supplement.routes.ts`, `integration.ts`.
+- **Entry:** `server.ts` → `ai.routes.ts`, `supplement.routes.ts`, `profiles.routes.ts`, `integration.ts`.
 
 ### 3.2 Python Core API (`apps/api`)
 - **Role:** Profile management, PDF/Image parsing, Dynamic Norms, Analytics, Feedback.
@@ -445,8 +448,15 @@ apps/api/
 | `PATCH`  | `/api/v1/ai/meal-log/:id`                   | Update meal log entry                           |
 | `DELETE` | `/api/v1/ai/meal-log/:id`                   | Delete meal log entry                           |
 | `POST`   | `/api/v1/ai/analytics/correlate-symptoms`   | Symptom-food correlation analytics              |
+| `GET`    | `/api/v1/ai/glycemic-timeline`              | Glycemic timeline data for Insulin Surfing panel |
+| `POST`   | `/api/v1/ai/push/subscribe`                 | Web Push подписка (VAPID endpoint + keys)       |
+| `POST`   | `/api/v1/ai/push/unsubscribe`               | Отписка от Web Push уведомлений                 |
+| `GET`    | `/api/v1/ai/cron/water-push`                | Cron: адаптивные push-напоминания о воде (1 мин интервал, эскалация 10→8→6 мин) |
 | `DELETE` | `/api/v1/ai/users/me`                       | Delete user account                             |
 | `DELETE` | `/api/v1/ai/chat/history`                   | Clear chat history                              |
+| `GET`    | `/api/v1/profiles/:userId`                  | Get user profile (Node.js proxy)                |
+| `PATCH`  | `/api/v1/profiles/:userId`                  | Update user profile                             |
+| `POST`   | `/api/v1/profiles/`                         | Create user profile (onboarding)                |
 | `GET`    | `/api/v1/supplements/today`                 | Today's supplement protocol + logs              |
 | `POST`   | `/api/v1/supplements/log`                   | Log supplement intake                           |
 | `DELETE` | `/api/v1/supplements/log/:id`               | Delete supplement log entry                     |

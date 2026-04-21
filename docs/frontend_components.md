@@ -1,6 +1,6 @@
 # VITOGRAPH — Frontend Component Map
 
-> **Дата актуальности:** 19 апреля 2026 (обновлено: Admin Panel, Health Goals)
+> **Дата актуальности:** 20 апреля 2026 (обновлено: Glycemic Surf, Push Notifications, Scroll FAB)
 >
 > Карта UI-компонентов Next.js 14+ (App Router) с описанием ответственности и зависимостей.
 
@@ -29,14 +29,15 @@ layout.tsx (RootLayout)
 
 | Компонент                | Назначение                                                 | Ключевые props / state                                                      | API-зависимости                                                                     |
 | :----------------------- | :--------------------------------------------------------- | :-------------------------------------------------------------------------- | :---------------------------------------------------------------------------------- |
-| **FoodDiaryView**        | Главный экран дневника. Чат-интерфейс для логирования еды  | `messages[]`, `threadId`, `macros`, `dynamicTarget`, `dynamicMicros`        | `apiClient.chat()`, `apiClient.getNutritionTargets()`, `apiClient.getChatHistory()` |
+| **FoodDiaryView**        | Главный экран дневника. Чат-интерфейс + **Scroll-to-Top FAB** (плавающая кнопка навигации)  | `messages[]`, `threadId`, `macros`, `dynamicTarget`, `dynamicMicros`        | `apiClient.chat()`, `apiClient.getNutritionTargets()`, `apiClient.getGlycemicTimeline()` |
 | **FoodInputForm**        | Поле ввода + кнопка фото + кнопка отправки                 | `onSend(text, imageBase64?)`                                                | Нет (чисто UI)                                                                      |
-| **ChatMessage**          | Рендер одного сообщения (user / system)                    | `variant`, `text`, `time`                                                   | Нет                                                                                 |
-| **GlycemicSurfPanel**    | Интерактивная кривая, средний показатель глюкозы, пики и цветные зоны   | `timeline`, `baseline`, `zones`                                             | Нет (вычисляет графики на основе AI данных)                                         |
+| **ChatMessage**          | Рендер одного сообщения. Поддерживает `onRedZoneConfirm/Reject` для конфирмации продуктов красной зоны   | `variant`, `text`, `time`, `mealMicros`, `onRedZoneConfirm`, `onRedZoneReject` | Нет                                                                                 |
+| **GlycemicSurfPanel**    | **Инсулиновый Сёрфинг:** интерактивная кривая, средний показатель, пики, цветные зоны, GL-бюджет, микронутриенты (~31 KB) | `timeline`, `baseline`, `zones`, `glBudget`, `micros`                       | `apiClient.getGlycemicTimeline()`, `apiClient.getNutritionTargets()`                |
+| **GlycemicCurveChart**   | SVG-кривая гликемического отклика с цветными зонами (зелёный/жёлтый/красный) | `points[]`, `zones`, `width`, `height`                                      | Нет (чисто презентационный)                                                     |
 | **DatePaginator**        | Переключение дат (← Сегодня →)                             | `selectedDate`, `onDateChange`                                              | Нет                                                                                 |
-| **WaterTracker**         | Трекер потребления воды                                    | `glasses`, `onAdd`, `onRemove`                                              | Supabase прямой запрос                                                              |
+| **WaterTracker**         | Трекер воды с push-уведомлениями (VAPID toggle: колокольчик). Optimistic UI, timezone-aware | `glasses`, `onAdd`, `onRemove`, push bell toggle                            | Supabase `water_logs`, `usePushNotifications` hook                                  |
 | **MealScoreBadge**       | Бейдж качества приёма пищи (0-100)                         | `score`, `reason`                                                           | Нет                                                                                 |
-| **FoodCard**             | Карточка приёма пищи в чате (GI Badge, chips для микронутриентов) | `mealData`, `mealScore`, `mealReason`                                       | Нет (презентационный)                                                              |
+| **FoodCard**             | Карточка приёма пищи: GI zone badge, response_type, energy_hours, микронутриентовые dot-chips, mobile `pr-6` clearance | `mealData`, `mealScore`, `mealReason`, `onEdit`, `onDelete`                 | Нет (презентационный)                                                              |
 | **FeedbackButton**       | Кнопка отправки фидбека                                    | —                                                                           | `apiClient.submitFeedback()`                                                        |
 
 ---
@@ -171,10 +172,11 @@ layout.tsx (RootLayout)
 graph LR
     subgraph Frontend
         FDV[FoodDiaryView]
+        GSP[GlycemicSurfPanel]
         AAV[AiAssistantView]
         MRV[MedicalResultsView]
         OBW[OnboardingWizard]
-        DAP[DailyAllowancesPanel]
+        WT[WaterTracker]
         ADM[Admin Panel]
     end
 
@@ -184,20 +186,25 @@ graph LR
         LAB["/ai/analyze-lab-report"]
         SOM["/ai/analyze-somatic"]
         NT["/ai/nutrition-targets"]
+        GT["/ai/glycemic-timeline"]
         SUPP["/supplements/today"]
         INT_PARSE["/integration/parse"]
         LABEL["/ai/vision/label"]
+        PUSH["/ai/push/subscribe"]
     end
 
     FDV --> CHAT
     FDV --> NT
     FDV --> FOOD
+    FDV --> GT
+    GSP --> GT
+    GSP --> NT
     AAV --> CHAT
     MRV --> INT_PARSE
     MRV --> LAB
     MRV --> SOM
-    FDV --> DAP
     FDV --> LABEL
+    WT --> PUSH
     ADM --> |Supabase Admin API| ADM
 ```
 
@@ -210,6 +217,9 @@ graph LR
 | [`nutrient-colors.ts`](file:///c:/project/VITOGRAPH/apps/web/src/lib/food-diary/nutrient-colors.ts) | Ядро цветового кодирования плашек в чате. Использует биологический/химический словарь ассоциаций + **детерминированный строковый хэшинг** для стабилизации цветов неизвестных микронутриентов. |
 | [`api-client.ts`](file:///c:/project/VITOGRAPH/apps/web/src/lib/api-client.ts)     | Единый HTTP-клиент для всех API-вызовов (20KB, ~40 методов)      |
 | [`image-utils.ts`](file:///c:/project/VITOGRAPH/apps/web/src/lib/image-utils.ts)   | Сжатие изображений (canvas → blob, max 2048px для анализов, 1024px для еды)  |
+| [`food-log-parser.ts`](file:///c:/project/VITOGRAPH/apps/web/src/components/diary/food-log-parser.ts) | Парсер food-лога из AI-ответов: извлечение `<meal_id>` тегов, маппинг на FoodCard |
 | [`health-core.ts`](file:///c:/project/VITOGRAPH/apps/web/src/types/health-core.ts) | Основные TypeScript-типы (Profile, Biomarker, MealLog, etc.)     |
 | [`middleware.ts`](file:///c:/project/VITOGRAPH/apps/web/src/middleware.ts)         | Next.js middleware для Supabase Auth (redirect неавторизованных) |
-| [`useLabScanJob.ts`](file:///c:/project/VITOGRAPH/apps/web/src/hooks/useLabScanJob.ts) 🆕 | **[NEW]** React-хук для async OCR pipeline. Управляет полным lifecycle задачи: запуск job → Supabase Realtime подписка → status tracking (`UPLOADING → PENDING → PROCESSING → COMPLETED/FAILED`) → fallback polling через 60 сек. |
+| [`useLabScanJob.ts`](file:///c:/project/VITOGRAPH/apps/web/src/hooks/useLabScanJob.ts) | React-хук для async OCR pipeline. Управляет lifecycle: `UPLOADING → PENDING → PROCESSING → COMPLETED/FAILED`. Supabase Realtime + fallback polling. |
+| [`usePushNotifications.ts`](file:///c:/project/VITOGRAPH/apps/web/src/hooks/usePushNotifications.ts) | React-хук Web Push: отслеживание состояния подписки, toggle subscribe/unsubscribe, VAPID key, Service Worker. |
+| [`use-typewriter.ts`](file:///c:/project/VITOGRAPH/apps/web/src/hooks/use-typewriter.ts) | Хук эффекта «печатная машинка» для SSE-стриминга AI-ответов. |

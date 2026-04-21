@@ -1,6 +1,6 @@
 # VITOGRAPH — Prompt Architecture
 
-> **Дата актуальности:** 19 апреля 2026 (обновлено: temporal hotfix, skills P0, deficit rule)
+> **Дата актуальности:** 20 апреля 2026 (обновлено: withGlycemicTimeline)
 
 ---
 
@@ -57,6 +57,7 @@ graph LR
 | `withNutritionTargets(targets)` | P1 | Diary | ~800 символов |
 | `withTodayProgress(meals, tz)` | P1 | Оба | ~600 символов |
 | `withFoodZones(text)` | P1 | Оба | ~300 символов |
+| `withGlycemicTimeline(timeline)` | P1 | Diary | ~800 символов |
 | `withLabReport(text)` | P1 | Assistant | ~2000 символов |
 | `withDeficitAwareRule()` | P1 | Diary | ~400 символов |
 | `withMealLogs(meals)` | P2 | Diary | ~1500 символов |

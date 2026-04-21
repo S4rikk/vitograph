@@ -1,7 +1,7 @@
 import { StateGraph, END } from "@langchain/langgraph";
 import { ChatOpenAI } from "@langchain/openai";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
-import { BaseMessage } from "@langchain/core/messages";
+import { BaseMessage, AIMessage } from "@langchain/core/messages";
 import { GraphAnnotation } from "./state.js";
 import { agentTools, assistantTools, diaryTools } from "./tools.js";
 import { checkpointer } from "./checkpointer.js";
@@ -74,7 +74,6 @@ function sanitizeMessages(messages: BaseMessage[]): BaseMessage[] {
       if (!allToolCallsAnswered) {
         // Strip tool_calls from this message — convert to plain AI message
         console.warn(`[Sanitizer] ⚠️ Removing orphaned tool_calls from AI message (${msg.tool_calls.length} calls without responses)`);
-        const { AIMessage } = require('@langchain/core/messages');
         const cleanContent = typeof msg.content === 'string' && msg.content.trim() 
           ? msg.content 
           : 'Извините, предыдущий запрос был прерван. Пожалуйста, повторите.';
@@ -174,7 +173,6 @@ async function callModel(state: typeof GraphAnnotation.State, config?: any) {
         return type !== 'tool';
       }).map(m => {
         if (m._getType?.() === 'ai' && 'tool_calls' in m && Array.isArray(m.tool_calls) && m.tool_calls.length > 0) {
-          const { AIMessage } = require('@langchain/core/messages');
           return new AIMessage(typeof m.content === 'string' ? m.content : 'Предыдущий запрос был прерван.');
         }
         return m;

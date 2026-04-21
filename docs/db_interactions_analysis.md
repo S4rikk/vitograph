@@ -1,72 +1,62 @@
 # Зависимости и Взаимодействие с Базой Данных (VITOGRAPH)
 
-> **Дата составления:** 2026-04-01
-> **Контекст:** Анализ текущих связей компонентов для подготовки к рефакторингу БД.
+> **Дата составления:** 20 апреля 2026
+> **Контекст:** Актуальная карта взаимодействия компонентов с базой данных.
 
-В проекте используется база данных **Supabase / PostgreSQL** (версия 15+). Для управления схемой и миграциями применяется **Prisma ORM**, однако доступ к данным на уровне выполнения разбит на разные подходы. Ниже приведено полное дерево зависимостей.
+В проекте используется база данных **Supabase / PostgreSQL** (версия 15+). Управление схемой осуществляется через **SQL-миграции** в директории `supabase/migrations/`. ORM **не используется** — все компоненты работают через Supabase SDK (REST/PostgREST).
 
-## 1. Топология подключений к БД (Настоящее время)
+## 1. Топология подключений к БД (Текущее состояние)
 
-Проект является монорепозиторием с разделением стека. Связь с базой происходит по трем принципиально разным паттернам:
+Проект является монорепозиторием с разделением стека. Связь с базой происходит через **два паттерна**:
 
 ### A. Next.js Frontend (`apps/web`)
-Фронтенд использует гибридный подход:
-1. **Prisma Client (`@prisma/client` + `@prisma/adapter-pg`)**
-   - **Конфиг:** `apps/web/src/lib/prisma.ts`.
-   - **Подключение:** Использует прямой `postgres://` URL (настроен через `DATABASE_URL` или Supabase Connection Pooling - Session/Transaction mode).
-   - **Использование:** В основном для мощных Server Actions и обхода RLS (через сервисный доступ) для тяжелых выборок.
-2. **Supabase JS Client (`@supabase/supabase-js`, `@supabase/ssr`)**
-   - **Подключение:** Идет по HTTP (REST API / PostgREST).
-   - **Использование:** 
-     - Supabase Auth (регистрация, логин, сессии).
-     - Storage (сохранение загруженных анализов `source_file_path`).
-     - Real-Time subscriptions (вероятно, используется для UI обновлений графиков).
-     - Клиентские запросы, защищенные автоматически через Row-Level Security (RLS) PostgreSQL. Пользовательские JWT токены пробрасывают `auth.uid()`.
+
+Фронтенд использует **Supabase JS Client** (`@supabase/supabase-js`, `@supabase/ssr`):
+- **Подключение:** HTTP (REST API / PostgREST).
+- **Использование:**
+  - Supabase Auth (регистрация, логин, сессии).
+  - Storage (сохранение загруженных анализов `source_file_path`).
+  - Supabase Realtime (`postgres_changes`) для async OCR job tracking (`lab_scans`).
+  - Прямые CRUD запросы к `profiles`, `water_logs`, `user_active_skills` — защищены автоматически через RLS (`auth.uid()`).
+  - Прокси через API-клиент (`api-client.ts`) к Node.js AI Engine и Python Core API.
 
 ### B. Python FastAPI Core API (`apps/api`)
-Слой бизнес-логики и работы с ML на Python **не использует ORM** типа SQLAlchemy.
+
+**Не использует ORM** (SQLAlchemy, Prisma и т.п.).
 - **Подключение:** `supabase.AsyncClient` из библиотеки `supabase` (Python).
-- **Конфиг:** `apps/api/core/database.py` Singleton Manager `SupabaseClientManager`.
-- **Механизм:** Все запросы в БД (repositories: `profile_repository.py`, `test_result_repository.py`) выполняются через REST HTTP-запросы к PostgREST API Supabase.
-- **Интеграция RLS:** 
-  - Роуты Python-приложения принимают Bearer JWT токен с фронтенда (содержащий `user_id`).
-  - При наличии заголовка фабрика `get_supabase_client()` создает scoped-клиент от имени юзера: `ClientOptions(headers={"Authorization": token})`.
-  - Это означает, что безопасность данных поддерживается за счет RLS на уровне БД.
+- **Конфиг:** `apps/api/core/database.py` — Singleton Manager `SupabaseClientManager`.
+- **Механизм:** Все запросы через REST HTTP к PostgREST API Supabase.
+- **Интеграция RLS:**
+  - Роуты принимают Bearer JWT токен с фронтенда.
+  - `get_supabase_client()` создает scoped-клиент от имени юзера через `ClientOptions(headers={"Authorization": token})`.
 
 ### C. Node.js AI Engine (Express) (`apps/api/src/ai`)
-Специфический сервис, работающий в основном с LangGraph и Vercel AI SDK.
-- **Связь с БД:** Полностью переведен на `@supabase/supabase-js`.
-- Prisma **не используется** в кодовой базе `src/ai`.
-- Проксирует запросы на AI-сервисы, напрямую читая/пиша в таблицы `ai_chat_messages`, `meal_logs` и др. через HTTP REST интерфейс Supabase. 
+
+- **Связь с БД:** `@supabase/supabase-js` (полностью).
+- **Прямое подключение:** `PostgresSaver` (LangGraph checkpoints) через `SUPABASE_DB_URL` (postgres:// URL напрямую, без PostgREST).
+- Напрямую читает/пишет в таблицы: `ai_chat_messages`, `meal_logs`, `meal_items`, `profiles`, `supplement_logs`, `push_subscriptions`, `water_logs`, `user_memory_vectors`, `user_emotional_profile`, `user_active_skills`, `biomarker_note_cache`.
+- Использует `web-push` для VAPID push notifications.
 
 ---
 
-## 2. Иерархия управления схемой данных (Schema Master)
+## 2. Управление схемой данных
 
-Единым источником истины (Source of Truth) для всей структуры таблиц PostgreSQL выступает **Prisma Schema**.
+**Source of Truth:** SQL-миграции в `supabase/migrations/`.
 
-- **Файл:** `C:\project\VITOGRAPH\prisma\schema.prisma`
-- Все таблицы (profiles, test_results, food_items, environment_readings, и т.д.) объявлены в этом файле.
-- **Индексы и ключи:** Присутствуют сложные композитные индексы `@@index([userId, loggedAt])` почти на всех таблицах со временными рядами для быстрой работы Time-series запросов.
-- **Связи (Relations):** Во всех таблицах настроены каскадные удаления `onDelete: Cascade` к родительской таблице `Profile` (профили удаляются → удаляются логи).
-- **Миграции/SQL:** Файл `phase51_supplement_logs.sql` и папка `supabase/migrations/` намекают, что в проекте есть ручные SQL-вмешательства (напр. триггеры, функции для RLS), которые Prisma не умеет/дополняет.
+- **Конвенция именования:** `YYYYMMDD_NNN_description.sql` (e.g. `20260419_070_add_cooking_method.sql`).
+- **Текущий последний номер:** `070`.
+- **Legacy:** Директория `apps/api/src/ai/migrations/` — устаревшая, **не используется** для новых миграций.
+- **Edge Functions и триггеры:** Определены в SQL-миграциях (RLS-политики, `pg_cron`, `pg_net`, triggers).
+
+> **Важно:** Prisma ORM **не используется** в проекте. Файл `prisma/schema.prisma` является legacy-артефактом и **не является** source of truth.
 
 ---
 
-## 3. Риски и рекомендации перед рефакторингом БД
+## 3. Ключевые риски
 
-Поскольку в проекте запланирован рефакторинг БД, следует учитывать следующие **угрозы архитектуре**:
-
-1. **Рассинхронизация Prisma и Supabase REST:**
-   - Изменение имен колонок или типов данных в `schema.prisma` потребует **ручного обновления** во всем Python-бэкенде (все файлы Pydantic-схем в `apps/api/schemas/` и репозитории в `apps/api/repositories/`), так как Python взаимодействует с БД строковыми/JSON ключами через REST, и нет строгой автогенерации типов, как это делает `Prisma Client` в TS.
-
-2. **Зависимость от Row-Level Security (RLS):**
-   - Бэкенд на Python и Next.js клиентская часть строго опираются на политику `user_id = auth.uid()`. При изменении табличных связей или создания новых таблиц необходимо вручную писать SQL RLS политики. Prisma не умеет генерировать RLS.
-   
-3. **Прямые SQL-запросы в RLS:**
-   - Если рефакторинг коснется таблицы `profiles`, необходимо проверить все политики (policies) в панели Supabase. 
-
-4. **Двойной пулинг соединений:**
-   - `apps/web` через `PrismaPg` (postgres://) и Python/Node.js через PostgREST (http://). Это хорошо масштабируется, так как нагрузка на PgBouncer (pooler) идет только с Next.js Server Actions.
-
-**Итог:** Рефакторинг должен начинаться строго с модификации `schema.prisma` -> `prisma db push` / `migrate`, далее — обновление TypeScript типов (`npx prisma generate`), и, что самое критичное — ручное обновление Pydantic-схем в папке `apps/api/schemas/` на Python.
+| Риск | Описание |
+|:--|:--|
+| **RLS-политики вручную** | При создании новых таблиц необходимо вручную писать SQL RLS-политики. Нет автогенерации. |
+| **Python Pydantic sync** | Изменение имен колонок требует ручного обновления `apps/api/schemas/` (Pydantic V2 schemas). |
+| **Двойной доступ к БД** | Node.js и Python оба пишут в `profiles`, `meal_logs` — синхронизация через RLS. |
+| **PostgresSaver direct** | Checkpointer подключается через raw postgres:// URL, минуя PostgREST и пулинг. |

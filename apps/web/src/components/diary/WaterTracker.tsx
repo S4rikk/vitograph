@@ -97,7 +97,7 @@ export default function WaterTracker({ selectedDate, userTimezone }: WaterTracke
   const isFull = glasses >= targetGlasses;
 
   return (
-    <div className="bg-transparent px-4 py-1 flex items-center justify-between w-full">
+    <div className="bg-transparent px-4 py-1 flex items-center justify-end gap-4 w-full">
       <div className="flex items-center gap-1">
         <span className="text-[1.1rem]">💧</span>
         <div className="flex items-center gap-1.5 whitespace-nowrap">

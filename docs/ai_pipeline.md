@@ -1,6 +1,6 @@
 # VITOGRAPH — AI Pipeline
 
-> **Дата актуальности:** 19 апреля 2026
+> **Дата актуальности:** 20 апреля 2026
 >
 > Документация AI/LLM пайплайна: LangGraph, модели, сервисы, инструменты.
 
@@ -286,3 +286,57 @@ Fluent builder, собирающий system prompt из секций с прио
 | `SUPABASE_DB_URL` | ⚠️ | PostgresSaver (без неё → MemorySaver fallback) |
 | `PYTHON_CORE_URL` | ✅ | Python FastAPI endpoint (default: `http://localhost:8001`) |
 | `PORT` | — | Порт Express-сервера (default: 3001) |
+| `VAPID_PUBLIC_KEY` | ✅ | VAPID public key для Web Push |
+| `VAPID_PRIVATE_KEY` | ✅ | VAPID private key для Web Push |
+| `VAPID_SUBJECT` | ✅ | VAPID subject (mailto: URI) |
+| `CRON_SECRET` | ✅ | Секрет для авторизации cron-эндпоинтов (x-cron-secret header) |
+
+---
+
+## 10. Web Push & Hydration Reminders
+
+### 10.1 Архитектура
+
+```mermaid
+graph LR
+    subgraph "Frontend (PWA)"
+        SW["Service Worker"]
+        HOOK["usePushNotifications"]
+        WT["WaterTracker UI"]
+    end
+
+    subgraph "Node.js AI Engine"
+        SUB["/push/subscribe"]
+        UNSUB["/push/unsubscribe"]
+        CRON["/cron/water-push"]
+    end
+
+    subgraph "Supabase"
+        PS[("push_subscriptions")]
+        WL[("water_logs")]
+        PR[("profiles.timezone")]
+    end
+
+    WT --> HOOK --> SUB
+    WT --> HOOK --> UNSUB
+    SUB --> PS
+    UNSUB --> PS
+    CRON --> PS
+    CRON --> WL
+    CRON --> PR
+    CRON -->|"web-push"| SW
+```
+
+### 10.2 Алгоритм адаптивных напоминаний
+
+| Retry Level | Интервал | Поведение |
+|:---|:---|:---|
+| 0 | 10 мин | Первое напоминание |
+| 1 | 8 мин | Усиление |
+| 2 | 6 мин | Максимальная частота |
+| 3+ | 6 мин | Постоянно |
+
+- **Quiet Hours:** 22:00–06:00 по локальному времени (`profiles.timezone`)
+- **Сброс:** При увеличении `water_logs` за сегодня → `retry_level = 0`
+- **Триггер:** Внешний cron (Vercel/GitHub Actions) вызывает `GET /api/v1/ai/cron/water-push` каждую 1 минуту
+- **Библиотека:** `web-push` (npm) с VAPID ключами
