@@ -358,7 +358,17 @@ export const logMealTool = new DynamicStructuredTool({
     // ── Post-log impact note (for direct logs where preview was skipped) ──
     const peakEstimate = peak_time_min ?? 30;
     const scoreVal = finalScore ?? 50;
-    baseResponse += ` AI INSTRUCTION (POST-LOG IMPACT): In your response, include a brief glycemic impact note in 1-2 natural sentences: predicted peak in ~${peakEstimate} minutes. ${scoreVal > 40 ? 'You may suggest ONE brief smoothing tip if GI is elevated. ' : 'This meal scored ' + scoreVal + '/100 (red zone). Do NOT suggest smoothing for THIS meal — instead briefly recommend what to eat NEXT to help balance today\'s intake. '}Do NOT use lists or markdown. Keep it conversational.`;
+    
+    let coachingTip = "";
+    if (scoreVal <= 40) {
+      coachingTip = `This meal scored ${scoreVal}/100 (red zone). Do NOT suggest smoothing for THIS meal — instead briefly recommend what to eat NEXT to help balance today's intake. `;
+    } else if (scoreVal < 80 && (glycemic_index ?? 0) <= 55 && (glycemic_index ?? 0) > 0) {
+      coachingTip = `The GI is good (${glycemic_index}), but the nutritional score is only ${scoreVal}/100 (likely missing protein or fiber). Briefly mention what macro is missing and suggest adding it in the next meal. `;
+    } else if (glycemic_index && glycemic_index > 55) {
+      coachingTip = `The GI is elevated (${glycemic_index}). You may suggest ONE brief smoothing tip (e.g., adding fiber/fat). `;
+    }
+
+    baseResponse += ` AI INSTRUCTION (POST-LOG IMPACT): In your response, include a brief glycemic impact note in 1-2 natural sentences: predicted peak in ~${peakEstimate} minutes. ${coachingTip}Do NOT use lists or markdown. Keep it conversational.`;
 
     baseResponse += ` <meal_id id="${logId}" />`;
 
