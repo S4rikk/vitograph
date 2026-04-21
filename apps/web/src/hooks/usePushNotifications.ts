@@ -53,9 +53,21 @@ export function usePushNotifications(token?: string) {
     }
 
     setIsPushLoading(true);
+
+    // Timeout helper
+    const withTimeout = <T>(promise: Promise<T>, ms: number, errorMsg: string): Promise<T> => {
+      const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error(errorMsg)), ms));
+      return Promise.race([promise, timeout]);
+    };
+
     try {
-      // 1. Request permission
-      const permission = await Notification.requestPermission();
+      // 1. Request permission with a long timeout (in case the prompt hangs or user stares at it)
+      const permission = await withTimeout(
+        Notification.requestPermission(),
+        60000, 
+        "Таймаут: Окно разрешений не ответило."
+      );
+      
       if (permission !== 'granted') {
          console.warn("Notification permission denied by user");
          window.alert("❌ Ошибка: Включите разрешения на уведомления в настройках браузера!");
@@ -63,19 +75,33 @@ export function usePushNotifications(token?: string) {
       }
 
       // 2. Register Service Worker
-      const registration = await navigator.serviceWorker.register('/sw.js');
-      await navigator.serviceWorker.ready;
+      let registration: ServiceWorkerRegistration;
+      try {
+        registration = await withTimeout(navigator.serviceWorker.register('/sw.js'), 10000, "Таймаут: Регистрация Service Worker зависла.");
+        await withTimeout(navigator.serviceWorker.ready, 10000, "Таймаут: Service Worker не активировался.");
+      } catch (e) {
+        throw new Error(`Service Worker Error: ${e instanceof Error ? e.message : e}`);
+      }
 
       // 3. Subscribe via PushManager
       const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
       if (!vapidPublicKey) {
-         throw new Error("NEXT_PUBLIC_VAPID_PUBLIC_KEY is not defined in environment");
+         throw new Error("NEXT_PUBLIC_VAPID_PUBLIC_KEY is missing!");
       }
 
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
-      });
+      let subscription: PushSubscription;
+      try {
+        subscription = await withTimeout(
+          registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+          }),
+          15000,
+          "Таймаут: PushManager системы не ответил. Попробуйте обновить страницу."
+        );
+      } catch (e) {
+        throw new Error(`PushManager Error: ${e instanceof Error ? e.message : e}`);
+      }
 
       // 4. Send subscription to our backend endpoint
       const bearerToken = await getBearerToken();
