@@ -2976,9 +2976,11 @@ export async function handleGetGlycemicTimeline(
     if (meals && meals.length > 0) {
       let currentSession: { timeMinute: number; glTotal: number; scoreSum: number; count: number } | null = null;
       
+      const dayStartEpoch = new Date(startDate).getTime();
+      
       for (const meal of meals) {
-        const mealTime = new Date(meal.logged_at);
-        const mealMinute = mealTime.getHours() * 60 + mealTime.getMinutes();
+        const mealTimeEpoch = new Date(meal.logged_at).getTime();
+        const mealMinute = Math.floor((mealTimeEpoch - dayStartEpoch) / 60000);
         const items = (meal as any).meal_items || [];
         const firstItem = items[0];
         const gi = firstItem?.glycemic_index || 50;

@@ -91,6 +91,26 @@ export default function GlycemicCurveChart({ timeline, meals, baseline }: Glycem
     return grids;
   }, [xMin, xMax]);
 
+  // Spline smoothing helper
+  const buildSmoothCurve = (points: {x: number, y: number}[]) => {
+    if (points.length < 2) return "";
+    let d = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = i > 0 ? points[i - 1] : points[0];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = i !== points.length - 2 ? points[i + 2] : p2;
+      
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = p1.y + (p2.y - p0.y) / 6;
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = p2.y - (p3.y - p1.y) / 6;
+      
+      d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+    }
+    return d;
+  };
+
   // Build SVG path from timeline data
   const { curvePath, areaPath } = useMemo(() => {
     if (!timeline || timeline.length === 0) return { curvePath: "", areaPath: "" };
@@ -100,7 +120,7 @@ export default function GlycemicCurveChart({ timeline, meals, baseline }: Glycem
       y: toY(p.glucose_mg_dl),
     }));
 
-    const curveD = points.map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`)).join(" ");
+    const curveD = buildSmoothCurve(points);
 
     // Area: close the path at the bottom
     const lastPoint = points[points.length - 1];
@@ -129,50 +149,30 @@ export default function GlycemicCurveChart({ timeline, meals, baseline }: Glycem
     });
   }, [curvePath]);
 
-  // Compute gradient stops based on zone distribution
   const gradientId = "glycemic-curve-gradient";
-  const gradientStops = useMemo(() => {
-    if (!timeline || timeline.length === 0) return [];
-    return timeline.map((p) => {
-      const offset = ((p.time_min - xMin) / (xMax - xMin)) * 100;
-      const colorMap: Record<string, string> = {
-        green: "#10B981",
-        yellow: "#F59E0B",
-        red: "#EF4444",
-        blue: "#3B82F6",
-      };
-      return { offset: `${offset}%`, color: colorMap[p.zone] || "#10B981" };
-    });
-  }, [timeline, xMin, xMax]);
-
-  // Simplify gradient stops — keep only zone-transition points
-  const simplifiedStops = useMemo(() => {
-    if (gradientStops.length === 0) return [];
-    const result = [gradientStops[0]];
-    for (let i = 1; i < gradientStops.length; i++) {
-      if (gradientStops[i].color !== gradientStops[i - 1].color) {
-        result.push(gradientStops[i - 1]);
-        result.push(gradientStops[i]);
-      }
-    }
-    result.push(gradientStops[gradientStops.length - 1]);
-    return result;
-  }, [gradientStops]);
 
   return (
-    <div className="w-full overflow-hidden rounded-2xl bg-white">
+    <div className="w-full rounded-2xl bg-white">
       <svg
-        viewBox={`0 0 ${SVG_W} ${SVG_H + 40}`}
+        viewBox={`0 -60 ${SVG_W} ${SVG_H + 100}`}
         width="100%"
         preserveAspectRatio="xMidYMid meet"
         className="block"
       >
         <defs>
           {/* Dynamic color gradient along the curve */}
-          <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-            {simplifiedStops.map((s, i) => (
-              <stop key={i} offset={s.offset} stopColor={s.color} />
-            ))}
+          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2={SVG_H} gradientUnits="userSpaceOnUse">
+            <stop offset="0" stopColor="#EF4444" />
+            <stop offset={toY(145) / SVG_H} stopColor="#EF4444" />
+            
+            <stop offset={toY(135) / SVG_H} stopColor="#F59E0B" />
+            <stop offset={toY(115) / SVG_H} stopColor="#F59E0B" />
+            
+            <stop offset={toY(105) / SVG_H} stopColor="#10B981" />
+            <stop offset={toY(75) / SVG_H} stopColor="#10B981" />
+            
+            <stop offset={toY(65) / SVG_H} stopColor="#3B82F6" />
+            <stop offset="1" stopColor="#3B82F6" />
           </linearGradient>
           {/* Area fill gradient (vertical) */}
           <linearGradient id="area-fill" x1="0" y1="0" x2="0" y2="1">
@@ -181,8 +181,28 @@ export default function GlycemicCurveChart({ timeline, meals, baseline }: Glycem
           </linearGradient>
           
           <clipPath id="chart-area-clip">
-            <rect x="0" y="0" width={SVG_W} height={SVG_H} />
+            <rect x="-10" y="-60" width={SVG_W + 20} height={SVG_H + 60} />
           </clipPath>
+
+          <filter id="neon-red-glow" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="4" result="blur1" />
+            <feGaussianBlur stdDeviation="12" result="blur2" />
+            <feMerge>
+              <feMergeNode in="blur2" />
+              <feMergeNode in="blur1" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          
+          <mask id="red-zone-mask" maskUnits="userSpaceOnUse" x="-100" y="-100" width={SVG_W + 200} height={SVG_H + 200}>
+            <rect x="-100" y="-100" width={SVG_W + 200} height={SVG_H + 200} fill="url(#mask-gradient)" />
+          </mask>
+          
+          <linearGradient id="mask-gradient" x1="0" y1="0" x2="0" y2={SVG_H} gradientUnits="userSpaceOnUse">
+            <stop offset={toY(145) / SVG_H} stopColor="white" />
+            <stop offset={toY(130) / SVG_H} stopColor="black" />
+            <stop offset="1" stopColor="black" />
+          </linearGradient>
         </defs>
 
         {/* Zone background bands */}
@@ -242,6 +262,23 @@ export default function GlycemicCurveChart({ timeline, meals, baseline }: Glycem
               strokeLinecap="round"
               strokeLinejoin="round"
             />
+          )}
+
+          {/* Red glow overlay (only visible in red zone) */}
+          {curvePath && (
+            <g mask="url(#red-zone-mask)">
+              <path
+                d={curvePath}
+                fill="none"
+                stroke="#EF4444"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                filter="url(#neon-red-glow)"
+                opacity={isAnimated ? 0.9 : 0}
+                className="transition-opacity duration-1000 delay-500"
+              />
+            </g>
           )}
         </g>
 
