@@ -79,8 +79,8 @@ export function usePushNotifications(token?: string) {
 
       // 4. Send subscription to our backend endpoint
       const bearerToken = await getBearerToken();
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-      const response = await fetch(`${apiUrl}/api/v1/ai/push/subscribe`, {
+      
+      const response = await fetch('/api/v1/ai/push/subscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -122,8 +122,7 @@ export function usePushNotifications(token?: string) {
       await subscription.unsubscribe();
 
       const bearerToken = await getBearerToken();
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-      const response = await fetch(`${apiUrl}/api/v1/ai/push/unsubscribe`, {
+      const response = await fetch('/api/v1/ai/push/unsubscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
