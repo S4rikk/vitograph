@@ -112,13 +112,43 @@ export default function GlycemicCurveChart({ timeline, meals, baseline, zoneThre
   };
 
   // Build SVG path from timeline data
-  const { curvePath, areaPath } = useMemo(() => {
-    if (!timeline || timeline.length === 0) return { curvePath: "", areaPath: "" };
+  const { curvePath, areaPath, redPeaks } = useMemo(() => {
+    if (!timeline || timeline.length === 0) return { curvePath: "", areaPath: "", redPeaks: [] };
 
     const points = timeline.map((p) => ({
       x: toX(p.time_min),
       y: toY(p.glucose_mg_dl),
+      mg_dl: p.glucose_mg_dl,
     }));
+
+    const peaks: {x: number, y: number}[] = [];
+    
+    // Better algorithm: Group points into "red segments" and find the absolute maximum of each segment.
+    let inRedZone = false;
+    let currentSegment: typeof points = [];
+
+    for (let i = 0; i < points.length; i++) {
+      const isRed = points[i].mg_dl >= zoneThresholds.yellowMax;
+      
+      if (isRed) {
+        inRedZone = true;
+        currentSegment.push(points[i]);
+      } else {
+        if (inRedZone && currentSegment.length > 0) {
+          // Finished a red segment! Find its peak.
+          const peakPoint = currentSegment.reduce((max, p) => p.mg_dl > max.mg_dl ? p : max, currentSegment[0]);
+          peaks.push({ x: peakPoint.x, y: peakPoint.y });
+          currentSegment = []; // reset
+        }
+        inRedZone = false;
+      }
+    }
+    
+    // Check if the timeline ended while inside a red zone
+    if (inRedZone && currentSegment.length > 0) {
+      const peakPoint = currentSegment.reduce((max, p) => p.mg_dl > max.mg_dl ? p : max, currentSegment[0]);
+      peaks.push({ x: peakPoint.x, y: peakPoint.y });
+    }
 
     const curveD = buildSmoothCurve(points);
 
@@ -127,8 +157,8 @@ export default function GlycemicCurveChart({ timeline, meals, baseline, zoneThre
     const firstPoint = points[0];
     const areaD = `${curveD} L ${lastPoint.x} ${SVG_H} L ${firstPoint.x} ${SVG_H} Z`;
 
-    return { curvePath: curveD, areaPath: areaD };
-  }, [timeline, toX]);
+    return { curvePath: curveD, areaPath: areaD, redPeaks: peaks };
+  }, [timeline, toX, zoneThresholds.yellowMax]);
 
   // Animate stroke drawing
   useEffect(() => {
@@ -152,9 +182,9 @@ export default function GlycemicCurveChart({ timeline, meals, baseline, zoneThre
   const gradientId = "glycemic-curve-gradient";
 
   return (
-    <div className="w-full rounded-2xl bg-white">
+    <div className="w-full rounded-2xl bg-white mt-1">
       <svg
-        viewBox={`0 -60 ${SVG_W} ${SVG_H + 100}`}
+        viewBox={`0 -40 ${SVG_W} ${SVG_H + 60}`}
         width="100%"
         preserveAspectRatio="xMidYMid meet"
         className="block"
@@ -179,12 +209,19 @@ export default function GlycemicCurveChart({ timeline, meals, baseline, zoneThre
             <stop offset="0%" stopColor="#10B981" stopOpacity="0.15" />
             <stop offset="100%" stopColor="#10B981" stopOpacity="0.02" />
           </linearGradient>
+
+          {/* Needle piercing gradient */}
+          <linearGradient id="needle-gradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#EF4444" stopOpacity="0" />
+            <stop offset="30%" stopColor="#EF4444" stopOpacity="1" />
+            <stop offset="100%" stopColor="#EF4444" stopOpacity="0" />
+          </linearGradient>
           
           <clipPath id="chart-area-clip">
             <rect x="-10" y="-60" width={SVG_W + 20} height={SVG_H + 60} />
           </clipPath>
 
-          <filter id="neon-red-glow" x="-100%" y="-100%" width="300%" height="300%">
+          <filter id="neon-red-glow" x="-500%" y="-500%" width="1100%" height="1100%">
             <feGaussianBlur stdDeviation="4" result="blur1" />
             <feGaussianBlur stdDeviation="12" result="blur2" />
             <feMerge>
@@ -207,7 +244,8 @@ export default function GlycemicCurveChart({ timeline, meals, baseline, zoneThre
 
         {/* Zone background bands */}
         {zoneBands.map((band, i) => {
-          const y1 = toY(band.yEnd);
+          const isTopBand = i === zoneBands.length - 1;
+          const y1 = isTopBand ? -40 : toY(band.yEnd);
           const y2 = toY(band.yStart);
           return (
             <rect key={i} x="0" y={y1} width={SVG_W} height={y2 - y1} fill={band.fill} />
@@ -230,7 +268,7 @@ export default function GlycemicCurveChart({ timeline, meals, baseline, zoneThre
           <line
             key={g.time}
             x1={toX(g.time)}
-            y1="0"
+            y1="-40"
             x2={toX(g.time)}
             y2={SVG_H}
             stroke="#E2E8F0"
@@ -240,6 +278,54 @@ export default function GlycemicCurveChart({ timeline, meals, baseline, zoneThre
         ))}
 
         <g clipPath="url(#chart-area-clip)">
+          {/* Ghost Syringe Needles for Peaks in Red Zone */}
+          {redPeaks.map((peak, i) => {
+            const h = 45; // total length of the metal needle
+            const tipY = peak.y + 15; // tip pierces slightly past the peak into the curve
+            const topY = tipY - h; // top of the metal needle
+            
+            return (
+              <g key={`syringe-group-${i}`}>
+                {/* Glowing Piercing Wound on the curve */}
+                <g 
+                  className="transition-opacity duration-[1500ms] delay-1000"
+                  opacity={isAnimated ? 1 : 0}
+                >
+                  <circle cx={peak.x} cy={peak.y} r={7} fill="#EF4444" opacity={0.7} filter="url(#neon-red-glow)" className="animate-pulse" style={{ animationDuration: "1.5s" }} />
+                  <circle cx={peak.x} cy={peak.y} r={2.5} fill="#DC2626" />
+                  {/* Expanding radar ping outward from the wound */}
+                  <circle cx={peak.x} cy={peak.y} r={8} fill="#EF4444" opacity={0.5} className="animate-ping origin-center" style={{ animationDuration: "2s", transformBox: "fill-box" }} />
+                </g>
+
+                {/* Dropping Syringe */}
+                <g
+                  className="transition-all duration-[1200ms] ease-out delay-700"
+                  style={{ 
+                    transform: isAnimated ? "translateY(0)" : "translateY(-30px)", 
+                    opacity: isAnimated ? 0.95 : 0 
+                  }}
+                >
+                  {/* Syringe Plunger/Top */}
+                  <rect x={peak.x - 2} y={topY - 14} width={4} height={3} rx={1} fill="#FCA5A5" />
+                  
+                  {/* Syringe Hub (Plastic base at the top) */}
+                  <rect x={peak.x - 4} y={topY - 11} width={8} height={4} rx={1} fill="#EF4444" />
+                  <rect x={peak.x - 3} y={topY - 7} width={6} height={7} rx={1} fill="#EF4444" />
+                  
+                  {/* Metal Needle Shaft */}
+                  <line x1={peak.x} y1={topY} x2={peak.x} y2={tipY - 4} stroke="#CBD5E1" strokeWidth="2" />
+                  <line x1={peak.x - 1} y1={topY} x2={peak.x - 1} y2={tipY - 5} stroke="#F8FAFC" strokeWidth="0.5" /> {/* Highlight */}
+                  
+                  {/* Beveled Tip (Sharp point) */}
+                  <path d={`M ${peak.x - 1} ${tipY - 5} L ${peak.x + 1} ${tipY - 5} L ${peak.x} ${tipY} Z`} fill="#94A3B8" />
+                  
+                  {/* Red warning glow behind the needle hub */}
+                  <circle cx={peak.x} cy={topY - 5} r={10} fill="#EF4444" opacity={0.15} filter="url(#neon-red-glow)" />
+                </g>
+              </g>
+            );
+          })}
+
           {/* Area fill under curve */}
           {areaPath && (
             <path
@@ -283,17 +369,17 @@ export default function GlycemicCurveChart({ timeline, meals, baseline, zoneThre
         </g>
 
         {/* "Now" marker — purple dashed vertical line */}
-        {isToday && nowMin >= xMin && nowMin <= xMax && (
+        {isToday && nowX >= 0 && nowX <= SVG_W && (
           <g>
             <line
               x1={nowX}
-              y1="0"
+              y1="-40"
               x2={nowX}
               y2={SVG_H}
-              stroke="#7C3AED"
+              stroke="#8B5CF6"
               strokeWidth="1.5"
-              strokeDasharray="6 3"
-              opacity="0.6"
+              strokeDasharray="4 4"
+              opacity="0.5"
             />
             <circle cx={nowX} cy={toY(baseline)} r="3" fill="#7C3AED" opacity="0.8" />
           </g>
@@ -313,7 +399,7 @@ export default function GlycemicCurveChart({ timeline, meals, baseline, zoneThre
             <g key={i}>
               <line
                 x1={x}
-                y1="0"
+                y1="-40"
                 x2={x}
                 y2={SVG_H}
                 stroke="#CBD5E1"

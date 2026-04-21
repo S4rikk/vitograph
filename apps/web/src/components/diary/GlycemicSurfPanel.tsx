@@ -108,6 +108,7 @@ export default function GlycemicSurfPanel({
   const [isLoading, setIsLoading] = useState(true);
   const [isMicrosExpanded, setIsMicrosExpanded] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [showThresholds, setShowThresholds] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -161,11 +162,11 @@ export default function GlycemicSurfPanel({
   };
 
   return (
-    <div className="bg-surface-muted border-b border-border p-4">
+    <div className="bg-surface-muted border-b border-border pb-1 px-1 pt-1">
       {/* ── Main Glycemic Panel ────────────────────────── */}
-      <div className="bg-white rounded-[20px] shadow-sm border border-border overflow-hidden animate-fade-in-up mb-4 mx-1 mt-1">
+      <div className="bg-white rounded-[16px] shadow-sm border border-border mx-0 mt-0 mb-1">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-3">
+        <div className="flex items-center justify-between px-3 pt-2 pb-1">
           <div className="flex items-center gap-2.5">
             <span className="text-2xl">🏄</span>
             <div>
@@ -191,22 +192,7 @@ export default function GlycemicSurfPanel({
 
         {/* ZoneStatsBar */}
         {stats && (
-          <div className="mx-5 mb-4">
-            <div className="flex justify-between flex-row-reverse mb-1.5">
-              <div className="relative group flex items-center cursor-help">
-                <Info className="w-3.5 h-3.5 text-ink-muted opacity-80" />
-                <div className="absolute right-0 top-full mt-1 w-56 p-2.5 bg-gray-900 text-white text-[11px] leading-normal rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none text-left">
-                  <div className="font-bold mb-1.5">Ваши индивидуальные границы:</div>
-                  <div className="flex gap-1.5"><span className="text-emerald-400">🟢</span> Оптимально: &lt; {thresholds.greenMax} мг/дл</div>
-                  <div className="flex gap-1.5"><span className="text-amber-400">🟡</span> Повышено: до {thresholds.yellowMax} мг/дл</div>
-                  {thresholds.greenMax < 110 && (
-                    <div className="mt-1.5 pt-1.5 border-t border-gray-700/60 font-medium text-blue-300">
-                      Границы усилены вашей целью!
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+          <div className="mx-3 mb-1">
             <div className="flex h-7 rounded-full overflow-hidden border border-border/50 shadow-inner">
               {([
                 { key: "green" as const, hours: stats.hours_in_green, emoji: "🟢" },
@@ -233,11 +219,39 @@ export default function GlycemicSurfPanel({
                 );
               })}
             </div>
+            
+            {/* Tab on Top of Graph */}
+            <div className="flex justify-end mr-6 mt-1 -mb-[3px] relative z-20 pointer-events-none">
+              <button 
+                onClick={() => setShowThresholds((p) => !p)}
+                onBlur={() => setShowThresholds(false)}
+                className="relative flex items-center cursor-pointer pointer-events-auto bg-white/95 backdrop-blur-md rounded-t-[10px] px-2 py-[3px] border-x border-t border-border/50 shadow-[0_-2px_4px_-3px_rgba(0,0,0,0.1)] outline-none"
+              >
+                <Info className="w-[10px] h-[10px] text-ink-muted opacity-80" />
+                <span className="text-[9px] text-ink-muted ml-1 font-semibold uppercase tracking-wider">Границы</span>
+                
+                {showThresholds && (
+                  <div 
+                    className="absolute top-full right-0 mt-[1px] w-56 p-2.5 bg-gray-900 text-white text-[11px] leading-normal rounded-xl shadow-xl z-50 text-left border border-gray-700/50 cursor-default shadow-[0_10px_20px_rgba(0,0,0,0.2)]"
+                    onMouseDown={(e) => e.preventDefault()} // Prevent blur when clicking inside the tooltip
+                  >
+                    <div className="font-bold mb-1.5">Ваши персональные границы:</div>
+                    <div className="flex gap-1.5"><span className="text-emerald-400">🟢</span> Оптимально: &lt; {thresholds.greenMax} мг/дл</div>
+                    <div className="flex gap-1.5"><span className="text-amber-400">🟡</span> Повышено: до {thresholds.yellowMax} мг/дл</div>
+                    {thresholds.greenMax < 110 && (
+                      <div className="mt-1.5 pt-1.5 border-t border-gray-700/60 font-medium text-blue-300">
+                        Границы усилены вашей целью!
+                      </div>
+                    )}
+                  </div>
+                )}
+              </button>
+            </div>
           </div>
         )}
 
         {/* SVG Chart or Loading/Empty State */}
-        <div className="px-4 pb-3">
+        <div className="px-1 pb-1">
           {isLoading ? (
             /* Skeleton shimmer */
             <div className="h-[130px] rounded-2xl bg-gradient-to-r from-surface-muted via-surface-subtle to-surface-muted animate-pulse" />
