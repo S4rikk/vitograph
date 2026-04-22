@@ -83,7 +83,7 @@ export async function fetchKnowledgeBaseContext(
     const { data, error } = await supabase.rpc("hybrid_search_kb", {
       p_query_text: userMessage,
       p_query_embedding: queryEmbedding,
-      p_top_k: 3,
+      p_top_k: 5,
       p_category: categoryFilter || null,
     });
 
