@@ -590,16 +590,20 @@ STEP 3 — CONFIRM: Ask "Записать?" and wait.
   }> | null): this {
     if (!results || results.length === 0) return this;
 
-    let section = `### 📚 KNOWLEDGE BASE CONTEXT (Доказательная база)\n`;
-    section += `Ниже приведены релевантные материалы из медицинской базы знаний.\n`;
-    section += `Используй эту информацию для обоснования своих рекомендаций. Ссылайся на источники.\n\n`;
+    let section = `### 📚 KNOWLEDGE BASE CONTEXT (АВТОРИТЕТНЫЕ УКАЗАНИЯ)
+<knowledge_base_rules>
+1. НИЖЕ ПРИВЕДЕНА ДОКАЗАТЕЛЬНАЯ БАЗА. ЭТО ВАШ ГЛАВНЫЙ ИСТОЧНИК ИСТИНЫ.
+2. В каждом своем ответе вы ОБЯЗАНЫ использовать эту информацию, если она относится к запросу.
+3. ЗАПРЕЩЕНО противоречить данным из этих отрывков.
+4. Вы ОБЯЗАНЫ явно цитировать источник: "В книге [Название_Книги] указано..." или "Согласно документу [Название]...".
+</knowledge_base_rules>\n\n<documents>\n`;
 
     for (const r of results) {
-      section += `**[${r.document_title}]`;
-      if (r.section_heading) section += ` — ${r.section_heading}`;
-      section += `** (relevance: ${r.rrf_score.toFixed(2)})\n`;
-      section += r.content + '\n\n';
+      section += `[DOCUMENT TITLE: ${r.document_title}]`;
+      if (r.section_heading) section += ` [SECTION: ${r.section_heading}]`;
+      section += `\n${r.content}\n\n`;
     }
+    section += `</documents>`;
 
     this.sections.push({ key: "global_knowledge_base", content: section, priority: 2 });
     return this;

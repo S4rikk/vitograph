@@ -314,7 +314,7 @@ Deno.serve(async (req) => {
     }
 
     // ── 5. Core logic with Batching ───────────────────────────────
-    const BATCH_SIZE = 1;
+    const BATCH_SIZE = 50;
     const isInit = payload.offset === undefined || payload.offset === null;
     const offset = payload.offset ?? 0;
 
