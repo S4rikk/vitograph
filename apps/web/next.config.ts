@@ -21,5 +21,10 @@ const nextConfig: NextConfig = {
     // Force Turbopack to follow the app's own directory as root to find local node_modules
     root: "./",
   },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '20mb',
+    },
+  },
 };
 export default nextConfig;
