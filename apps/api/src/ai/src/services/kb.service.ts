@@ -57,8 +57,23 @@ export async function fetchKnowledgeBaseContext(
   if (!supabaseUrl || !supabaseKey) return null;
 
   try {
-    // Generate embedding via singleton (reuse, NOT new instance)
-    const queryEmbedding = await embeddings.embedQuery(userMessage);
+    // Generate embedding via Edge Function proxy (gte-small) to match kb_chunks
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceKey) throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY");
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/kb-embed-query`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${serviceKey}`,
+      },
+      body: JSON.stringify({ text: userMessage }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to generate query embedding: ${response.statusText}`);
+    }
+    const { embedding: queryEmbedding } = await response.json();
 
     // Call RPC hybrid_search_kb
     const supabase = createClient(supabaseUrl, supabaseKey, {

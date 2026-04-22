@@ -33,8 +33,8 @@ graph TB
 
     subgraph "Хранение (Supabase PostgreSQL)"
         DOC["kb_documents<br/>(source markdown)"]
-        SEC["kb_sections<br/>(H2/H3 разделы)"]
-        CHK["kb_chunks<br/>(~500 char, vector 384d)"]
+        SEC["kb_sections<br/>(H1-H3 разделы)"]
+        CHK["kb_chunks<br/>(~1500 char, vector 384d)"]
         LOG["kb_search_log<br/>(hit-rate tracking)"]
     end
 
@@ -91,7 +91,7 @@ graph TB
 > **Indexes:** `category`, `status`, `tags (GIN)`
 > **RLS:** SELECT для authenticated, ALL для service_role
 
-### 3.2 `kb_sections` — Разделы документа (H2/H3)
+### 3.2 `kb_sections` — Разделы документа (H1/H2/H3)
 
 | Column | Type | Constraints / Notes |
 |:---|:---|:---|
@@ -113,7 +113,7 @@ graph TB
 | `id` | `bigint identity` | PK |
 | `document_id` | `bigint` | FK → `kb_documents(id)` ON DELETE CASCADE |
 | `section_id` | `bigint` | FK → `kb_sections(id)` ON DELETE CASCADE. Nullable |
-| `content` | `text` | NOT NULL. Текст чанка (~500 символов) |
+| `content` | `text` | NOT NULL. Текст чанка (~1500 символов) |
 | `chunk_order` | `int` | NOT NULL. Порядок внутри секции |
 | `char_start` | `int` | Offset начала в source_markdown |
 | `char_end` | `int` | Offset конца |
@@ -224,8 +224,9 @@ sequenceDiagram
     EF->>DB: SELECT source_markdown, version FROM kb_documents WHERE id = doc_id
     EF->>EF: Validate version match (idempotency guard)
     EF->>DB: UPDATE kb_documents SET status = 'indexing'
-    EF->>EF: Parse markdown → sections[] (by H2/H3 headings)
-    EF->>EF: Split sections → chunks[] (~500 chars, 80 char overlap)
+    EF->>EF: Parse markdown → sections[] (by H1/H2/H3 headings)
+    EF->>EF: Split sections → chunks[] (~1500 chars, 100 char overlap)
+    EF->>EF: IF chunks > 50 -> Enqueue next batch via pgmq
 
     loop For each chunk
         EF->>AI: session.run(chunk.content, {mean_pool: true, normalize: true})
@@ -245,21 +246,25 @@ sequenceDiagram
 ```
 Input: source_markdown (full document text)
 
-1. Split by H2/H3 headings → sections[]
-   - Regex: /^#{2,3}\s+(.+)$/gm
+1. Split by H1/H2/H3 headings → sections[]
+   - Regex: /^#{1,3}\s+(.+)$/gm
    - Each section includes: heading, level, content (text between headings)
 
-2. For each section:
+2. For each section (Smart Sentence Boundaries):
    a. Split content by paragraphs (\n\n)
-   b. Accumulate paragraphs into chunks until ~500 chars
-   c. When chunk exceeds 500 chars → finalize, start new chunk
-   d. Include overlap: last 80 chars of previous chunk prepended to next
-   e. If paragraph < 100 chars → merge with previous chunk
+   b. If standard paragraph fits, accumulate until > TARGET_CHUNK_SIZE (1500 chars)
+   c. If single paragraph exceeds TARGET_CHUNK_SIZE, split by sentences: /(?<=[.!?»])\s+/
+   d. Accumulate sentences up to TARGET_CHUNK_SIZE. If single sentence > 2000 chars, strict chunk by character offset.
+   e. Include overlap: 100 chars overlap for context continuity.
    
 3. For each chunk:
    a. Estimate token_count ≈ content.length / 4
    b. Record char_start, char_end offsets
-   c. Generate embedding via gte-small
+   
+4. Batch Processing (New):
+   - Chunks are generated in memory and temporarily saved to kb_documents.metadata as pending_chunks.
+   - Processing is batched 50 chunks at a time (generating embeddings via gte-small & DB insertion). 
+   - If more chunks remain, EF re-enqueues itself via pgmq.send('kb_ingest') to bypass Deno Worker resource limits.
 ```
 
 ### 5.3 Idempotency Guard
