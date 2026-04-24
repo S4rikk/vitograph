@@ -21,6 +21,7 @@ interface FoodCardProps {
   micros?: { name: string; value: string; type: string }[];
   time: string;
   mealId?: string;
+  imageUrl?: string;
   onDelete?: (id: string) => void;
   onEdit?: (id: string) => void;
 }
@@ -177,13 +178,26 @@ export default function FoodCard({
   micros,
   time,
   mealId,
+  imageUrl,
   onDelete,
   onEdit,
 }: FoodCardProps) {
   const finalEmoji = emoji && emoji !== "🍽️" ? emoji : getEmojiForFood(name);
 
   return (
-    <div className="bg-white border border-border shadow-sm rounded-2xl px-3 pt-3 pb-2 w-full flex flex-col max-w-[320px] sm:max-w-[400px]">
+    <div className="bg-white border border-border shadow-sm rounded-2xl overflow-hidden w-full flex flex-col max-w-[320px] sm:max-w-[400px]">
+      {/* Photo Thumbnail */}
+      {imageUrl && (
+        <div className="w-full overflow-hidden" style={{ maxHeight: "140px" }}>
+          <img
+            src={imageUrl}
+            alt="Фото еды"
+            className="w-full object-cover"
+            style={{ maxHeight: "140px", objectFit: "cover" }}
+          />
+        </div>
+      )}
+      <div className="px-3 pt-3 pb-2 flex flex-col">
       {/* Header */}
       <div className="flex items-start justify-between mb-2 gap-2">
         <div className="flex items-start gap-2">
@@ -271,6 +285,7 @@ export default function FoodCard({
               </div>
           )}
           <span className="text-[10px] text-ink-faint">{time}</span>
+      </div>
       </div>
     </div>
   );

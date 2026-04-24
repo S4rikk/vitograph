@@ -20,6 +20,7 @@ type Message = {
   text: string;
   time: string;
   mealMicros?: Record<string, number>;
+  imageUrl?: string;
 };
 
 const INITIAL_MESSAGES: Message[] = [
@@ -117,6 +118,7 @@ export default function FoodDiaryView() {
               text: m.content,
               time: `${dateStr.getHours().toString().padStart(2, "0")}:${dateStr.getMinutes().toString().padStart(2, "0")}`,
               mealMicros: m.mealMicros || undefined,
+              imageUrl: m.imageUrl || undefined,
             };
           });
           setMessages([...INITIAL_MESSAGES, ...mapped]);
@@ -460,6 +462,7 @@ export default function FoodDiaryView() {
               text={msg.text}
               time={msg.time}
               mealMicros={msg.mealMicros}
+              imageUrl={msg.imageUrl}
               onDelete={handleDeleteMeal}
               onEdit={handleStartEdit}
               onRedZoneConfirm={handleRedZoneConfirm}

@@ -18,6 +18,8 @@ type ChatMessageProps = {
   onRedZoneConfirm?: (food: string, weight: string) => void;
   /** Called when user declines RED ZONE meal */
   onRedZoneReject?: () => void;
+  /** URL of food photo (from photo analysis) */
+  imageUrl?: string;
 };
 
 // Logic moved to food-log-parser.ts
@@ -96,6 +98,7 @@ export default function ChatMessage({
   mealMicros,
   onRedZoneConfirm,
   onRedZoneReject,
+  imageUrl,
 }: ChatMessageProps) {
   const isUser = variant === "user";
 
@@ -129,7 +132,7 @@ export default function ChatMessage({
                </div>
            )}
            <div className="flex justify-start">
-             <FoodCard {...parsed.cardProps} onDelete={onDelete} onEdit={onEdit} />
+             <FoodCard {...parsed.cardProps} imageUrl={imageUrl} onDelete={onDelete} onEdit={onEdit} />
            </div>
         </div>
       );
