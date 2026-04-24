@@ -119,7 +119,7 @@ export default function SupplementChecklistWidget({
             return (
               <label
                 key={`supp-${i}`}
-                className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold tracking-tight transition-all cursor-pointer border select-none w-max ${
+                className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[0.625rem] sm:text-[0.6875rem] font-semibold tracking-tight transition-all cursor-pointer border select-none w-max ${
                   isChecked 
                     ? "bg-primary-50 text-primary-800 border-primary-200 shadow-sm ring-1 ring-primary-100" 
                     : "bg-surface-subtle text-ink-muted border-divider hover:bg-surface-base hover:border-border"
@@ -153,7 +153,7 @@ export default function SupplementChecklistWidget({
     if (isLoading && meds.length === 0) {
       return (
         <div className="w-full flex flex-col gap-2">
-          <h4 className="text-[11px] font-bold text-ink-muted uppercase tracking-wider px-1">Добавки на сегодня</h4>
+          <h4 className="text-[0.6875rem] font-bold text-ink-muted uppercase tracking-wider px-1">Добавки на сегодня</h4>
           <div className="grid grid-cols-2 gap-2 px-1 pb-1">
             <div className="w-full h-6 bg-surface-muted rounded-full animate-pulse"></div>
             <div className="w-full h-6 bg-surface-muted rounded-full animate-pulse"></div>
@@ -164,7 +164,7 @@ export default function SupplementChecklistWidget({
 
     return (
       <div className="w-full flex flex-col gap-2">
-         <h4 className="text-[11px] font-bold text-ink-muted uppercase tracking-wider px-1">Добавки на сегодня</h4>
+         <h4 className="text-[0.6875rem] font-bold text-ink-muted uppercase tracking-wider px-1">Добавки на сегодня</h4>
          <div className="grid grid-cols-2 gap-2 px-1 pb-1">
            {meds.map((med, i) => {
              const matchedLog = todaySuppLogs.find((log) => log.supplement_name === med);
@@ -173,7 +173,7 @@ export default function SupplementChecklistWidget({
              return (
                <label
                  key={`supp-${i}`}
-                 className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold tracking-tight transition-all cursor-pointer border select-none w-full ${
+                 className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[0.625rem] sm:text-[0.6875rem] font-semibold tracking-tight transition-all cursor-pointer border select-none w-full ${
                    isChecked 
                      ? "bg-primary-50 text-primary-800 border-primary-200 shadow-sm ring-1 ring-primary-100" 
                      : "bg-surface-subtle text-ink-muted border-divider hover:bg-surface-base hover:border-border"
@@ -206,7 +206,7 @@ export default function SupplementChecklistWidget({
   // Default variant for Profile Sheet
   return (
     <div className="mt-5 pt-4 border-t border-divider">
-      <label className="block text-[13px] font-semibold text-ink-main mb-3">
+      <label className="block text-[0.8125rem] font-semibold text-ink-main mb-3">
         Чеклист на сегодня
       </label>
       {isLoading && todaySuppLogs.length === 0 ? (

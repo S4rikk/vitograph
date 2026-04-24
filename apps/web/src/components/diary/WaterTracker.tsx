@@ -103,7 +103,7 @@ export default function WaterTracker({ selectedDate, userTimezone }: WaterTracke
         <div className="flex items-center gap-1.5 whitespace-nowrap">
           <div>
             <span className="text-sm font-semibold text-ink">Вода </span>
-            <span className={`text-[11px] ${isFull ? 'text-green-500 font-bold' : 'text-ink-muted'}`}>
+            <span className={`text-[0.6875rem] ${isFull ? 'text-green-500 font-bold' : 'text-ink-muted'}`}>
               ({glasses} / {targetGlasses} стаканов)
             </span>
           </div>

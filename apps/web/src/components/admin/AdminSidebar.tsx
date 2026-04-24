@@ -69,7 +69,7 @@ export default function AdminSidebar({ currentUserId }: { currentUserId: string 
             </div>
             <div>
               <h2 className="font-semibold text-slate-100 tracking-wide text-sm">VITOGRAPH</h2>
-              <p className="text-[10px] uppercase font-mono text-slate-500 tracking-widest">Admin Console</p>
+              <p className="text-[0.625rem] uppercase font-mono text-slate-500 tracking-widest">Admin Console</p>
             </div>
           </div>
           <button className="md:hidden text-slate-400 hover:text-white p-1" onClick={() => setIsOpen(false)}>

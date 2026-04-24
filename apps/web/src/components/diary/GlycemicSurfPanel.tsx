@@ -180,14 +180,14 @@ export default function GlycemicSurfPanel({
                   </button>
                 </h4>
               </div>
-              <p className="text-[10px] text-ink-faint">Гликемический отклик за день</p>
+              <p className="text-[0.625rem] text-ink-faint">Гликемический отклик за день</p>
             </div>
           </div>
           {stats && (
             <div className="text-right">
-              <span className="text-[11px] text-ink-muted">Avg</span>
+              <span className="text-[0.6875rem] text-ink-muted">Avg</span>
               <span className="ml-1 text-sm font-bold text-ink">{stats.average_glucose_mg_dl}</span>
-              <span className="text-[10px] text-ink-faint ml-0.5">мг/дл</span>
+              <span className="text-[0.625rem] text-ink-faint ml-0.5">мг/дл</span>
             </div>
           )}
         </div>
@@ -208,7 +208,7 @@ export default function GlycemicSurfPanel({
                 return (
                   <div
                     key={zone.key}
-                    className="flex items-center justify-center gap-1 text-[11px] font-bold transition-all duration-500 min-w-[56px] px-1 whitespace-nowrap"
+                    className="flex items-center justify-center gap-1 text-[0.6875rem] font-bold transition-all duration-500 min-w-[56px] px-1 whitespace-nowrap"
                     style={{
                       width: `${pct}%`,
                       backgroundColor: colors.bg,
@@ -230,11 +230,11 @@ export default function GlycemicSurfPanel({
                 className="relative flex items-center cursor-pointer pointer-events-auto bg-white/95 backdrop-blur-md rounded-t-[10px] px-2 py-[3px] border-x border-t border-border/50 shadow-[0_-2px_4px_-3px_rgba(0,0,0,0.1)] outline-none"
               >
                 <Info className="w-[10px] h-[10px] text-ink-muted opacity-80" />
-                <span className="text-[9px] text-ink-muted ml-1 font-semibold uppercase tracking-wider">Границы</span>
+                <span className="text-[0.5625rem] text-ink-muted ml-1 font-semibold uppercase tracking-wider">Границы</span>
                 
                 {showThresholds && (
                   <div 
-                    className="absolute top-full right-0 mt-[1px] w-56 p-2.5 bg-gray-900 text-white text-[11px] leading-normal rounded-xl shadow-xl z-50 text-left border border-gray-700/50 cursor-default shadow-[0_10px_20px_rgba(0,0,0,0.2)]"
+                    className="absolute top-full right-0 mt-[1px] w-56 p-2.5 bg-gray-900 text-white text-[0.6875rem] leading-normal rounded-xl shadow-xl z-50 text-left border border-gray-700/50 cursor-default shadow-[0_10px_20px_rgba(0,0,0,0.2)]"
                     onMouseDown={(e) => e.preventDefault()} // Prevent blur when clicking inside the tooltip
                   >
                     <div className="font-bold mb-1.5">Ваши персональные границы:</div>
@@ -286,15 +286,15 @@ export default function GlycemicSurfPanel({
             >
               <TrendingUp className="w-5 h-5 mb-0.5 opacity-80" strokeWidth={2.5} color={getSpikeZone(stats.max_spike_mg_dl).text} />
               <span
-                className="text-[9px] font-semibold uppercase tracking-wide"
+                className="text-[0.5625rem] font-semibold uppercase tracking-wide"
                 style={{ color: getSpikeZone(stats.max_spike_mg_dl).text }}
               >
                 MAX ПИК
               </span>
-              <span className="text-[18px] font-[800] text-ink leading-none mt-1">
+              <span className="text-[1.125rem] font-[800] text-ink leading-none mt-1">
                 {Math.round(stats.max_spike_mg_dl)}
               </span>
-              <span className="text-[9px] text-ink-muted">мг/дл</span>
+              <span className="text-[0.5625rem] text-ink-muted">мг/дл</span>
             </div>
 
             {/* Hours in Green */}
@@ -303,13 +303,13 @@ export default function GlycemicSurfPanel({
               style={{ backgroundColor: ZONE_COLORS.green.bg }}
             >
               <Timer className="w-5 h-5 mb-0.5 opacity-80" strokeWidth={2.5} color={ZONE_COLORS.green.text} />
-              <span className="text-[9px] font-semibold uppercase tracking-wide" style={{ color: ZONE_COLORS.green.text }}>
+              <span className="text-[0.5625rem] font-semibold uppercase tracking-wide" style={{ color: ZONE_COLORS.green.text }}>
                 В ЗЕЛЁНОМ
               </span>
-              <span className="text-[18px] font-[800] text-ink leading-none mt-1">
+              <span className="text-[1.125rem] font-[800] text-ink leading-none mt-1">
                 {stats.hours_in_green}
               </span>
-              <span className="text-[9px] text-ink-muted">часов</span>
+              <span className="text-[0.5625rem] text-ink-muted">часов</span>
             </div>
 
             {/* Average Glucose */}
@@ -318,13 +318,13 @@ export default function GlycemicSurfPanel({
               style={{ backgroundColor: getSpikeZone(stats.average_glucose_mg_dl).bg }}
             >
               <Target className="w-5 h-5 mb-0.5 opacity-80" strokeWidth={2.5} color={getSpikeZone(stats.average_glucose_mg_dl).text} />
-              <span className="text-[9px] font-semibold uppercase tracking-wide" style={{ color: getSpikeZone(stats.average_glucose_mg_dl).text }}>
+              <span className="text-[0.5625rem] font-semibold uppercase tracking-wide" style={{ color: getSpikeZone(stats.average_glucose_mg_dl).text }}>
                 СРЕДНЕЕ
               </span>
-              <span className="text-[18px] font-[800] text-ink leading-none mt-1">
+              <span className="text-[1.125rem] font-[800] text-ink leading-none mt-1">
                 {stats.average_glucose_mg_dl}
               </span>
-              <span className="text-[9px] text-ink-muted">мг/дл</span>
+              <span className="text-[0.5625rem] text-ink-muted">мг/дл</span>
             </div>
           </div>
         )}
@@ -354,8 +354,8 @@ export default function GlycemicSurfPanel({
           <div className="flex items-center gap-2.5">
             <span className="text-lg">✨</span>
             <div>
-              <h4 className="text-[13px] font-bold text-ink leading-tight">Микронутриенты</h4>
-              <p className="text-[10px] text-ink-faint">{trackedMicros.length} из 16 отслеживаются</p>
+              <h4 className="text-[0.8125rem] font-bold text-ink leading-tight">Микронутриенты</h4>
+              <p className="text-[0.625rem] text-ink-faint">{trackedMicros.length} из 16 отслеживаются</p>
             </div>
           </div>
           <div className={`p-1 transform transition-transform duration-300 ${isMicrosExpanded ? "rotate-180" : ""}`}>
@@ -379,11 +379,11 @@ export default function GlycemicSurfPanel({
                       strokeLinecap="round" className="transition-all duration-700"
                     />
                   </svg>
-                  <span className="absolute text-[13px] font-bold">{avgCoverage}%</span>
+                  <span className="absolute text-[0.8125rem] font-bold">{avgCoverage}%</span>
                 </div>
                 <div>
-                  <p className="text-[12px] font-bold text-ink">Покрытие дневной нормы</p>
-                  <p className="text-[10px] text-ink-faint">Среднее значение по всем витаминам и минералам</p>
+                  <p className="text-[0.75rem] font-bold text-ink">Покрытие дневной нормы</p>
+                  <p className="text-[0.625rem] text-ink-faint">Среднее значение по всем витаминам и минералам</p>
                 </div>
               </div>
 
@@ -396,7 +396,7 @@ export default function GlycemicSurfPanel({
                   <div key={cat} className="mb-6 last:mb-0">
                     <div className="flex items-center gap-2 mb-3 px-1">
                       <div className={`w-1.5 h-1.5 rounded-full ${cat === 'Витамины' ? 'bg-[#F59E0B]' : 'bg-[#6366F1]'}`} />
-                      <h5 className="text-[10px] font-bold uppercase tracking-wider text-ink-muted">{cat}</h5>
+                      <h5 className="text-[0.625rem] font-bold uppercase tracking-wider text-ink-muted">{cat}</h5>
                     </div>
 
                     <div className="flex flex-col gap-0.5">
@@ -408,16 +408,16 @@ export default function GlycemicSurfPanel({
                         return (
                           <div key={name} className="flex items-center justify-between gap-3 py-1.5 px-0.5">
                             {/* Icon */}
-                            <div className={`w-9 h-9 shrink-0 rounded-[12px] flex items-center justify-center text-[18px] shadow-sm bg-white border border-border/50 ${isVitamin(name) ? 'bg-[#FFFBF2]' : 'bg-[#F8FAFC]'}`}>
+                            <div className={`w-9 h-9 shrink-0 rounded-[12px] flex items-center justify-center text-[1.125rem] shadow-sm bg-white border border-border/50 ${isVitamin(name) ? 'bg-[#FFFBF2]' : 'bg-[#F8FAFC]'}`}>
                               {NUTRIENT_EMOJI[name] || '💊'}
                             </div>
 
                             {/* Middle Info */}
                             <div className="flex-1 flex flex-col justify-center min-w-0 pr-1">
                               <div className="flex items-end justify-between leading-none mb-1.5 mt-0.5">
-                                <span className="text-[14px] font-[700] text-ink truncate mr-2">{name}</span>
-                                <span className="text-[13px] font-bold text-ink shrink-0">
-                                  {Number(value.toFixed(1))} <span className="text-ink-muted font-medium text-[12px]">/ {target || '—'} {unit}</span>
+                                <span className="text-[0.875rem] font-[700] text-ink truncate mr-2">{name}</span>
+                                <span className="text-[0.8125rem] font-bold text-ink shrink-0">
+                                  {Number(value.toFixed(1))} <span className="text-ink-muted font-medium text-[0.75rem]">/ {target || '—'} {unit}</span>
                                 </span>
                               </div>
                               <div className="w-full h-[6px] bg-black/5 rounded-full overflow-hidden">
@@ -432,13 +432,13 @@ export default function GlycemicSurfPanel({
                             <div className="shrink-0 flex items-center gap-1.5">
                               {level.isOverdose && (
                                 <div
-                                  className="w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-[12px] font-bold shadow-sm animate-pulse cursor-help"
+                                  className="w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-[0.75rem] font-bold shadow-sm animate-pulse cursor-help"
                                   title={OVERDOSE_INFO[name] || 'Превышение нормы может быть токсичным для организма'}
                                 >
                                   !
                                 </div>
                               )}
-                              <div className={`min-w-[42px] text-center px-1.5 py-1 rounded-md text-[11px] font-[800] ${level.badgeBg} ${level.badgeText}`}>
+                              <div className={`min-w-[42px] text-center px-1.5 py-1 rounded-md text-[0.6875rem] font-[800] ${level.badgeBg} ${level.badgeText}`}>
                                 {Math.round(pct)}%
                               </div>
                             </div>
@@ -457,7 +457,7 @@ export default function GlycemicSurfPanel({
                     <div key={c} className="w-1.5 h-1.5 rounded-full" style={{ background: c }} />
                   ))}
                 </div>
-                <span className="text-[10px] font-bold text-primary-600">
+                <span className="text-[0.625rem] font-bold text-primary-600">
                   ✧ Гликемический сёрфинг
                 </span>
               </div>
@@ -510,7 +510,7 @@ export default function GlycemicSurfPanel({
             <div className="bg-[#EFF6FF] p-3.5 rounded-[14px] border border-[#BFDBFE]/50 relative overflow-hidden mt-2">
               <div className="absolute -right-4 -bottom-4 opacity-10 text-6xl">🏄</div>
               <h5 className="font-bold mb-1 text-[#2563EB] relative z-10">Что это дает вам?</h5>
-              <p className="text-[13px] text-[#1D4ED8] relative z-10">
+              <p className="text-[0.8125rem] text-[#1D4ED8] relative z-10">
                 Соблюдая правила «сёрфинга» и удерживаясь в зелёных зонах, вы избавляетесь от вечернего жора, спонтанной усталости после обеда и получаете ровную, предсказуемую энергию 24/7. Ваше тело из режима паники переходит в естественный режим жиросжигания.
               </p>
             </div>

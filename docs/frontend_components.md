@@ -1,8 +1,8 @@
 # VITOGRAPH — Frontend Component Map
 
-> **Дата актуальности:** 20 апреля 2026 (обновлено: Glycemic Surf, Push Notifications, Scroll FAB)
+> **Дата актуальности:** 24 апреля 2026 (обновлено: Glassmorphism Tabs, Capacitor Android App)
 >
-> Карта UI-компонентов Next.js 14+ (App Router) с описанием ответственности и зависимостей.
+> Карта UI-компонентов Next.js 14+ (App Router) с описанием ответственности и зависимостей, а также интеграция Android Capacitor.
 
 ---
 
@@ -38,6 +38,7 @@ layout.tsx (RootLayout)
 | **WaterTracker**         | Трекер воды с push-уведомлениями (VAPID toggle: колокольчик). Optimistic UI, timezone-aware | `glasses`, `onAdd`, `onRemove`, push bell toggle                            | Supabase `water_logs`, `usePushNotifications` hook                                  |
 | **MealScoreBadge**       | Бейдж качества приёма пищи (0-100)                         | `score`, `reason`                                                           | Нет                                                                                 |
 | **FoodCard**             | Карточка приёма пищи: GI zone badge, response_type, energy_hours, микронутриентовые dot-chips, mobile `pr-6` clearance | `mealData`, `mealScore`, `mealReason`, `onEdit`, `onDelete`                 | Нет (презентационный)                                                              |
+| **FoodInputForm**        | Поле ввода + кнопка фото + анализ с возможностью отмены (кнопка закрытия миниатюры) | `onSend(text, imageBase64?)`                                                | Нет (чисто UI)                                                                      |
 | **FeedbackButton**       | Кнопка отправки фидбека                                    | —                                                                           | `apiClient.submitFeedback()`                                                        |
 
 ---
@@ -96,7 +97,7 @@ layout.tsx (RootLayout)
 
 | Компонент             | Назначение                                     | API-зависимости         |
 | :-------------------- | :--------------------------------------------- | :---------------------- |
-| **UserProfileSheet**  | Боковая панель профиля (редактирование данных) | Supabase `profiles`     |
+| **UserProfileSheet**  | Боковая панель профиля (редактирование данных). Использует кастомную 3D-верстку вкладок (Glassmorphism, overlapping folders). | Supabase `profiles`     |
 | **DeviceWidgetCard**  | Виджет подключённого устройства (wearable)     | — (будущая фича)        |
 | **ManualEntryDialog** | Диалог ручного ввода биомаркера                | Supabase `test_results` |
 

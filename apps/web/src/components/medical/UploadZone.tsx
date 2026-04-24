@@ -243,12 +243,12 @@ export default function UploadZone({
             <p className="text-base font-bold text-slate-800">
               Загрузить новые результаты
             </p>
-            <p className="mt-1 text-[13px] text-slate-500 max-w-xs mx-auto">
+            <p className="mt-1 text-[0.8125rem] text-slate-500 max-w-xs mx-auto">
               Нажмите сюда или перетащите новые фото/PDF бланка для следующего анализа
             </p>
           </div>
 
-          <div className="mt-2 inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-6 py-3 text-[14px] font-bold text-slate-700 shadow-sm transition-all hover:border-cyan-300 hover:text-cyan-700 hover:shadow-md group">
+          <div className="mt-2 inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-6 py-3 text-[0.875rem] font-bold text-slate-700 shadow-sm transition-all hover:border-cyan-300 hover:text-cyan-700 hover:shadow-md group">
             <svg className="h-5 w-5 text-slate-400 group-hover:text-cyan-500 transition-colors" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>

@@ -42,7 +42,7 @@ export default function TabSwitcher({
             onClick={() => onTabChange(tab.id)}
             className={`
               cursor-pointer relative flex flex-1 sm:flex-none justify-center items-center gap-1 sm:gap-2 rounded-lg px-2 sm:px-5 py-2.5
-              text-[13px] sm:text-sm font-medium transition-all duration-200 select-none whitespace-nowrap flex-shrink-0
+              text-[0.8125rem] sm:text-sm font-medium transition-all duration-200 select-none whitespace-nowrap flex-shrink-0
               ${
                 isActive
                   ? "bg-primary-600 text-white shadow-md"

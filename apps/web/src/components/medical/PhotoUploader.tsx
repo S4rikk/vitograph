@@ -101,7 +101,7 @@ export default function PhotoUploader({ type, onSuccess, onAnalysisComplete }: P
           {config.icon}
         </div>
         <div className="flex-1">
-          <h3 className="text-[17px] font-extrabold text-[#001d3d] leading-tight">
+          <h3 className="text-[1.0625rem] font-extrabold text-[#001d3d] leading-tight">
             {config.title}
           </h3>
         </div>
@@ -109,7 +109,7 @@ export default function PhotoUploader({ type, onSuccess, onAnalysisComplete }: P
       
       {/* Description */}
       <div className="flex-1 mb-8">
-        <p className="text-[14px] text-slate-500 leading-relaxed font-medium">
+        <p className="text-[0.875rem] text-slate-500 leading-relaxed font-medium">
           {config.description}
         </p>
       </div>
@@ -125,7 +125,7 @@ export default function PhotoUploader({ type, onSuccess, onAnalysisComplete }: P
       />
 
       {error && (
-        <div className="text-red-500 text-[13px] font-medium mb-4 p-3 bg-red-50 border border-red-100 rounded-xl leading-tight text-center">
+        <div className="text-red-500 text-[0.8125rem] font-medium mb-4 p-3 bg-red-50 border border-red-100 rounded-xl leading-tight text-center">
           {error}
         </div>
       )}

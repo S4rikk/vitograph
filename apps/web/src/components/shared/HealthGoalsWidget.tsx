@@ -90,10 +90,10 @@ export default function HealthGoalsWidget() {
             <Target className="w-4 h-4" />
           </div>
           <div className="flex flex-col">
-            <p className="text-[12px] font-semibold text-slate-700 leading-tight">
+            <p className="text-[0.75rem] font-semibold text-slate-700 leading-tight">
               У вас пока нет целей
             </p>
-            <p className="text-[11px] text-slate-500 italic mt-0.5 leading-snug">
+            <p className="text-[0.6875rem] text-slate-500 italic mt-0.5 leading-snug">
               Напишите в чат: «Хочу похудеть на 5 кг»
             </p>
           </div>

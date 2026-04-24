@@ -41,7 +41,7 @@ const ScoreBadge = ({ score, reason }: { score: number; reason: string }) => {
         <div>
           <div className="flex items-center space-x-2">
             <span className={`h-2 w-2 rounded-full ${dotColor} animate-pulse`}></span>
-            <p className="font-bold uppercase tracking-wider text-[11px] opacity-80">{label} Health Score</p>
+            <p className="font-bold uppercase tracking-wider text-[0.6875rem] opacity-80">{label} Health Score</p>
           </div>
           <p className="text-sm italic mt-1 leading-snug font-medium text-ink-muted">{reason}</p>
         </div>
@@ -61,7 +61,7 @@ const NutrPill = ({ type, children }: { type: string; children: React.ReactNode 
   const colorSpace = getMicronutrientColor(content);
   
   return (
-    <span className={`inline-flex items-center rounded-lg px-2 py-0.5 text-[13px] font-semibold border bg-slate-50 border-slate-200 mx-0.5 my-0 transition-all hover:scale-105 cursor-default shadow-sm ${colorSpace.text}`}>
+    <span className={`inline-flex items-center rounded-lg px-2 py-0.5 text-[0.8125rem] font-semibold border bg-slate-50 border-slate-200 mx-0.5 my-0 transition-all hover:scale-105 cursor-default shadow-sm ${colorSpace.text}`}>
        {children}
     </span>
   );
@@ -129,7 +129,7 @@ const AssistantMessageContent = ({ content }: { content: string }) => {
   // Render in a container with pre-wrap to respect the preserved double-newlines as paragraph breaks
   return (
     <div className="assistant-content flex flex-col gap-3">
-      <div className="whitespace-pre-wrap leading-relaxed text-[15px] text-ink-muted/90">
+      <div className="whitespace-pre-wrap leading-relaxed text-[0.9375rem] text-ink-muted/90">
         {fragments}
       </div>
     </div>
@@ -473,7 +473,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
     <div className="flex flex-1 sm:flex-none flex-col overflow-hidden rounded-xl border border-cloud-dark bg-white shadow-sm sm:h-[750px] mb-[env(safe-area-inset-bottom)]">
       {/* Header with Clear Button */}
       <div className="flex items-center justify-between border-b border-cloud px-4 py-1 sm:py-1.5 bg-white">
-        <h3 className="text-[11px] sm:text-xs font-semibold text-ink-muted uppercase tracking-widest">
+        <h3 className="text-[0.6875rem] sm:text-xs font-semibold text-ink-muted uppercase tracking-widest">
           {profile?.ai_name || "ИИ-Помощник"}
         </h3>
         <button
@@ -531,7 +531,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
                   {msg.role === "assistant" ? (
                     <TypewritingAssistantMessage content={msg.content} isTyping={!!msg.isStreaming} />
                   ) : (
-                    <p className="whitespace-pre-wrap text-[15px]">{msg.content}</p>
+                    <p className="whitespace-pre-wrap text-[0.9375rem]">{msg.content}</p>
                   )}
                 </div>
             </div>
@@ -598,12 +598,12 @@ export default function AiAssistantView({ userId }: { userId: string }) {
                 handleSubmit(e);
               }
             }}
-            className="flex-1 rounded-xl border-cloud-dark bg-white px-4 py-3 text-[15px] text-ink shadow-sm transition-all focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 max-h-[150px] min-h-[44px] overflow-y-auto resize-none"
+            className="flex-1 rounded-xl border-cloud-dark bg-white px-4 py-3 text-[0.9375rem] text-ink shadow-sm transition-all focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 max-h-[150px] min-h-[44px] overflow-y-auto resize-none"
           />
           <button
             type="submit"
             disabled={isLoading || (!input.trim() && !selectedImageBase64)}
-            className="inline-flex items-center justify-center rounded-xl bg-primary-600 px-3 sm:px-5 py-3 text-[15px] font-semibold text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-cloud-dark disabled:text-ink-muted disabled:shadow-none min-h-[44px]"
+            className="inline-flex items-center justify-center rounded-xl bg-primary-600 px-3 sm:px-5 py-3 text-[0.9375rem] font-semibold text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-cloud-dark disabled:text-ink-muted disabled:shadow-none min-h-[44px]"
           >
             <span className="hidden sm:inline">Отправить</span>
             <svg className="w-5 h-5 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">

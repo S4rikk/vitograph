@@ -1,6 +1,6 @@
 # VITOGRAPH — Architecture: Database Schema & API Structure
 
-> **Последнее обновление:** 20 апреля 2026
+> **Последнее обновление:** 24 апреля 2026
 >
 > Смотрите также: [API Reference](./api_reference.md) | [Frontend Components](./frontend_components.md) | [AI Pipeline](./ai_pipeline.md)
 
@@ -16,6 +16,7 @@
 | Layer      | Technology                                     |
 | ---------- | ---------------------------------------------- |
 | Frontend   | Next.js (App Router, Server Components)        |
+| Mobile App | Capacitor 7 (Android Shell), Remote Server Mode|
 | AI/App API | Node.js / Express (Port 3001) - *Hybrid Layer* |
 | Core API   | Python 3.12+, FastAPI (async-first)            |
 | Database   | Supabase (PostgreSQL 15+, pgvector, RLS)       |

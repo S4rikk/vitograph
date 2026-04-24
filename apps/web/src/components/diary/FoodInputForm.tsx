@@ -226,8 +226,8 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
                 return (
                   <div key={idx} className={`rounded-lg px-2 py-1 ${s.bg}`}>
                     <div className="flex items-center justify-between mb-0.5">
-                      <span className={`text-[11px] font-bold ${s.text}`}>{item.name_ru}</span>
-                      <span className={`text-[10px] font-semibold ${s.text}`}>{s.label} · GI {gi} · GL {gl.toFixed(1)}</span>
+                      <span className={`text-[0.6875rem] font-bold ${s.text}`}>{item.name_ru}</span>
+                      <span className={`text-[0.625rem] font-semibold ${s.text}`}>{s.label} · GI {gi} · GL {gl.toFixed(1)}</span>
                     </div>
                     <div className="w-full h-[4px] bg-black/10 rounded-full overflow-hidden">
                       <div className={`h-full rounded-full transition-all duration-700 ${s.bar}`} style={{ width: `${barPct}%` }} />
@@ -256,7 +256,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
           }`}
         >
           <div className="flex justify-between items-start gap-2">
-            <p className="font-semibold text-[15px]">{labelResult.product_name}</p>
+            <p className="font-semibold text-[0.9375rem]">{labelResult.product_name}</p>
             <span className={`px-2 py-0.5 rounded-full text-xs font-bold leading-none flex items-center shrink-0 ${
               labelResult.verdict === "GREEN" ? "bg-green-100 text-green-800" :
               labelResult.verdict === "YELLOW" ? "bg-yellow-100 text-yellow-800" :
@@ -272,7 +272,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
           
           {labelResult.e_codes && labelResult.e_codes.length > 0 && (
             <div className="mt-1 space-y-1">
-              <p className="text-[10px] font-bold opacity-60 uppercase tracking-wider mb-1">Е-добавки</p>
+              <p className="text-[0.625rem] font-bold opacity-60 uppercase tracking-wider mb-1">Е-добавки</p>
               {labelResult.e_codes.map((eCode, idx) => (
                 <div key={idx} className="flex flex-col text-xs bg-black/5 p-1.5 rounded text-ink">
                   <span className="font-semibold flex items-center gap-1">
@@ -284,7 +284,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
                     </span> 
                     - {eCode.name}
                   </span>
-                  <span className="opacity-80 text-[11px] leading-tight">{eCode.description}</span>
+                  <span className="opacity-80 text-[0.6875rem] leading-tight">{eCode.description}</span>
                 </div>
               ))}
             </div>

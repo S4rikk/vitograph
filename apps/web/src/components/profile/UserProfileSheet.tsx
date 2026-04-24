@@ -30,9 +30,10 @@ const COMMON_TIMEZONES = [
 
 import { apiClient } from "@/lib/api-client";
 import { createClient } from "@/lib/supabase/client";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import DeviceWidgetCard from "./DeviceWidgetCard";
 import ManualEntryDialog from "./ManualEntryDialog";
+import { useFontScale } from "@/components/providers/FontScaleProvider";
 import type {
     MetricItem,
     MetricFieldDefinition,
@@ -119,7 +120,9 @@ export default function UserProfileSheet({
     userEmail,
 }: UserProfileSheetProps) {
     const [isOpen, setIsOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState("overview");
     const [mounted, setMounted] = useState(false);
+    const { scale, setScale } = useFontScale();
 
     useEffect(() => {
         setMounted(true);
@@ -568,38 +571,44 @@ export default function UserProfileSheet({
                                     </div>
                                 )}
 
-                                <Tabs defaultValue="overview" className="w-full">
-                                    <TabsList className="flex w-full overflow-x-auto justify-start mb-6">
-                                        <TabsTrigger
-                                            value="overview"
-                                            className="flex items-center gap-1.5 text-xs cursor-pointer"
-                                        >
-                                            <User size={14} className="hidden sm:block" /> Обзор
-                                        </TabsTrigger>
-                                        <TabsTrigger
-                                            value="lifestyle"
-                                            className="flex items-center gap-1.5 text-xs cursor-pointer"
-                                        >
-                                            <Leaf size={14} className="hidden sm:block" /> Образ жизни
-                                        </TabsTrigger>
-                                        <TabsTrigger
-                                            value="medical"
-                                            className="flex items-center gap-1.5 text-xs cursor-pointer"
-                                        >
-                                            <Activity size={14} className="hidden sm:block" /> Медицина
-                                        </TabsTrigger>
-                                        <TabsTrigger
-                                            value="wearables"
-                                            className="flex items-center gap-1.5 text-xs cursor-pointer"
-                                        >
-                                            <Watch size={14} className="hidden sm:block" /> Устройства
-                                        </TabsTrigger>
-                                    </TabsList>
+                                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                                    {/* ── Custom Glassmorphism Overlapping Tabs ── */}
+                                    {/* ── Custom Glassmorphism Overlapping Tabs ── */}
+                                    <div className="flex items-end pl-4 overflow-visible w-full -mb-[3px]">
+                                        {[
+                                            { id: "overview", label: "Обзор", icon: User },
+                                            { id: "lifestyle", label: "Образ жизни", icon: Leaf },
+                                            { id: "medical", label: "Медицина", icon: Activity },
+                                            { id: "wearables", label: "Устройства", icon: Watch },
+                                        ].map((tab, idx) => {
+                                            const isActive = activeTab === tab.id;
+                                            const zIndex = isActive ? 20 : 5 - idx;
+                                            return (
+                                                <button
+                                                    key={tab.id}
+                                                    onClick={() => setActiveTab(tab.id)}
+                                                    style={{ zIndex, borderBottom: 'none' }}
+                                                    className={`relative -ml-4 px-4 pt-3 rounded-t-2xl transition-all duration-300 flex items-center gap-2 text-xs font-semibold cursor-pointer min-w-0 ${
+                                                        isActive
+                                                            ? "bg-white/60 text-primary-800 backdrop-blur-xl border border-white/70 shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_1px_0_2px_rgba(255,255,255,0.5),inset_-1px_0_2px_rgba(255,255,255,0.5),0_-4px_10px_rgba(0,0,0,0.05)] pb-4"
+                                                            : "bg-surface-muted/50 text-ink-muted backdrop-blur-md border border-white/30 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-2px_4px_rgba(0,0,0,0.05)] hover:bg-white/40 pb-2"
+                                                    }`}
+                                                    aria-selected={isActive}
+                                                    role="tab"
+                                                >
+                                                    <tab.icon size={16} className={`shrink-0 transition-colors ${isActive ? "text-primary-600" : "text-ink-muted"}`} />
+                                                    <span className={`transition-all duration-300 ${isActive ? "whitespace-nowrap opacity-100 max-w-[200px]" : "hidden sm:block truncate opacity-70"}`}>
+                                                        {tab.label}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
 
                                     {/* ═══ TAB 1: OVERVIEW ═══ */}
                                     <TabsContent
                                         value="overview"
-                                        className="space-y-6 focus:outline-none"
+                                        className="!mt-0 relative z-10 bg-white/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-6 focus:outline-none"
                                     >
                                         {/* Personal Info */}
                                         <div className="bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-4">
@@ -607,10 +616,10 @@ export default function UserProfileSheet({
                                                 Личная информация
                                             </h3>
                                             <div className="space-y-4">
-                                                <div>
+                                                <div className="flex flex-col h-full">
                                                     <label
                                                         htmlFor="display_name"
-                                                        className="block text-[13px] font-semibold text-ink-main mb-1.5"
+                                                        className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
                                                     >
                                                         Имя
                                                     </label>
@@ -621,15 +630,15 @@ export default function UserProfileSheet({
                                                         onChange={(e) =>
                                                             setFormData({ ...formData, display_name: e.target.value })
                                                         }
-                                                        className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
                                                         placeholder="Не указано"
                                                     />
                                                 </div>
 
-                                                <div>
+                                                <div className="flex flex-col h-full">
                                                     <label
                                                         htmlFor="ai_name"
-                                                        className="block text-[13px] font-semibold text-ink-main mb-1.5"
+                                                        className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
                                                     >
                                                         Имя ассистента
                                                     </label>
@@ -640,15 +649,15 @@ export default function UserProfileSheet({
                                                         onChange={(e) =>
                                                             setFormData({ ...formData, ai_name: e.target.value })
                                                         }
-                                                        className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
                                                         placeholder="Например: Maya Pro"
                                                     />
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-5">
-                                                    <div>
+                                                    <div className="flex flex-col h-full">
                                                         <label
                                                             htmlFor="date_of_birth"
-                                                            className="block text-[13px] font-semibold text-ink-main mb-1.5"
+                                                            className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
                                                         >
                                                             Дата рождения
                                                         </label>
@@ -662,13 +671,13 @@ export default function UserProfileSheet({
                                                                     date_of_birth: e.target.value,
                                                                 })
                                                             }
-                                                            className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                            className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                                         />
                                                     </div>
-                                                    <div>
+                                                    <div className="flex flex-col h-full">
                                                         <label
                                                             htmlFor="biological_sex"
-                                                            className="block text-[13px] font-semibold text-ink-main mb-1.5"
+                                                            className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
                                                         >
                                                             Пол
                                                         </label>
@@ -681,7 +690,7 @@ export default function UserProfileSheet({
                                                                     biological_sex: e.target.value,
                                                                 })
                                                             }
-                                                            className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                            className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                                         >
                                                             <option value="">Не указано</option>
                                                             <option value="male">Мужской</option>
@@ -706,10 +715,10 @@ export default function UserProfileSheet({
                                                 )}
                                             </div>
                                             <div className="grid grid-cols-2 gap-5">
-                                                <div>
+                                                <div className="flex flex-col h-full">
                                                     <label
                                                         htmlFor="weight_kg"
-                                                        className="block text-[13px] font-semibold text-ink-main mb-1.5"
+                                                        className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
                                                     >
                                                         Вес (кг)
                                                     </label>
@@ -721,14 +730,14 @@ export default function UserProfileSheet({
                                                         onChange={(e) =>
                                                             setFormData({ ...formData, weight_kg: e.target.value })
                                                         }
-                                                        className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
                                                         placeholder="Не указано"
                                                     />
                                                 </div>
-                                                <div>
+                                                <div className="flex flex-col h-full">
                                                     <label
                                                         htmlFor="height_cm"
-                                                        className="block text-[13px] font-semibold text-ink-main mb-1.5"
+                                                        className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
                                                     >
                                                         Рост (см)
                                                     </label>
@@ -739,16 +748,16 @@ export default function UserProfileSheet({
                                                         onChange={(e) =>
                                                             setFormData({ ...formData, height_cm: e.target.value })
                                                         }
-                                                        className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
                                                         placeholder="Не указано"
                                                     />
                                                 </div>
                                             </div>
                                             <div className="grid grid-cols-2 gap-5">
-                                                <div>
+                                                <div className="flex flex-col h-full">
                                                     <label
                                                         htmlFor="city"
-                                                        className="block text-[13px] font-semibold text-ink-main mb-1.5"
+                                                        className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
                                                     >
                                                         Город
                                                     </label>
@@ -759,14 +768,14 @@ export default function UserProfileSheet({
                                                         onChange={(e) =>
                                                             setFormData({ ...formData, city: e.target.value })
                                                         }
-                                                        className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
                                                         placeholder="Не указано"
                                                     />
                                                 </div>
-                                                <div>
+                                                <div className="flex flex-col h-full">
                                                     <label
                                                         htmlFor="timezone"
-                                                        className="block text-[13px] font-semibold text-ink-main mb-1.5"
+                                                        className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
                                                     >
                                                         Часовой пояс
                                                     </label>
@@ -780,7 +789,7 @@ export default function UserProfileSheet({
                                                             }
                                                             onFocus={() => setShowDropdown(true)}
                                                             onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                                                            className="w-full pl-3 pr-10 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                            className="mt-auto w-full pl-3 pr-10 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
                                                             placeholder="Поиск часового пояса..."
                                                         />
                                                         <button
@@ -812,7 +821,7 @@ export default function UserProfileSheet({
                                                                                 setFormData({ ...formData, timezone: tz });
                                                                                 setShowDropdown(false);
                                                                             }}
-                                                                            className="w-full text-left px-3 py-2 text-sm hover:bg-primary-50 hover:text-primary-700 transition-colors cursor-pointer flex items-center gap-2 group"
+                                                                            className="mt-auto w-full text-left px-3 py-2 text-sm hover:bg-primary-50 hover:text-primary-700 transition-colors cursor-pointer flex items-center gap-2 group"
                                                                         >
                                                                             <span className="w-1 h-1 rounded-full bg-ink-muted group-hover:bg-primary-400" />
                                                                             {tz}
@@ -825,6 +834,27 @@ export default function UserProfileSheet({
                                                         )}
                                                     </div>
                                                 </div>
+                                            </div>
+                                        </div>
+
+                                        {/* App Settings */}
+                                        <div className="mt-8 bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-4">
+                                            <h3 className="font-semibold text-ink-main border-b border-divider pb-3">
+                                                Настройки приложения
+                                            </h3>
+                                            <div className="flex flex-col h-full">
+                                                <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
+                                                    Масштаб интерфейса
+                                                </label>
+                                                <select
+                                                    value={scale}
+                                                    onChange={(e) => setScale(e.target.value as "small" | "medium" | "large")}
+                                                    className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                >
+                                                    <option value="small">Мелкий</option>
+                                                    <option value="medium">Средний</option>
+                                                    <option value="large">Крупный</option>
+                                                </select>
                                             </div>
                                         </div>
 
@@ -843,22 +873,22 @@ export default function UserProfileSheet({
                                                     <div className="p-5 pt-0 space-y-4 border-t border-divider mt-2">
                                                         <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
                                                             <div className="font-semibold text-ink-main flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[10px] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
                                                                 <span>В чем главная суперсила Vitograph?</span>
                                                             </div>
-                                                            <div className="text-[14px] text-ink-muted leading-relaxed flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[10px] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
+                                                            <div className="text-[0.875rem] text-ink-muted leading-relaxed flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
                                                                 <span>Vitograph — это не просто трекер калорий или папка для анализов. Это единый ИИ-мозг, который «видит» картину целиком. Приложение связывает то, что вы едите (Дневник), с тем, как вы себя чувствуете (Симптомы), и тем, что происходит внутри вашего организма (Анализы). На основе этих данных Ассистент выстраивает персональную стратегию здоровья.</span>
                                                             </div>
                                                         </div>
 
                                                         <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
                                                             <div className="font-semibold text-ink-main flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[10px] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
                                                                 <span>Чем вкладка «Дневник» отличается от «Ассистента»?</span>
                                                             </div>
-                                                            <div className="text-[14px] text-ink-muted leading-relaxed flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[10px] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
+                                                            <div className="text-[0.875rem] text-ink-muted leading-relaxed flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
                                                                 <div className="space-y-2">
                                                                     <p>Дневник — это ваш умный калькулятор питания. Сюда нужно писать (или скидывать фото) того, что вы съели. Например: "Яичница из 3 яиц с беконом и кофе". ИИ сам распознает блюдо, просчитает гликемический отклик и микронутриенты (витамины, минералы).</p>
                                                                     <p>Ассистент (Айболит) — это ваш персональный коуч по здоровью. С ним можно советоваться, обсуждать ваши анализы, просить составить меню на день или жаловаться на звон в ушах. Он помнит ваш контекст и профиль.</p>
@@ -868,55 +898,55 @@ export default function UserProfileSheet({
 
                                                         <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
                                                             <div className="font-semibold text-ink-main flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[10px] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
                                                                 <span>Я загрузил анализы, но нормы отличаются от тех, что были на бланке Инвитро/Гемотеста. Почему?</span>
                                                             </div>
-                                                            <div className="text-[14px] text-ink-muted leading-relaxed flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[10px] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
+                                                            <div className="text-[0.875rem] text-ink-muted leading-relaxed flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
                                                                 <span>Референсные значения лабораторий показывают «среднюю температуру по больнице» — норму для людей всех возрастов и состояний от 18 до 99 лет. Vitograph использует динамические персонализированные нормы (оптимумы). Они рассчитываются индивидуально под ваш возраст, пол, текущие заболевания и цели. Поэтому показатель, который лаборатория считает «нормальным», у нас может подсвечиваться желтым как требующий внимания.</span>
                                                             </div>
                                                         </div>
 
                                                         <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
                                                             <div className="font-semibold text-ink-main flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[10px] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
                                                                 <span>Как работает загрузка анализов?</span>
                                                             </div>
-                                                            <div className="text-[14px] text-ink-muted leading-relaxed flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[10px] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
+                                                            <div className="text-[0.875rem] text-ink-muted leading-relaxed flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
                                                                 <span>Вы можете перетащить PDF-файл или загрузить пачку фотографий ваших бланков (до 10 штук за раз). Важно: ИИ нужно время, чтобы внимательно «прочитать» каждое фото. Этот процесс может занять от 30 секунд до 2 минут. Вы увидите шкалу прогресса: просто подождите завершения анализа, и результаты превратятся в интерактивные карточки. Вы всегда сможете скорректировать цифру вручную, если ИИ ошибся.</span>
                                                             </div>
                                                         </div>
 
                                                         <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
                                                             <div className="font-semibold text-ink-main flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[10px] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
                                                                 <span>Зачем нужны фото ногтей, кожи и языка во вкладке Анализов?</span>
                                                             </div>
-                                                            <div className="text-[14px] text-ink-muted leading-relaxed flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[10px] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
+                                                            <div className="text-[0.875rem] text-ink-muted leading-relaxed flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
                                                                 <span>Это соматическая диагностика. Наше тело часто подает визуальные сигналы о дефицитах витаминов или проблемах с ЖКТ еще до того, как они отразятся в биохимии крови. ИИ обучен распознавать паттерны (например, белые пятна на ногтях или налет на языке) и сопоставлять их с недостатком конкретных нутриентов.</span>
                                                             </div>
                                                         </div>
 
                                                         <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
                                                             <div className="font-semibold text-ink-main flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[10px] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
                                                                 <span>Заменяет ли Vitograph поход к врачу?</span>
                                                             </div>
-                                                            <div className="text-[14px] text-ink-muted leading-relaxed flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[10px] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
+                                                            <div className="text-[0.875rem] text-ink-muted leading-relaxed flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
                                                                 <span>Нет. Vitograph — это мощный аналитический инструмент и ваш личный навигатор по здоровью, но он не ставит медицинские диагнозы и не назначает лечение. Все инсайты и AI-рекомендации созданы для того, чтобы вы могли предметно обсудить их со своим лечащим врачом.</span>
                                                             </div>
                                                         </div>
 
                                                         <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
                                                             <div className="font-semibold text-ink-main flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[10px] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
                                                                 <span>Конфиденциальны ли мои данные?</span>
                                                             </div>
-                                                            <div className="text-[14px] text-ink-muted leading-relaxed flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[10px] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
+                                                            <div className="text-[0.875rem] text-ink-muted leading-relaxed flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
                                                                 <span>Да. Ваши медицинские данные, анализы и анкеты хранятся в защищенной базе. ИИ использует их исключительно для персонализации рекомендаций в рамках ваших защищенных сессий.</span>
                                                             </div>
                                                         </div>
@@ -929,7 +959,7 @@ export default function UserProfileSheet({
                                                     <summary className="flex items-center justify-between p-5 font-semibold text-ink-main cursor-pointer list-none hover:bg-surface-muted transition-colors [&::-webkit-details-marker]:hidden">
                                                         <div className="flex items-center gap-2">
                                                             <span>О приложении (About)</span>
-                                                            <span className="px-2 py-0.5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold uppercase tracking-widest border border-primary-200/50">v2.0</span>
+                                                            <span className="px-2 py-0.5 rounded-full bg-primary-100 text-primary-700 text-[0.625rem] font-bold uppercase tracking-widest border border-primary-200/50">v2.0</span>
                                                         </div>
                                                         <span className="transition group-open:-rotate-180">
                                                             <svg className="w-5 h-5 text-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -937,7 +967,7 @@ export default function UserProfileSheet({
                                                             </svg>
                                                         </span>
                                                     </summary>
-                                                    <div className="p-5 pt-0 text-[14px] text-ink-muted space-y-5 border-t border-divider mt-2">
+                                                    <div className="p-5 pt-0 text-[0.875rem] text-ink-muted space-y-5 border-t border-divider mt-2">
                                                         {/* Header banner */}
                                                         <div className="text-center bg-surface-muted rounded-xl p-4 mt-2 flex flex-col items-center">
                                                             <Logo size="lg" />
@@ -951,25 +981,25 @@ export default function UserProfileSheet({
 
                                                         {/* How we do it list */}
                                                         <div className="space-y-4">
-                                                            <h4 className="font-bold text-ink-main text-[16px] border-b border-divider pb-2">Как мы это делаем?</h4>
+                                                            <h4 className="font-bold text-ink-main text-[1rem] border-b border-divider pb-2">Как мы это делаем?</h4>
                                                             <ul className="space-y-4">
                                                                 <li className="flex gap-4">
-                                                                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-[13px] shadow-sm">1</div>
+                                                                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-[0.8125rem] shadow-sm">1</div>
                                                                     <p className="leading-relaxed mt-1"><strong className="text-ink-main">Собираем пазл воедино.</strong> Ваши анализы крови, качество сна, уровень стресса и каждая съеденная тарелка еды — больше не разрозненные данные. Vitograph анализирует их в комплексе 24/7.</p>
                                                                 </li>
                                                                 <li className="flex gap-4">
-                                                                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-[13px] shadow-sm">2</div>
+                                                                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-[0.8125rem] shadow-sm">2</div>
                                                                     <p className="leading-relaxed mt-1"><strong className="text-ink-main">Ищем оптимум, а не "норму".</strong> Мы не опираемся на усредненные лабораторные референсы. Мы рассчитываем ваши идеальные показатели (динамические нормы) с учетом вашего возраста, профиля и генетических особенностей.</p>
                                                                 </li>
                                                                 <li className="flex gap-4">
-                                                                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-[13px] shadow-sm">3</div>
+                                                                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-[0.8125rem] shadow-sm">3</div>
                                                                     <p className="leading-relaxed mt-1"><strong className="text-ink-main">Действуем на опережение.</strong> ИИ-ассистент замечает скрытые дефициты и корреляции в вашем дневнике питания еще до того, как они превратятся в проблему, помогая корректировать состояние точечными изменениями в еде и добавках.</p>
                                                                 </li>
                                                             </ul>
                                                         </div>
                                                         
                                                         {/* Disclaimer footer */}
-                                                        <div className="bg-blue-50 border border-blue-100 text-blue-800 rounded-xl p-4 mt-6 text-[13px] leading-relaxed font-medium">
+                                                        <div className="bg-blue-50 border border-blue-100 text-blue-800 rounded-xl p-4 mt-6 text-[0.8125rem] leading-relaxed font-medium">
                                                             Мы не заменяем врачей. Мы даем вам инструмент, чтобы понимать свой организм, кормить свои клетки тем, что им действительно нужно, и находить свой идеальный баланс. Начните с профиля — и позвольте науке и данным работать на ваше долголетие.
                                                         </div>
                                                     </div>
@@ -983,12 +1013,12 @@ export default function UserProfileSheet({
                                                 <AlertTriangle size={16} /> Опасная зона
                                             </h3>
                                             <div className="bg-red-50 p-5 rounded-2xl border border-red-100 shadow-sm">
-                                                <p className="text-[13px] text-red-700 leading-relaxed font-medium mb-4">
+                                                <p className="text-[0.8125rem] text-red-700 leading-relaxed font-medium mb-4">
                                                     Удаление аккаунта приведет к безвозвратной потере всех ваших данных, включая анализы, историю чатов и настройки профиля.
                                                 </p>
                                                 <button
                                                     onClick={() => setShowDeleteConfirm(true)}
-                                                    className="w-full sm:w-auto px-5 py-2.5 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                                                    className="mt-auto w-full sm:w-auto px-5 py-2.5 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                                                 >
                                                     <Trash2 size={16} /> Удалить мой аккаунт и данные
                                                 </button>
@@ -999,7 +1029,7 @@ export default function UserProfileSheet({
                                     {/* ═══ TAB 2: LIFESTYLE ═══ */}
                                     <TabsContent
                                         value="lifestyle"
-                                        className="space-y-6 focus:outline-none"
+                                        className="!mt-0 relative z-10 bg-white/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-6 focus:outline-none"
                                     >
                                         {/* Nutrition & Environment */}
                                         <div className="bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-4">
@@ -1007,8 +1037,8 @@ export default function UserProfileSheet({
                                                 Питание и Среда
                                             </h3>
                                             <div className="grid grid-cols-2 gap-5">
-                                                <div>
-                                                    <label className="block text-[13px] font-semibold text-ink-main mb-1.5">
+                                                <div className="flex flex-col h-full">
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
                                                         Тип диеты
                                                     </label>
                                                     <select
@@ -1016,7 +1046,7 @@ export default function UserProfileSheet({
                                                         onChange={(e) =>
                                                             setFormData({ ...formData, diet_type: e.target.value })
                                                         }
-                                                        className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                                     >
                                                         <option value="omnivore">Omnivore</option>
                                                         <option value="vegetarian">Vegetarian</option>
@@ -1026,8 +1056,8 @@ export default function UserProfileSheet({
                                                         <option value="other">Other</option>
                                                     </select>
                                                 </div>
-                                                <div>
-                                                    <label className="block text-[13px] font-semibold text-ink-main mb-1.5">
+                                                <div className="flex flex-col h-full">
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
                                                         Алкоголь
                                                     </label>
                                                     <select
@@ -1038,7 +1068,7 @@ export default function UserProfileSheet({
                                                                 alcohol_frequency: e.target.value,
                                                             })
                                                         }
-                                                        className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                                     >
                                                         <option value="none">Не употребляю</option>
                                                         <option value="occasional">Иногда</option>
@@ -1046,8 +1076,8 @@ export default function UserProfileSheet({
                                                         <option value="heavy">Часто</option>
                                                     </select>
                                                 </div>
-                                                <div>
-                                                    <label className="block text-[13px] font-semibold text-ink-main mb-1.5">
+                                                <div className="flex flex-col h-full">
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
                                                         Климат
                                                     </label>
                                                     <select
@@ -1058,7 +1088,7 @@ export default function UserProfileSheet({
                                                                 climate_zone: e.target.value,
                                                             })
                                                         }
-                                                        className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                                     >
                                                         <option value="temperate">Умеренный</option>
                                                         <option value="tropical">Тропический</option>
@@ -1067,8 +1097,8 @@ export default function UserProfileSheet({
                                                         <option value="polar">Полярный</option>
                                                     </select>
                                                 </div>
-                                                <div>
-                                                    <label className="block text-[13px] font-semibold text-ink-main mb-1.5">
+                                                <div className="flex flex-col h-full">
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
                                                         Уровень солнца
                                                     </label>
                                                     <select
@@ -1079,7 +1109,7 @@ export default function UserProfileSheet({
                                                                 sun_exposure: e.target.value,
                                                             })
                                                         }
-                                                        className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                                     >
                                                         <option value="minimal">Минимальный</option>
                                                         <option value="moderate">Умеренный</option>
@@ -1095,8 +1125,8 @@ export default function UserProfileSheet({
                                                 Активность и Восстановление
                                             </h3>
                                             <div className="grid grid-cols-2 gap-5">
-                                                <div>
-                                                    <label className="block text-[13px] font-semibold text-ink-main mb-1.5">
+                                                <div className="flex flex-col h-full">
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
                                                         Уровень активности
                                                     </label>
                                                     <select
@@ -1107,7 +1137,7 @@ export default function UserProfileSheet({
                                                                 activity_level: e.target.value,
                                                             })
                                                         }
-                                                        className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                                     >
                                                         <option value="sedentary">Сидячий</option>
                                                         <option value="light">Лёгкий</option>
@@ -1116,8 +1146,8 @@ export default function UserProfileSheet({
                                                         <option value="very_active">Очень активный</option>
                                                     </select>
                                                 </div>
-                                                <div>
-                                                    <label className="block text-[13px] font-semibold text-ink-main mb-1.5">
+                                                <div className="flex flex-col h-full">
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
                                                         Тип работы
                                                     </label>
                                                     <select
@@ -1128,7 +1158,7 @@ export default function UserProfileSheet({
                                                                 work_lifestyle: e.target.value,
                                                             })
                                                         }
-                                                        className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                                     >
                                                         <option value="office_sedentary">Офис (сидячая)</option>
                                                         <option value="office_active">Офис (активная)</option>
@@ -1137,8 +1167,8 @@ export default function UserProfileSheet({
                                                         <option value="shift_work">Сменная работа</option>
                                                     </select>
                                                 </div>
-                                                <div>
-                                                    <label className="block text-[13px] font-semibold text-ink-main mb-1.5">
+                                                <div className="flex flex-col h-full">
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
                                                         Кардио в нед. (мин)
                                                     </label>
                                                     <input
@@ -1152,12 +1182,12 @@ export default function UserProfileSheet({
                                                                 physical_activity_minutes_weekly: e.target.value,
                                                             })
                                                         }
-                                                        className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
                                                         placeholder="Не указано"
                                                     />
                                                 </div>
-                                                <div>
-                                                    <label className="block text-[13px] font-semibold text-ink-main mb-1.5">
+                                                <div className="flex flex-col h-full">
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
                                                         Среднее время сна (ч)
                                                     </label>
                                                     <input
@@ -1170,7 +1200,7 @@ export default function UserProfileSheet({
                                                                 sleep_hours_avg: e.target.value,
                                                             })
                                                         }
-                                                        className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
                                                         placeholder="Не указано"
                                                     />
                                                 </div>
@@ -1182,8 +1212,8 @@ export default function UserProfileSheet({
                                             <h3 className="font-semibold text-ink-main border-b border-divider pb-3">
                                                 Сон и Стресс
                                             </h3>
-                                            <div>
-                                                <label className="block text-[13px] font-semibold text-ink-main mb-1.5">
+                                            <div className="flex flex-col h-full">
+                                                <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
                                                     Базовый уровень стресса
                                                 </label>
                                                 <select
@@ -1194,7 +1224,7 @@ export default function UserProfileSheet({
                                                             stress_level: e.target.value,
                                                         })
                                                     }
-                                                    className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                    className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                                 >
                                                     <option value="low">Низкий</option>
                                                     <option value="moderate">Средний</option>
@@ -1208,7 +1238,7 @@ export default function UserProfileSheet({
                                     {/* ═══ TAB 3: MEDICAL CONTEXT ═══ */}
                                     <TabsContent
                                         value="medical"
-                                        className="space-y-6 focus:outline-none"
+                                        className="!mt-0 relative z-10 bg-white/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-6 focus:outline-none"
                                     >
                                         <div className="bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-5">
                                             <div className="grid grid-cols-2 gap-5">
@@ -1227,13 +1257,13 @@ export default function UserProfileSheet({
                                                     />
                                                     <label
                                                         htmlFor="isSmoker"
-                                                        className="text-[13px] font-semibold text-ink-main"
+                                                        className="text-[0.8125rem] font-semibold text-ink-main"
                                                     >
                                                         Курение / Вейпинг
                                                     </label>
                                                 </div>
-                                                <div>
-                                                    <label className="block text-[13px] font-semibold text-ink-main mb-1.5">
+                                                <div className="flex flex-col h-full">
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
                                                         Беременность
                                                     </label>
                                                     <select
@@ -1244,7 +1274,7 @@ export default function UserProfileSheet({
                                                                 pregnancy_status: e.target.value,
                                                             })
                                                         }
-                                                        className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                                     >
                                                         <option value="not_applicable">Не применимо</option>
                                                         <option value="pregnant">Беременна</option>
@@ -1255,7 +1285,7 @@ export default function UserProfileSheet({
 
                                             {/* Chronic Conditions */}
                                             <div className="pt-2 border-t border-divider">
-                                                <label className="block text-[13px] font-semibold text-ink-main mb-1.5">
+                                                <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
                                                     Хронические заболевания и Аллергии
                                                 </label>
                                                 <div className="flex flex-wrap gap-2 mb-3">
@@ -1302,7 +1332,7 @@ export default function UserProfileSheet({
 
                                             {/* Medications */}
                                             <div className="pt-2 border-t border-divider">
-                                                <label className="block text-[13px] font-semibold text-ink-main mb-1.5">
+                                                <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
                                                     Медикаменты и Добавки
                                                 </label>
                                                 <div className="flex flex-wrap gap-2 mb-3">
@@ -1355,7 +1385,7 @@ export default function UserProfileSheet({
                                     {/* ═══ TAB 4: WEARABLES HUB ═══ */}
                                     <TabsContent
                                         value="wearables"
-                                        className="focus:outline-none space-y-4"
+                                        className="!mt-0 relative z-10 bg-white/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-4 focus:outline-none"
                                     >
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             {/* Card 1: Sleep & Recovery */}
@@ -1493,7 +1523,7 @@ export default function UserProfileSheet({
                             <button
                                 onClick={handleDeleteAccount}
                                 disabled={isDeleting}
-                                className="w-full py-4 bg-red-600 text-white font-bold rounded-2xl hover:bg-red-700 disabled:opacity-50 transition-all shadow-lg shadow-red-200 active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
+                                className="mt-auto w-full py-4 bg-red-600 text-white font-bold rounded-2xl hover:bg-red-700 disabled:opacity-50 transition-all shadow-lg shadow-red-200 active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
                             >
                                 {isDeleting ? (
                                     <>
@@ -1510,7 +1540,7 @@ export default function UserProfileSheet({
                             <button
                                 onClick={() => setShowDeleteConfirm(false)}
                                 disabled={isDeleting}
-                                className="w-full py-4 bg-surface-muted text-ink-main font-bold rounded-2xl hover:bg-surface-hover disabled:opacity-50 transition-all border border-divider cursor-pointer"
+                                className="mt-auto w-full py-4 bg-surface-muted text-ink-main font-bold rounded-2xl hover:bg-surface-hover disabled:opacity-50 transition-all border border-divider cursor-pointer"
                             >
                                 Отмена
                             </button>
@@ -1534,13 +1564,13 @@ export default function UserProfileSheet({
                         <div className="flex flex-col gap-3">
                             <button
                                 onClick={handleForceClose}
-                                className="w-full py-4 bg-amber-600 text-white font-bold rounded-2xl hover:bg-amber-700 transition-all shadow-lg shadow-amber-200 active:scale-[0.98] cursor-pointer"
+                                className="mt-auto w-full py-4 bg-amber-600 text-white font-bold rounded-2xl hover:bg-amber-700 transition-all shadow-lg shadow-amber-200 active:scale-[0.98] cursor-pointer"
                             >
                                 Выйти без сохранения
                             </button>
                             <button
                                 onClick={() => setShowUnsavedConfirm(false)}
-                                className="w-full py-4 bg-surface-muted text-ink-main font-bold rounded-2xl hover:bg-surface-hover transition-all border border-divider cursor-pointer"
+                                className="mt-auto w-full py-4 bg-surface-muted text-ink-main font-bold rounded-2xl hover:bg-surface-hover transition-all border border-divider cursor-pointer"
                             >
                                 Остаться и продолжить
                             </button>

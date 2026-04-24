@@ -48,7 +48,7 @@ export default function DeviceWidgetCard({
                         {icon}
                     </div>
                     <div>
-                        <h4 className="text-[15px] font-semibold text-ink-main leading-tight">
+                        <h4 className="text-[0.9375rem] font-semibold text-ink-main leading-tight">
                             {title}
                         </h4>
                         <p
@@ -74,7 +74,7 @@ export default function DeviceWidgetCard({
                             key={metric.label}
                             className="flex items-center justify-between py-1.5 border-b border-divider/50 last:border-b-0"
                         >
-                            <span className="text-[13px] text-ink-muted font-medium truncate mr-2">
+                            <span className="text-[0.8125rem] text-ink-muted font-medium truncate mr-2">
                                 {metric.label}
                             </span>
                             <div className="flex items-baseline gap-1 shrink-0">
@@ -85,7 +85,7 @@ export default function DeviceWidgetCard({
                                     {isEmpty ? "—" : metric.value}
                                 </span>
                                 {!isEmpty && metric.unit && (
-                                    <span className="text-[11px] text-ink-muted font-medium">
+                                    <span className="text-[0.6875rem] text-ink-muted font-medium">
                                         {metric.unit}
                                     </span>
                                 )}
@@ -99,14 +99,14 @@ export default function DeviceWidgetCard({
             <div className="flex items-center gap-2 mt-auto pt-3 border-t border-divider">
                 <button
                     onClick={onManualEntry}
-                    className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-surface-muted px-3 py-2 text-[13px] font-semibold text-ink-main transition-colors hover:bg-surface-hover active:scale-95 cursor-pointer"
+                    className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-surface-muted px-3 py-2 text-[0.8125rem] font-semibold text-ink-main transition-colors hover:bg-surface-hover active:scale-95 cursor-pointer"
                 >
                     <Pencil size={14} />
                     Ввести вручную
                 </button>
                 <button
                     onClick={onScreenshotUpload}
-                    className="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-divider bg-white px-3 py-2 text-[13px] font-semibold text-primary-600 shadow-sm transition-colors hover:bg-primary-50 hover:border-primary-100 active:scale-95 cursor-pointer"
+                    className="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-divider bg-white px-3 py-2 text-[0.8125rem] font-semibold text-primary-600 shadow-sm transition-colors hover:bg-primary-50 hover:border-primary-100 active:scale-95 cursor-pointer"
                 >
                     <Camera size={14} />
                     Скриншот

@@ -63,9 +63,9 @@ export default function DatePaginator({ selectedDate, onChange, userTimezone }: 
       </button>
 
       <div className="flex-1 text-center flex flex-col items-center justify-center cursor-pointer" onClick={handleToday}>
-        <span className="text-[15px] font-bold text-ink">{label}</span>
+        <span className="text-[0.9375rem] font-bold text-ink">{label}</span>
         {!isToday && (
-          <span className="text-[10px] text-primary-600 hover:text-primary-700 font-medium tracking-wide uppercase mt-0.5">
+          <span className="text-[0.625rem] text-primary-600 hover:text-primary-700 font-medium tracking-wide uppercase mt-0.5">
             Вернуться в сегодня
           </span>
         )}

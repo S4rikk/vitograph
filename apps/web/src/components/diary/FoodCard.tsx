@@ -202,14 +202,14 @@ export default function FoodCard({
       <div className="flex items-start justify-between mb-2 gap-2">
         <div className="flex items-start gap-2">
             <div className="flex flex-col items-center justify-center shrink-0">
-                <span className="text-[24px] leading-none">{finalEmoji}</span>
-                <span className="text-[11px] text-ink-muted font-medium whitespace-nowrap mt-0.5">{weight} г</span>
+                <span className="text-[1.5rem] leading-none">{finalEmoji}</span>
+                <span className="text-[0.6875rem] text-ink-muted font-medium whitespace-nowrap mt-0.5">{weight} г</span>
             </div>
-            <span className="font-bold text-ink text-[14px] leading-tight line-clamp-2 max-w-[160px] sm:max-w-[220px] pt-0.5" title={name}>
+            <span className="font-bold text-ink text-[0.875rem] leading-tight line-clamp-2 max-w-[160px] sm:max-w-[220px] pt-0.5" title={name}>
                 {name}
             </span>
         </div>
-        <div title={scoreReason} className={`shrink-0 px-2 py-0.5 rounded-full text-[11px] font-bold shadow-sm mt-0.5 ${getHealthScoreStyle(score)}`}>
+        <div title={scoreReason} className={`shrink-0 px-2 py-0.5 rounded-full text-[0.6875rem] font-bold shadow-sm mt-0.5 ${getHealthScoreStyle(score)}`}>
             {score}/100
         </div>
       </div>
@@ -218,9 +218,9 @@ export default function FoodCard({
       <div className="flex gap-1.5 mb-2 justify-between">
         {/* GI Value */}
         <div className={`flex-1 flex flex-col items-center justify-center ${getGIColor(gi).bg} border border-border/40 rounded-xl py-1.5 px-1 min-w-0`}>
-          <span className={`font-[800] text-[18px] ${getGIColor(gi).text} leading-none mb-1`}>{gi ?? '?'}</span>
-          <span className={`text-[9px] ${getGIColor(gi).text} opacity-80 flex items-center gap-0.5`}>
-            ГИ <span className="text-[10px] mx-0.5 leading-none">{getGIColor(gi).emoji}</span> {getGIColor(gi).label}
+          <span className={`font-[800] text-[1.125rem] ${getGIColor(gi).text} leading-none mb-1`}>{gi ?? '?'}</span>
+          <span className={`text-[0.5625rem] ${getGIColor(gi).text} opacity-80 flex items-center gap-0.5`}>
+            ГИ <span className="text-[0.625rem] mx-0.5 leading-none">{getGIColor(gi).emoji}</span> {getGIColor(gi).label}
           </span>
         </div>
 
@@ -230,7 +230,7 @@ export default function FoodCard({
           return (
             <div className={`flex-1 flex flex-col items-center justify-center ${badge.bg} border ${badge.border} rounded-xl py-1.5 px-1 min-w-0 text-center`}>
               <div className={`mb-1 ${badge.text}`}>{badge.icon}</div>
-              <span className={`text-[9px] font-bold ${badge.text} leading-tight text-center`}>{badge.label}</span>
+              <span className={`text-[0.5625rem] font-bold ${badge.text} leading-tight text-center`}>{badge.label}</span>
             </div>
           );
         })()}
@@ -238,10 +238,10 @@ export default function FoodCard({
         {/* Energy Duration */}
         {energyHours && (
           <div className="flex-1 flex flex-col items-center justify-center bg-[#EFF6FF] border border-[#BFDBFE] rounded-xl py-1.5 px-1 min-w-0">
-            <span className="font-[800] text-[17px] text-[#2563EB] leading-none mb-1 flex items-baseline justify-center whitespace-nowrap">
-              {energyHours}<span className="text-[12px] font-bold ml-[1px]">ч</span>
+            <span className="font-[800] text-[1.0625rem] text-[#2563EB] leading-none mb-1 flex items-baseline justify-center whitespace-nowrap">
+              {energyHours}<span className="text-[0.75rem] font-bold ml-[1px]">ч</span>
             </span>
-            <span className="text-[9px] text-[#2563EB] opacity-70 whitespace-nowrap">энергии</span>
+            <span className="text-[0.5625rem] text-[#2563EB] opacity-70 whitespace-nowrap">энергии</span>
           </div>
         )}
       </div>
@@ -249,12 +249,12 @@ export default function FoodCard({
       {/* Micros */}
       {micros && micros.length > 0 && (
           <div className="mb-1 pt-1.5 border-t border-border/50">
-             <div className="text-[9px] text-ink-faint uppercase font-bold tracking-wider mb-1">Микронутриенты</div>
+             <div className="text-[0.5625rem] text-ink-faint uppercase font-bold tracking-wider mb-1">Микронутриенты</div>
              <div className="flex flex-wrap gap-1">
                  {micros.map((micro, idx) => {
                      const colorSpace = getMicronutrientColor(micro.name);
                      return (
-                         <div key={idx} className="flex items-center gap-1 px-1.5 py-0.5 bg-surface-subtle border border-border/60 rounded-full text-[11px] leading-tight">
+                         <div key={idx} className="flex items-center gap-1 px-1.5 py-0.5 bg-surface-subtle border border-border/60 rounded-full text-[0.6875rem] leading-tight">
                              <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${colorSpace.dot}`}></div>
                              <span className={colorSpace.text}>{micro.name} <span className="opacity-60 ml-0.5">{micro.value}</span></span>
                          </div>
@@ -284,7 +284,7 @@ export default function FoodCard({
                   </button>
               </div>
           )}
-          <span className="text-[10px] text-ink-faint">{time}</span>
+          <span className="text-[0.625rem] text-ink-faint">{time}</span>
       </div>
       </div>
     </div>

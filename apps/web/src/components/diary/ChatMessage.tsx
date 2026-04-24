@@ -127,7 +127,7 @@ export default function ChatMessage({
                <div className="flex justify-start">
                  <div className="max-w-[80%] rounded-2xl px-4 py-2.5 rounded-bl-md bg-white text-ink border border-border">
                     <div className="text-sm leading-relaxed whitespace-pre-wrap">{parseNutrientTags(parsed.comment)}</div>
-                    <p className="mt-1 text-[10px] text-right text-ink-faint">{time}</p>
+                    <p className="mt-1 text-[0.625rem] text-right text-ink-faint">{time}</p>
                  </div>
                </div>
            )}
@@ -171,7 +171,7 @@ export default function ChatMessage({
         )}
         <p
           className={`
-            mt-1 text-[10px] text-right
+            mt-1 text-[0.625rem] text-right
             ${isUser ? "text-primary-200" : "text-ink-faint"}
           `}
         >

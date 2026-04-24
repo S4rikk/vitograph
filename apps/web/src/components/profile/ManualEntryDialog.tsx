@@ -89,7 +89,7 @@ export default function ManualEntryDialog({
                             <div key={field.key}>
                                 <label
                                     htmlFor={`manual-${field.key}`}
-                                    className="block text-[13px] font-semibold text-ink-main mb-1.5"
+                                    className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
                                 >
                                     {field.label}
                                     {field.unit && (

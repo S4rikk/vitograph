@@ -32,7 +32,7 @@ export function MealScoreBadge({ score, reason }: MealScoreBadgeProps) {
             </div>
 
             {reason && (
-                <p className="text-[11px] text-gray-500 italic leading-relaxed mt-0.5">
+                <p className="text-[0.6875rem] text-gray-500 italic leading-relaxed mt-0.5">
                     {reason}
                 </p>
             )}

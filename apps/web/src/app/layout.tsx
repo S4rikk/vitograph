@@ -4,6 +4,7 @@ import SignOutButton from "@/components/auth/SignOutButton";
 import { createClient } from "@/lib/supabase/server";
 import UserProfileSheet from "@/components/profile/UserProfileSheet";
 import Logo from "@/components/ui/Logo";
+import { FontScaleProvider } from "@/components/providers/FontScaleProvider";
 
 export const metadata: Metadata = {
   title: "VITOGRAPH — Feed your cells, find balance",
@@ -27,8 +28,17 @@ export default async function RootLayout({
   } = await supabase.auth.getUser();
 
   return (
-    <html lang="ru">
+    <html lang="ru" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            try {
+              var scale = localStorage.getItem('vitograph-font-scale') || 'medium';
+              var size = scale === 'small' ? '14px' : scale === 'large' ? '18px' : '16px';
+              document.documentElement.style.fontSize = size;
+            } catch (e) {}
+          `
+        }} />
         <link rel="manifest" href="/manifest.json" />
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
@@ -36,16 +46,18 @@ export default async function RootLayout({
         />
       </head>
       <body className="h-[100dvh] flex flex-col bg-surface-muted sm:h-auto sm:min-h-screen sm:block">
-        {user && (
-          <header className="shrink-0 bg-white border-b border-border px-4 py-2 sm:px-6 sm:py-3 flex items-center justify-between">
-            <Logo size="sm" showSubtitle={false} />
-            <div className="flex items-center gap-4">
-              <UserProfileSheet userId={user.id} userEmail={user.email || "User"} />
-              <SignOutButton />
-            </div>
-          </header>
-        )}
-        <main className="flex-1 flex flex-col min-h-0">{children}</main>
+        <FontScaleProvider>
+          {user && (
+            <header className="shrink-0 bg-white border-b border-border px-4 py-2 sm:px-6 sm:py-3 flex items-center justify-between">
+              <Logo size="sm" showSubtitle={false} />
+              <div className="flex items-center gap-4">
+                <UserProfileSheet userId={user.id} userEmail={user.email || "User"} />
+                <SignOutButton />
+              </div>
+            </header>
+          )}
+          <main className="flex-1 flex flex-col min-h-0">{children}</main>
+        </FontScaleProvider>
       </body>
     </html>
   );
