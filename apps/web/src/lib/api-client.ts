@@ -32,6 +32,24 @@ const getAuthToken = async (): Promise<string | null> => {
 
   tokenPromise = (async () => {
     try {
+      // ── Fast path: read cached token from localStorage (instant, no network) ──
+      try {
+        const storageKey = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
+        if (storageKey) {
+          const raw = localStorage.getItem(storageKey);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            const cachedToken = parsed?.access_token;
+            const expiresAt = parsed?.expires_at; // Unix timestamp in seconds
+            // Use cached token if it has > 60s remaining lifetime
+            if (cachedToken && expiresAt && (expiresAt - Math.floor(Date.now() / 1000)) > 60) {
+              return cachedToken;
+            }
+          }
+        }
+      } catch { /* localStorage unavailable */ }
+
+      // ── Slow path: call getSession (may hang on Android WebView) ──
       if (!supabaseClient) {
         const { createClient } = await import("@/lib/supabase/client");
         supabaseClient = createClient();
@@ -49,26 +67,10 @@ const getAuthToken = async (): Promise<string | null> => {
         return result.data.session.access_token;
       }
 
-      // Fallback: try to read cached token from localStorage (Supabase stores it there)
-      try {
-        const storageKey = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
-        if (storageKey) {
-          const raw = localStorage.getItem(storageKey);
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            const cachedToken = parsed?.access_token;
-            if (cachedToken) {
-              console.warn('[getAuthToken] Using cached token (getSession timed out)');
-              return cachedToken;
-            }
-          }
-        }
-      } catch { /* localStorage unavailable */ }
-
       return null;
     } finally {
       // Clear the promise so future calls fetch fresh tokens,
-      // but debounce concurrent calls happening in within the same event loop/render cycle
+      // but debounce concurrent calls happening within the same event loop/render cycle
       setTimeout(() => {
         tokenPromise = null;
       }, 1000);
