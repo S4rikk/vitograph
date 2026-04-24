@@ -541,7 +541,7 @@ export default function UserProfileSheet({
                     {/* Header */}
                     <div className="px-6 py-5 border-b border-border flex items-center justify-between bg-white z-10 relative">
                         <div>
-                            <h2 className="text-xl font-bold text-ink-main">Health Profile</h2>
+                            <h2 className="text-xl font-bold text-ink-main">Профиль здоровья</h2>
                             <p className="text-sm text-ink-muted mt-0.5">{userEmail}</p>
                         </div>
                         <button
@@ -574,25 +574,25 @@ export default function UserProfileSheet({
                                             value="overview"
                                             className="flex items-center gap-1.5 text-xs cursor-pointer"
                                         >
-                                            <User size={14} className="hidden sm:block" /> Overview
+                                            <User size={14} className="hidden sm:block" /> Обзор
                                         </TabsTrigger>
                                         <TabsTrigger
                                             value="lifestyle"
                                             className="flex items-center gap-1.5 text-xs cursor-pointer"
                                         >
-                                            <Leaf size={14} className="hidden sm:block" /> Lifestyle
+                                            <Leaf size={14} className="hidden sm:block" /> Образ жизни
                                         </TabsTrigger>
                                         <TabsTrigger
                                             value="medical"
                                             className="flex items-center gap-1.5 text-xs cursor-pointer"
                                         >
-                                            <Activity size={14} className="hidden sm:block" /> Medical
+                                            <Activity size={14} className="hidden sm:block" /> Медицина
                                         </TabsTrigger>
                                         <TabsTrigger
                                             value="wearables"
                                             className="flex items-center gap-1.5 text-xs cursor-pointer"
                                         >
-                                            <Watch size={14} className="hidden sm:block" /> Devices
+                                            <Watch size={14} className="hidden sm:block" /> Устройства
                                         </TabsTrigger>
                                     </TabsList>
 
@@ -604,7 +604,7 @@ export default function UserProfileSheet({
                                         {/* Personal Info */}
                                         <div className="bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-4">
                                             <h3 className="font-semibold text-ink-main border-b border-divider pb-3">
-                                                Personal Info
+                                                Личная информация
                                             </h3>
                                             <div className="space-y-4">
                                                 <div>
@@ -697,11 +697,11 @@ export default function UserProfileSheet({
                                         <div className="bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-4">
                                             <div className="flex items-center justify-between border-b border-divider pb-3">
                                                 <h3 className="font-semibold text-ink-main">
-                                                    Physical Parameters
+                                                    Физические параметры
                                                 </h3>
                                                 {bmi && (
                                                     <div className="px-2.5 py-1 text-xs font-bold rounded-full bg-primary-50 text-primary-700 border border-primary-100">
-                                                        BMI: {bmi} ({bmiCategory(parseFloat(bmi))})
+                                                        ИМТ: {bmi} ({bmiCategory(parseFloat(bmi))})
                                                     </div>
                                                 )}
                                             </div>
