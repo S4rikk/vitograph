@@ -183,12 +183,11 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
               {photoResult.items.map((i) => `${i.name_ru} (~${i.estimated_weight_g}г)`).join(", ")}
             </p>
             {photoResult.imageUrl && (
-              <div className="rounded-lg overflow-hidden shrink-0 mt-auto">
+              <div className="rounded-lg overflow-hidden shrink-0 mt-auto max-w-[120px]">
                 <img
                   src={photoResult.imageUrl}
                   alt="Фото еды"
-                  className="w-full object-cover rounded-lg"
-                  style={{ maxHeight: "100px" }}
+                  className="w-full object-cover rounded-lg aspect-[3/4]"
                 />
               </div>
             )}
