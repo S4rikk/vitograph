@@ -175,6 +175,17 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
         <div
           className={`rounded-xl border p-3 text-sm ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-gray-50"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-gray-200"} ${REACTION_STYLES[photoResult.reaction_type]?.text || "text-gray-800"}`}
         >
+        {/* Photo thumbnail */}
+          {photoResult.imageUrl && (
+            <div className="mb-2 rounded-lg overflow-hidden max-h-[120px] w-full">
+              <img
+                src={photoResult.imageUrl}
+                alt="Фото еды"
+                className="w-full h-full object-cover rounded-lg"
+                style={{ maxHeight: "120px", objectFit: "cover" }}
+              />
+            </div>
+          )}
         <div className="flex justify-between items-start mb-2 gap-2">
             <p className="font-medium">
               {photoResult.items.map((i) => `${i.name_ru} (~${i.estimated_weight_g}г)`).join(", ")}
