@@ -265,6 +265,7 @@ Input: source_markdown (full document text)
    - Chunks are generated in memory and temporarily saved to kb_documents.metadata as pending_chunks.
    - Processing is batched 50 chunks at a time (generating embeddings via gte-small & DB insertion). 
    - If more chunks remain, EF re-enqueues itself via pgmq.send('kb_ingest') to bypass Deno Worker resource limits.
+   - 20MB limit is enabled in `next.config.ts` for file uploads, and processing is driven by an automated `pg_cron` schedule `* * * * *` (every minute).
 ```
 
 ### 5.3 Idempotency Guard
@@ -356,20 +357,29 @@ ChatPromptBuilder
 
 ### 7.3 ChatPromptBuilder Section
 
-```
-### KNOWLEDGE BASE CONTEXT
-Ниже приведены релевантные материалы из базы медицинских знаний.
-Используй эту информацию для обоснования своих рекомендаций.
+### 7.3 ChatPromptBuilder Section (Синтез Знаний)
 
-**[{document_title}] — {section_heading}**
+> **Анти-плагиат логика**: Чтобы ИИ не цитировал книги напрямую и не проговаривал "Согласно базе знаний...", секция передается обезличенно как фундамент для ответов.
+
+```
+### 📚 KNOWLEDGE BASE CONTEXT (СИНТЕЗ ЗНАНИЙ)
+<knowledge_base_rules>
+1. НИЖЕ ПРИВЕДЕНЫ ЭКСПЕРТНЫЕ ЗНАНИЯ. Это твой фундамент для ответов (Источник Истины).
+2. СИНТЕЗИРУЙ информацию из этих отрывков так, чтобы ответ звучал как твоя собственная экспертная рекомендация. Пересказывай своими словами (избегай плагиата).
+3. 🚫 СТРОГО ЗАПРЕЩЕНО упоминать названия книг, документов, авторов...
+</knowledge_base_rules>
+
+<documents>
+[EXCERPT]
 {chunk_content}
 
-**[{document_title_2}] — {section_heading_2}**
+[EXCERPT]
 {chunk_content_2}
+</documents>
 ```
 
-Приоритет: P2 (после Supplement Protocol, перед Chronic Conditions).
-Estimated tokens: ~600-900 (3 чанка × ~200 токенов).
+Приоритет: P2 (после Supplement Protocol).
+Estimated tokens: ~1000-1500 (5 чанков × ~200 токенов).
 
 ---
 
@@ -436,8 +446,9 @@ graph LR
 |:---|:---|:---|
 | `generate-skill-document` EF | KB lookup **ДО** вызова OpenAI | Протокол теперь evidence-based |
 | `match-skill-context` EF | KB fallback **ПОСЛЕ** skill search | Контекст доступен даже без скиллов |
+| `kb-embed-query` EF | Прокси `gte-small` для генерации векторов | Преодолевает несовместимость моделей Node.js/Supabase |
 | `ai.controller.ts` | Параллельный `fetchKnowledgeBaseContext()` | Прямой KB-контекст в промпте |
-| `ChatPromptBuilder` | Новый `.withKnowledgeBase()` (P2) | Глобальная KB в системном промпте |
+| `ChatPromptBuilder` | Новый `.withKnowledgeBase()` (P2) | Глобальная KB (Synthesis Mode) |
 
 ### 9.4 Различие методов ChatPromptBuilder
 

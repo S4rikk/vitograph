@@ -588,6 +588,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onInput={(e) => setInput((e.target as HTMLTextAreaElement).value)}
             disabled={isLoading}
             placeholder="Задайте вопрос о здоровье..."
             rows={1}

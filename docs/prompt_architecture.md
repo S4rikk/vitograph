@@ -63,7 +63,7 @@ graph LR
 | `withMealLogs(meals)` | P2 | Diary | ~1500 символов |
 | `withKnowledgeBases(kbs)` | P2 | Оба | ~800 символов |
 | `withSupplementProtocol(text)` | P2 | Оба | ~600 символов |
-| `withKnowledgeBase(results)` | P2 | Оба | ~900 символов |
+| `withKnowledgeBase(results)` | P2 | Оба | ~1500 символов |
 | `withTodaySupplements(logs)` | P2 | Оба | ~300 символов |
 | `withWeatherAlert(alert)` | P3 | Оба | ~200 символов |
 

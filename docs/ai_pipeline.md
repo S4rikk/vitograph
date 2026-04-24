@@ -63,7 +63,8 @@ graph TB
 | **Chat (primary)** | `gpt-5.4-mini` | Режимы `assistant` и `diary` — основной ReAct Agent |
 | **Chat (fallback)** | `gpt-4o-mini` | Fallback для обоих режимов при сбое primary |
 | **Vision / Lab / Label** | `gpt-5.4-mini` | Standalone analyzers (food-vision, lab-report, label-scanner) |
-| **Embeddings** | `text-embedding-3-small` (384d) | Семантический поиск в памяти, KB, skills |
+| **Embeddings (Memory/Skills)** | `text-embedding-3-small` (384d) | Семантический поиск в episodic memory (PostgresSaver/MemVector) |
+| **Embeddings (Knowledge Base)**| `gte-small` (Supabase.ai) | Вложенный поиск в Knowledge Base (проксируется через EF `kb-embed-query`) |
 
 > ⚠️ **Примечание:** `gpt-5.4-mini` является reasoning-моделью и не поддерживает параметр `temperature`. AI SDK выдаёт предупреждение — это ожидаемое поведение, игнорируется.
 
@@ -186,10 +187,11 @@ const weatherData = await getOrFetchWeatherContext(dbContext.profile, userId);
 
 Файл: `services/kb.service.ts`
 
-- Hybrid search (semantic + lexical) через RPC `hybrid_search_kb`
-- Reuses embeddings singleton из `memory.service.ts` (text-embedding-3-small, 384d)
-- RRF fusion, top-3 результата
-- Graceful degradation: null при ошибке или пустом результате
+- Для формирования вектора вопроса обращается к Edge Function прокси `kb-embed-query` (используется бесплатная модель `gte-small`).
+- Выполняет Hybrid search (semantic + lexical) через RPC `hybrid_search_kb`
+- RRF fusion, top-5 результатов (`p_top_k: 5`)
+- Graceful degradation: null при ошибке или пустом результате.
+- Формирует контекст в строгом формате "ЗНАНИЯ ДЛЯ СИНТЕЗА" без упоминания оригинальных названий книг во избежание плагиата.
 
 База знаний: `kb_documents → kb_sections → kb_chunks`
 
@@ -242,8 +244,8 @@ Fluent builder, собирающий system prompt из секций с прио
 Статусы async-job: `PENDING → PROCESSING → COMPLETED | FAILED`
 
 Оптимизации:
-- **Semantic Cache:** перед LLM-вызовом ищет известные паттерны `(slug, flag)` в `biomarker_note_cache`. Сокращает контекст на 1000–2000 токенов.
-- `maxOutputTokens: 16384` — предотвращает обрезку больших отчётов.
+1. **Semantic Cache:** перед LLM-вызовом ищет известные паттерны `(slug, flag)` в `biomarker_note_cache`. Сокращает контекст на 1000–2000 токенов.
+2. `maxOutputTokens: 16384` — предотвращает обрезку больших отчётов.
 
 ### 7.3 Label Scanner
 Файл: `graph/label-scanner.ts` *(новый)*
