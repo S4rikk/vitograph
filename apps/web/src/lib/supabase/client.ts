@@ -10,10 +10,29 @@ class MemoryLock {
     const nextLock = new Promise<void>((resolve) => {
       releaseLock = resolve;
     });
-    this.locks[name] = prevLock.then(() => nextLock);
+    // Ensure nextLock resolves even if prevLock rejects to prevent chain breakage
+    this.locks[name] = prevLock.then(() => nextLock).catch(() => nextLock);
 
     try {
-      await prevLock;
+      // Prevent deadlocks if app was backgrounded and a network request hung indefinitely
+      const timeoutMs = acquireTimeout && acquireTimeout < 5000 ? acquireTimeout : 3000;
+      let timeoutId: any;
+      const timeoutPromise = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error('LockTimeout')), timeoutMs);
+      });
+
+      await Promise.race([prevLock, timeoutPromise]);
+      clearTimeout(timeoutId);
+    } catch (err: any) {
+      if (err.message === 'LockTimeout') {
+        console.warn(`[MemoryLock] Timeout waiting for ${name}, breaking lock to avoid deadlock.`);
+        // Proceed without throwing to break the deadlock
+      } else {
+        throw err;
+      }
+    }
+
+    try {
       return await fn();
     } finally {
       releaseLock!();
