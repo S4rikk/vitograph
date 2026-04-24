@@ -363,7 +363,7 @@ export default function MedicalResultsView() {
       )}
 
       {/* ── Results grid ──────────────────────────────────── */}
-      {editableBiomarkers && editableBiomarkers.length > 0 && uploadState === "done" && (
+      {editableBiomarkers && editableBiomarkers.length > 0 && uploadState === "done" && !reportAlreadyGenerated && (
         <>
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-ink">

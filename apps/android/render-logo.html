@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { margin: 0; background: white; display: flex; align-items: center; justify-content: center; }
+  #canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+const SIZE = 1024;
+const svgMarkup = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-200 -200 400 400" width="${SIZE}" height="${SIZE}">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0ea5e9" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <g id="fish-outline">
+      <path d="M 15 0 Q 80 -50 160 25 M 15 0 Q 80 50 160 -25" 
+            fill="none" stroke="url(#grad1)" stroke-width="8" stroke-linecap="round"/>
+    </g>
+  </defs>
+  <g transform="rotate(-90)">
+    <g transform="rotate(0)">
+      <use href="#fish-outline" />
+      <line x1="40" y1="-18.77" x2="40" y2="18.77" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+      <line x1="56" y1="-23.69" x2="56" y2="23.69" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
+      <line x1="72" y1="-25.76" x2="72" y2="25.76" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+      <line x1="88" y1="-23.78" x2="88" y2="23.78" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
+      <line x1="104" y1="-18.73" x2="104" y2="18.73" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+      <line x1="120" y1="-12.75" x2="120" y2="12.75" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <g transform="rotate(120)">
+      <use href="#fish-outline" />
+      <line x1="40" y1="-18.79" x2="40" y2="18.79" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+      <line x1="56" y1="-23.86" x2="56" y2="23.86" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
+      <line x1="72" y1="-25.50" x2="72" y2="25.50" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+      <line x1="88" y1="-23.53" x2="88" y2="23.53" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
+      <line x1="104" y1="-18.51" x2="104" y2="18.51" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+      <line x1="120" y1="-12.53" x2="120" y2="12.53" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <g transform="rotate(240)">
+      <use href="#fish-outline" />
+      <line x1="40" y1="-18.48" x2="40" y2="18.48" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+      <line x1="56" y1="-23.54" x2="56" y2="23.54" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
+      <line x1="72" y1="-25.52" x2="72" y2="25.52" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+      <line x1="88" y1="-23.54" x2="88" y2="23.54" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
+      <line x1="104" y1="-18.54" x2="104" y2="18.54" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+      <line x1="120" y1="-12.52" x2="120" y2="12.52" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <circle cx="0" cy="0" r="8" fill="#0ea5e9" />
+  </g>
+</svg>`;
+
+const canvas = document.getElementById('canvas');
+canvas.width = SIZE;
+canvas.height = SIZE;
+const ctx = canvas.getContext('2d');
+
+// White background
+ctx.fillStyle = '#ffffff';
+ctx.fillRect(0, 0, SIZE, SIZE);
+
+const img = new Image();
+const blob = new Blob([svgMarkup], { type: 'image/svg+xml;charset=utf-8' });
+const url = URL.createObjectURL(blob);
+
+img.onload = () => {
+  ctx.drawImage(img, 0, 0, SIZE, SIZE);
+  URL.revokeObjectURL(url);
+  
+  // Export as data URL and set title to signal completion
+  const dataUrl = canvas.toDataURL('image/png');
+  document.title = 'DONE';
+  
+  // Create download link
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = 'vitograph-logo-1024.png';
+  a.textContent = 'Download PNG';
+  a.style.cssText = 'position:fixed;top:10px;left:10px;font-size:24px;z-index:999';
+  document.body.appendChild(a);
+  
+  // Store dataUrl globally for retrieval
+  window.__logoDataUrl = dataUrl;
+};
+img.src = url;
+</script>
+</body>
+</html>

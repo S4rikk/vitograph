@@ -10,7 +10,7 @@ const config: CapacitorConfig = {
     androidScheme: 'https',
   },
   android: {
-    backgroundColor: '#0ea5e9',
+    backgroundColor: '#10b981',
     allowMixedContent: false,
     captureInput: false,
     webContentsDebuggingEnabled: true,  // DEBUG: для chrome://inspect
@@ -18,15 +18,15 @@ const config: CapacitorConfig = {
   plugins: {
     SplashScreen: {
       launchAutoHide: true,
-      launchShowDuration: 2000,
+      launchShowDuration: 3000,
       backgroundColor: '#ffffff',
       androidSplashResourceName: 'splash',
-      androidScaleType: 'CENTER_CROP',
+      androidScaleType: 'FIT_CENTER',
       showSpinner: false,
     },
     StatusBar: {
       style: 'LIGHT',
-      backgroundColor: '#0ea5e9',
+      backgroundColor: '#10b981',
     },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
