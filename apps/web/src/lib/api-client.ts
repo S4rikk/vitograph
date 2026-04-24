@@ -37,8 +37,35 @@ const getAuthToken = async (): Promise<string | null> => {
         supabaseClient = createClient();
       }
 
-      const { data } = await supabaseClient.auth.getSession();
-      return data.session?.access_token ?? null;
+      // Race getSession against a 5s timeout to prevent Android WebView hangs
+      const sessionPromise = supabaseClient.auth.getSession();
+      const timeoutPromise = new Promise<null>((resolve) =>
+        setTimeout(() => resolve(null), 5000)
+      );
+
+      const result = await Promise.race([sessionPromise, timeoutPromise]);
+
+      if (result && 'data' in result && result.data.session?.access_token) {
+        return result.data.session.access_token;
+      }
+
+      // Fallback: try to read cached token from localStorage (Supabase stores it there)
+      try {
+        const storageKey = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
+        if (storageKey) {
+          const raw = localStorage.getItem(storageKey);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            const cachedToken = parsed?.access_token;
+            if (cachedToken) {
+              console.warn('[getAuthToken] Using cached token (getSession timed out)');
+              return cachedToken;
+            }
+          }
+        }
+      } catch { /* localStorage unavailable */ }
+
+      return null;
     } finally {
       // Clear the promise so future calls fetch fresh tokens,
       // but debounce concurrent calls happening in within the same event loop/render cycle
