@@ -569,7 +569,7 @@ export default function UserProfileSheet({
                                 )}
 
                                 <Tabs defaultValue="overview" className="w-full">
-                                    <TabsList className="grid w-full grid-cols-4 mb-6">
+                                    <TabsList className="flex w-full overflow-x-auto justify-start mb-6">
                                         <TabsTrigger
                                             value="overview"
                                             className="flex items-center gap-1.5 text-xs cursor-pointer"
@@ -631,7 +631,7 @@ export default function UserProfileSheet({
                                                         htmlFor="ai_name"
                                                         className="block text-[13px] font-semibold text-ink-main mb-1.5"
                                                     >
-                                                        Имя ИИ ассистента
+                                                        Имя ассистента
                                                     </label>
                                                     <input
                                                         id="ai_name"
@@ -670,7 +670,7 @@ export default function UserProfileSheet({
                                                             htmlFor="biological_sex"
                                                             className="block text-[13px] font-semibold text-ink-main mb-1.5"
                                                         >
-                                                            Биологический пол
+                                                            Пол
                                                         </label>
                                                         <select
                                                             id="biological_sex"
@@ -695,7 +695,7 @@ export default function UserProfileSheet({
 
                                         {/* Physical Parameters */}
                                         <div className="bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-4">
-                                            <div className="flex items-center justify-between border-b border-divider pb-3">
+                                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-divider pb-3">
                                                 <h3 className="font-semibold text-ink-main">
                                                     Физические параметры
                                                 </h3>
