@@ -61,9 +61,10 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
       let nutritionalContext: any = null;
       if (photoResult) {
         nutritionalContext = {
-          fullVisionResult: photoResult, // Pass the ENTIRE object
+          fullVisionResult: photoResult,
           userEnteredWeight: parsedWeight,
-          source: "photo"
+          source: "photo",
+          imageUrl: photoResult.imageUrl, // Pass photo URL so FoodCard can display it
         };
       }
 

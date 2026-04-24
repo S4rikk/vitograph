@@ -110,15 +110,24 @@ export default function FoodDiaryView() {
         const data = await apiClient.getChatHistory("diary", startIso, endIso);
 
         if (data.history && data.history.length > 0) {
+          // image_url is stored only on user messages in DB.
+          // For each assistant message, inherit imageUrl from the preceding user message.
           const mapped: Message[] = data.history.map((m: any, idx: number) => {
             const dateStr = m.createdAt ? new Date(m.createdAt) : new Date();
+            let imageUrl = m.imageUrl || undefined;
+            if (m.role === "assistant" && !imageUrl && idx > 0) {
+              const prev = data.history[idx - 1];
+              if (prev?.role === "user" && prev?.imageUrl) {
+                imageUrl = prev.imageUrl;
+              }
+            }
             return {
               id: idx + 1,
               variant: m.role === "assistant" ? "system" : "user",
               text: m.content,
               time: `${dateStr.getHours().toString().padStart(2, "0")}:${dateStr.getMinutes().toString().padStart(2, "0")}`,
               mealMicros: m.mealMicros || undefined,
-              imageUrl: m.imageUrl || undefined,
+              imageUrl,
             };
           });
           setMessages([...INITIAL_MESSAGES, ...mapped]);
@@ -233,6 +242,8 @@ export default function FoodDiaryView() {
           variant: "system",
           text: payload.response,
           time,
+          // If this was a photo submission, attach the imageUrl so FoodCard can show it
+          imageUrl: nutritionalContext?.imageUrl || undefined,
         };
         
         const match = payload.response.match(/<meal_id id="([^"]+)"\s*\/>/);
