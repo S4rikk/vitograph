@@ -52,6 +52,9 @@ export default function FoodDiaryView() {
 
   const [consumedMicros, setConsumedMicros] = useState<Record<string, number>>({});
   const [dynamicMicros, setDynamicMicros] = useState<Record<string, number>>({});
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const triggerRefresh = useCallback(() => setRefreshTrigger(prev => prev + 1), []);
 
   // 1. Мгновенная инициализация на клиенте (Разблокирует рендер и загрузку историй!)
   useEffect(() => {
@@ -245,6 +248,7 @@ export default function FoodDiaryView() {
 
         setMessages((prev) => [...prev, aiMsg]);
         fetchDailyMicros(selectedDate);
+        triggerRefresh();
         window.dispatchEvent(new Event("refresh-health-goals"));
       })
       .catch((err) => {
@@ -283,6 +287,7 @@ export default function FoodDiaryView() {
         }
         setMessages((prev) => [...prev, aiMsg]);
         fetchDailyMicros(selectedDate);
+        triggerRefresh();
       })
       .catch((err) => {
         setMessages((prev) => [...prev, { id: nextId.current++, variant: "system", text: `⚠️ Ошибка: ${(err as Error).message}`, time }]);
@@ -340,8 +345,9 @@ export default function FoodDiaryView() {
         return prev.filter((_, idx) => !removeIndices.has(idx));
       });
 
-      // Refresh bars
+      // Refresh bars and graph
       fetchDailyMicros(selectedDate);
+      triggerRefresh();
     } catch (err) {
       console.error("Failed to delete meal:", err);
     }
@@ -385,6 +391,7 @@ export default function FoodDiaryView() {
       
       // Phase 56 v8: STOP manual string scaling. Just refresh from the source of truth.
       await fetchDailyMicros(selectedDate);
+      triggerRefresh();
       
       if (!userTimezone) return;
 
@@ -440,6 +447,7 @@ export default function FoodDiaryView() {
               endIso={getTzDayBoundaries(selectedDate, userTimezone || "UTC").endIso}
               dynamicMicros={dynamicMicros}
               consumedMicros={consumedMicros}
+              refreshTrigger={refreshTrigger}
             />
           </div>
 

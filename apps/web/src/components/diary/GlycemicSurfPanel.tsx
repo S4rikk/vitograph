@@ -94,6 +94,7 @@ interface GlycemicSurfPanelProps {
   endIso: string;
   dynamicMicros?: Record<string, number>;
   consumedMicros?: Record<string, number>;
+  refreshTrigger?: number;
 }
 
 // ── Component ──────────────────────────────────────
@@ -103,6 +104,7 @@ export default function GlycemicSurfPanel({
   endIso,
   dynamicMicros = {},
   consumedMicros = {},
+  refreshTrigger = 0,
 }: GlycemicSurfPanelProps) {
   const [timelineData, setTimelineData] = useState<GlycemicTimelineData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -126,7 +128,7 @@ export default function GlycemicSurfPanel({
     };
     fetchData();
     return () => { cancelled = true; };
-  }, [startIso, endIso]);
+  }, [startIso, endIso, refreshTrigger]);
 
   // Normalize consumed micros
   const normalizedConsumed: Record<string, { value: number; unit: string }> = {};
