@@ -175,15 +175,40 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
         <div
           className={`rounded-xl border p-3 text-sm ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-gray-50"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-gray-200"} ${REACTION_STYLES[photoResult.reaction_type]?.text || "text-gray-800"}`}
         >
-          <div className="flex justify-between items-start mb-2 gap-2">
+        <div className="flex justify-between items-start mb-2 gap-2">
             <p className="font-medium">
               {photoResult.items.map((i) => `${i.name_ru} (~${i.estimated_weight_g}г)`).join(", ")}
             </p>
             <MealScoreBadge score={photoResult.meal_quality_score} reason={photoResult.meal_quality_reason} />
           </div>
-          <p className="text-xs opacity-80">
-            {photoResult.meal_summary.total_calories_kcal} ккал · Б {photoResult.meal_summary.total_protein_g}г · Ж {photoResult.meal_summary.total_fat_g}г · У {photoResult.meal_summary.total_carbs_g}г
-          </p>
+          {/* Glycemic zone per item */}
+          {photoResult.items.length > 0 && (
+            <div className="flex flex-col gap-1 mb-1.5">
+              {photoResult.items.map((item, idx) => {
+                const cls = item.glycemic_class ?? "flat";
+                const styleMap = {
+                  flat:     { bg: "bg-emerald-100", text: "text-emerald-800", label: "🟢 Flat",     bar: "bg-emerald-500" },
+                  moderate: { bg: "bg-amber-100",   text: "text-amber-800",   label: "🟡 Moderate", bar: "bg-amber-400"   },
+                  spike:    { bg: "bg-red-100",      text: "text-red-800",     label: "🔴 Spike",    bar: "bg-red-500"     },
+                } as const;
+                const s = styleMap[cls] ?? styleMap.flat;
+                const gi = item.glycemic_index ?? 0;
+                const gl = item.glycemic_load ?? 0;
+                const barPct = Math.min(100, Math.round((gl / 30) * 100));
+                return (
+                  <div key={idx} className={`rounded-lg px-2 py-1 ${s.bg}`}>
+                    <div className="flex items-center justify-between mb-0.5">
+                      <span className={`text-[11px] font-bold ${s.text}`}>{item.name_ru}</span>
+                      <span className={`text-[10px] font-semibold ${s.text}`}>{s.label} · GI {gi} · GL {gl.toFixed(1)}</span>
+                    </div>
+                    <div className="w-full h-[4px] bg-black/10 rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full transition-all duration-700 ${s.bar}`} style={{ width: `${barPct}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
           <p className="mt-1 text-xs">{photoResult.health_reaction}</p>
           {photoResult.llmError && (
             <p className="mt-1 text-xs opacity-60">Ошибка: {photoResult.llmError}</p>

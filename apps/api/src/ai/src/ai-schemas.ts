@@ -195,6 +195,9 @@ const FoodItemSchema = z.object({
     .describe("Уверенность распознавания 0-1"),
   per_100g: NutrientsPer100gSchema,
   estimated_total: EstimatedTotalSchema,
+  glycemic_index: z.number().min(0).max(110).describe("Гликемический индекс продукта (0-110). 0=нет углеводов, 55=низкий, 56-69=средний, 70+=высокий"),
+  glycemic_load: z.number().min(0).describe("Гликемическая нагрузка порции (weight*carbs*GI/10000). Низкая=<10, средняя=11-19, высокая=20+"),
+  glycemic_class: z.enum(["flat", "moderate", "spike"]).describe("Класс гликемического отклика: flat=GI<55 или GL<10, moderate=GI56-69 или GL11-19, spike=GI70+ или GL20+"),
 });
 
 /** An active ingredient in a supplement. */

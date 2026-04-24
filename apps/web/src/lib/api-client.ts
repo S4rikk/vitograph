@@ -991,6 +991,9 @@ export type FoodRecognitionResult = {
       fat_g: number;
       carbs_g: number;
     };
+    glycemic_index: number;
+    glycemic_load: number;
+    glycemic_class: "flat" | "moderate" | "spike";
   }[];
   meal_summary: {
     total_calories_kcal: number;
