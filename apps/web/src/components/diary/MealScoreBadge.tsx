@@ -18,7 +18,7 @@ export function MealScoreBadge({ score, reason }: MealScoreBadgeProps) {
     }
 
     return (
-        <div className="flex flex-col gap-1.5 mt-2 w-64 max-w-full">
+        <div className="flex flex-col gap-1.5 mt-2 w-full max-w-[200px]">
             <div className="flex items-center justify-between text-xs text-gray-500">
                 <span>Полезность для твоего организма</span>
                 <span className="font-semibold text-gray-700">{score}/100</span>

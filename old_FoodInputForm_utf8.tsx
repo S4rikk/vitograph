@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { compressImage } from "@/lib/image-utils";
@@ -61,10 +61,9 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
       let nutritionalContext: any = null;
       if (photoResult) {
         nutritionalContext = {
-          fullVisionResult: photoResult,
+          fullVisionResult: photoResult, // Pass the ENTIRE object
           userEnteredWeight: parsedWeight,
-          source: "photo",
-          imageUrl: photoResult.imageUrl, // Pass photo URL so FoodCard can display it
+          source: "photo"
         };
       }
 
@@ -176,28 +175,23 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
         <div
           className={`rounded-xl border p-3 text-sm ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-gray-50"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-gray-200"} ${REACTION_STYLES[photoResult.reaction_type]?.text || "text-gray-800"}`}
         >
-        <div className="flex justify-between items-start mb-2 gap-3">
-          {/* Left Column: Title + Thumbnail */}
-          <div className="flex flex-col flex-1 min-w-0">
-            <p className="font-medium mb-2 leading-snug">
+        {/* Photo thumbnail */}
+          {photoResult.imageUrl && (
+            <div className="mb-2 rounded-lg overflow-hidden max-h-[120px] w-full">
+              <img
+                src={photoResult.imageUrl}
+                alt="Фото еды"
+                className="w-full h-full object-cover rounded-lg"
+                style={{ maxHeight: "120px", objectFit: "cover" }}
+              />
+            </div>
+          )}
+        <div className="flex justify-between items-start mb-2 gap-2">
+            <p className="font-medium">
               {photoResult.items.map((i) => `${i.name_ru} (~${i.estimated_weight_g}г)`).join(", ")}
             </p>
-            {photoResult.imageUrl && (
-              <div className="rounded-lg overflow-hidden shrink-0 mt-auto">
-                <img
-                  src={photoResult.imageUrl}
-                  alt="Фото еды"
-                  className="w-full object-cover rounded-lg"
-                  style={{ maxHeight: "100px" }}
-                />
-              </div>
-            )}
-          </div>
-          {/* Right Column: Score Badge */}
-          <div className="shrink-0">
             <MealScoreBadge score={photoResult.meal_quality_score} reason={photoResult.meal_quality_reason} />
           </div>
-        </div>
           {/* Glycemic zone per item */}
           {photoResult.items.length > 0 && (
             <div className="flex flex-col gap-1 mb-1.5">

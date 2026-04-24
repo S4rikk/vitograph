@@ -496,16 +496,16 @@ class AiApiClient {
    * Fetches aggregated macronutrients and micronutrients for the diary counter.
    */
   async getDiaryDailyMacros(startIso: string, endIso: string): Promise<any> {
-    const endpoint = `/diary-macros?startDate=${encodeURIComponent(startIso)}&endDate=${encodeURIComponent(endIso)}`;
-    return this.get<any>(endpoint, {});
+    const endpoint = `/diary-macros?startDate=${encodeURIComponent(startIso)}&endDate=${encodeURIComponent(endIso)}&_t=${Date.now()}`;
+    return this.get<any>(endpoint, { cache: 'no-store' });
   }
 
   /**
    * Fetches the predicted glycemic response timeline for a given date range.
    */
   async getGlycemicTimeline(startIso: string, endIso: string): Promise<GlycemicTimelineData> {
-    const endpoint = `/glycemic-timeline?startDate=${encodeURIComponent(startIso)}&endDate=${encodeURIComponent(endIso)}`;
-    return this.get<GlycemicTimelineData>(endpoint, {});
+    const endpoint = `/glycemic-timeline?startDate=${encodeURIComponent(startIso)}&endDate=${encodeURIComponent(endIso)}&_t=${Date.now()}`;
+    return this.get<GlycemicTimelineData>(endpoint, { cache: 'no-store' });
   }
 
   /**
