@@ -5,7 +5,7 @@ import { compressImage } from "@/lib/image-utils";
 import { apiClient } from "@/lib/api-client";
 import type { FoodRecognitionResult, LabelScannerOutput } from "@/lib/api-client";
 import { MealScoreBadge } from "./MealScoreBadge";
-
+import { X } from "lucide-react";
 type FoodInputFormProps = {
   /** Called when the form is submitted with valid data. */
   onSubmit: (name: string, weight: number, nutritionalContext?: any) => void;
@@ -174,8 +174,20 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
       {/* ── Photo Analysis Notification ─────────────────────────── */}
       {photoResult && (
         <div
-          className={`rounded-xl border p-3 text-sm ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-gray-50"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-gray-200"} ${REACTION_STYLES[photoResult.reaction_type]?.text || "text-gray-800"}`}
+          className={`relative rounded-xl border p-3 pr-8 text-sm ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-gray-50"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-gray-200"} ${REACTION_STYLES[photoResult.reaction_type]?.text || "text-gray-800"}`}
         >
+          <button
+            type="button"
+            onClick={() => {
+              setPhotoResult(null);
+              setName("");
+              setWeight("");
+            }}
+            className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-black/5 text-gray-500 hover:text-gray-700 transition-colors"
+            title="Отменить и очистить"
+          >
+            <X className="w-4 h-4" />
+          </button>
         <div className="flex justify-between items-start mb-2 gap-3">
           {/* Left Column: Title + Thumbnail */}
           <div className="flex flex-col flex-1 min-w-0">
