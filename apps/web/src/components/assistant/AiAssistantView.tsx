@@ -240,16 +240,6 @@ export default function AiAssistantView({ userId }: { userId: string }) {
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
   const [selectedImageBase64, setSelectedImageBase64] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // Native input listener: bypasses React 19 composition suppression on Android IME
-  useEffect(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    const syncInput = () => setInput(el.value);
-    el.addEventListener('input', syncInput);
-    return () => el.removeEventListener('input', syncInput);
-  }, []);
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -596,7 +586,6 @@ export default function AiAssistantView({ userId }: { userId: string }) {
             </svg>
           </button>
           <textarea
-            ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={isLoading}
