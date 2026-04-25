@@ -76,19 +76,33 @@ export function usePushNotifications(token?: string) {
         return false;
       }
 
-      // 2. Register for push — will trigger 'registration' event
-      await cap.register();
+      // 2. Listen for registration event BEFORE registering (prevent race condition)
+      return new Promise<boolean>(async (resolve) => {
+        let isResolved = false;
+        let regListener: any;
+        let errListener: any;
 
-      // 3. Listen for registration event to get FCM token
-      return new Promise<boolean>((resolve) => {
+        const cleanup = () => {
+          if (regListener) regListener.remove();
+          if (errListener) errListener.remove();
+        };
+
         const timeout = setTimeout(() => {
+          if (isResolved) return;
+          isResolved = true;
+          cleanup();
           console.error('[Push] FCM registration timeout');
           window.alert('❌ Таймаут регистрации FCM. Попробуйте ещё раз.');
+          setIsPushLoading(false);
           resolve(false);
         }, 15000);
 
-        cap.addListener('registration', async (fcmData: { value: string }) => {
+        regListener = await cap.addListener('registration', async (fcmData: { value: string }) => {
+          if (isResolved) return;
+          isResolved = true;
           clearTimeout(timeout);
+          cleanup();
+
           const fcmToken = fcmData.value;
           console.log('[Push] FCM token received:', fcmToken.slice(0, 20) + '...');
 
@@ -103,6 +117,7 @@ export function usePushNotifications(token?: string) {
             body: JSON.stringify({ fcm_token: fcmToken, type: 'fcm' }),
           });
 
+          setIsPushLoading(false);
           if (response.ok) {
             localStorage.setItem('vg_fcm_subscribed', 'true');
             localStorage.setItem('vg_fcm_token', fcmToken);
@@ -115,12 +130,30 @@ export function usePushNotifications(token?: string) {
           }
         });
 
-        cap.addListener('registrationError', (err: any) => {
+        errListener = await cap.addListener('registrationError', (err: any) => {
+          if (isResolved) return;
+          isResolved = true;
           clearTimeout(timeout);
+          cleanup();
           console.error('[Push] FCM registration error:', err);
           window.alert(`❌ Ошибка регистрации: ${err?.error || 'Unknown'}`);
+          setIsPushLoading(false);
           resolve(false);
         });
+
+        // 3. NOW call register
+        try {
+          await cap.register();
+        } catch(e) {
+          if (!isResolved) {
+             isResolved = true;
+             clearTimeout(timeout);
+             cleanup();
+             setIsPushLoading(false);
+             window.alert(`❌ Ошибка вызова register: ${e}`);
+             resolve(false);
+          }
+        }
       });
     } catch (error) {
       console.error('[Push] Capacitor subscribe error:', error);
