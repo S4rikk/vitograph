@@ -3163,7 +3163,7 @@ export async function handlePushSubscribe(req: Request, res: Response, next: Nex
         endpoint: `fcm://${fcm_token.slice(0, 32)}`, // synthetic endpoint for compatibility
         p256dh: '',
         auth: '',
-      }, { onConflict: 'fcm_token' });
+      }, { onConflict: 'endpoint' });
 
       if (error) {
         console.error("[handlePushSubscribe] FCM Upsert Error:", error);
