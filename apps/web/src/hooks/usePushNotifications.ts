@@ -141,8 +141,16 @@ export function usePushNotifications(token?: string) {
           resolve(false);
         });
 
-        // 3. NOW call register
+        // 2. NOW call register
         try {
+          // Создаем канал перед регистрацией, это может предотвратить зависание Firebase на некоторых Android
+          await cap.createChannel({
+            id: 'vitograph_default',
+            name: 'Напоминания',
+            description: 'Уведомления о приеме воды',
+            importance: 4, // High
+            visibility: 1, // Public
+          });
           await cap.register();
         } catch(e) {
           if (!isResolved) {
