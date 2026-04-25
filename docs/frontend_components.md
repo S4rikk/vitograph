@@ -1,6 +1,6 @@
 # VITOGRAPH — Frontend Component Map
 
-> **Дата актуальности:** 24 апреля 2026 (обновлено: Glassmorphism Tabs, Capacitor Android App)
+> **Дата актуальности:** 25 апреля 2026 (обновлено: Glassmorphism Tabs, Capacitor Android App, FontScaleProvider, Android Auth Fixes)
 >
 > Карта UI-компонентов Next.js 14+ (App Router) с описанием ответственности и зависимостей, а также интеграция Android Capacitor.
 
@@ -111,7 +111,13 @@ layout.tsx (RootLayout)
 
 ---
 
-### 2.8 `ui/` — Общие UI-компоненты
+### 2.8 `providers/` — React Context Providers
+
+| Компонент | Назначение |
+| :--- | :--- |
+| **FontScaleProvider** | React Context для глобального масштабирования шрифтов (`small` / `medium` / `large`). Персистит в `localStorage`. Применяет масштаб через `rem` на `<html>` root. Инжектируется в `RootLayout`, anti-FOUC через синхронный `<script>` в `<head>`. UI-контроль в `UserProfileSheet` («Настройки приложения»). |
+
+### 2.9 `ui/` — Общие UI-компоненты
 
 | Компонент       | Назначение                                         |
 | :-------------- | :------------------------------------------------- |
@@ -122,7 +128,7 @@ layout.tsx (RootLayout)
 
 ---
 
-### 2.9 `admin/` — Админ-панель
+### 2.10 `admin/` — Админ-панель
 
 > **Доступ:** `app_metadata.role === "admin"`. Проверяется в `admin/layout.tsx`. Dark mode forced.
 
@@ -216,7 +222,8 @@ graph LR
 | Файл                                                                               | Назначение                                                       |
 | :--------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
 | [`nutrient-colors.ts`](file:///c:/project/VITOGRAPH/apps/web/src/lib/food-diary/nutrient-colors.ts) | Ядро цветового кодирования плашек в чате. Использует биологический/химический словарь ассоциаций + **детерминированный строковый хэшинг** для стабилизации цветов неизвестных микронутриентов. |
-| [`api-client.ts`](file:///c:/project/VITOGRAPH/apps/web/src/lib/api-client.ts)     | Единый HTTP-клиент для всех API-вызовов (20KB, ~40 методов)      |
+| [`api-client.ts`](file:///c:/project/VITOGRAPH/apps/web/src/lib/api-client.ts)     | Единый HTTP-клиент для всех API-вызовов (20KB, ~40 методов). **Android Auth:** `getAuthToken()` использует двухфазную стратегию: 1) Fast-path — чтение токена из `localStorage` (мгновенно, проверка `expires_at`), 2) Slow-path — `getSession()` с 5s race-timeout для предотвращения зависаний Android WebView |
+| [`supabase/client.ts`](file:///c:/project/VITOGRAPH/apps/web/src/lib/supabase/client.ts) | Supabase Browser Client с Capacitor-спецификой: `dummyLock` (обход `navigator.locks`), Cookie Backup (`localStorage` зеркало сессии), автовосстановление при force-close |
 | [`image-utils.ts`](file:///c:/project/VITOGRAPH/apps/web/src/lib/image-utils.ts)   | Сжатие изображений (canvas → blob, max 2048px для анализов, 1024px для еды)  |
 | [`food-log-parser.ts`](file:///c:/project/VITOGRAPH/apps/web/src/components/diary/food-log-parser.ts) | Парсер food-лога из AI-ответов: извлечение `<meal_id>` тегов, маппинг на FoodCard |
 | [`health-core.ts`](file:///c:/project/VITOGRAPH/apps/web/src/types/health-core.ts) | Основные TypeScript-типы (Profile, Biomarker, MealLog, etc.)     |

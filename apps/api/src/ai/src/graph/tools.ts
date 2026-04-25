@@ -3,6 +3,7 @@ import { z } from "zod";
 import { pythonCore } from "../lib/python-core.js";
 import { createClient } from "@supabase/supabase-js";
 import { embeddings } from "../services/memory.service.js";
+import { applyGiBioavailability } from "../lib/gi-bioavailability.js";
 
 // ── Singleton admin Supabase client (for GI cache writes, bypasses RLS) ──
 const supabaseAdmin = (() => {
@@ -255,6 +256,16 @@ export const logMealTool = new DynamicStructuredTool({
       if (micronutrients.selenium_mcg) finalMicros["Селен (мкг)"] = micronutrients.selenium_mcg;
       if (micronutrients.potassium_mg) finalMicros["Калий (мг)"] = micronutrients.potassium_mg;
       if (micronutrients.sodium_mg) finalMicros["Натрий (мг)"] = micronutrients.sodium_mg;
+    }
+
+    // 4. Apply GI-based bioavailability coefficients to micronutrients
+    const { adjusted: adjustedMicros, appliedGi } = applyGiBioavailability(finalMicros, glycemic_index);
+    finalMicros = adjustedMicros;
+    
+    if (appliedGi != null) {
+      console.log(`[Tool:log_meal] GI bioavailability applied (GI=${appliedGi}):`,
+        Object.entries(finalMicros).slice(0, 5).map(([k, v]) => `${k}: ${v}`).join(', '),
+        Object.keys(finalMicros).length > 5 ? `... +${Object.keys(finalMicros).length - 5} more` : '');
     }
 
     const isoNow = new Date().toISOString();

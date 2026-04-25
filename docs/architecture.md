@@ -1,6 +1,6 @@
 # VITOGRAPH — Architecture: Database Schema & API Structure
 
-> **Последнее обновление:** 24 апреля 2026
+> **Последнее обновление:** 25 апреля 2026
 >
 > Смотрите также: [API Reference](./api_reference.md) | [Frontend Components](./frontend_components.md) | [AI Pipeline](./ai_pipeline.md)
 
@@ -255,6 +255,10 @@
 | `user_active_skills` | Health goal journeys: FSM lifecycle, step plan, skill document + embedding для контекстного роутинга |
 | `_app_config` | Internal config: edge_function_url, service_role_key для pg_net trigger'ов |
 | `biomarker_note_cache` | Семантический кэш AI-описаний биомаркеров (slug + flag → description) |
+| `kb_documents` | Мастер-таблица документов базы знаний (nutrition, supplements, lifestyle и др.). RLS: read-only для authenticated |
+| `kb_sections` | Разделы документа KB (H1/H2/H3 заголовки), привязаны к `kb_documents` |
+| `kb_chunks` | Атомарные чанки с `vector(384)` эмбеддингами (HNSW index) + `tsvector` для full-text search. Hybrid search через RPC `hybrid_search_kb()` |
+| `kb_search_log` | Лог поисковых запросов к KB для hit-rate аналитики |
 
 > `profiles` extended with: `lab_diagnostic_reports` (JSONB), `active_supplement_protocol` (JSONB), `active_nutrition_targets` (JSONB), `active_condition_knowledge_bases` FK
 
@@ -357,21 +361,105 @@ erDiagram
 
 ---
 
-## 3. Backend Structure (Actual — Phase 53f)
+## 3. Mobile App — Android (Capacitor)
 
-### 3.1 Node.js AI API (`apps/api/src/ai`)
+> **Архитектура:** Remote Server Mode — Capacitor запускает WebView, который загружает `https://vitograph.com`. Весь UI/логика живёт на сервере; Android-оболочка обеспечивает нативный доступ к камере, push-уведомлениям и haptics.
+
+### 3.1 Конфигурация
+
+| Параметр | Значение |
+|---|---|
+| **App ID** | `com.sanderok.vitograph` |
+| **App Name** | `Vitograph` |
+| **Capacitor** | `@capacitor/core@8.3.1`, `@capacitor/cli@8.3.1` |
+| **Server URL** | `https://vitograph.com` (Remote Server Mode) |
+| **Android Scheme** | `https` (no mixed content) |
+| **Min SDK** | Defined in `variables.gradle` |
+| **Debug** | `webContentsDebuggingEnabled: true` → `chrome://inspect` |
+
+### 3.2 Capacitor-плагины
+
+| Plugin | Версия | Назначение |
+|---|---|---|
+| `@capacitor/camera` | `^8.1.0` | Фото для анализа еды, лабораторных отчётов, соматики |
+| `@capacitor/push-notifications` | `^8.0.3` | Push-уведомления (водный трекер, напоминания) |
+| `@capacitor/splash-screen` | `^8.0.1` | Splash-экран при загрузке (3s, FIT_CENTER, белый фон) |
+| `@capacitor/status-bar` | `^8.0.2` | Кастомизация статус-бара (`#10b981`, LIGHT style) |
+| `@capacitor/haptics` | `^8.0.2` | Тактильная обратная связь |
+
+### 3.3 Android Permissions (`AndroidManifest.xml`)
+
+```xml
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+```
+
+### 3.4 Структура проекта
+
+```
+apps/android/
+├── capacitor.config.ts         # Remote Server Mode config + plugins
+├── package.json                # Capacitor deps + build scripts
+├── www/                        # Fallback static page (minimal)
+│   └── index.html              # "Loading..." placeholder
+├── android/                    # Native Android project (Gradle)
+│   ├── app/
+│   │   ├── src/main/
+│   │   │   ├── AndroidManifest.xml
+│   │   │   ├── java/           # MainActivity (auto-generated)
+│   │   │   └── res/            # Icons, splash, strings
+│   │   └── build.gradle        # App-level Gradle config
+│   └── build.gradle            # Root Gradle config
+├── icon-source.svg             # Source SVG for icon generation
+├── logo-1024.png               # 1024x1024 source logo
+├── generate-icons-v2.js        # Node.js script: генерация mipmap иконок
+└── generate-splash-v2.js       # Node.js script: генерация splash-ресурсов
+```
+
+### 3.5 Сборка APK
+
+```bash
+# Debug APK (для тестирования)
+cd apps/android
+npm run cap:build:debug
+# → android/app/build/outputs/apk/debug/app-debug.apk
+
+# Release APK
+npm run cap:build:release
+# → android/app/build/outputs/apk/release/app-release-unsigned.apk
+```
+
+> **Требования:** `JAVA_HOME` → JDK 17+, `ANDROID_HOME` → Android SDK (API 34+).
+
+### 3.6 Известные проблемы и workarounds
+
+| Проблема | Workaround | Файл |
+|---|---|---|
+| `navigator.locks` deadlock при backgrounding | `dummyLock` — bypass native lock | `supabase/client.ts` |
+| Android стирает cookies при force-close | Cookie Backup → `localStorage` mirror + `setSession()` restore | `supabase/client.ts` |
+| `getSession()` зависает 10-30с при resume | localStorage fast-path + 5s race timeout | `api-client.ts` |
+
+> Подробнее: [§5.1 Capacitor Android Auth Specifics](#51-capacitor-android-auth-specifics)
+
+---
+
+## 4. Backend Structure (Actual — Phase 53f)
+
+
+### 4.1 Node.js AI API (`apps/api/src/ai`)
 - **Role:** AI Orchestration, Chat, Food Vision, Lab Diagnostics, Somatic Analysis, Nutrition Targets.
 - **Stack:** Express, LangGraph, Vercel AI SDK, Zod.
 - **Port:** `3001`.
 - **Entry:** `server.ts` → `ai.routes.ts`, `supplement.routes.ts`, `profiles.routes.ts`, `integration.ts`.
 
-### 3.2 Python Core API (`apps/api`)
+### 4.2 Python Core API (`apps/api`)
 - **Role:** Profile management, PDF/Image parsing, Dynamic Norms, Analytics, Feedback.
 - **Stack:** FastAPI, AsyncOpenAI, Pydantic V2, Supabase Python SDK.
 - **Port:** `8001`.
 - **Entry:** `main.py`.
 
-### 3.3 Actual Directory Layout
+### 4.3 Actual Directory Layout
 
 ```
 apps/api/
@@ -424,7 +512,7 @@ apps/api/
         └── routes/              # Express routers
 ```
 
-### 3.4 Key API Endpoints (Actual)
+### 4.4 Key API Endpoints (Actual)
 
 > For full reference with request/response schemas, see [API Reference](./api_reference.md).
 
@@ -492,7 +580,7 @@ apps/api/
 
 ---
 
-## 4. Authentication & Authorization Flow
+## 5. Authentication & Authorization Flow
 
 ```mermaid
 sequenceDiagram
@@ -514,9 +602,23 @@ sequenceDiagram
 - **FastAPI** verifies the JWT and extracts `user_id` from the token claims.
 - **RLS** enforces row-level data isolation in PostgreSQL — defense-in-depth.
 
+### 5.1 Capacitor Android Auth Specifics
+
+> **Проблема:** Android WebView (Capacitor) имеет два критических бага:
+> 1. `navigator.locks` (Web Locks API) зависает при backgrounding/resume → Supabase Auth deadlock.
+> 2. Android стирает cookies при force-close приложения → потеря сессии.
+
+**Решение (3 уровня защиты):**
+
+| Уровень | Файл | Механизм |
+|---|---|---|
+| **L1: Lock Bypass** | `supabase/client.ts` | `dummyLock` — полностью обходит `navigator.locks`, передавая управление напрямую в `fn()` |
+| **L2: Cookie Backup** | `supabase/client.ts` | `onAuthStateChange` → зеркалирует `access_token` + `refresh_token` в `localStorage` (ключ `vitograph_capacitor_session_backup`). При старте, если cookies пусты — восстанавливает сессию через `client.auth.setSession()` |
+| **L3: Token Fast-Path** | `api-client.ts` | `getAuthToken()` сначала читает токен из `localStorage` (мгновенно, без сети). Проверяет `expires_at > now + 60s`. Только если токен протух → вызывает `getSession()` с 5-секундным race-timeout |
+
 ---
 
-## 5. Dynamic Norm Calculation Engine (Conceptual)
+## 6. Dynamic Norm Calculation Engine (Conceptual)
 
 ```mermaid
 flowchart LR
@@ -542,7 +644,7 @@ flowchart LR
 
 ---
 
-## 6. pgvector Integration
+## 7. pgvector Integration
 
 > **Extension:** `CREATE EXTENSION vector;`
 
@@ -555,7 +657,7 @@ flowchart LR
 
 ---
 
-## 7. Key Design Decisions & Rationale
+## 8. Key Design Decisions & Rationale
 
 | Decision                              | Rationale                                                                       |
 | ------------------------------------- | ------------------------------------------------------------------------------- |

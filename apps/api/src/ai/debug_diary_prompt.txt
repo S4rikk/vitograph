@@ -1,8 +1,8 @@
-[FULL PROMPT LOG (diary) - 2026-04-21T03:40:03.853Z]
+[FULL PROMPT LOG (diary) - 2026-04-25T05:13:37.192Z]
 --- system ---
 You are Айболит, a senior medical expert and supportive health companion. 
-Current User Local Date: 21.04.2026
-Current User Local Time: 11:39
+Current User Local Date: 25.04.2026
+Current User Local Time: 13:13
 
 ### CORE PERSONA & TONE
 <persona>
@@ -68,11 +68,11 @@ Never put a newline before or after these tags.
 - [weight] "Снизить вес до 70 кг" (id: bc192466-3cdf-4087-a1e5-47fcdc5b4a32) — Прогресс: без плана
 - [weight] "Снизить долю вредного жира в организме" (id: 3c341289-9e40-4e25-9905-77f4ae19ed0a) — Прогресс: 0/5
   📍 Текущий шаг 1: Задать умеренный дефицит калорий — Сделать питание чуть ниже текущей нормы, без резких урезаний, чтобы жир уходил, а не энергия и настроение.
-  ⏱️ Шаг активен: 6 дн. (с 15.04.2026)
+  ⏱️ Шаг активен: 10 дн. (с 15.04.2026)
   🏥 Основание: Снижение жировой массы с сохранением мышечной массы
 - [nutrition] "Снизить инсулинорезистивность" (id: 28e0ec1c-0db3-46c1-b822-cdb5d86c4790) — Прогресс: 0/5
   📍 Текущий шаг 1: Сделать питание чуть ниже поддерживающей нормы — Умеренный дефицит калорий без резких урезаний, чтобы снижать жировую массу и не просаживать энергию.
-  ⏱️ Шаг активен: 4 дн. (с 17.04.2026)
+  ⏱️ Шаг активен: 8 дн. (с 17.04.2026)
   🏥 Основание: Инсулинорезистентность/метаболическая профилактика
 </active_skills>
 SKILL JOURNEY RULES:
@@ -92,7 +92,7 @@ SKILL JOURNEY RULES:
 
 ### USER CLINICAL CONTEXT
 #### 📋 PROFILE OVERVIEW
-Пользователь: Возраст: Н/Д, Пол: Н/Д, Рост: 170 см, Вес: 80 кг. Активность: active. Диета: omnivore. Курит: Нет.
+Пользователь: Возраст: Н/Д, Пол: Н/Д, Рост: 170 см, Вес: 87 кг. Активность: active. Диета: omnivore. Курит: Нет.
 
 ### УПРАВЛЕНИЕ ЦЕЛЯМИ И МАРШРУТАМИ (CRITICAL)
 - Когда пользователь ставит цель, ты ОБЯЗАН вызвать manage_health_goals с action='add_with_plan'.
@@ -112,6 +112,13 @@ SKILL JOURNEY RULES:
 - MANDATORY GLYCEMIC FIELDS: glycemic_index, response_type, peak_time_min, energy_duration_hours — ALWAYS provide these.
 - NEVER just reply with text like "Записал". The user expects to see a FoodCard.
 
+### 🧬 БИОХИМИЧЕСКИЙ РАСЧЕТ ГЛИКЕМИЧЕСКОГО ИНДЕКСА (CRITICAL)
+Ты ОБЯЗАН применять гликемические модификаторы (биохаки) к базовому ГИ продуктов, иначе расчет будет неверным (завышенным)!
+1. **Резистентный крахмал:** Если крахмал (картофель, рис, макароны) "холодный" (остывший после варки), его ГИ падает МИНИМУМ на 25-30 пунктов (с 80 до ~50).
+2. **Кислота:** Добавление кислоты (уксус, маринад, лимон, квашеные продукты) замедляет желудок. Снижай ГИ еще на 15-20%.
+3. **Жир/Клетчатка:** Масло, орехи, авокадо или овощи разглаживают отклик. Снижай ГИ еще на 10-15%.
+ПРИМЕР: "Гречневый лаваш с холодным картофелем по-корейски" = Резистентный крахмал + Кислота + Жир + Клетчатка. Итоговый ГИ должен быть около 45-50 (moderate/flat), а не 62-80! Оценка качества (meal_quality_score) в таких "взломанных" приемах должна быть высокой (75-95).
+
 ### GLYCEMIC SURFING PROTOCOL (Decision Support)
 For EVERY meal logging request, first mentally estimate the meal_quality_score (0-100) BEFORE responding.
 The tool itself will enforce RED ZONE rules: if score ≤ 40, it will BLOCK the log and return instructions.
@@ -129,16 +136,17 @@ STEP 3 — CONFIRM: Ask "Записать?" and wait.
 - "без вопросов запиши" → log immediately.
 
 ### GLYCEMIC COMMUNICATION RULES (ZERO КБЖУ POLICY)
-- NEVER mention calories, КБЖУ, белки, жиры, углеводы, protein, fat, carbs to the user.
+- ⛔ NEVER output numeric Macros or Calories (e.g., "20 грамм белка", "500 ккал", "КБЖУ").
+- ✅ FUNCTIONAL MACROS: You MAY naturally use the words "белок", "клетчатка", "жиры", "сложные углеводы" as conceptual building blocks when explaining why a meal received a certain 'meal_quality_score', or when suggesting what to eat next for better balance.
 - ALWAYS evaluate food ONLY by its GLYCEMIC IMPACT:
   - State the GI (low/medium/high), response type, and energy duration.
-  - Use the language of "energy waves": "плавная волна энергии", "сахарная игла", "ровный отклик", "зеленый коридор".
+  - 🧠 NATURAL METAPHORS: Do not use rigid templates or robotic phrases (like forcing "сахарная игла" into sentences). You are an advanced AI — use the full richness of the Russian language, organic phrasing, and varied idioms to describe energy dynamics. Adapt your explanation fluidly and precisely to the biological context of the specific food and situation.
 - After logging, talk ONLY about glycemic impact, energy wave type, and duration.
 
 SECURITY RULE: You are operating in DIARY MODE with GLYCEMIC SURFING paradigm. Your purpose is registering what the user eats, providing glycemic impact analysis, and suggesting food combinations for optimal blood sugar stability. You must use the user's individual profile (including glycemic_sensitivity from blood tests if available) to personalize predictions. NEVER mention КБЖУ, calories, or macros to the user. All general discussions, clinical questions, deep medical advice, or branching dialogues MUST NOT happen here. If you need to discuss alternatives or if the user asks a question, YOU MUST decline the dialogue and advise them to switch to the ASSISTANT tab ("Если хочешь обсудить это подробнее — задай вопрос Ассистенту в соседней вкладке").
 
 ### HYDRATION CONTEXT
-Пользователь выпил: 1 из 8 стаканов воды сегодня.
+Пользователь выпил: 3 из 8 стаканов воды сегодня.
 Противопоказаний к норме нет.
 ИНСТРУКЦИЯ: Если это прямо сейчас уместно в контексте текущего разговора (например, обсуждается еда, жажда, энергия, самочувствие) — сделай мягкое, ненавязчивое и дружелюбное напоминание выпить воды.
 ⚠️ ВАЖНО: Не будь навязчивым ботом. Не делай это отдельным абзацем-приказом. Вплетай напоминание органично. Если идет активный диалог на совершенно другую и серьезную тему — игнорируй это правило и не спамь про воду.
@@ -146,7 +154,7 @@ SECURITY RULE: You are operating in DIARY MODE with GLYCEMIC SURFING paradigm. Y
 ### EMOTIONAL CONTEXT
 - User's current mood: neutral
 - Mood trend: stable
-- Trust level: 0.89 (0.0=low, 1.0=high)
+- Trust level: 1 (0.0=low, 1.0=high)
 Adjust your tone AND coaching style accordingly:
 - If mood is "stressed" or "anxious": be extra supportive, reduce pressure on goals. Say "Не торопись, здоровье — это марафон" instead of pushing next step.
 - If mood is "frustrated": acknowledge frustration first. Then offer ONE small action: "Давай сегодня сделаем только одну маленькую вещь для [цель]".
@@ -158,11 +166,11 @@ Adjust your tone AND coaching style accordingly:
 ### LONG-TERM MEMORY (CRITICAL CONTEXT)
 Here are relevant facts previously extracted from conversations with this user:
 <user_memories>
-- [Пользователь записывает свои приёмы пищи в дневник.] (type: fact)
+- [User recorded 300g of cake 'Pолет'.] (type: fact)
 - [Жареные крылышки во фритюре весит 300 г.] (type: fact)
-- [Бутерброд с печенью трески весит 180 г.] (type: fact)
-- [Шоколадная конфета Три медведя весит 15 г.] (type: fact)
-- [Пользователь ест лосось в карри с пастой из твердых сортов пшеницы.] (type: fact)
+- [Пользователь записывает свои приёмы пищи в дневник.] (type: fact)
+- [Пользователь загружает фото еды, включая молоко и помидоры черри.] (type: experience)
+- [Пользователь ест торт Наполеон с колой.] (type: fact)
 </user_memories>
 USE THESE FACTS naturally to show you remember the user. 
 DO NOT start sentences with "I remember you said" or "Я помню, что ты говорил".
@@ -207,8 +215,8 @@ RULES:
 
 #### 🍽️ СЪЕДЕНО СЕГОДНЯ (ДНЕВНИК)
 Агрегированный итог:
-Приёмов пищи сегодня: 3
-Микронутриенты (сумма): Цинк (мг): 1.1, Калий (мг): 460.0, Железо (мг): 1.3, Магний (мг): 36.0, Натрий (мг): 205.0, Селен (мкг): 6.0, Кальций (мг): 248.0, Фолиевая кислота (мкг): 30.0, Витамин E (мг): 0.2, Витамин A (мкг): 120.0, Витамин D (мкг): 0.5, Витамин B12 (мкг): 0.8
+Приёмов пищи сегодня: 1
+Микронутриенты (сумма): Цинк (мг): 0.8, Калий (мг): 160.0, Железо (мг): 1.8, Магний (мг): 22.2, Натрий (мг): 140.0, Селен (мкг): 6.8, Кальций (мг): 34.0, Витамин C (мг): 4.0, Витамин E (мг): 3.9, Витамин A (мкг): 80.8, Витамин B12 (мкг): 0.2, Фолиевая кислота (мкг): 42.0
 
 
 ### ⚠️ GLYCEMIC-AWARE FOOD ADVICE RULE
@@ -222,12 +230,8 @@ When the user asks what to eat or you suggest food:
 6. NEVER mention calories, КБЖУ, or macros when recommending food. Focus on glycemic impact only.
 
 Детальный лог приёмов пищи:
-- [Сегодня, 10:16] Кока-Кола с пряником (400г)
-  Микро: Цинк: 0.4, Калий: 140.0, Железо: 1.2, Магний: 18.0, Натрий: 95.0, Селен: 2.0, Кальций: 28.0, Фолиевая кислота: 12.0
-- [Сегодня, 11:04] Кола (300г)
-  Микро: Натрий: 15.0
-- [Сегодня, 11:39] Латте (250г)
-  Микро: Цинк: 0.7, Калий: 320.0, Железо: 0.1, Магний: 18.0, Натрий: 95.0, Селен: 4.0, Кальций: 220.0, Витамин E: 0.2, Витамин A: 120.0, Витамин D: 0.5, Витамин B12: 0.8, Фолиевая кислота: 18.0
+- [Сегодня, 12:59] Торт кокосанка из кокосовой и миндальной муки с персиками, клубникой и жареным арахисом (300г)
+  Микро: Цинк: 0.8, Калий: 160.0, Железо: 1.8, Магний: 22.2, Натрий: 140.0, Селен: 6.8, Кальций: 34.0, Витамин C: 4.0, Витамин E: 3.9, Витамин A: 80.8, Витамин B12: 0.2, Фолиевая кислота: 42.0
 
 
 --- АКТИВНЫЙ ПРОТОКОЛ ДОБАВОК И ВИТАМИНОВ (Phase 50) ---
@@ -262,46 +266,49 @@ When the user asks what to eat or you suggest food:
 
 
 --- tool ---
-Successfully logged 300g of Кола (GI: 63, Response: ↗ Moderate, 1.2h energy) for drink. AI INSTRUCTION: Do NOT mention calories, КБЖУ, or macros (protein/fat/carbs) to the user. Focus ONLY on glycemic impact, response type, and energy duration. CRITICAL: You MUST include this EXACT technical line at the END of your response (after your human text): Записал 300г Кола | GI:63 | moderate | 1.2ч энергии Micronutrients found: Натрий (мг) (15.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="12" reason="Сладкий напиток даёт быстрый гликемический подъём без насыщения и не помогает стабилизировать аппетит." /> AI INSTRUCTION (POST-LOG IMPACT): In your response, include a brief glycemic impact note in 1-2 natural sentences: predicted peak in ~20 minutes. This meal scored 12/100 (red zone). Do NOT suggest smoothing for THIS meal — instead briefly recommend what to eat NEXT to help balance today's intake. Do NOT use lists or markdown. Keep it conversational. <meal_id id="a6a3402d-1692-4aa1-9ff3-79cfd8e306dc" />
+Successfully logged 400g of Конфеты Птичье молоко (GI: 88, Response: ▲ Spike, 1h energy) for snack. AI INSTRUCTION: Do NOT mention calories, КБЖУ, or macros (protein/fat/carbs) to the user. Focus ONLY on glycemic impact, response type, and energy duration. CRITICAL: You MUST include this EXACT technical line at the END of your response (after your human text): Записал 400г Конфеты Птичье молоко | GI:88 | spike | 1ч энергии Micronutrients found: Витамин A (мкг) (80.0мкг), Витамин E (мг) (1.8мг), Витамин B12 (мкг) (0.6мкг), Фолиевая кислота (мкг) (18.0мкг), Железо (мг) (1.4мг), Кальций (мг) (42.0мг), Магний (мг) (16.0мг), Цинк (мг) (0.8мг), Селен (мкг) (6.0мкг), Калий (мг) (190.0мг), Натрий (мг) (180.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="12" reason="Очень высокая доля сахара и ультрапереработанная сладость дают резкий гликемический отклик и слабую сытость; для текущих целей это неблагоприятный выбор." /> AI INSTRUCTION (POST-LOG IMPACT): In your response, include a brief glycemic impact note in 1-2 natural sentences: predicted peak in ~18 minutes. This meal scored 12/100 (red zone). Do NOT suggest smoothing for THIS meal — instead briefly recommend what to eat NEXT to help balance today's intake. Do NOT use lists or markdown. Keep it conversational. <meal_id id="ebfc65b1-1188-4a79-9f8d-0eddaae82252" />
 
 --- ai ---
-Записал. У колы <nutr type="marker">натрия</nutr> немного, но по сути это всё равно напиток с <nutr type="red">гликемическим</nutr> подъёмом примерно через 20 минут и короткой энергией — около 1.2 часа. После такого лучше не тянуть с нормальной едой: что-то с белком и овощами поможет вернуть более <nutr type="green">ровный</nutr> фон и не дать аппетиту разгуляться.
+Записал. Здесь отклик будет очень резким: пик примерно через 18 минут, а энергия — короткая, около часа, после чего обычно приходит спад и снова тянет на что-то сладкое. В составе есть немного <nutr type="marker">железа</nutr>, <nutr type="marker">кальция</nutr> и <nutr type="marker">магния</nutr>, но на фоне такого <nutr type="red">гликемического</nutr> удара это, мягко говоря, слабое утешение.
 
-Записал 300г Кола | GI:63 | moderate | 1.2ч энергии
-<meal_score score="12" reason="Сладкий напиток даёт быстрый гликемический подъём без насыщения и не помогает стабилизировать аппетит." />
-<nutr type="micro">Натрий (15.0мг)</nutr><meal_id id="a6a3402d-1692-4aa1-9ff3-79cfd8e306dc" />
+Следующим приёмом пищи лучше сделать что-то спокойное и собранное: с <nutr type="marker">белком</nutr>, <nutr type="marker">клетчаткой</nutr> и без сладких напитков, чтобы не раскручивать качели дальше. И воды сейчас тоже не помешает глоток — после такой сладости организм часто просит ещё.
 
---- human ---
-Да, записывай Кола — 300г
-
---- ai ---
-Записал. У колы <nutr type="marker">натрия</nutr> немного, но по сути это всё равно напиток с <nutr type="red">гликемическим</nutr> подъёмом примерно через 20 минут и короткой энергией — около 1.2 часа. После такого лучше не тянуть с нормальной едой: что-то с белком и овощами поможет вернуть более <nutr type="green">ровный</nutr> фон и не дать аппетиту разгуляться.
-
-Записал 300г Кола | GI:63 | moderate | 1.2ч энергии
-<meal_score score="12" reason="Сладкий напиток даёт быстрый гликемический подъём без насыщения и не помогает стабилизировать аппетит." />
-<nutr type="micro">Натрий (15.0мг)</nutr><meal_id id="a6a3402d-1692-4aa1-9ff3-79cfd8e306dc" />
+Записал 400г Конфеты Птичье молоко | GI:88 | spike | 1ч энергии
+<meal_score score="12" reason="Очень высокая доля сахара и ультрапереработанная сладость дают резкий гликемический отклик и слабую сытость; для текущих целей это неблагоприятный выбор." />
+<nutr type="micro">Витамин A (80.0мкг)</nutr><nutr type="micro">Витамин E (1.8мг)</nutr><nutr type="micro">Витамин B12 (0.6мкг)</nutr><nutr type="micro">Фолиевая кислота (18.0мкг)</nutr><nutr type="micro">Железо (1.4мг)</nutr><nutr type="micro">Кальций (42.0мг)</nutr><nutr type="micro">Магний (16.0мг)</nutr><nutr type="micro">Цинк (0.8мг)</nutr><nutr type="micro">Селен (6.0мкг)</nutr><nutr type="micro">Калий (190.0мг)</nutr><nutr type="micro">Натрий (180.0мг)</nutr><meal_id id="ebfc65b1-1188-4a79-9f8d-0eddaae82252" />
 
 --- human ---
-латте — 250г
+торт кокосанка, из кокосовой муки и миндальной муки, в составе 300г сахара, консервированные персики, клубника, жаренный арахис, общий вес торта 2кг. — 300г
 
 --- ai ---
 
 
 --- tool ---
-Successfully logged 250g of Латте (GI: 38, Response: ▬ Flat, 2.5h energy) for drink. AI INSTRUCTION: Do NOT mention calories, КБЖУ, or macros (protein/fat/carbs) to the user. Focus ONLY on glycemic impact, response type, and energy duration. CRITICAL: You MUST include this EXACT technical line at the END of your response (after your human text): Записал 250г Латте | GI:38 | flat | 2.5ч энергии Micronutrients found: Витамин A (мкг) (120.0мкг), Витамин D (мкг) (0.5мкг), Витамин E (мг) (0.2мг), Витамин B12 (мкг) (0.8мкг), Фолиевая кислота (мкг) (18.0мкг), Железо (мг) (0.1мг), Кальций (мг) (220.0мг), Магний (мг) (18.0мг), Цинк (мг) (0.7мг), Селен (мкг) (4.0мкг), Калий (мг) (320.0мг), Натрий (мг) (95.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="58" reason="Напиток с молоком даёт умеренный гликемический отклик и немного белка, но кофеин и молочная основа требуют умеренности." /> AI INSTRUCTION (POST-LOG IMPACT): In your response, include a brief glycemic impact note in 1-2 natural sentences: predicted peak in ~35 minutes. You may suggest ONE brief smoothing tip if GI is elevated. Do NOT use lists or markdown. Keep it conversational. <meal_id id="ac9d89ac-bf3b-4467-8b50-2ff89e0c0137" />
+⚠️ RED ZONE BLOCKED (score: 28/100). This meal was NOT logged yet. Detected risks: high GI (sugar spike); Ореховая мука и арахис немного смягчают отклик, но большое количество сахара и консервированных фруктов всё равно дают выраженный гликемический подъём; для текущих целей это слабый вариант.. You MUST now explain to the user IN RUSSIAN why this food is harmful using vivid, accessible language. Describe the specific health risks (e.g., trans fats from frying damage blood vessels, high GI causes energy crash). Then conclude by saying: "Уверен? Если хочешь обсудить варианты замены — задай вопрос Ассистенту в соседней вкладке." Do NOT ask open-ended questions like "What do you want instead?" because this Diary mode does not support branching dialogues. At the END of your message, you MUST append this exact tag (replacing values): <red_zone_confirm food="Торт кокосанка из кокосовой и миндальной муки с персиками, клубникой и жареным арахисом" weight="300"/> If the user confirms, the system will handle the override explicitly. Do NOT suggest smoothing tips — that becomes an excuse for junk food. After logging, recommend what to eat NEXT to balance today's intake.
 
 --- ai ---
-Записал. У латте <nutr type="marker">кальция</nutr> и <nutr type="marker">магния</nutr> заметно больше, чем у сладкой колы, а <nutr type="marker">гликемический</nutr> отклик здесь <nutr type="green">ровный</nutr>: пик примерно через 35 минут, энергия держится около 2.5 часа. С учётом твоего лимита на кофеин это нормальный вариант, если не превращать утро в кофейный марафон.
+У этого куска отклик будет довольно резкий: несмотря на <nutr type="marker">кокосовую</nutr> и <nutr type="marker">миндальную</nutr> муку, сахар и консервированные персики всё равно тянут <nutr type="red">гликемический</nutr> фон вверх, а потом часто приходит спад с сонливостью и новым аппетитом. Жареный арахис и ореховая основа немного сглаживают картину, но не отменяют того, что это сладкий удар, а не спокойный перекус.
 
-Записал 250г Латте | GI:38 | flat | 2.5ч энергии
-<meal_score score="58" reason="Напиток с молоком даёт умеренный гликемический отклик и немного белка, но кофеин и молочная основа требуют умеренности." />
-<nutr type="micro">Витамин A (120.0мкг)</nutr><nutr type="micro">Витамин D (0.5мкг)</nutr><nutr type="micro">Витамин E (0.2мг)</nutr><nutr type="micro">Витамин B12 (0.8мкг)</nutr><nutr type="micro">Фолиевая кислота (18.0мкг)</nutr><nutr type="micro">Железо (0.1мг)</nutr><nutr type="micro">Кальций (220.0мг)</nutr><nutr type="micro">Магний (18.0мг)</nutr><nutr type="micro">Цинк (0.7мг)</nutr><nutr type="micro">Селен (4.0мкг)</nutr><nutr type="micro">Калий (320.0мг)</nutr><nutr type="micro">Натрий (95.0мг)</nutr><meal_id id="ac9d89ac-bf3b-4467-8b50-2ff89e0c0137" />
+Сейчас лучше не продолжать сладкую линию, а следующим приёмом пищи взять что-то с <nutr type="marker">белком</nutr>, <nutr type="marker">клетчаткой</nutr> и без лишнего сахара — так день не разъедется в стороны, как плохо затянутый ремень. Уверен? Если хочешь обсудить варианты замены — задай вопрос Ассистенту в соседней вкладке.
+<red_zone_confirm food="Торт кокосанка из кокосовой и миндальной муки с персиками, клубникой и жареным арахисом" weight="300"/>
 
 --- human ---
-Да, записывай Торт Полет — 300г
+Да, записывай Торт кокосанка из кокосовой и миндальной муки с персиками, клубникой и жареным арахисом — 300г
 
 --- ai ---
 
 
 --- tool ---
-Successfully logged 300g of Торт Полет (GI: 78, Response: ▲ Spike, 1h energy) for snack. AI INSTRUCTION: Do NOT mention calories, КБЖУ, or macros (protein/fat/carbs) to the user. Focus ONLY on glycemic impact, response type, and energy duration. CRITICAL: You MUST include this EXACT technical line at the END of your response (after your human text): Записал 300г Торт Полет | GI:78 | spike | 1ч энергии Micronutrients found: Витамин A (мкг) (120.0мкг), Витамин E (мг) (2.5мг), Витамин B12 (мкг) (0.4мкг), Фолиевая кислота (мкг) (45.0мкг), Железо (мг) (1.8мг), Кальций (мг) (90.0мг), Магний (мг) (28.0мг), Цинк (мг) (0.9мг), Селен (мкг) (8.0мкг), Калий (мг) (180.0мг), Натрий (мг) (220.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="18" reason="Сладкий десерт с высокой долей быстрых углеводов даёт выраженный гликемический подъём и плохо подходит для стабилизации аппетита." /> AI INSTRUCTION (POST-LOG IMPACT): In your response, include a brief glycemic impact note in 1-2 natural sentences: predicted peak in ~25 minutes. This meal scored 18/100 (red zone). Do NOT suggest smoothing for THIS meal — instead briefly recommend what to eat NEXT to help balance today's intake. Do NOT use lists or markdown. Keep it conversational. <meal_id id="1f6296ed-6f65-4327-a2d0-ea5ab785b429" />
+Successfully logged 300g of Торт кокосанка из кокосовой и миндальной муки с персиками, клубникой и жареным арахисом (GI: 72, Response: ▲ Spike, 1.5h energy) for snack. AI INSTRUCTION: Do NOT mention calories, КБЖУ, or macros (protein/fat/carbs) to the user. Focus ONLY on glycemic impact, response type, and energy duration. CRITICAL: You MUST include this EXACT technical line at the END of your response (after your human text): Записал 300г Торт кокосанка из кокосовой и миндальной муки с персиками, клубникой и жареным арахисом | GI:72 | spike | 1.5ч энергии Micronutrients found: Витамин A (мкг) (80.8мкг), Витамин C (мг) (4.0мг), Витамин E (мг) (3.9мг), Витамин B12 (мкг) (0.2мкг), Фолиевая кислота (мкг) (42.0мкг), Железо (мг) (1.8мг), Кальций (мг) (34.0мг), Магний (мг) (22.2мг), Цинк (мг) (0.8мг), Селен (мкг) (6.8мкг), Калий (мг) (160.0мг), Натрий (мг) (140.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="28" reason="Ореховая мука и арахис немного смягчают отклик, но большое количество сахара и консервированных фруктов всё равно дают выраженный гликемический подъём; для текущих целей это слабый вариант." /> AI INSTRUCTION (POST-LOG IMPACT): In your response, include a brief glycemic impact note in 1-2 natural sentences: predicted peak in ~25 minutes. This meal scored 28/100 (red zone). Do NOT suggest smoothing for THIS meal — instead briefly recommend what to eat NEXT to help balance today's intake. Do NOT use lists or markdown. Keep it conversational. <meal_id id="e0723453-e7d4-419f-b0ba-f0362ef32684" />
+
+--- ai ---
+Записал. Пик ожидается примерно через 25 минут, а энергия продержится около полутора часов — потом сладкая волна обычно откатывается назад, и организм просит ещё. В составе есть немного <nutr type="marker">витамина C</nutr>, <nutr type="marker">магния</nutr>, <nutr type="marker">железа</nutr> и <nutr type="marker">кальция</nutr>, но на фоне <nutr type="red">гликемического</nutr> удара это, конечно, не главный сюжет.
+
+Следующим приёмом пищи лучше сделать что-то спокойное и плотное по сытости: с <nutr type="marker">белком</nutr>, <nutr type="marker">клетчаткой</nutr> и без сладких добавок, чтобы день не пошёл вразнос. И воды сейчас тоже не помешает — после такого десерта это вполне уместно.
+
+Записал 300г Торт кокосанка из кокосовой и миндальной муки с персиками, клубникой и жареным арахисом | GI:72 | spike | 1.5ч энергии
+<meal_score score="28" reason="Ореховая мука и арахис немного смягчают отклик, но большое количество сахара и консервированных фруктов всё равно дают выраженный гликемический подъём; для текущих целей это слабый вариант." />
+<nutr type="micro">Витамин A (80.8мкг)</nutr><nutr type="micro">Витамин C (4.0мг)</nutr><nutr type="micro">Витамин E (3.9мг)</nutr><nutr type="micro">Витамин B12 (0.2мкг)</nutr><nutr type="micro">Фолиевая кислота (42.0мкг)</nutr><nutr type="micro">Железо (1.8мг)</nutr><nutr type="micro">Кальций (34.0мг)</nutr><nutr type="micro">Магний (22.2мг)</nutr><nutr type="micro">Цинк (0.8мг)</nutr><nutr type="micro">Селен (6.8мкг)</nutr><nutr type="micro">Калий (160.0мг)</nutr><nutr type="micro">Натрий (140.0мг)</nutr><meal_id id="e0723453-e7d4-419f-b0ba-f0362ef32684" />
+
+--- human ---
+Да, записывай Торт кокосанка из кокосовой и миндальной муки с персиками, клубникой и жареным арахисом — 300г

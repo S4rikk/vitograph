@@ -184,7 +184,7 @@ export default function GlycemicCurveChart({ timeline, meals, baseline, zoneThre
   return (
     <div className="w-full rounded-2xl bg-white mt-1">
       <svg
-        viewBox={`0 -40 ${SVG_W} ${SVG_H + 60}`}
+        viewBox={`0 -40 ${SVG_W} ${SVG_H + 80}`}
         width="100%"
         preserveAspectRatio="xMidYMid meet"
         className="block"
@@ -407,15 +407,17 @@ export default function GlycemicCurveChart({ timeline, meals, baseline, zoneThre
                 strokeDasharray="3 3"
                 opacity="0.6"
               />
-              <text
-                x={x}
-                y={SVG_H + 21}
-                textAnchor="middle"
-                fontSize="19"
-                className="select-none"
+              <foreignObject
+                x={x - 20}
+                y={SVG_H + 2}
+                width={40}
+                height={40}
+                className="overflow-visible"
               >
-                {emoji}
-              </text>
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-[20px] leading-normal select-none">{emoji}</span>
+                </div>
+              </foreignObject>
             </g>
           );
         })}

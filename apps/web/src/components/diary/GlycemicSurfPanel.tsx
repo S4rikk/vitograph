@@ -408,7 +408,7 @@ export default function GlycemicSurfPanel({
                         return (
                           <div key={name} className="flex items-center justify-between gap-3 py-1.5 px-0.5">
                             {/* Icon */}
-                            <div className={`w-9 h-9 shrink-0 rounded-[12px] flex items-center justify-center text-[1.125rem] shadow-sm bg-white border border-border/50 ${isVitamin(name) ? 'bg-[#FFFBF2]' : 'bg-[#F8FAFC]'}`}>
+                            <div className={`aspect-square p-2 shrink-0 rounded-[0.75rem] flex items-center justify-center text-[1.25rem] leading-normal shadow-sm bg-white border border-border/50 ${isVitamin(name) ? 'bg-[#FFFBF2]' : 'bg-[#F8FAFC]'}`}>
                               {NUTRIENT_EMOJI[name] || '💊'}
                             </div>
 

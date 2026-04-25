@@ -1040,3 +1040,115 @@ model PushSubscription {
   @@index([userId])
   @@map("push_subscriptions")
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// §7  DOMAIN 7 — KNOWLEDGE BASE (Phase 60+)
+// ═══════════════════════════════════════════════════════════════════════
+
+enum KbDocumentStatus {
+  pending
+  indexing
+  indexed
+  error
+}
+
+enum KbCategory {
+  nutrition
+  supplements
+  lifestyle
+  diagnostics
+  mental_health
+  sleep
+  exercise
+  condition_protocol
+  biohacking
+  general
+}
+
+/// Master table for KB articles (global, not user-scoped).
+/// Stores the original source Markdown and indexing metadata.
+model KbDocument {
+  id             Int              @id @default(autoincrement())
+  title          String
+  slug           String           @unique
+  category       KbCategory
+  tags           String[]         @default([])
+  sourceMarkdown String           @map("source_markdown")
+  language       String           @default("ru")
+  version        Int              @default(1)
+  status         KbDocumentStatus @default(pending)
+  errorMessage   String?          @map("error_message")
+  metadata       Json             @default("{}") @db.JsonB
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  sections KbSection[]
+  chunks   KbChunk[]
+
+  @@index([category])
+  @@index([status])
+  @@map("kb_documents")
+}
+
+/// Document sections (H1/H2/H3 headings) for structural navigation.
+model KbSection {
+  id           Int    @id @default(autoincrement())
+  documentId   Int    @map("document_id")
+  heading      String
+  level        Int    // 1, 2, or 3
+  sectionOrder Int    @map("section_order")
+  content      String
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  document KbDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  chunks   KbChunk[]
+
+  @@index([documentId, sectionOrder])
+  @@map("kb_sections")
+}
+
+/// Atomic text chunks with pgvector embeddings + tsvector for hybrid search.
+/// HNSW index on embedding (cosine), GIN on search_vector (FTS).
+model KbChunk {
+  id             Int                             @id @default(autoincrement())
+  documentId     Int                             @map("document_id")
+  sectionId      Int?                            @map("section_id")
+  content        String
+  chunkOrder     Int                             @map("chunk_order")
+  charStart      Int?                            @map("char_start")
+  charEnd        Int?                            @map("char_end")
+  tokenCount     Int?                            @map("token_count")
+  embedding      Unsupported("vector(384)")?     // gte-small-v1, HNSW indexed
+  embeddingModel String                          @default("gte-small-v1") @map("embedding_model")
+  // search_vector tsvector GENERATED ALWAYS AS (to_tsvector('russian', content)) STORED
+  metadata       Json                            @default("{}") @db.JsonB
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  document KbDocument  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  section  KbSection?  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, chunkOrder])
+  @@index([sectionId])
+  @@map("kb_chunks")
+}
+
+/// Search query log for hit-rate analytics and relevance tuning.
+model KbSearchLog {
+  id             Int                             @id @default(autoincrement())
+  userId         String?                         @map("user_id") @db.Uuid
+  queryText      String                          @map("query_text")
+  queryEmbedding Unsupported("vector(384)")?     @map("query_embedding")
+  resultsCount   Int?                            @map("results_count")
+  topChunkIds    Int[]                           @map("top_chunk_ids")
+  topScores      Float[]                         @map("top_scores")
+  categoryFilter String?                         @map("category_filter")
+  wasUseful      Boolean?                        @map("was_useful")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("kb_search_log")
+}
