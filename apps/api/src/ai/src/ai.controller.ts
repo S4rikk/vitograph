@@ -3136,14 +3136,17 @@ export async function handlePushSubscribe(req: Request, res: Response, next: Nex
     }
     
     const { endpoint, keys, fcm_token, type = 'web' } = req.body;
+    console.log(`[handlePushSubscribe] body:`, JSON.stringify(req.body));
 
     // Validate based on type
     if (type === 'fcm') {
       if (!fcm_token) {
+        console.error(`[handlePushSubscribe] 400: Missing fcm_token`);
         return res.status(400).json({ success: false, error: "Missing fcm_token" });
       }
     } else {
       if (!endpoint || !keys || !keys.p256dh || !keys.auth) {
+        console.error(`[handlePushSubscribe] 400: Missing subscription data. body:`, req.body);
         return res.status(400).json({ success: false, error: "Missing subscription data" });
       }
     }

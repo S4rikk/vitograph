@@ -125,7 +125,9 @@ export function usePushNotifications(token?: string) {
             window.alert('🔔 Напоминания о воде включены!');
             resolve(true);
           } else {
-            window.alert('❌ Ошибка сохранения подписки на сервере');
+            const errorText = await response.text();
+            console.error('[Push] Backend Error:', response.status, errorText);
+            window.alert(`❌ Ошибка сохранения подписки на сервере: ${response.status} - ${errorText}`);
             resolve(false);
           }
         });
