@@ -1,52 +1,167 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
-// Утилита для конвертации VAPID ключа
+// --- Utility ---
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding)
-    .replace(/\-/g, '+')
-    .replace(/_/g, '/');
-
+  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);
-
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
+  for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
   return outputArray;
 }
+
+/** Detect Capacitor native platform */
+const isCapacitorNative = (): boolean => {
+  return typeof window !== 'undefined' && !!(window as any).Capacitor?.isNativePlatform?.();
+};
+
+/** Get Capacitor PushNotifications plugin via global bridge */
+const getCapacitorPush = (): any | null => {
+  return (window as any).Capacitor?.Plugins?.PushNotifications ?? null;
+};
 
 export function usePushNotifications(token?: string) {
   const [isSupported, setIsSupported] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isPushLoading, setIsPushLoading] = useState(false);
+  const [platform, setPlatform] = useState<'web' | 'capacitor' | null>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
+    if (typeof window === 'undefined') return;
+
+    if (isCapacitorNative()) {
+      const cap = getCapacitorPush();
+      if (cap) {
+        setPlatform('capacitor');
+        setIsSupported(true);
+        // Check if already registered by looking for stored state
+        const stored = localStorage.getItem('vg_fcm_subscribed');
+        setIsSubscribed(stored === 'true');
+      }
+    } else if ('serviceWorker' in navigator && 'PushManager' in window) {
+      setPlatform('web');
       setIsSupported(true);
-      
-      navigator.serviceWorker.ready.then(registration => {
-        registration.pushManager.getSubscription().then(sub => {
+      navigator.serviceWorker.ready.then(reg => {
+        reg.pushManager.getSubscription().then(sub => {
           setIsSubscribed(!!sub);
         }).catch(err => console.error("Error checking subscription:", err));
       }).catch(err => console.error("Error getting SW ready:", err));
     }
   }, []);
 
-  const getBearerToken = async () => {
+  const getBearerToken = useCallback(async () => {
     let bearerToken = token;
     if (!bearerToken) {
       try {
-         const { createClient } = await import("@/lib/supabase/client");
-         const supabase = createClient();
-         const { data: { session } } = await supabase.auth.getSession();
-         if (session) bearerToken = session.access_token;
-      } catch(e) {}
+        const { createClient } = await import("@/lib/supabase/client");
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) bearerToken = session.access_token;
+      } catch (e) {}
     }
     return bearerToken;
-  };
+  }, [token]);
 
-  const subscribe = async () => {
+  // ── Capacitor FCM Subscribe ──
+  const subscribeCapacitor = useCallback(async () => {
+    const cap = getCapacitorPush();
+    if (!cap) return false;
+
+    setIsPushLoading(true);
+    try {
+      // 1. Request permissions
+      const permResult = await cap.requestPermissions();
+      if (permResult.receive !== 'granted') {
+        window.alert('❌ Разрешите уведомления в настройках устройства!');
+        return false;
+      }
+
+      // 2. Register for push — will trigger 'registration' event
+      await cap.register();
+
+      // 3. Listen for registration event to get FCM token
+      return new Promise<boolean>((resolve) => {
+        const timeout = setTimeout(() => {
+          console.error('[Push] FCM registration timeout');
+          window.alert('❌ Таймаут регистрации FCM. Попробуйте ещё раз.');
+          resolve(false);
+        }, 15000);
+
+        cap.addListener('registration', async (fcmData: { value: string }) => {
+          clearTimeout(timeout);
+          const fcmToken = fcmData.value;
+          console.log('[Push] FCM token received:', fcmToken.slice(0, 20) + '...');
+
+          // 4. Send to backend
+          const bearerToken = await getBearerToken();
+          const response = await fetch('/api/v1/ai/push/subscribe', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(bearerToken ? { 'Authorization': `Bearer ${bearerToken}` } : {}),
+            },
+            body: JSON.stringify({ fcm_token: fcmToken, type: 'fcm' }),
+          });
+
+          if (response.ok) {
+            localStorage.setItem('vg_fcm_subscribed', 'true');
+            localStorage.setItem('vg_fcm_token', fcmToken);
+            setIsSubscribed(true);
+            window.alert('🔔 Напоминания о воде включены!');
+            resolve(true);
+          } else {
+            window.alert('❌ Ошибка сохранения подписки на сервере');
+            resolve(false);
+          }
+        });
+
+        cap.addListener('registrationError', (err: any) => {
+          clearTimeout(timeout);
+          console.error('[Push] FCM registration error:', err);
+          window.alert(`❌ Ошибка регистрации: ${err?.error || 'Unknown'}`);
+          resolve(false);
+        });
+      });
+    } catch (error) {
+      console.error('[Push] Capacitor subscribe error:', error);
+      window.alert(`❌ Ошибка: ${error instanceof Error ? error.message : String(error)}`);
+      return false;
+    } finally {
+      setIsPushLoading(false);
+    }
+  }, [getBearerToken]);
+
+  // ── Capacitor FCM Unsubscribe ──
+  const unsubscribeCapacitor = useCallback(async () => {
+    setIsPushLoading(true);
+    try {
+      const fcmToken = localStorage.getItem('vg_fcm_token');
+      const bearerToken = await getBearerToken();
+      
+      await fetch('/api/v1/ai/push/unsubscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(bearerToken ? { 'Authorization': `Bearer ${bearerToken}` } : {}),
+        },
+        body: JSON.stringify({ type: 'fcm', fcm_token: fcmToken }),
+      });
+
+      localStorage.removeItem('vg_fcm_subscribed');
+      localStorage.removeItem('vg_fcm_token');
+      setIsSubscribed(false);
+      window.alert('🔕 Напоминания отключены.');
+      return true;
+    } catch (err) {
+      console.error('[Push] Capacitor unsubscribe error:', err);
+      return false;
+    } finally {
+      setIsPushLoading(false);
+    }
+  }, [getBearerToken]);
+
+  // ── Web Push Subscribe (existing logic, unchanged) ──
+  const subscribeWeb = useCallback(async () => {
     if (!isSupported) {
       console.warn("Push notifications are not supported in this browser.");
       return false;
@@ -131,9 +246,10 @@ export function usePushNotifications(token?: string) {
     } finally {
       setIsPushLoading(false);
     }
-  };
+  }, [getBearerToken, isSupported]);
 
-  const unsubscribe = async () => {
+  // ── Web Push Unsubscribe (existing logic, unchanged) ──
+  const unsubscribeWeb = useCallback(async () => {
     if (!isSupported) return false;
     
     setIsPushLoading(true);
@@ -170,7 +286,18 @@ export function usePushNotifications(token?: string) {
     } finally {
       setIsPushLoading(false);
     }
-  };
+  }, [getBearerToken, isSupported]);
+
+  // ── Public API: route to correct implementation ──
+  const subscribe = useCallback(async () => {
+    if (platform === 'capacitor') return subscribeCapacitor();
+    return subscribeWeb();
+  }, [platform, subscribeCapacitor, subscribeWeb]);
+
+  const unsubscribe = useCallback(async () => {
+    if (platform === 'capacitor') return unsubscribeCapacitor();
+    return unsubscribeWeb();
+  }, [platform, unsubscribeCapacitor, unsubscribeWeb]);
 
   return { isSupported, isSubscribed, isPushLoading, subscribe, unsubscribe };
 }

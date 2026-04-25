@@ -111,10 +111,6 @@ export default function WaterTracker({ selectedDate, userTimezone }: WaterTracke
           <button 
               onClick={async () => {
                 if (isPushLoading) return;
-                if (!isSupported) {
-                  window.alert('🔕 Push-уведомления недоступны в этом браузере. Откройте сайт в Chrome или Safari для включения напоминаний.');
-                  return;
-                }
                 if (isSubscribed) {
                   await unsubscribe();
                 } else {

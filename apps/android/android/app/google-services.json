@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "503461532272",
+    "project_id": "vitograph-com",
+    "storage_bucket": "vitograph-com.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:503461532272:android:3571a7823293b3339a1ab5",
+        "android_client_info": {
+          "package_name": "com.sanderok.vitograph"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCA1Pstuw5raUtKi72zkktEgLozTae-lwY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

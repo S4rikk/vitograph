@@ -18,6 +18,7 @@ import {
   generateDiagnosticHypothesis,
 } from "./ai-triggers.js";
 import { uploadAndRotateNailPhoto, uploadAndRotateFoodPhoto } from "./lib/storage.js";
+import { sendFcmNotification } from "./lib/fcm-sender.js";
 import { runSomaticVisionAnalyzer } from "./graph/vision-analyzer.js";
 import { runFoodVisionAnalyzer } from "./graph/food-vision-analyzer.js";
 import { runLabReportAnalyzer } from "./graph/lab-report-analyzer.js";
@@ -3134,9 +3135,17 @@ export async function handlePushSubscribe(req: Request, res: Response, next: Nex
        return res.status(401).json({ success: false, error: "Unauthorized" });
     }
     
-    const { endpoint, keys } = req.body;
-    if (!endpoint || !keys || !keys.p256dh || !keys.auth) {
-       return res.status(400).json({ success: false, error: "Missing subscription data" });
+    const { endpoint, keys, fcm_token, type = 'web' } = req.body;
+
+    // Validate based on type
+    if (type === 'fcm') {
+      if (!fcm_token) {
+        return res.status(400).json({ success: false, error: "Missing fcm_token" });
+      }
+    } else {
+      if (!endpoint || !keys || !keys.p256dh || !keys.auth) {
+        return res.status(400).json({ success: false, error: "Missing subscription data" });
+      }
     }
 
     const supabase = createClient(
@@ -3145,16 +3154,35 @@ export async function handlePushSubscribe(req: Request, res: Response, next: Nex
       { auth: { persistSession: false } }
     );
 
-    const { error } = await supabase.from('push_subscriptions').upsert({
-      user_id: user.id,
-      endpoint,
-      p256dh: keys.p256dh,
-      auth: keys.auth,
-    }, { onConflict: 'endpoint' });
+    if (type === 'fcm') {
+      // Upsert by fcm_token
+      const { error } = await supabase.from('push_subscriptions').upsert({
+        user_id: user.id,
+        type: 'fcm',
+        fcm_token,
+        endpoint: `fcm://${fcm_token.slice(0, 32)}`, // synthetic endpoint for compatibility
+        p256dh: '',
+        auth: '',
+      }, { onConflict: 'fcm_token' });
 
-    if (error) {
-       console.error("[handlePushSubscribe] Upsert Error:", error);
-       return res.status(500).json({ success: false, error: error.message });
+      if (error) {
+        console.error("[handlePushSubscribe] FCM Upsert Error:", error);
+        return res.status(500).json({ success: false, error: error.message });
+      }
+    } else {
+      // Web Push (existing logic)
+      const { error } = await supabase.from('push_subscriptions').upsert({
+        user_id: user.id,
+        type: 'web',
+        endpoint,
+        p256dh: keys.p256dh,
+        auth: keys.auth,
+      }, { onConflict: 'endpoint' });
+
+      if (error) {
+        console.error("[handlePushSubscribe] Upsert Error:", error);
+        return res.status(500).json({ success: false, error: error.message });
+      }
     }
 
     res.json({ success: true });
@@ -3204,7 +3232,7 @@ export async function handleWaterCronPush(req: Request, res: Response, next: Nex
     // 1. Fetch active push subscriptions & join timezone from profiles
     const { data: subscriptions } = await supabase
       .from('push_subscriptions')
-      .select('user_id, endpoint, p256dh, auth, water_retry_level, water_last_reminded_at, water_last_glasses_count, profiles(timezone, chronic_conditions)');
+      .select('user_id, type, fcm_token, endpoint, p256dh, auth, water_retry_level, water_last_reminded_at, water_last_glasses_count, profiles(timezone, chronic_conditions)');
       
     if (!subscriptions || subscriptions.length === 0) {
       return res.json({ ok: true, sent: 0, reason: "No active subscriptions" });
@@ -3315,16 +3343,31 @@ export async function handleWaterCronPush(req: Request, res: Response, next: Nex
       // 6. Execute & Save State
       if (shouldSend) {
          try {
-           await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload);
-           sentCount++;
+           if (sub.type === 'fcm' && sub.fcm_token) {
+             // --- FCM Native Push ---
+             const { success, shouldDelete } = await sendFcmNotification(
+               sub.fcm_token,
+               'Время пить воду! 💧',
+               'Пора промочить горло, стакан воды ждет!'
+             );
+             if (shouldDelete) {
+               await supabase.from('push_subscriptions').delete().eq('fcm_token', sub.fcm_token);
+               continue;
+             }
+             if (success) sentCount++;
+           } else {
+             // --- Web Push (existing) ---
+             await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload);
+             sentCount++;
+           }
            
-           console.log(`[WaterPush] 🌊 Sent successfully to user ${sub.user_id.split('-')[0]} | retryLvl: ${nextLvl} | glasses: ${todayGlasses}`);
+           console.log(`[WaterPush] 🌊 Sent (${sub.type}) to user ${sub.user_id.split('-')[0]} | retryLvl: ${nextLvl} | glasses: ${todayGlasses}`);
 
            await supabase.from('push_subscriptions').update({
               water_retry_level: nextLvl,
               water_last_reminded_at: new Date().toISOString(),
               water_last_glasses_count: todayGlasses
-           }).eq('endpoint', sub.endpoint);
+           }).eq(sub.type === 'fcm' ? 'fcm_token' : 'endpoint', sub.type === 'fcm' ? sub.fcm_token : sub.endpoint);
          } catch (e: any) {
            if (e.statusCode === 410 || e.statusCode === 404) {
               await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
@@ -3333,7 +3376,7 @@ export async function handleWaterCronPush(req: Request, res: Response, next: Nex
            }
          }
       } else if (isReset) {
-        await supabase.from('push_subscriptions').update({ water_retry_level: 0, water_last_glasses_count: todayGlasses }).eq('endpoint', sub.endpoint);
+        await supabase.from('push_subscriptions').update({ water_retry_level: 0, water_last_glasses_count: todayGlasses }).eq(sub.type === 'fcm' ? 'fcm_token' : 'endpoint', sub.type === 'fcm' ? sub.fcm_token : sub.endpoint);
       }
     }
 
@@ -3356,10 +3399,7 @@ export async function handlePushUnsubscribe(req: Request, res: Response, next: N
        return res.status(401).json({ success: false, error: "Unauthorized" });
     }
     
-    const { endpoint } = req.body;
-    if (!endpoint) {
-       return res.status(400).json({ success: false, error: "Missing endpoint" });
-    }
+    const { endpoint, type = 'web', fcm_token } = req.body;
 
     const { createClient } = await import("@supabase/supabase-js");
     const supabase = createClient(
@@ -3368,15 +3408,31 @@ export async function handlePushUnsubscribe(req: Request, res: Response, next: N
       { auth: { persistSession: false } }
     );
 
-    const { error } = await supabase
-      .from('push_subscriptions')
-      .delete()
-      .eq('endpoint', endpoint)
-      .eq('user_id', user.id);
+    if (type === 'fcm' && fcm_token) {
+      const { error } = await supabase
+        .from('push_subscriptions')
+        .delete()
+        .eq('fcm_token', fcm_token)
+        .eq('user_id', user.id);
+        
+      if (error) {
+         console.error("[handlePushUnsubscribe] FCM Delete Error:", error);
+         return res.status(500).json({ success: false, error: error.message });
+      }
+    } else {
+      if (!endpoint) {
+         return res.status(400).json({ success: false, error: "Missing endpoint" });
+      }
+      const { error } = await supabase
+        .from('push_subscriptions')
+        .delete()
+        .eq('endpoint', endpoint)
+        .eq('user_id', user.id);
 
-    if (error) {
-       console.error("[handlePushUnsubscribe] Delete Error:", error);
-       return res.status(500).json({ success: false, error: error.message });
+      if (error) {
+         console.error("[handlePushUnsubscribe] Delete Error:", error);
+         return res.status(500).json({ success: false, error: error.message });
+      }
     }
 
     res.json({ success: true });
