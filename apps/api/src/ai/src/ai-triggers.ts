@@ -162,6 +162,7 @@ const DIAGNOSTIC_FALLBACK: DiagnosticOutput = {
 export async function generatePsychologicalResponse(
   food: FoodContext,
   userProfile: UserProfileContext,
+  locale: string = "ru"
 ): Promise<PsychologicalOutput> {
   const userMessage = JSON.stringify({
     food: {
@@ -182,7 +183,7 @@ export async function generatePsychologicalResponse(
   const result = await callLlmStructured({
     schema: PsychologicalOutputSchema,
     schemaName: "psychological_response",
-    systemPrompt: PSYCHOLOGICAL_PROMPT.template,
+    systemPrompt: PSYCHOLOGICAL_PROMPT.template.replace("{locale}", locale).replace("{locale}", locale),
     userMessage,
     timeoutMs: LLM_TIMEOUTS.sync,
     maxRetries: LLM_RETRIES.sync,

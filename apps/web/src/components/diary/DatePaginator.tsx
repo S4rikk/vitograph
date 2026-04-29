@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { getTzToday } from "@/lib/date-utils";
+import { useTranslations } from "next-intl";
 
 type DatePaginatorProps = {
   selectedDate: Date;
@@ -10,6 +11,8 @@ type DatePaginatorProps = {
 };
 
 export default function DatePaginator({ selectedDate, onChange, userTimezone }: DatePaginatorProps) {
+  const t = useTranslations('diary');
+  
   const isToday = useMemo(() => {
     const today = getTzToday(userTimezone);
     return (
@@ -20,7 +23,7 @@ export default function DatePaginator({ selectedDate, onChange, userTimezone }: 
   }, [selectedDate, userTimezone]);
 
   const label = useMemo(() => {
-    if (isToday) return "Сегодня";
+    if (isToday) return t('today');
     
     const yesterday = getTzToday(userTimezone);
     yesterday.setDate(yesterday.getDate() - 1);
@@ -29,7 +32,8 @@ export default function DatePaginator({ selectedDate, onChange, userTimezone }: 
       selectedDate.getMonth() === yesterday.getMonth() &&
       selectedDate.getFullYear() === yesterday.getFullYear()
     ) {
-      return "Вчера";
+      // If yesterday exists in ru.json use it, else fallback to native string format
+      return t('yesterday') !== 'yesterday' ? t('yesterday') : "Вчера";
     }
 
     return selectedDate.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
@@ -66,7 +70,7 @@ export default function DatePaginator({ selectedDate, onChange, userTimezone }: 
         <span className="text-[0.9375rem] font-bold text-ink">{label}</span>
         {!isToday && (
           <span className="text-[0.625rem] text-primary-600 hover:text-primary-700 font-medium tracking-wide uppercase mt-0.5">
-            Вернуться в сегодня
+            {t('returnToToday') !== 'returnToToday' ? t('returnToToday') : "Вернуться в сегодня"}
           </span>
         )}
       </div>

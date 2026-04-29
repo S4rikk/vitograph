@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { X } from "lucide-react";
 import type { MetricFieldDefinition } from "@/types/wearable-types";
+import { useTranslations } from "next-intl";
 
 interface ManualEntryDialogProps {
     /** Whether the dialog is visible. */
@@ -41,6 +42,8 @@ export default function ManualEntryDialog({
         return defaults;
     });
 
+    const t = useTranslations("common");
+
     const handleChange = useCallback((key: string, value: string) => {
         setValues((prev) => ({ ...prev, [key]: value }));
     }, []);
@@ -77,7 +80,7 @@ export default function ManualEntryDialog({
                         <button
                             onClick={onClose}
                             className="p-1.5 text-ink-muted hover:text-ink-main hover:bg-surface-muted rounded-full transition-colors cursor-pointer"
-                            aria-label="Закрыть"
+                            aria-label={t("close")}
                         >
                             <X size={18} />
                         </button>
@@ -104,7 +107,7 @@ export default function ManualEntryDialog({
                                     step={field.step ?? (field.type === "number" ? "0.1" : undefined)}
                                     value={values[field.key] ?? ""}
                                     onChange={(e) => handleChange(field.key, e.target.value)}
-                                    placeholder={field.placeholder ?? `Введите ${field.label.toLowerCase()}`}
+                                    placeholder={field.placeholder ?? `${t("enterValue")} ${field.label.toLowerCase()}`}
                                     className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                 />
                             </div>
@@ -118,14 +121,14 @@ export default function ManualEntryDialog({
                             onClick={onClose}
                             className="px-4 py-2 text-sm font-semibold text-ink-muted hover:text-ink-main rounded-lg hover:bg-surface-muted transition-colors cursor-pointer"
                         >
-                            Отмена
+                            {t("cancel")}
                         </button>
                         <button
                             type="submit"
                             onClick={handleSubmit}
                             className="px-5 py-2 text-sm font-semibold text-white bg-primary-600 rounded-xl hover:bg-primary-700 transition-colors shadow-sm active:scale-95 cursor-pointer"
                         >
-                            Сохранить
+                            {t("save")}
                         </button>
                     </div>
                 </div>

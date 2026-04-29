@@ -9,6 +9,7 @@ import { apiClient, type BiomarkerResult, type LabReportExtraction, type StoredD
 import { compressImageToBlob } from "@/lib/image-utils";
 import SymptomTrackerWidget from "./SymptomTrackerWidget";
 import { useLabScanJob } from "@/hooks/useLabScanJob";
+import { useTranslations } from "next-intl";
 
 /**
  * Medical Results view — orchestrates:
@@ -31,6 +32,7 @@ export default function MedicalResultsView() {
   const { startJob, status: jobStatus, result: jobResult, error: jobError, reset: resetJob } = useLabScanJob();
 
   const controlsRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations("medical");
 
   useEffect(() => {
     if (uploadState === "done" && editableBiomarkers && editableBiomarkers.length > 0) {
@@ -135,7 +137,7 @@ export default function MedicalResultsView() {
           `${errorData.message}\n\n💡 ${errorData.suggestion}`
         );
       } else {
-        setDiagnosisError(err?.message || "Ошибка диагностического анализа");
+        setDiagnosisError(err?.message || t("diagnosticError"));
       }
     } finally {
       setIsDiagnosing(false);
@@ -171,7 +173,7 @@ export default function MedicalResultsView() {
       }
 
       if (!data.biomarkers || data.biomarkers.length === 0) {
-        setErrorMessage("Анализы не найдены. Пожалуйста, убедитесь, что тексты/фото читаемы.");
+        setErrorMessage(t("noBiomarkersFound"));
         setUploadState("error");
         return;
       }
@@ -257,7 +259,7 @@ export default function MedicalResultsView() {
       setDirtyIndexes(new Set());
     } catch (error) {
       console.error("Refresh notes failed", error);
-      alert("Не удалось обновить показатели. Попробуйте еще раз.");
+      alert(t("refreshFailed"));
     } finally {
       setIsRefreshing(false);
     }
@@ -267,7 +269,7 @@ export default function MedicalResultsView() {
     if (!selectedTimestamp) return;
     const targetTimestamp = selectedTimestamp;
 
-    const isConfirmed = window.confirm("Вы уверены, что хотите безвозвратно удалить этот диагностический отчёт?");
+    const isConfirmed = window.confirm(t("deleteConfirm"));
     if (!isConfirmed) return;
 
     try {
@@ -285,7 +287,7 @@ export default function MedicalResultsView() {
       }
     } catch (error) {
       console.error("Delete failed", error);
-      alert("Не удалось удалить отчёт.");
+      alert(t("deleteFailed"));
     }
   };
 
@@ -312,13 +314,13 @@ export default function MedicalResultsView() {
       {(somaticHistory["nails_analysis_history"]?.length > 0 || somaticHistory["tongue_analysis_history"]?.length > 0 || somaticHistory["skin_analysis_history"]?.length > 0) && (
         <div className="space-y-4">
           {somaticHistory["nails_analysis_history"]?.length > 0 && (
-            <SomaticAnalysisCard title="Анализ ногтей" items={somaticHistory["nails_analysis_history"]} />
+            <SomaticAnalysisCard title={t("nailsAnalysis")} items={somaticHistory["nails_analysis_history"]} />
           )}
           {somaticHistory["tongue_analysis_history"]?.length > 0 && (
-            <SomaticAnalysisCard title="Анализ языка" items={somaticHistory["tongue_analysis_history"]} />
+            <SomaticAnalysisCard title={t("tongueAnalysis")} items={somaticHistory["tongue_analysis_history"]} />
           )}
           {somaticHistory["skin_analysis_history"]?.length > 0 && (
-            <SomaticAnalysisCard title="Анализ кожи" items={somaticHistory["skin_analysis_history"]} />
+            <SomaticAnalysisCard title={t("skinAnalysis")} items={somaticHistory["skin_analysis_history"]} />
           )}
         </div>
       )}
@@ -331,15 +333,15 @@ export default function MedicalResultsView() {
           </div>
           <div className="text-center">
             <p className="text-sm font-semibold text-cyan-800">
-              {jobStatus === "UPLOADING" && "Загружаем файлы..."}
-              {jobStatus === "PENDING" && "Запрос принят, ожидаем обработку..."}
-              {jobStatus === "PROCESSING" && "AI анализирует ваши анализы..."}
-              {!["UPLOADING", "PENDING", "PROCESSING"].includes(jobStatus) && "Обработка..."}
+              {jobStatus === "UPLOADING" && t("uploadingFiles")}
+              {jobStatus === "PENDING" && t("requestAccepted")}
+              {jobStatus === "PROCESSING" && t("aiAnalyzing")}
+              {!["UPLOADING", "PENDING", "PROCESSING"].includes(jobStatus) && t("processing")}
             </p>
             <p className="mt-1 text-xs text-cyan-600">
               {jobStatus === "PROCESSING"
-                ? "GPT-4o Vision распознаёт показатели на фото"
-                : "Это может занять до 2 минут"}
+                ? t("gpt4oProcessing")
+                : t("processingTime")}
             </p>
           </div>
           {/* Progress steps */}
@@ -367,14 +369,14 @@ export default function MedicalResultsView() {
         <>
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-ink">
-              Результаты анализа {results?.report_date ? `(От ${results.report_date})` : ""}
+              {t("analysisResults")} {results?.report_date ? `(От ${results.report_date})` : ""}
             </h2>
             <span className="text-sm text-ink-muted">
-              {editableBiomarkers.length} показателей
+              {editableBiomarkers.length} {t("markersCount")}
             </span>
           </div>
           {results?.context && (
-            <p className="text-sm text-ink-faint italic mb-2">Контекст: {results.context}</p>
+            <p className="text-sm text-ink-faint italic mb-2">{t("contextLabel")} {results.context}</p>
           )}
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -429,15 +431,15 @@ export default function MedicalResultsView() {
 
                   {/* Референс */}
                   <div className="mt-3 flex items-center gap-2">
-                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Норма:</span>
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("normLabel")}</span>
                     {(() => {
-                      const isNormMissing = !marker.reference_range?.text || marker.reference_range?.text === "нет данных";
+                      const isNormMissing = !marker.reference_range?.text || marker.reference_range?.text === t("noData");
                       return (
                         <input
                           type="text"
                           value={marker.reference_range?.text ?? ""}
                           onChange={(e) => handleMarkerChange(index, 'ref_text', e.target.value)}
-                          placeholder="нет данных"
+                          placeholder={t("noData")}
                           className={`flex-1 border-b px-1 py-0.5 text-sm transition-all focus:outline-none ${
                             isNormMissing
                               ? "bg-rose-50/50 border-rose-300 text-rose-700 animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite] placeholder:text-rose-300"
@@ -476,9 +478,9 @@ export default function MedicalResultsView() {
               {isRefreshing ? (
                 <>
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-white" />
-                  Обновляем...
+                  {t("refreshing")}
                 </>
-              ) : "Обновить показатели"}
+              ) : t("refreshMarkers")}
             </button>
             <button
               onClick={() => editableBiomarkers && runDiagnosticAnalysis(editableBiomarkers)}
@@ -489,7 +491,7 @@ export default function MedicalResultsView() {
                   : "bg-slate-100 text-slate-400 cursor-not-allowed opacity-70"
               }`}
             >
-              {isDiagnosing ? "Анализируем..." : "Сформировать отчёт"}
+              {isDiagnosing ? t("analyzing") : t("generateReport")}
             </button>
             {isDirty ? (
               <div className="ml-auto w-full lg:w-auto flex-1 max-w-md flex items-start gap-3 rounded-xl bg-amber-50/80 p-3.5 border border-amber-200 shadow-sm transition-all duration-300">
@@ -499,14 +501,14 @@ export default function MedicalResultsView() {
                   </svg>
                 </div>
                 <div className="text-xs font-medium leading-relaxed text-amber-700 pt-1">
-                  <span className="font-bold text-amber-900 block mb-0.5">Несохраненные изменения</span>
-                  Нажмите «Обновить показатели», чтобы применить ваши правки.
+                  <span className="font-bold text-amber-900 block mb-0.5">{t("unsavedChanges")}</span>
+                  {t("unsavedChangesSub")}
                 </div>
               </div>
             ) : (
               <div className="ml-auto w-full lg:w-auto flex items-center justify-center rounded-xl bg-amber-50/50 px-5 py-3 border border-amber-200/30 transition-all duration-300 hover:bg-amber-50 hover:border-amber-200/60">
                 <div className="text-sm font-semibold text-amber-700">
-                  ⚠️ Внимание! Сверьте данные с оригиналом.
+                  ⚠️ {t("verifyData")}
                 </div>
               </div>
             )}
@@ -522,7 +524,7 @@ export default function MedicalResultsView() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900">Медицинский анализ AI</h3>
+                  <h3 className="text-xl font-bold text-slate-900">{t("aiMedicalAnalysis")}</h3>
                 </div>
 
                 <ul className="space-y-3">
@@ -541,7 +543,7 @@ export default function MedicalResultsView() {
 
       {/* ── Empty State ───────────────────────────────────── */}
       {(!results || (results.biomarkers?.length ?? 0) === 0) && uploadState === "done" && (
-        <p className="text-center text-ink-muted">Анализы не найдены.</p>
+        <p className="text-center text-ink-muted">{t("noAnalysesFound")}</p>
       )}
 
       {/* ── GPT-5.4 Diagnostic Report ─────────────────────── */}
@@ -551,10 +553,10 @@ export default function MedicalResultsView() {
             <div className="absolute inset-0 animate-spin rounded-full border-2 border-purple-200 border-t-purple-600" />
           </div>
           <p className="text-sm font-medium text-purple-700">
-            Готовим диагностический отчёт (GPT-5.4)…
+            {t("preparingReport")}
           </p>
           <p className="text-xs text-purple-500">
-            Глубокий анализ может занять до 8 минут для большого количества показателей
+            {t("deepAnalysisTime")}
           </p>
         </div>
       )}
@@ -568,13 +570,13 @@ export default function MedicalResultsView() {
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-amber-900 mb-1">Не удалось сформировать отчёт</h3>
+              <h3 className="font-semibold text-amber-900 mb-1">{t("reportFailed")}</h3>
               <p className="text-sm text-amber-800 whitespace-pre-line">{diagnosisError}</p>
               <button
                 onClick={() => { setDiagnosisError(undefined); setReportAlreadyGenerated(false); }}
                 className="mt-4 px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 transition-colors"
               >
-                Попробовать снова
+                {t("tryAgain")}
               </button>
             </div>
           </div>
@@ -587,7 +589,7 @@ export default function MedicalResultsView() {
           <div className="flex flex-col gap-4 mb-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold bg-gradient-to-r from-cyan-700 to-blue-600 bg-clip-text text-transparent">
-                История диагностик
+                {t("diagnosisHistory")}
               </h2>
 
               {/* Date Selector (if multiple dates exist) */}
@@ -633,7 +635,7 @@ export default function MedicalResultsView() {
                             }`}
                         >
                           <span className="text-lg">{idx === 0 ? "🕒" : "⏱️"}</span>
-                          Сессия {timeStr}
+                          {t("session")} {timeStr}
                         </button>
                       );
                     }) : (
@@ -648,9 +650,9 @@ export default function MedicalResultsView() {
                     onClick={handleDeleteReport}
                     disabled={isDiagnosing}
                     className="flex items-center gap-2 px-3 py-2 mr-2 rounded-xl text-xs font-medium text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50"
-                    title="Удалить выбранный отчёт"
+                    title={t("deleteSelectedReport")}
                   >
-                    🗑️ Удалить
+                    🗑️ {t("delete")}
                   </button>
                 </div>
               );

@@ -1,6 +1,7 @@
 "use client";
 
 import type { LabDiagnosticReport } from "@/lib/api-client";
+import { useTranslations } from "next-intl";
 
 /* ── Color Maps ──────────────────────────────────────────────── */
 
@@ -37,6 +38,8 @@ type DiagnosticReportCardProps = {
  * priority actions, additional tests, dietary recommendations, disclaimer.
  */
 export default function DiagnosticReportCard({ report }: DiagnosticReportCardProps) {
+    const t = useTranslations("medical");
+
     return (
         <div className="space-y-6 rounded-2xl border border-border bg-white p-6 shadow-sm">
             {/* ── Header ──────────────────────────────────────────── */}
@@ -46,9 +49,9 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
                 </div>
                 <div>
                     <h3 className="text-lg font-semibold text-ink">
-                        Диагностический отчёт
+                        {t("diagnosticReportTitle")}
                     </h3>
-                    <p className="text-xs text-ink-muted">GPT-5.4 · Премиум-анализ</p>
+                    <p className="text-xs text-ink-muted">{t("premiumAnalysis")}</p>
                 </div>
             </div>
 
@@ -61,7 +64,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
             {report.biomarker_assessments.length > 0 && (
                 <section>
                     <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
-                        <span>🔬</span> Оценка показателей
+                        <span>🔬</span> {t("markersAssessment")}
                     </h4>
                     <div className="grid gap-2 sm:grid-cols-2">
                         {report.biomarker_assessments.map((b, i) => (
@@ -76,7 +79,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
                                     </span>
                                 </div>
                                 <p className="mt-1 text-xs opacity-80">
-                                    Реф.: {b.reference_range}
+                                    {t("refLabel")} {b.reference_range}
                                 </p>
                                 <p className="mt-1 text-xs leading-snug">
                                     {b.clinical_significance}
@@ -91,7 +94,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
             {report.diagnostic_patterns.length > 0 && (
                 <section>
                     <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
-                        <span>🔍</span> Выявленные паттерны
+                        <span>🔍</span> {t("identifiedPatterns")}
                     </h4>
                     <div className="space-y-3">
                         {report.diagnostic_patterns.map((p, i) => (
@@ -108,7 +111,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
                                     </span>
                                 </div>
                                 <p className="mt-1 text-xs text-ink-muted">
-                                    Маркеры: {p.involved_markers.join(", ")}
+                                    {t("markersLabel")} {p.involved_markers.join(", ")}
                                 </p>
                                 <p className="mt-2 text-sm leading-relaxed text-ink">
                                     {p.explanation}
@@ -132,7 +135,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
             {report.priority_actions.length > 0 && (
                 <section>
                     <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
-                        <span>🎯</span> Приоритетные действия
+                        <span>🎯</span> {t("priorityActions")}
                     </h4>
                     <div className="space-y-2">
                         {report.priority_actions.map((a, i) => {
@@ -162,7 +165,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
             {report.recommended_additional_tests.length > 0 && (
                 <section>
                     <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
-                        <span>⚕️</span> Рекомендуемые допол. анализы
+                        <span>⚕️</span> {t("recommendedTests")}
                     </h4>
                     <ul className="space-y-2">
                         {report.recommended_additional_tests.map((t, i) => (
@@ -182,7 +185,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
             {report.dietary_recommendations.length > 0 && (
                 <section>
                     <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
-                        <span>🥗</span> Диетарные рекомендации
+                        <span>🥗</span> {t("dietaryRecommendations")}
                     </h4>
                     <ul className="space-y-2">
                         {report.dietary_recommendations.map((d, i) => (
@@ -192,7 +195,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
                             >
                                 <p className="text-sm text-ink">{d.recommendation}</p>
                                 <p className="mt-1 text-xs text-ink-muted">
-                                    Целевые маркеры: {d.target_markers.join(", ")}
+                                    {t("targetMarkersLabel")} {d.target_markers.join(", ")}
                                 </p>
                             </li>
                         ))}

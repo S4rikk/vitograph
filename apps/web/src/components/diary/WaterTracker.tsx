@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { getTzDayBoundaries } from "@/lib/date-utils";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useTranslations } from "next-intl";
 
 type WaterTrackerProps = {
   selectedDate: Date;
@@ -15,6 +16,7 @@ export default function WaterTracker({ selectedDate, userTimezone }: WaterTracke
   const targetGlasses = 8;
   const [supabase] = useState(() => createClient());
   const { isSupported, isSubscribed, isPushLoading, subscribe, unsubscribe } = usePushNotifications();
+  const t = useTranslations("water");
 
   const loadWater = useCallback(async () => {
     setIsLoading(true);
@@ -102,9 +104,9 @@ export default function WaterTracker({ selectedDate, userTimezone }: WaterTracke
         <span className="text-[1.1rem]">💧</span>
         <div className="flex items-center gap-1.5 whitespace-nowrap">
           <div>
-            <span className="text-sm font-semibold text-ink">Вода </span>
+            <span className="text-sm font-semibold text-ink">{t('title')} </span>
             <span className={`text-[0.6875rem] ${isFull ? 'text-green-500 font-bold' : 'text-ink-muted'}`}>
-              ({glasses} / {targetGlasses} стаканов)
+              {t('glassesOf', { current: glasses, target: targetGlasses })}
             </span>
           </div>
 
@@ -127,7 +129,7 @@ export default function WaterTracker({ selectedDate, userTimezone }: WaterTracke
                     ? 'text-ink-muted hover:text-ink hover:bg-surface-muted' 
                     : 'text-ink-muted bg-surface-muted'
               }`}
-              title={isSubscribed ? "Отключить напоминания" : "Включить напоминания"}
+              title={isSubscribed ? t('disableReminders') : t('enableReminders')}
             >
               {isPushLoading ? (
                 <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -150,7 +152,7 @@ export default function WaterTracker({ selectedDate, userTimezone }: WaterTracke
       <div className="flex items-center gap-2.5">
         <button
           onClick={() => {
-            if (window.confirm("Убрать один выпитый стакан воды?")) {
+            if (window.confirm(t('removeConfirm'))) {
               updateWater(glasses - 1);
             }
           }}

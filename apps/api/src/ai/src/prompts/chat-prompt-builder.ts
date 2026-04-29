@@ -34,12 +34,14 @@ interface PromptSection {
 
 // ── Builder ─────────────────────────────────────────────────────────
 
+import { getLocalizedPersona } from "./localized-personas.js";
+
 export class ChatPromptBuilder {
-  static readonly PROMPT_VERSION = "1.2.0";
+  static readonly PROMPT_VERSION = "1.3.0";
 
   private sections: PromptSection[] = [];
 
-  constructor(private readonly mode: "assistant" | "diary") {}
+  constructor(private readonly mode: "assistant" | "diary", private readonly locale: string = "ru") {}
 
   // ── P0: Core Persona (always included) ────────────────────────────
 
@@ -48,17 +50,19 @@ export class ChatPromptBuilder {
    * This is the EXACT text from ai.controller.ts L1150-1203.
    */
   withPersona(aiName: string, userDateStr: string, userTimeStr: string): this {
+    const localizedInstructions = getLocalizedPersona(this.locale);
+
     const content = `You are ${aiName}, a senior medical expert and supportive health companion. 
 Current User Local Date: ${userDateStr}
 Current User Local Time: ${userTimeStr}
 
 ### CORE PERSONA & TONE
 <persona>
-Ты — Senior-ментор по здоровью. Твой стиль общения объединяет прагматичную заботу, высокий профессионализм и легкую, теплую иронию. Ты общаешься на равных, как мудрый наставник.
+${localizedInstructions}
 </persona>
 
 <metaphor_framework>
-При необходимости объяснить что-либо, используй богатство русского языка, органичные сравнения и уместные фразеологизмы.
+При необходимости объяснить что-либо, используй органичные сравнения и уместные фразеологизмы.
 ⛔ СТРОГИЙ ЗАПРЕТ: НИКАКОГО "ЦИРКА". Тебе категорически запрещено использовать слово "цирк" (например, "устраивать цирк", "цирк с голодом", "клоунада") и любые подобные инфантильные обесценивающие сравнения. 
 Твоя задача — звучать естественно и грамотно, как образованный врач-эксперт.
 </metaphor_framework>
@@ -85,6 +89,7 @@ Current User Local Time: ${userTimeStr}
   ⛔ FORBIDDEN: NEVER use image placeholders like [Image of...] or similar descriptive text in brackets. You cannot show images in the chat, so do not describe them.
   The ONLY allowed formatting is <nutr> tags and <meal_score> tags.
 - TAGS (CRITICAL): You MUST wrap EVERY single mention of a nutrient, vitamin, mineral, or blood biomarker (e.g. Glucose, Iron) in <nutr type="...">Label</nutr> tags. This applies to the main text, lists, and recommendations. For example: <nutr type="marker">калий</nutr>, <nutr type="vitamin_c">витамин C</nutr>. 
+  *   IMPORTANT: ALL XML tags like <nutr>, <meal_score>, <meal_id> MUST remain exactly in English format. Only natural language responses should be translated into the user's language.
   *   Для тегов <nutr> используй специфичные типы, если они известны: type="iron" (Железо), type="calcium" (Кальций), type="magnesium" (Магний), type="vitamin_c", type="vitamin_d", type="vitamin_b" (B6, B12, Фолаты), type="omega" (Омега-3). Для остальных используй type="marker".  ⛔ STRICT FORBIDDEN: NEVER tag medical conditions, diseases, or diagnoses (e.g., DO NOT tag "нейтропения", "анемия", "диабет"). Tag ONLY the substance or marker itself.
   *   ⛔ FORBIDDEN tag types: "protein", "fat", "carbs", "calories". These MUST NEVER appear — Zero КБЖУ Policy.
   *   **ZONE HIGHLIGHTING**: When discussing glycemic impact, energy spikes, or zone-related words (e.g. "гликемический отклик", "сахарная игла", "ровный фон"), you MUST color-code them: type="red" (bad/spike/high), type="yellow" (warning/medium), or type="green" (good/flat/low). Example: <nutr type="red">отклик</nutr>.
@@ -667,11 +672,33 @@ When the user asks what to eat or you suggest food:
     return this;
   }
 
+  // ── P-1: Language Directive (ABSOLUTE PRIORITY) ────────────────────
+
+  /**
+   * Instructs the LLM to respond entirely in the user's locale language
+   * and use the appropriate unit system (imperial for `en`, metric otherwise).
+   * Must be called before `.build()`.
+   */
+  withLanguageDirective(): this {
+    const units = this.locale === 'en'
+      ? 'imperial (lbs, ft/in, mg/dL, °F)'
+      : 'metric (kg, cm, mmol/L, °C)';
+
+    const content = `### LANGUAGE DIRECTIVE (ABSOLUTE PRIORITY)
+You MUST respond ENTIRELY in the language of this locale code: "${this.locale}".
+All conversational text, recommendations, meal names, and medical terms must be in that language.
+Technical XML tags (<nutr>, <meal_score>) and their attributes MUST remain in English.
+Unit values: use ${units} system.`;
+
+    this.sections.push({ key: "language_directive", content, priority: -1 });
+    return this;
+  }
+
   // ── Build ─────────────────────────────────────────────────────────
 
   /**
    * Assembles all registered sections into a single system prompt string.
-   * Sections are sorted by priority (0 = highest, 3 = lowest).
+   * Sections are sorted by priority (-1 = highest, 3 = lowest).
    * Within the same priority, insertion order is preserved (stable sort).
    */
   build(): PromptBuildResult {

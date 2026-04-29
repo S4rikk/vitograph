@@ -1,6 +1,6 @@
 # Архитектура Долговременной Памяти Ассистента
 
-> **Дата актуальности:** 7 апреля 2026
+> **Дата актуальности:** 29 апреля 2026
 > **Статус:** Production
 
 ## 1. Обзор
@@ -321,8 +321,14 @@ Actions: `add`, `add_with_plan`, `remove`, `pause`, `resume`, `advance_step`
 `fetchActiveSkills(userId, token)` — returns top-3 active skills ordered by priority.
 Called in parallel alongside `fetchUserContext()` and `fetchAdvancedMemoryContext()`.
 
-### Prompt Integration
-`ChatPromptBuilder.withActiveSkills()` injects ONLY the current step of each active skill (~200 tokens).
+### Prompt Integration & Temporal Context Engine
+`ChatPromptBuilder.withActiveSkills()` injects ONLY the current step of each active skill (~200 tokens). 
+
+**Критический механизм защиты (Temporal Context Engine):**
+Для предотвращения "амнезии" и галлюцинаций LLM со временем, бэкенд берет на себя вычисление времени:
+1. Вычисляет количество дней активности текущего шага (`stepActiveDays`), учитывая локальную таймзону пользователя (`userDateStr`).
+2. Извлекает требуемый срок из описания шага (например, "на 3 дня") и автоматически формирует строку `📅 День X из Y`.
+3. Добавляет инструкцию `⚠️ СРОК ВЫПОЛНЕН. Пора завершить шаг (advance_step)` при истечении срока, гарантированно направляя ИИ на вызов инструмента.
 
 ### Skill Document Flow
 1. `manage_health_goals(add_with_plan)` → INSERT into `user_active_skills`

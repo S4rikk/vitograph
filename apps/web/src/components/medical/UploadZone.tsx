@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 type UploadState = "idle" | "hover" | "loading" | "done" | "error";
 
@@ -36,6 +37,7 @@ export default function UploadZone({
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const t = useTranslations("medical");
 
   const effectiveState = dragOver ? "hover" : state;
 
@@ -50,11 +52,11 @@ export default function UploadZone({
         || firstFile.name.endsWith(".docx");
       if (isDocument) {
         if (files.length > 1) {
-          alert("Пожалуйста, загружайте только один документ (PDF/DOCX/TXT) за раз.");
+          alert(t("onlyOneDocument"));
           return;
         }
         if (firstFile.size > 10 * 1024 * 1024) {
-          alert("Файл слишком большой. Максимум — 10 МБ.");
+          alert(t("documentTooLarge"));
           return;
         }
         onFilesAccepted([firstFile], "document");
@@ -65,12 +67,12 @@ export default function UploadZone({
       const imageFiles = files.filter(f => IMAGE_TYPES.includes(f.type) || f.type.startsWith("image/"));
       if (imageFiles.length > 0) {
         if (imageFiles.length > 10) {
-          alert("Максимум 10 фотографий за один раз.");
+          alert(t("maxTenPhotos"));
           return;
         }
         const totalSize = imageFiles.reduce((acc, file) => acc + file.size, 0);
         if (totalSize > 50 * 1024 * 1024) {
-          alert("Общий размер фотографий слишком большой. Максимум — 50 МБ.");
+          alert(t("photosTooLarge"));
           return;
         }
         onFilesAccepted(imageFiles, "image");
@@ -113,7 +115,7 @@ export default function UploadZone({
     <div
       role="button"
       tabIndex={0}
-      aria-label="Upload lab report (PDF, DOCX, TXT, or Photo)"
+      aria-label={t("uploadAriaLabel")}
       onDragOver={(e) => {
         e.preventDefault();
         setDragOver(true);
@@ -178,19 +180,19 @@ export default function UploadZone({
           </div>
           <div>
             <p className="text-sm font-semibold text-ink">
-              Перетащите результаты медицинских анализов сюда
+              {t("dragDropTitle")}
             </p>
             <p className="mt-1 text-xs text-ink-muted">
-              или нажмите для выбора файла
+              {t("dragDropSubtitle")}
             </p>
           </div>
           <span className="inline-block rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary-700">
-            PDF, DOCX, TXT, Фото (до 10 шт)
+            {t("acceptedFormats")}
           </span>
 
           <div className="mt-3 flex items-center gap-2 text-xs text-ink-muted">
             <span className="h-px flex-1 bg-border" />
-            <span>или</span>
+            <span>{t("or")}</span>
             <span className="h-px flex-1 bg-border" />
           </div>
 
@@ -206,7 +208,7 @@ export default function UploadZone({
               <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
             </svg>
-            Сфотографировать бланк
+            {t("takePhoto")}
           </button>
         </div>
       )}
@@ -218,7 +220,7 @@ export default function UploadZone({
             <div className="absolute inset-0 animate-spin rounded-full border-2 border-primary-200 border-t-primary-600" />
           </div>
           <p className="text-sm font-medium text-ink-muted">
-            Анализируем документ…
+            {t("analyzingDocument")}
           </p>
         </div>
       )}
@@ -236,15 +238,15 @@ export default function UploadZone({
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className="text-sm font-bold text-success">Отчет сформирован</span>
+            <span className="text-sm font-bold text-success">{t("reportGenerated")}</span>
           </div>
           
           <div className="text-center">
             <p className="text-base font-bold text-slate-800">
-              Загрузить новые результаты
+              {t("uploadNewResults")}
             </p>
             <p className="mt-1 text-[0.8125rem] text-slate-500 max-w-xs mx-auto">
-              Нажмите сюда или перетащите новые фото/PDF бланка для следующего анализа
+              {t("uploadNewResultsSub")}
             </p>
           </div>
 
@@ -252,7 +254,7 @@ export default function UploadZone({
             <svg className="h-5 w-5 text-slate-400 group-hover:text-cyan-500 transition-colors" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
-            Добавить новый анализ
+            {t("addNewAnalysis")}
           </div>
         </div>
       )}
@@ -276,7 +278,7 @@ export default function UploadZone({
             </svg>
           </div>
           <p className="text-sm font-semibold text-error">
-            {errorMessage || "Ошибка обработки файла"}
+            {errorMessage || t("processingError")}
           </p>
         </div>
       )}

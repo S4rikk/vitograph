@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { apiClient } from "@/lib/api-client";
 import { Loader2, Plus, Sparkles, AlertCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface Symptom {
   name: string;
@@ -17,9 +18,10 @@ interface CorrelationResult {
   explanation: string;
 }
 
-const COMMON_SYMPTOMS = ["Головная боль", "Усталость", "Вздутие", "Давит виски", "Тошнота", "Стресс", "Бессонница"];
+const COMMON_SYMPTOMS_KEYS = ["headache", "fatigue", "bloating", "templePressure", "nausea", "stress", "insomnia"];
 
 export default function SymptomTrackerWidget() {
+  const t = useTranslations("medical");
   const [symptoms, setSymptoms] = useState<Symptom[]>([]);
   const [customSymptom, setCustomSymptom] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -96,7 +98,7 @@ export default function SymptomTrackerWidget() {
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
       console.error("Error saving symptoms:", err);
-      alert("Ошибка при сохранении симптомов");
+      alert(t("errorSavingSymptoms"));
     } finally {
       setIsSaving(false);
     }
@@ -111,7 +113,7 @@ export default function SymptomTrackerWidget() {
       setCorrelations(insights);
     } catch (err: any) {
       console.error("Error generating correlations:", err);
-      setAnalysisError(err.message || "Не удалось сгенерировать инсайты");
+      setAnalysisError(err.message || t("errorGeneratingInsights"));
     } finally {
       setIsAnalyzing(false);
     }
@@ -121,15 +123,17 @@ export default function SymptomTrackerWidget() {
     <div className="w-full space-y-8 mt-10">
       {/* Tracker Section */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-xl font-bold text-slate-900">Регистрация симптомов</h2>
+        <h2 className="mb-4 text-xl font-bold text-slate-900">{t("symptomsRegistration")}</h2>
         <p className="mb-6 text-sm text-slate-500">
-          Отмечайте ваше самочувствие ежедневно. ИИ проанализирует ваши симптомы, питание и погоду, чтобы найти скрытые триггеры.
+          {t("symptomsDescription")}
         </p>
 
         <div className="mb-6">
-          <label className="mb-2 block text-sm font-medium text-slate-700">Частые симптомы</label>
+          <label className="mb-2 block text-sm font-medium text-slate-700">{t("frequentSymptoms")}</label>
           <div className="flex flex-wrap gap-2">
-            {COMMON_SYMPTOMS.map((sym) => (
+            {COMMON_SYMPTOMS_KEYS.map((key) => {
+              const sym = t(`symptomsList.${key}`);
+              return (
               <button
                 key={sym}
                 onClick={() => addSymptom(sym)}
@@ -138,7 +142,7 @@ export default function SymptomTrackerWidget() {
               >
                 + {sym}
               </button>
-            ))}
+            )})}
           </div>
         </div>
 
@@ -148,28 +152,28 @@ export default function SymptomTrackerWidget() {
             value={customSymptom}
             onChange={(e) => setCustomSymptom(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addSymptom(customSymptom)}
-            placeholder="Свой симптом..."
+            placeholder={t("customSymptomPlaceholder")}
             className="flex-1 rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
           <button
             onClick={() => addSymptom(customSymptom)}
             className="flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
           >
-            <Plus className="mr-2 h-4 w-4" /> Добавить
+            <Plus className="mr-2 h-4 w-4" /> {t("add")}
           </button>
         </div>
 
         {symptoms.length > 0 && (
           <div className="space-y-4 mb-8">
-            <h3 className="text-sm font-semibold text-slate-800">Выбрано:</h3>
+            <h3 className="text-sm font-semibold text-slate-800">{t("selected")}</h3>
             {symptoms.map((s) => (
               <div key={s.name} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-slate-100 bg-slate-50 p-4">
                 <div className="flex items-center gap-3">
                   <span className="font-medium text-slate-800">{s.name}</span>
-                  <button onClick={() => removeSymptom(s.name)} className="text-xs text-red-500 hover:text-red-700 underline">Удалить</button>
+                  <button onClick={() => removeSymptom(s.name)} className="text-xs text-red-500 hover:text-red-700 underline">{t("delete")}</button>
                 </div>
                 <div className="flex items-center gap-4 flex-1 max-w-xs">
-                  <span className="text-xs text-slate-500 w-12 sm:text-right">Сила: {s.severity}</span>
+                  <span className="text-xs text-slate-500 w-12 sm:text-right">{t("strengthLabel")} {s.severity}</span>
                   <input
                     type="range"
                     min="1"
@@ -190,9 +194,9 @@ export default function SymptomTrackerWidget() {
             disabled={isSaving || symptoms.length === 0}
             className="rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white transition hover:bg-cyan-700 disabled:bg-slate-300 disabled:cursor-not-allowed"
           >
-            {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : "Сохранить день"}
+            {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : t("saveDay")}
           </button>
-          {saveSuccess && <span className="text-sm font-medium text-green-600">Успешно сохранено! ✅</span>}
+          {saveSuccess && <span className="text-sm font-medium text-green-600">{t("successfullySaved")}</span>}
         </div>
       </div>
 
@@ -202,10 +206,10 @@ export default function SymptomTrackerWidget() {
           <div>
             <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-purple-600" />
-              Анализ связей (ИИ)
+              {t("aiCorrelationAnalysis")}
             </h2>
             <p className="mt-2 text-sm text-slate-600 max-w-2xl">
-              ИИ анализирует вашу историю за 14-30 дней (симптомы, питание, перепады давления и магнитные бури), чтобы найти скрытые корреляции.
+              {t("aiCorrelationDescription")}
             </p>
           </div>
           <button
@@ -215,10 +219,10 @@ export default function SymptomTrackerWidget() {
           >
             {isAnalyzing ? (
               <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Анализируем...
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" /> {t("analyzing")}
               </>
             ) : (
-              "Сгенерировать инсайты"
+              t("generateInsights")
             )}
           </button>
         </div>
@@ -249,7 +253,7 @@ export default function SymptomTrackerWidget() {
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="font-bold text-slate-800 text-lg">{corr.symptom}</h3>
                   <span className="flex items-center gap-1 rounded-full bg-purple-100 px-2.5 py-1 text-xs font-semibold text-purple-700">
-                    Уверенность: {Math.round(corr.confidence * 100)}%
+                    {t("confidenceLabel")} {Math.round(corr.confidence * 100)}%
                   </span>
                 </div>
                 
@@ -271,7 +275,7 @@ export default function SymptomTrackerWidget() {
 
         {!isAnalyzing && correlations && correlations.length === 0 && (
           <div className="rounded-xl border border-slate-100 bg-slate-50 p-8 text-center">
-            <p className="text-slate-500 text-sm">Корреляций пока не найдено. Продолжайте вести дневник и отмечать симптомы каждый день.</p>
+            <p className="text-slate-500 text-sm">{t("noCorrelationsFound")}</p>
           </div>
         )}
       </div>

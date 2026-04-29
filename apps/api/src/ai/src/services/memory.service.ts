@@ -58,7 +58,7 @@ export interface SemanticMemory {
 // ── Internal functions ──────────────────────────────────────────────
 
 async function fetchEmotionalProfile(
-  supabase: ReturnType<typeof createClient>, 
+  supabase: any, 
   userId: string
 ): Promise<EmotionalProfile | null> {
   try {
@@ -83,7 +83,7 @@ async function fetchEmotionalProfile(
 }
 
 async function fetchSemanticMemories(
-  supabase: ReturnType<typeof createClient>, 
+  supabase: any, 
   userId: string, 
   message: string
 ): Promise<SemanticMemory[] | null> {
@@ -119,7 +119,7 @@ async function fetchSemanticMemories(
  * cosine similarity search. Returns top-3 most relevant past actions.
  */
 async function fetchPastActions(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   message: string
 ): Promise<SemanticMemory[] | null> {

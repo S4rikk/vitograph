@@ -101,7 +101,7 @@ export async function fetchMatchingSkillDocument(
       return null;
     }
 
-    const { match } = await response.json();
+    const { match } = await response.json() as any;
     if (match) {
       console.log(`[SkillsService] Matched skill document: "${match.title}" (similarity: ${match.similarity})`);
     }

@@ -330,8 +330,10 @@ export const logMealTool = new DynamicStructuredTool({
         confidence: 0.7,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'food_name_key' })
-        .then(() => console.log(`[Tool:log_meal] GI cached for: ${normalizedKey}`))
-        .catch((err: any) => console.warn('[Tool:log_meal] GI cache write failed (non-blocking):', err));
+        .then(
+          () => console.log(`[Tool:log_meal] GI cached for: ${normalizedKey}`),
+          (err: any) => console.warn('[Tool:log_meal] GI cache write failed (non-blocking):', err)
+        );
     }
 
     const mappingUnits: Record<string, string> = {

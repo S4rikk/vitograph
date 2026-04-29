@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { apiClient } from "@/lib/api-client";
+import { useTranslations } from "next-intl";
 
 interface Props {
   variant?: "default" | "compact" | "mobileStrip";
@@ -14,6 +15,7 @@ export default function SupplementChecklistWidget({
   startIso,
   endIso,
 }: Props) {
+  const t = useTranslations("shared.supplements");
   const [meds, setMeds] = useState<string[]>(providedMeds || []);
   const [todaySuppLogs, setTodaySuppLogs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -153,7 +155,7 @@ export default function SupplementChecklistWidget({
     if (isLoading && meds.length === 0) {
       return (
         <div className="w-full flex flex-col gap-2">
-          <h4 className="text-[0.6875rem] font-bold text-ink-muted uppercase tracking-wider px-1">Добавки на сегодня</h4>
+          <h4 className="text-[0.6875rem] font-bold text-ink-muted uppercase tracking-wider px-1">{t("supplementsToday")}</h4>
           <div className="grid grid-cols-2 gap-2 px-1 pb-1">
             <div className="w-full h-6 bg-surface-muted rounded-full animate-pulse"></div>
             <div className="w-full h-6 bg-surface-muted rounded-full animate-pulse"></div>
@@ -164,7 +166,7 @@ export default function SupplementChecklistWidget({
 
     return (
       <div className="w-full flex flex-col gap-2">
-         <h4 className="text-[0.6875rem] font-bold text-ink-muted uppercase tracking-wider px-1">Добавки на сегодня</h4>
+         <h4 className="text-[0.6875rem] font-bold text-ink-muted uppercase tracking-wider px-1">{t("supplementsToday")}</h4>
          <div className="grid grid-cols-2 gap-2 px-1 pb-1">
            {meds.map((med, i) => {
              const matchedLog = todaySuppLogs.find((log) => log.supplement_name === med);
@@ -207,7 +209,7 @@ export default function SupplementChecklistWidget({
   return (
     <div className="mt-5 pt-4 border-t border-divider">
       <label className="block text-[0.8125rem] font-semibold text-ink-main mb-3">
-        Чеклист на сегодня
+        {t("checklistToday")}
       </label>
       {isLoading && todaySuppLogs.length === 0 ? (
         <div className="animate-pulse space-y-2.5">

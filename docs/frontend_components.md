@@ -1,8 +1,8 @@
 # VITOGRAPH — Frontend Component Map
 
-> **Дата актуальности:** 25 апреля 2026 (обновлено: Glassmorphism Tabs, Capacitor Android App, FontScaleProvider, Android Auth Fixes)
+> **Дата актуальности:** 29 апреля 2026 (обновлено: i18n Localization, Dual-Path Push, Temporal AI Logic)
 >
-> Карта UI-компонентов Next.js 14+ (App Router) с описанием ответственности и зависимостей, а также интеграция Android Capacitor.
+> Карта UI-компонентов Next.js 14+ (App Router) с описанием ответственности и зависимостей, а также интеграцией Android Capacitor и next-intl.
 
 ---
 
@@ -29,16 +29,15 @@ layout.tsx (RootLayout)
 
 | Компонент                | Назначение                                                 | Ключевые props / state                                                      | API-зависимости                                                                     |
 | :----------------------- | :--------------------------------------------------------- | :-------------------------------------------------------------------------- | :---------------------------------------------------------------------------------- |
-| **FoodDiaryView**        | Главный экран дневника. Чат-интерфейс + **Scroll-to-Top FAB** (плавающая кнопка навигации)  | `messages[]`, `threadId`, `macros`, `dynamicTarget`, `dynamicMicros`        | `apiClient.chat()`, `apiClient.getNutritionTargets()`, `apiClient.getGlycemicTimeline()` |
-| **FoodInputForm**        | Поле ввода + кнопка фото + кнопка отправки                 | `onSend(text, imageBase64?)`                                                | Нет (чисто UI)                                                                      |
-| **ChatMessage**          | Рендер одного сообщения. Поддерживает `onRedZoneConfirm/Reject` для конфирмации продуктов красной зоны   | `variant`, `text`, `time`, `mealMicros`, `onRedZoneConfirm`, `onRedZoneReject` | Нет                                                                                 |
-| **GlycemicSurfPanel**    | **Инсулиновый Сёрфинг:** интерактивная кривая, средний показатель, пики, цветные зоны, GL-бюджет, микронутриенты (~31 KB) | `timeline`, `baseline`, `zones`, `glBudget`, `micros`                       | `apiClient.getGlycemicTimeline()`, `apiClient.getNutritionTargets()`                |
-| **GlycemicCurveChart**   | SVG-кривая гликемического отклика с цветными зонами (зелёный/жёлтый/красный) | `points[]`, `zones`, `width`, `height`                                      | Нет (чисто презентационный)                                                     |
-| **DatePaginator**        | Переключение дат (← Сегодня →)                             | `selectedDate`, `onDateChange`                                              | Нет                                                                                 |
-| **WaterTracker**         | Трекер воды с push-уведомлениями (VAPID toggle: колокольчик). Optimistic UI, timezone-aware | `glasses`, `onAdd`, `onRemove`, push bell toggle                            | Supabase `water_logs`, `usePushNotifications` hook                                  |
-| **MealScoreBadge**       | Бейдж качества приёма пищи (0-100)                         | `score`, `reason`                                                           | Нет                                                                                 |
-| **FoodCard**             | Карточка приёма пищи: GI zone badge, response_type, energy_hours, микронутриентовые dot-chips, mobile `pr-6` clearance | `mealData`, `mealScore`, `mealReason`, `onEdit`, `onDelete`                 | Нет (презентационный)                                                              |
+| **FoodDiaryView**        | Главный экран дневника. Чат-интерфейс + **Scroll-to-Top FAB**. Полностью локализован (next-intl).  | `messages[]`, `threadId`, `macros`, `dynamicTarget`, `dynamicMicros`        | `apiClient.chat()`, `apiClient.getNutritionTargets()`, `apiClient.getGlycemicTimeline()` |
 | **FoodInputForm**        | Поле ввода + кнопка фото + анализ с возможностью отмены (кнопка закрытия миниатюры) | `onSend(text, imageBase64?)`                                                | Нет (чисто UI)                                                                      |
+| **ChatMessage**          | Рендер сообщения. Поддерживает `onRedZoneConfirm/Reject`. Локализован через `useTranslations`. | `variant`, `text`, `time`, `mealMicros`, `onRedZoneConfirm`, `onRedZoneReject` | Нет                                                                                 |
+| **GlycemicSurfPanel**    | **Инсулиновый Сёрфинг:** кривая, зоны, микронутриенты. Динамический перевод единиц измерения через `nutrient-utils.ts`. | `timeline`, `baseline`, `zones`, `glBudget`, `micros`                       | `apiClient.getGlycemicTimeline()`, `apiClient.getNutritionTargets()`                |
+| **GlycemicCurveChart**   | SVG-кривая гликемического отклика с цветными зонами (зелёный/жёлтый/красный) | `points[]`, `zones`, `width`, `height`                                      | Нет (чисто презентационный)                                                     |
+| **DatePaginator**        | Переключение дат (← Сегодня →). Локализовано форматирование даты.          | `selectedDate`, `onDateChange`                                              | Нет                                                                                 |
+| **WaterTracker**         | Трекер воды с push-уведомлениями (VAPID toggle). Optimistic UI, timezone-aware | `glasses`, `onAdd`, `onRemove`, push bell toggle                            | Supabase `water_logs`, `usePushNotifications` hook                                  |
+| **MealScoreBadge**       | Бейдж качества приёма пищи (0-100)                         | `score`, `reason`                                                           | Нет                                                                                 |
+| **FoodCard**             | Карточка приёма пищи: GI zone badge, response_type. Микронутриенты мапятся через `MICRONUTRIENT_NAME_MAPPING`. | `mealData`, `mealScore`, `mealReason`, `onEdit`, `onDelete`                 | Нет (презентационный)                                                              |
 | **FeedbackButton**       | Кнопка отправки фидбека                                    | —                                                                           | `apiClient.submitFeedback()`                                                        |
 
 ---
@@ -97,7 +96,7 @@ layout.tsx (RootLayout)
 
 | Компонент             | Назначение                                     | API-зависимости         |
 | :-------------------- | :--------------------------------------------- | :---------------------- |
-| **UserProfileSheet**  | Боковая панель профиля (редактирование данных). Использует кастомную 3D-верстку вкладок (Glassmorphism, overlapping folders). | Supabase `profiles`     |
+| **UserProfileSheet**  | Боковая панель профиля (редактирование данных). Кастомная 3D-верстка вкладок. Все данные (ИМТ, носимые устройства, вкладки) локализованы (`tProfile`, `tWearables`). | Supabase `profiles`     |
 | **DeviceWidgetCard**  | Виджет подключённого устройства (wearable)     | — (будущая фича)        |
 | **ManualEntryDialog** | Диалог ручного ввода биомаркера                | Supabase `test_results` |
 
@@ -222,6 +221,8 @@ graph LR
 | Файл                                                                               | Назначение                                                       |
 | :--------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
 | [`nutrient-colors.ts`](file:///c:/project/VITOGRAPH/apps/web/src/lib/food-diary/nutrient-colors.ts) | Ядро цветового кодирования плашек в чате. Использует биологический/химический словарь ассоциаций + **детерминированный строковый хэшинг** для стабилизации цветов неизвестных микронутриентов. |
+| [`nutrient-utils.ts`](file:///c:/project/VITOGRAPH/apps/web/src/lib/food-diary/nutrient-utils.ts) | Унифицированный маппинг сырых ключей микронутриентов от ИИ (через `MICRONUTRIENT_NAME_MAPPING`) и парсинг локализованных единиц измерения. Используется в FoodCard и GlycemicSurfPanel. |
+| [`wearable-field-defs.ts`](file:///c:/project/VITOGRAPH/apps/web/src/lib/wearables/wearable-field-defs.ts) | Библиотека определений полей для носимых устройств (Sleep, Cardio, Metabolic и т.д.) с поддержкой `next-intl` локализации названий и метрик. |
 | [`api-client.ts`](file:///c:/project/VITOGRAPH/apps/web/src/lib/api-client.ts)     | Единый HTTP-клиент для всех API-вызовов (20KB, ~40 методов). **Android Auth:** `getAuthToken()` использует двухфазную стратегию: 1) Fast-path — чтение токена из `localStorage` (мгновенно, проверка `expires_at`), 2) Slow-path — `getSession()` с 5s race-timeout для предотвращения зависаний Android WebView |
 | [`supabase/client.ts`](file:///c:/project/VITOGRAPH/apps/web/src/lib/supabase/client.ts) | Supabase Browser Client с Capacitor-спецификой: `dummyLock` (обход `navigator.locks`), Cookie Backup (`localStorage` зеркало сессии), автовосстановление при force-close |
 | [`image-utils.ts`](file:///c:/project/VITOGRAPH/apps/web/src/lib/image-utils.ts)   | Сжатие изображений (canvas → blob, max 2048px для анализов, 1024px для еды)  |

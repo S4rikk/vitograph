@@ -9,27 +9,29 @@ import Image from "next/image";
 import React from "react";
 import HealthGoalsWidget from "@/components/shared/HealthGoalsWidget";
 import { useTypewriter } from "@/hooks/use-typewriter";
+import { useTranslations } from "next-intl";
 
 
 // ── CUSTOM PREMIUM RENDERERS ──
 
 const ScoreBadge = ({ score, reason }: { score: number; reason: string }) => {
+  const t = useTranslations("assistant.chat");
   let colorClass = "bg-red-50 text-red-700 border-red-200";
   let dotColor = "bg-red-500";
-  let label = "Низкий"; // Poor
+  let label = t("healthScorePoor"); // Poor
   
   if (score >= 86) {
     colorClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
     dotColor = "bg-emerald-500";
-    label = "Идеально"; // Ideal
+    label = t("healthScoreIdeal"); // Ideal
   } else if (score >= 70) {
     colorClass = "bg-amber-50 text-amber-700 border-amber-200";
     dotColor = "bg-amber-500";
-    label = "Хорошо"; // Good
+    label = t("healthScoreGood"); // Good
   } else if (score >= 40) {
     colorClass = "bg-orange-50 text-orange-700 border-orange-200";
     dotColor = "bg-orange-500";
-    label = "Средне"; // Average
+    label = t("healthScoreAverage"); // Average
   }
 
   return (
@@ -214,6 +216,7 @@ type Message = {
 };
 
 export default function AiAssistantView({ userId }: { userId: string }) {
+  const t = useTranslations("assistant.chat");
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -226,7 +229,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
     {
       id: "welcome",
       role: "assistant",
-      content: "Привет! Я твой ИИ-друг. Буду рад помочь тебе с интерпретацией твоих данных и достижением твоих целей по здоровью. О чем поговорим?",
+      content: t("welcomeMessage"),
     }
   ]);
   const [input, setInput] = useState("");
@@ -250,7 +253,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
       setSelectedImageBase64(base64);
     } catch (err) {
       console.error("Failed to compress image:", err);
-      alert("Не удалось загрузить фото. Попробуйте другое.");
+      alert(t("uploadPhotoFailed"));
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
@@ -303,7 +306,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
   useEffect(() => {
     if (profile?.ai_name && messages.length > 0 && messages[0].id === "welcome") {
       const currentContent = messages[0].content;
-      const expectedContent = `Привет! Я ${profile.ai_name}. Буду рад помочь тебе с интерпретацией твоих данных и достижением твоих целей по здоровью. О чем поговорим?`;
+      const expectedContent = t("welcomeMessageWithName", { name: profile.ai_name });
       
       if (currentContent !== expectedContent) {
         setMessages(prev => {
@@ -404,7 +407,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
       console.error("[AiAssistant] Chat Error:", error);
       setMessages(prev =>
         prev.map(m => m.id === placeholderId
-          ? { ...m, content: "Извините, произошла ошибка сети при обращении к ИИ. Пожалуйста, попробуйте позже." }
+          ? { ...m, content: t("networkError") }
           : m
         )
       );
@@ -421,7 +424,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
     const uploadedImageUrl = searchParams.get("imageUrl");
 
     if (trigger === "nail_photo" && uploadedImageUrl) {
-      const promptText = "Я загрузил фото ногтей. Дай подробную рекомендацию по извлеченным маркерам.";
+      const promptText = t("nailPhotoPrompt");
       
       // Delay the router replacement slightly to ensure React state has time to batch
       // and the component has fully hydrated its initial storage data.
@@ -436,7 +439,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
     e.preventDefault();
     if ((!input.trim() && !selectedImageBase64) || isLoading || !threadId) return;
 
-    const content = input.trim() || "Оцени этот продукт на фото.";
+    const content = input.trim() || t("assessProductPrompt");
     const base64 = selectedImageBase64 || undefined;
     
     setInput("");
@@ -447,7 +450,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
   const handleClearChat = async () => {
     if (!threadId || isLoading) return;
     
-    const confirmed = window.confirm("Вы уверены? Это полностью сотрет вашу историю общения с ИИ.");
+    const confirmed = window.confirm(t("clearChatConfirm"));
     if (!confirmed) return;
     
     setIsLoading(true);
@@ -458,12 +461,12 @@ export default function AiAssistantView({ userId }: { userId: string }) {
         {
           id: "welcome",
           role: "assistant",
-          content: "Привет! Я твой ИИ-друг. Буду рад помочь тебе с интерпретацией твоих данных и достижением твоих целей по здоровью. О чем поговорим?",
+          content: t("welcomeMessage"),
         }
       ]);
     } catch (error) {
       console.error("[AiAssistant] Clear Error:", error);
-      alert("Не удалось очистить историю чата. Пожалуйста, попробуйте позже.");
+      alert(t("clearChatError"));
     } finally {
       setIsLoading(false);
     }
@@ -474,13 +477,13 @@ export default function AiAssistantView({ userId }: { userId: string }) {
       {/* Header with Clear Button */}
       <div className="flex items-center justify-between border-b border-cloud px-4 py-1 sm:py-1.5 bg-white">
         <h3 className="text-[0.6875rem] sm:text-xs font-semibold text-ink-muted uppercase tracking-widest">
-          {profile?.ai_name || "ИИ-Помощник"}
+          {profile?.ai_name || t("defaultAssistantName")}
         </h3>
         <button
           onClick={handleClearChat}
           disabled={isLoading || messages.length <= 1}
           className="p-1.5 text-ink-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-          title="Очистить чат"
+          title={t("clearChatTitle")}
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -559,7 +562,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
             <button
               onClick={() => setSelectedImageBase64(null)}
               className="absolute top-1 right-1 bg-black/60 hover:bg-black/80 text-white rounded-full p-1 transition-colors"
-              title="Удалить фото"
+              title={t("removePhotoTitle")}
               type="button"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -578,7 +581,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className="inline-flex items-center justify-center rounded-xl bg-white border border-cloud-dark px-3 py-3 text-ink-muted hover:text-primary-600 hover:border-primary-300 transition-colors focus:outline-none min-h-[44px]"
-            title="Прикрепить фото этикетки или продукта"
+            title={t("attachPhotoTitle")}
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -589,7 +592,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={isLoading}
-            placeholder="Задайте вопрос о здоровье..."
+            placeholder={t("inputPlaceholder")}
             rows={1}
             style={{ fieldSizing: "content" } as any}
             onKeyDown={(e) => {
@@ -605,7 +608,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
             disabled={isLoading || (!input.trim() && !selectedImageBase64)}
             className="inline-flex items-center justify-center rounded-xl bg-primary-600 px-3 sm:px-5 py-3 text-[0.9375rem] font-semibold text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-cloud-dark disabled:text-ink-muted disabled:shadow-none min-h-[44px]"
           >
-            <span className="hidden sm:inline">Отправить</span>
+            <span className="hidden sm:inline">{t("send")}</span>
             <svg className="w-5 h-5 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
             </svg>

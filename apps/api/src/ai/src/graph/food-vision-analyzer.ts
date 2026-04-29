@@ -42,11 +42,12 @@ const FOOD_VISION_FALLBACK: FoodRecognitionOutput = {
 export async function runFoodVisionAnalyzer(
     imageUrl: string,
     userContext: string,
+    locale: string = "ru"
 ): Promise<{ data: FoodRecognitionOutput; errorMessage: string | null }> {
-    const systemPrompt = FOOD_VISION_PROMPT.template.replace(
-        "{userContext}",
-        userContext,
-    );
+    const systemPrompt = FOOD_VISION_PROMPT.template
+        .replace("{userContext}", userContext)
+        .replace("{locale}", locale)
+        .replace("{locale}", locale);
 
     const messages = [
         {

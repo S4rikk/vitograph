@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 
 import { type SomaticHistoryItem } from "@/lib/api-client";
+import { useTranslations } from "next-intl";
 
 interface SomaticAnalysisCardProps {
     title: string;
@@ -29,6 +30,7 @@ function getMarkerColor(index: number): string {
  * detected markers as colored chips, and AI interpretation text.
  */
 export default function SomaticAnalysisCard({ title, items, onDismiss }: SomaticAnalysisCardProps) {
+    const t = useTranslations("medical");
     const [isZoomed, setIsZoomed] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -61,14 +63,14 @@ export default function SomaticAnalysisCard({ title, items, onDismiss }: Somatic
                         <span className="text-lg">🔬</span>
                         <h3 className="text-sm font-semibold text-ink">{title}</h3>
                         <span className={`text-xs font-medium ${confidenceColor}`}>
-                            {confidencePercent}% уверенности
+                            {confidencePercent}% {t("confidence")}
                         </span>
                     </div>
                     {onDismiss && (
                         <button
                             onClick={onDismiss}
                             className="rounded-lg p-1 text-ink-muted hover:bg-white/60 hover:text-ink transition-colors"
-                            aria-label="Закрыть"
+                            aria-label={t("close")}
                         >
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -96,7 +98,7 @@ export default function SomaticAnalysisCard({ title, items, onDismiss }: Somatic
                                             : "bg-surface bg-slate-50 text-slate-500 hover:bg-slate-100 border border-slate-200"
                                             }`}
                                     >
-                                        {idx === 0 ? "Свежий" : `${dateStr} ${timeStr}`}
+                                        {idx === 0 ? t("fresh") : `${dateStr} ${timeStr}`}
                                     </button>
                                 );
                             })}
@@ -126,7 +128,7 @@ export default function SomaticAnalysisCard({ title, items, onDismiss }: Somatic
 
                         {/* Markers */}
                         <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-ink-muted mb-2">Обнаруженные маркеры</p>
+                            <p className="text-xs font-medium text-ink-muted mb-2">{t("detectedMarkers")}</p>
                             {result?.markers?.length > 0 ? (
                                 <div className="flex flex-wrap gap-1.5">
                                     {result.markers.map((marker: string, i: number) => (
@@ -140,7 +142,7 @@ export default function SomaticAnalysisCard({ title, items, onDismiss }: Somatic
                                 </div>
                             ) : (
                                 <p className="text-sm text-success font-medium">
-                                    ✓ Видимых отклонений не обнаружено
+                                    ✓ {t("noDeviations")}
                                 </p>
                             )}
                         </div>
@@ -148,7 +150,7 @@ export default function SomaticAnalysisCard({ title, items, onDismiss }: Somatic
 
                     {/* Interpretation */}
                     <div className="rounded-xl bg-surface-muted p-4">
-                        <p className="text-xs font-medium text-ink-muted mb-1.5">Интерпретация ИИ</p>
+                        <p className="text-xs font-medium text-ink-muted mb-1.5">{t("aiInterpretation")}</p>
                         <p className="text-sm text-ink leading-relaxed whitespace-pre-wrap">
                             {result.interpretation}
                         </p>
@@ -165,7 +167,7 @@ export default function SomaticAnalysisCard({ title, items, onDismiss }: Somatic
                     <div className="relative w-full max-w-3xl max-h-[90vh]">
                         <img
                             src={imageUrl}
-                            alt={`${title} (увеличенное)`}
+                            alt={`${title} ${t("zoomedIn")}`}
                             className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl cursor-zoom-out mx-auto"
                         />
                         <button

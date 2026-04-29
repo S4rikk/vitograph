@@ -1283,7 +1283,7 @@ export async function handleChat(
           const hasWaterContraindications = conditions.some((c: string) => c.toLowerCase().includes('поч') || c.toLowerCase().includes('серд') || c.toLowerCase().includes('kidney') || c.toLowerCase().includes('heart'));
           const todayWater = dbContext?.todayWaterLogs && dbContext.todayWaterLogs.length > 0 ? dbContext.todayWaterLogs[0].amount_glasses : 0;
 
-          const builder = new ChatPromptBuilder(chatMode === "diary" ? "diary" : "assistant")
+          const builder = new ChatPromptBuilder(chatMode === "diary" ? "diary" : "assistant", dbContext.profile?.locale || "ru")
             .withWaterContext(todayWater, hasWaterContraindications)
             .withPersona(
               dbContext.profile.ai_name || 'Maya',
@@ -1346,6 +1346,7 @@ export async function handleChat(
             weatherAlert += `\n[MERGE_ALERTS]: У тебя есть и weather alert, и skill check-in. Объедини их в ОДИН естественный абзац, не два отдельных блока. Пример: "Доброе утро! Сегодня небольшая магнитная буря — береги себя. Кстати, как продвигается [текущий шаг]?"`;
           }
           builder.withWeatherAlert(weatherAlert);
+          builder.withLanguageDirective();
 
           const { systemPrompt, includedSections } = builder.build();
           console.log('[DEBUG PROMPT] Sections:', includedSections.join(', '));
@@ -1600,7 +1601,7 @@ export async function handleChatStream(
           const hasWaterContraindications = conditions.some((c: string) => c.toLowerCase().includes('поч') || c.toLowerCase().includes('серд') || c.toLowerCase().includes('kidney') || c.toLowerCase().includes('heart'));
           const todayWater = dbContext?.todayWaterLogs && dbContext.todayWaterLogs.length > 0 ? dbContext.todayWaterLogs[0].amount_glasses : 0;
 
-          const builder = new ChatPromptBuilder(chatMode === "diary" ? "diary" : "assistant")
+          const builder = new ChatPromptBuilder(chatMode === "diary" ? "diary" : "assistant", dbContext.profile?.locale || "ru")
             .withWaterContext(todayWater, hasWaterContraindications)
             .withPersona(
               dbContext.profile.ai_name || 'Maya',
@@ -1661,6 +1662,7 @@ export async function handleChatStream(
             weatherAlert += `\n[MERGE_ALERTS]: У тебя есть и weather alert, и skill check-in. Объедини их в ОДИН естественный абзац, не два отдельных блока. Пример: "Доброе утро! Сегодня небольшая магнитная буря — береги себя. Кстати, как продвигается [текущий шаг]?"`;
           }
           builder.withWeatherAlert(weatherAlert);
+          builder.withLanguageDirective();
 
           const { systemPrompt, includedSections } = builder.build();
           console.log('[DEBUG STREAM PROMPT] Sections:', includedSections.join(', '));
@@ -1712,6 +1714,7 @@ export async function handleChatStream(
           redZoneConfirm: body.redZoneConfirm
         },
         streamMode: "messages",
+        recursionLimit: 5,
       }
     );
 
@@ -1734,14 +1737,14 @@ export async function handleChatStream(
       }
 
       if (
-        isAIMessageChunk(message) &&
+        isAIMessageChunk(message as any) &&
         message.content &&
         typeof message.content === "string"
       ) {
         // Skip tool-call-only chunks (they have tool_call_chunks but no text)
         if (
-          message.tool_call_chunks &&
-          message.tool_call_chunks.length > 0 &&
+          (message as any).tool_call_chunks &&
+          (message as any).tool_call_chunks.length > 0 &&
           !message.content
         ) {
           continue;
@@ -2065,8 +2068,10 @@ export async function handleAnalyzeFood(
         historySynopsis: formatHistorySynopsis(dbContext.profile),
       });
 
+      const locale = dbContext.profile?.locale || "ru";
+
       // 3. Run GPT-4o Vision food analyzer
-      const { data: result, errorMessage: llmError } = await runFoodVisionAnalyzer(imageUrl, userContext);
+      const { data: result, errorMessage: llmError } = await runFoodVisionAnalyzer(imageUrl, userContext, locale);
 
       const supabaseUrl = process.env.SUPABASE_URL;
       const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
@@ -2157,12 +2162,15 @@ export async function handleAnalyzeLabReport(
         historySynopsis: formatHistorySynopsis(dbContext.profile),
       });
 
+      const locale = dbContext.profile?.locale || "ru";
+
       // 2. Run GPT-5.4 diagnostic analysis
       const report = await runLabReportAnalyzer(
         body.biomarkers,
         userContext,
         userId,
         token,
+        locale
       );
 
       res.json({
@@ -3192,6 +3200,19 @@ export async function handlePushSubscribe(req: Request, res: Response, next: Nex
   }
 }
 
+const PUSH_TRANSLATIONS: Record<string, { title: string, body: string }> = {
+  ru: { title: 'Время пить воду! 💧', body: 'Пора промочить горло, стакан воды ждет!' },
+  en: { title: 'Time to drink water! 💧', body: 'Time to wet your whistle, a glass of water is waiting!' },
+  es: { title: '¡Hora de beber agua! 💧', body: '¡Es hora de mojar la garganta, un vaso de agua te espera!' },
+  zh: { title: '喝水时间到了！ 💧', body: '该润润嗓子了，一杯水在等你！' },
+  hi: { title: 'पानी पीने का समय! 💧', body: 'गला तर करने का समय आ गया है, एक गिलास पानी आपका इंतजार कर रहा है!' },
+  pt: { title: 'Hora de beber água! 💧', body: 'Hora de molhar a garganta, um copo de água está esperando!' },
+  fr: { title: "Il est temps de boire de l'eau ! 💧", body: "Il est temps de vous hydrater, un verre d'eau vous attend !" },
+  de: { title: 'Zeit zum Wassertrinken! 💧', body: 'Es ist Zeit, die Kehle zu befeuchten, ein Glas Wasser wartet!' },
+  id: { title: 'Waktunya minum air! 💧', body: 'Waktunya membasahi tenggorokan, segelas air menunggumu!' },
+  ar: { title: 'حان وقت شرب الماء! 💧', body: 'حان الوقت لترطيب حلقك، كوب من الماء في انتظارك!' },
+};
+
 /**
  * Cron Endpoint for Water Push Notifications
  * GET /api/v1/ai/cron/water-push
@@ -3232,7 +3253,7 @@ export async function handleWaterCronPush(req: Request, res: Response, next: Nex
     // 1. Fetch active push subscriptions & join timezone from profiles
     const { data: subscriptions } = await supabase
       .from('push_subscriptions')
-      .select('user_id, type, fcm_token, endpoint, p256dh, auth, water_retry_level, water_last_reminded_at, water_last_glasses_count, profiles(timezone, chronic_conditions)');
+      .select('user_id, type, fcm_token, endpoint, p256dh, auth, water_retry_level, water_last_reminded_at, water_last_glasses_count, profiles(timezone, chronic_conditions, locale)');
       
     if (!subscriptions || subscriptions.length === 0) {
       return res.json({ ok: true, sent: 0, reason: "No active subscriptions" });
@@ -3245,11 +3266,6 @@ export async function handleWaterCronPush(req: Request, res: Response, next: Nex
       process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '',
       process.env.VAPID_PRIVATE_KEY || ''
     );
-    const payload = JSON.stringify({ 
-      title: 'Время пить воду! 💧', 
-      body: 'Пора промочить горло, стакан воды ждет!' 
-    });
-
     // 2. Fetch past 48 hours of water logs to guarantee timezone overlap coverage
     const userIds = [...new Set(subscriptions.map((s: any) => s.user_id))];
     const twoDaysAgo = new Date();
@@ -3343,12 +3359,15 @@ export async function handleWaterCronPush(req: Request, res: Response, next: Nex
       // 6. Execute & Save State
       if (shouldSend) {
          try {
+           const locale = (sub.profiles as any)?.locale || 'ru';
+           const t = PUSH_TRANSLATIONS[locale] || PUSH_TRANSLATIONS['ru'];
+
            if (sub.type === 'fcm' && sub.fcm_token) {
              // --- FCM Native Push ---
              const { success, shouldDelete } = await sendFcmNotification(
                sub.fcm_token,
-               'Время пить воду! 💧',
-               'Пора промочить горло, стакан воды ждет!'
+               t.title,
+               t.body
              );
              if (shouldDelete) {
                await supabase.from('push_subscriptions').delete().eq('fcm_token', sub.fcm_token);
@@ -3357,6 +3376,7 @@ export async function handleWaterCronPush(req: Request, res: Response, next: Nex
              if (success) sentCount++;
            } else {
              // --- Web Push (existing) ---
+             const payload = JSON.stringify(t);
              await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload);
              sentCount++;
            }

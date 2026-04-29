@@ -3,6 +3,7 @@ import { MealScoreBadge } from "./MealScoreBadge";
 import FoodCard from "./FoodCard";
 import { detectAndParseFoodLog } from "./food-log-parser";
 import { getMicronutrientColor } from "@/lib/food-diary/nutrient-colors";
+import { useTranslations } from "next-intl";
 
 type ChatMessageProps = {
   /** "user" for right-aligned, "system" for left-aligned. */
@@ -100,6 +101,7 @@ export default function ChatMessage({
   onRedZoneReject,
   imageUrl,
 }: ChatMessageProps) {
+  const t = useTranslations("diary.chatMessage");
   const isUser = variant === "user";
 
   // ── Detect RED ZONE confirm tag ──
@@ -159,13 +161,13 @@ export default function ChatMessage({
               onClick={() => onRedZoneConfirm?.(redZoneMatch[1], redZoneMatch[2])}
               className="flex-1 px-3 py-2 rounded-xl bg-red-50 text-red-700 text-xs font-semibold border border-red-200 hover:bg-red-100 transition-colors"
             >
-              🍽️ Добавить {redZoneMatch[1]}
+              🍽️ {t("addFood", { food: redZoneMatch[1] })}
             </button>
             <button
               onClick={() => onRedZoneReject?.()}
               className="flex-1 px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200 hover:bg-emerald-100 transition-colors"
             >
-              💚 Подумать
+              💚 {t("thinkAboutIt")}
             </button>
           </div>
         )}

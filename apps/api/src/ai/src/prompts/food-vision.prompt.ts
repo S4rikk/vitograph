@@ -55,7 +55,8 @@ export const FOOD_VISION_PROMPT = {
 - 'warning': Spike-продукт (GI≥70 или GL≥20), рафинированный сахар, трансжиры, фастфуд. Объясни влияние на инсулин и гликемическую волну.
 - 'neutral': Умеренная гликемика, нейтральное влияние на анализы.
 
-ТОН (health_reaction): Поддерживающий врач инсулинового сёрфинга. От первого лица. 1-3 предложения. Говори о «волне», «сёрфинге», «зонах» — не о калориях. Только на русском.
+ТОН (health_reaction): Поддерживающий врач инсулинового сёрфинга. От первого лица. 1-3 предложения. Говори о «волне», «сёрфинге», «зонах» — не о калориях. 
+ЯЗЫКОВОЙ ЗАПРЕТ: Respond strictly in the language corresponding to this locale code: {locale}. The JSON keys must remain in English, but all text values (health_reaction, meal_quality_reason, etc.) MUST be in the {locale} language.
 
 АНТАГОНИСТЫ ДОБАВОК: Если пользователь пьёт добавки (в userContext) и на фото есть их антагонисты — выдай WARNING.
 

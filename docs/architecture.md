@@ -1,6 +1,6 @@
 # VITOGRAPH — Architecture: Database Schema & API Structure
 
-> **Последнее обновление:** 25 апреля 2026
+> **Последнее обновление:** 29 апреля 2026
 >
 > Смотрите также: [API Reference](./api_reference.md) | [Frontend Components](./frontend_components.md) | [AI Pipeline](./ai_pipeline.md)
 
@@ -16,6 +16,7 @@
 | Layer      | Technology                                     |
 | ---------- | ---------------------------------------------- |
 | Frontend   | Next.js (App Router, Server Components)        |
+| Localization | `next-intl` (Поддержка ru, en, ar и др.)       |
 | Mobile App | Capacitor 7 (Android Shell), Remote Server Mode|
 | AI/App API | Node.js / Express (Port 3001) - *Hybrid Layer* |
 | Core API   | Python 3.12+, FastAPI (async-first)            |
@@ -248,7 +249,7 @@
 | `feedback` | User feedback with anti-spam (`created_at` cooldown) |
 | `active_condition_knowledge_bases` | Medical condition knowledge for norm adjustments |
 | `lab_scans` | Async OCR job tracking: `PENDING → PROCESSING → COMPLETED/FAILED` |
-| `push_subscriptions` | Web Push подписки (VAPID). Хранит `endpoint`, `keys` (p256dh, auth), `user_id`, + state для адаптивных напоминаний: `water_retry_level` (0-3), `water_last_reminded_at`, `water_last_glasses_count` |
+| `push_subscriptions` | Dual-Path Push: Web Push (VAPID) и Android Native (FCM). Хранит `endpoint`, `keys` (p256dh, auth) или FCM Token, `user_id`, + state для адаптивных напоминаний: `water_retry_level` (0-3), `water_last_reminded_at` |
 | `user_memory_vectors` | Семантическая память: факты, предпочтения, действия ассистента. pgvector embedding (384d, HNSW). См. [memory_architecture.md](./memory_architecture.md) |
 | `user_emotional_profile` | Эмпатическая память: настроение, тренд, уровень доверия. Обновляется асинхронно через Edge Function |
 | `memory_consolidation_log` | Лог ежедневной консолидации (pending → success/failed) |
@@ -441,6 +442,14 @@ npm run cap:build:release
 | `getSession()` зависает 10-30с при resume | localStorage fast-path + 5s race timeout | `api-client.ts` |
 
 > Подробнее: [§5.1 Capacitor Android Auth Specifics](#51-capacitor-android-auth-specifics)
+
+### 3.7 Cross-Platform Push Notifications (Dual-Path)
+
+Система уведомлений работает в двух режимах (Dual-Path):
+1. **Web Push (VAPID):** Используется для браузерной версии (PWA). Работает через Service Workers.
+2. **Android Native Push (FCM HTTP v1):** Используется в Capacitor Android App. Реализовано через интеграцию `google-auth-library` для безопасной авторизации server-to-server запросов к Firebase Cloud Messaging.
+
+**Бэкенд:** База `push_subscriptions` хранит оба типа токенов. При срабатывании cron-задач (например, `water-push`), API определяет тип подписки (наличие FCM-токена vs VAPID keys) и динамически маршрутизирует уведомления в нужный канал. Хук `usePushNotifications` на клиенте автоматически определяет среду выполнения (Native Capacitor vs Web) и регистрирует соответствующий тип пушей.
 
 ---
 

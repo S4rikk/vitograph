@@ -7,39 +7,12 @@ import GlycemicCurveChart from "./GlycemicCurveChart";
 import { apiClient } from "@/lib/api-client";
 import type { GlycemicTimelineData } from "@/lib/api-client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useTranslations } from "next-intl";
+import { MICRONUTRIENT_NAME_MAPPING, normalizeMicronutrientKey, translateUnit } from "@/lib/food-diary/nutrient-utils";
 
 // ── Reused Micronutrient Logic (from DailyAllowancesPanel) ──────────
 
-const MICRONUTRIENT_NAME_MAPPING: Record<string, string> = {
-  'vitamin c': 'Витамин C', 'vitamin c (mg)': 'Витамин C',
-  'iron': 'Железо', 'iron (mg)': 'Железо',
-  'vitamin d': 'Витамин D', 'vitamin d (iu)': 'Витамин D', 'vitamin d (mcg)': 'Витамин D',
-  'vitamin b12': 'Витамин B12', 'vitamin b12 (mcg)': 'Витамин B12',
-  'vitamin b6': 'Витамин B6', 'vitamin b6 (mg)': 'Витамин B6',
-  'vitamin a': 'Витамин A', 'vitamin a (mcg)': 'Витамин A', 'vitamin a (iu)': 'Витамин A',
-  'vitamin e': 'Витамин E', 'vitamin e (mg)': 'Витамин E',
-  'folate': 'Фолиевая кислота', 'folic acid': 'Фолиевая кислота', 'folate (mcg)': 'Фолиевая кислота',
-  'calcium': 'Кальций', 'calcium (mg)': 'Кальций',
-  'magnesium': 'Магний', 'magnesium (mg)': 'Магний',
-  'zinc': 'Цинк', 'zinc (mg)': 'Цинк',
-  'selenium': 'Селен', 'selenium (mcg)': 'Селен',
-  'iodine': 'Йод', 'iodine (mcg)': 'Йод',
-  'potassium': 'Калий', 'potassium (mg)': 'Калий',
-  'sodium': 'Натрий', 'sodium (mg)': 'Натрий',
-  'phosphorus': 'Фосфор', 'phosphorus (mg)': 'Фосфор',
-  'oemga-3': 'Омега-3', 'omega-3': 'Омега-3', 'omega 3': 'Омега-3', 'dha': 'Омега-3', 'epa': 'Омега-3',
-  'витамин c': 'Витамин C', 'витамин c (мг)': 'Витамин C', 'витамин c (mg)': 'Витамин C',
-  'витамин а': 'Витамин A', 'витамин е': 'Витамин E', 'витамин д': 'Витамин D',
-  'железо': 'Железо', 'железо (мг)': 'Железо', 'железо (mg)': 'Железо',
-  'калий (mg)': 'Калий', 'магний (mg)': 'Магний', 'натрий (mg)': 'Натрий',
-  'кальций (mg)': 'Кальций', 'кальций (мг)': 'Кальций', 'цинк (mg)': 'Цинк', 'фосфор (mg)': 'Фосфор',
-};
 
-const normalizeMicronutrientKey = (rawKey: string): string => {
-  const lowerKey = rawKey.toLowerCase().trim();
-  if (MICRONUTRIENT_NAME_MAPPING[lowerKey]) return MICRONUTRIENT_NAME_MAPPING[lowerKey];
-  return rawKey.split(' (')[0].trim();
-};
 
 const getMicroLevel = (pct: number) => {
   if (pct < 25) return { color: 'bg-gradient-to-r from-[#FCA5A5] to-[#EF4444]', badgeBg: 'bg-[#FEE2E2]', badgeText: 'text-[#DC2626]', label: '< 25%', isOverdose: false };
@@ -50,32 +23,24 @@ const getMicroLevel = (pct: number) => {
 };
 
 const NUTRIENT_EMOJI: Record<string, string> = {
-  'Витамин C': '🍊', 'Витамин D': '☀️', 'Витамин B6': '🥬', 'Витамин A': '🫐',
-  'Витамин B12': '💊', 'Витамин E': '🌻', 'Фолиевая кислота': '🥦',
-  'Железо': '🔩', 'Кальций': '🦴', 'Калий': '⚡', 'Магний': '🧲',
-  'Цинк': '🔬', 'Селен': '🌰', 'Фосфор': '🧪', 'Натрий': '🧂', 'Омега-3': '🐟'
+  'Vitamin C': '🍊', 'Vitamin D': '☀️', 'Vitamin B6': '🥬', 'Vitamin A': '🫐',
+  'Vitamin B12': '💊', 'Vitamin E': '🌻', 'Folic Acid': '🥦',
+  'Iron': '🔩', 'Calcium': '🦴', 'Potassium': '⚡', 'Magnesium': '🧲',
+  'Zinc': '🔬', 'Selenium': '🌰', 'Phosphorus': '🧪', 'Sodium': '🧂', 'Omega-3': '🐟'
 };
 
-const OVERDOSE_INFO: Record<string, string> = {
-  'Витамин A': 'Разовая передозировка может вызвать тошноту и головную боль. Систематический избыток токсичен для печени.',
-  'Витамин D': 'Кратковременный избыток обычно безопасен. Хроническая передозировка ведет к слабости, кальцификации сосудов и камням в почках.',
-  'Витамин E': 'Разово: легкое расстройство желудка. Систематически: риск кровотечений и снижение усвоения других витаминов.',
-  'Витамин C': 'Разово: возможна изжога или диарея. Излишки водорастворимого витамина выводятся. Систематически: риск образования камней в почках.',
-  'Витамин B6': 'Разово безопасно в небольших дозах. Систематический сильный избыток может привести к онемению (нейропатии).',
-  'Фолиевая кислота': 'Безопасно разово. Долгий избыток может маскировать дефицит витамина B12, что опасно для нервной системы.',
-  'Железо': 'Разово: тошнота, дискомфорт в желудке. Систематически: накапливается в органах, вызывая поражение печени и сердца.',
-  'Кальций': 'Разово: возможны запоры. Систематически: риск камней в почках и отложения кальция на стенках сосудов.',
-  'Магний': 'Разово: послабляющий эффект (диарея), снижение давления. Организм обычно справляется с разовым избытком.',
-  'Цинк': 'Разово: появление легкой тошноты. Систематически: подавляет иммунитет и приводит к дефициту меди.',
-  'Селен': 'Разово безопасно. Хронический избыток ведет к ломкости ногтей, выпадению волос и чесночному запаху кожи.',
-  'Натрий': 'Разово: задержка жидкости, легкие отеки. Систематически: развитие гипертонии и перегрузка сердца.',
-  'Калий': 'У здоровых людей излишки выводятся. Систематический избыток опасен нарушением ритма сердца (аритмией).',
-  'Фосфор': 'Разово безопасно. Хроническая передозировка ускоренно вымывает кальций из костей.',
-  'Омега-3': 'Разово: легкое расстройство желудка. Систематический сильный избыток (в добавках) снижает свертываемость крови.',
-  'Йод': 'Разово безопасно. Хронический излишек может спровоцировать гипертиреоз (ускоренную работу щитовидной железы).'
+const OVERDOSE_KEYS: Record<string, string> = {
+  'Vitamin A': 'overdoseVitaminA', 'Vitamin D': 'overdoseVitaminD',
+  'Vitamin E': 'overdoseVitaminE', 'Vitamin C': 'overdoseVitaminC',
+  'Vitamin B6': 'overdoseVitaminB6', 'Folic Acid': 'overdoseFolicAcid',
+  'Iron': 'overdoseIron', 'Calcium': 'overdoseCalcium',
+  'Magnesium': 'overdoseMagnesium', 'Zinc': 'overdoseZinc',
+  'Selenium': 'overdoseSelenium', 'Sodium': 'overdoseSodium',
+  'Potassium': 'overdosePotassium', 'Phosphorus': 'overdosePhosphorus',
+  'Omega-3': 'overdoseOmega3', 'Iodine': 'overdoseIodine',
 };
 
-const isVitamin = (name: string) => name.startsWith('Витамин') || name === 'Фолиевая кислота';
+const isVitamin = (name: string) => name.startsWith('Vitamin') || name === 'Folic Acid';
 const calcPercentSafe = (val: number, max: number) => Math.max(0, (val / Math.max(max, 1)) * 100);
 
 // ── Zone colors ─────────────────────────
@@ -106,6 +71,9 @@ export default function GlycemicSurfPanel({
   consumedMicros = {},
   refreshTrigger = 0,
 }: GlycemicSurfPanelProps) {
+  const t = useTranslations("diary.glycemicSurf");
+  const tNutrients = useTranslations("nutrients");
+  const tUnits = useTranslations("units");
   const [timelineData, setTimelineData] = useState<GlycemicTimelineData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isMicrosExpanded, setIsMicrosExpanded] = useState(false);
@@ -146,9 +114,15 @@ export default function GlycemicSurfPanel({
   });
 
   const microsEntries = Object.entries(normalizedConsumed);
-  const trackedMicros = microsEntries.filter(([name]) => dynamicMicros[name] && dynamicMicros[name] > 0);
+  // Normalize dynamicMicros keys to match English canonical keys
+  const normalizedDynamic: Record<string, number> = {};
+  Object.entries(dynamicMicros).forEach(([rawKey, val]) => {
+    const nk = normalizeMicronutrientKey(rawKey);
+    normalizedDynamic[nk] = (normalizedDynamic[nk] || 0) + val;
+  });
+  const trackedMicros = microsEntries.filter(([name]) => normalizedDynamic[name] && normalizedDynamic[name] > 0);
   const avgCoverage = trackedMicros.length > 0
-    ? Math.round(trackedMicros.reduce((acc, [name, { value }]) => acc + calcPercentSafe(value, dynamicMicros[name]!), 0) / trackedMicros.length)
+    ? Math.round(trackedMicros.reduce((acc, [name, { value }]) => acc + calcPercentSafe(value, normalizedDynamic[name]!), 0) / trackedMicros.length)
     : 0;
 
   const stats = timelineData?.stats;
@@ -174,20 +148,20 @@ export default function GlycemicSurfPanel({
             <div>
               <div className="mb-0.5">
                 <h4 className="text-sm font-bold text-ink leading-tight">
-                  <span className="align-middle">Инсулиновый сёрфинг</span>
+                  <span className="align-middle">{t("insulinSurfingTitle")}</span>
                   <button onClick={() => setShowInfo(true)} className="inline-flex align-middle ml-1.5 p-0.5 rounded-full text-blue-500 bg-blue-50 hover:bg-blue-100 transition-colors shadow-sm">
                     <Info className="w-3.5 h-3.5" strokeWidth={2.5} />
                   </button>
                 </h4>
               </div>
-              <p className="text-[0.625rem] text-ink-faint">Гликемический отклик за день</p>
+              <p className="text-[0.625rem] text-ink-faint">{t("insulinSurfingSubtitle")}</p>
             </div>
           </div>
           {stats && (
             <div className="text-right">
               <span className="text-[0.6875rem] text-ink-muted">Avg</span>
               <span className="ml-1 text-sm font-bold text-ink">{stats.average_glucose_mg_dl}</span>
-              <span className="text-[0.625rem] text-ink-faint ml-0.5">мг/дл</span>
+              <span className="text-[0.625rem] text-ink-faint ml-0.5">{t("mgDl")}</span>
             </div>
           )}
         </div>
@@ -206,18 +180,18 @@ export default function GlycemicSurfPanel({
                 const pct = totalHours > 0 ? (zone.hours / totalHours) * 100 : 0;
                 const colors = ZONE_COLORS[zone.key];
                 return (
-                  <div
-                    key={zone.key}
-                    className="flex items-center justify-center gap-1 text-[0.6875rem] font-bold transition-all duration-500 min-w-[56px] px-1 whitespace-nowrap"
-                    style={{
-                      width: `${pct}%`,
-                      backgroundColor: colors.bg,
-                      color: colors.text,
-                    }}
-                  >
-                    <span>{zone.emoji}</span>
-                    <span>{zone.hours}ч</span>
-                  </div>
+                    <div
+                      key={zone.key}
+                      className="flex items-center justify-center gap-1 text-[0.6875rem] font-bold transition-all duration-500 min-w-[56px] px-1 whitespace-nowrap"
+                      style={{
+                        width: `${pct}%`,
+                        backgroundColor: colors.bg,
+                        color: colors.text,
+                      }}
+                    >
+                      <span>{zone.emoji}</span>
+                      <span>{zone.hours}{t("hoursShort")}</span>
+                    </div>
                 );
               })}
             </div>
@@ -230,19 +204,19 @@ export default function GlycemicSurfPanel({
                 className="relative flex items-center cursor-pointer pointer-events-auto bg-white/95 backdrop-blur-md rounded-t-[10px] px-2 py-[3px] border-x border-t border-border/50 shadow-[0_-2px_4px_-3px_rgba(0,0,0,0.1)] outline-none"
               >
                 <Info className="w-[10px] h-[10px] text-ink-muted opacity-80" />
-                <span className="text-[0.5625rem] text-ink-muted ml-1 font-semibold uppercase tracking-wider">Границы</span>
+                <span className="text-[0.5625rem] text-ink-muted ml-1 font-semibold uppercase tracking-wider">{t("thresholds")}</span>
                 
                 {showThresholds && (
                   <div 
                     className="absolute top-full right-0 mt-[1px] w-56 p-2.5 bg-gray-900 text-white text-[0.6875rem] leading-normal rounded-xl shadow-xl z-50 text-left border border-gray-700/50 cursor-default shadow-[0_10px_20px_rgba(0,0,0,0.2)]"
                     onMouseDown={(e) => e.preventDefault()} // Prevent blur when clicking inside the tooltip
                   >
-                    <div className="font-bold mb-1.5">Ваши персональные границы:</div>
-                    <div className="flex gap-1.5"><span className="text-emerald-400">🟢</span> Оптимально: &lt; {thresholds.greenMax} мг/дл</div>
-                    <div className="flex gap-1.5"><span className="text-amber-400">🟡</span> Повышено: до {thresholds.yellowMax} мг/дл</div>
+                    <div className="font-bold mb-1.5">{t("personalThresholds")}</div>
+                    <div className="flex gap-1.5"><span className="text-emerald-400">🟢</span> {t("optimalThreshold")} {thresholds.greenMax} {t("mgDl")}</div>
+                    <div className="flex gap-1.5"><span className="text-amber-400">🟡</span> {t("elevatedThreshold")} {thresholds.yellowMax} {t("mgDl")}</div>
                     {thresholds.greenMax < 110 && (
                       <div className="mt-1.5 pt-1.5 border-t border-gray-700/60 font-medium text-blue-300">
-                        Границы усилены вашей целью!
+                        {t("thresholdsEnhanced")}
                       </div>
                     )}
                   </div>
@@ -261,9 +235,9 @@ export default function GlycemicSurfPanel({
             /* Empty state */
             <div className="flex flex-col items-center justify-center py-10 text-center">
               <span className="text-4xl mb-3">🏄</span>
-              <p className="text-sm font-bold text-ink mb-1">Тут пока пусто!</p>
+              <p className="text-sm font-bold text-ink mb-1">{t("emptyChartTitle")}</p>
               <p className="text-xs text-ink-muted max-w-[260px]">
-                Запиши первый приём пищи, чтобы увидеть свою гликемическую волну.
+                {t("emptyChartDesc")}
               </p>
             </div>
           ) : (
@@ -289,12 +263,12 @@ export default function GlycemicSurfPanel({
                 className="text-[0.5625rem] font-semibold uppercase tracking-wide"
                 style={{ color: getSpikeZone(stats.max_spike_mg_dl).text }}
               >
-                MAX ПИК
+                {t("maxSpike")}
               </span>
               <span className="text-[1.125rem] font-[800] text-ink leading-none mt-1">
                 {Math.round(stats.max_spike_mg_dl)}
               </span>
-              <span className="text-[0.5625rem] text-ink-muted">мг/дл</span>
+              <span className="text-[0.5625rem] text-ink-muted">{t("mgDl")}</span>
             </div>
 
             {/* Hours in Green */}
@@ -304,12 +278,12 @@ export default function GlycemicSurfPanel({
             >
               <Timer className="w-5 h-5 mb-0.5 opacity-80" strokeWidth={2.5} color={ZONE_COLORS.green.text} />
               <span className="text-[0.5625rem] font-semibold uppercase tracking-wide" style={{ color: ZONE_COLORS.green.text }}>
-                В ЗЕЛЁНОМ
+                {t("inGreenZone")}
               </span>
               <span className="text-[1.125rem] font-[800] text-ink leading-none mt-1">
                 {stats.hours_in_green}
               </span>
-              <span className="text-[0.5625rem] text-ink-muted">часов</span>
+              <span className="text-[0.5625rem] text-ink-muted">{t("hours")}</span>
             </div>
 
             {/* Average Glucose */}
@@ -319,12 +293,12 @@ export default function GlycemicSurfPanel({
             >
               <Target className="w-5 h-5 mb-0.5 opacity-80" strokeWidth={2.5} color={getSpikeZone(stats.average_glucose_mg_dl).text} />
               <span className="text-[0.5625rem] font-semibold uppercase tracking-wide" style={{ color: getSpikeZone(stats.average_glucose_mg_dl).text }}>
-                СРЕДНЕЕ
+                {t("averageValue")}
               </span>
               <span className="text-[1.125rem] font-[800] text-ink leading-none mt-1">
                 {stats.average_glucose_mg_dl}
               </span>
-              <span className="text-[0.5625rem] text-ink-muted">мг/дл</span>
+              <span className="text-[0.5625rem] text-ink-muted">{t("mgDl")}</span>
             </div>
           </div>
         )}
@@ -354,8 +328,8 @@ export default function GlycemicSurfPanel({
           <div className="flex items-center gap-2.5">
             <span className="text-lg">✨</span>
             <div>
-              <h4 className="text-[0.8125rem] font-bold text-ink leading-tight">Микронутриенты</h4>
-              <p className="text-[0.625rem] text-ink-faint">{trackedMicros.length} из 16 отслеживаются</p>
+              <h4 className="text-[0.8125rem] font-bold text-ink leading-tight">{t("micronutrientsTitle")}</h4>
+              <p className="text-[0.625rem] text-ink-faint">{trackedMicros.length} {t("outOf16Tracked")}</p>
             </div>
           </div>
           <div className={`p-1 transform transition-transform duration-300 ${isMicrosExpanded ? "rotate-180" : ""}`}>
@@ -382,26 +356,27 @@ export default function GlycemicSurfPanel({
                   <span className="absolute text-[0.8125rem] font-bold">{avgCoverage}%</span>
                 </div>
                 <div>
-                  <p className="text-[0.75rem] font-bold text-ink">Покрытие дневной нормы</p>
-                  <p className="text-[0.625rem] text-ink-faint">Среднее значение по всем витаминам и минералам</p>
+                  <p className="text-[0.75rem] font-bold text-ink">{t("dailyNormCoverage")}</p>
+                  <p className="text-[0.625rem] text-ink-faint">{t("averageValueDesc")}</p>
                 </div>
               </div>
 
               {/* Render 2 categories: ВИТАМИНЫ / МИНЕРАЛЫ */}
-              {(['Витамины', 'Минералы'] as const).map(cat => {
-                const list = microsEntries.filter(([name]) => (cat === 'Витамины' ? isVitamin(name) : !isVitamin(name)));
+              {(['vitamins', 'minerals'] as const).map(catKey => {
+                const catLabel = catKey === 'vitamins' ? t("vitamins") : t("minerals");
+                const list = microsEntries.filter(([name]) => (catKey === 'vitamins' ? isVitamin(name) : !isVitamin(name)));
                 if (list.length === 0) return null;
 
                 return (
-                  <div key={cat} className="mb-6 last:mb-0">
+                  <div key={catKey} className="mb-6 last:mb-0">
                     <div className="flex items-center gap-2 mb-3 px-1">
-                      <div className={`w-1.5 h-1.5 rounded-full ${cat === 'Витамины' ? 'bg-[#F59E0B]' : 'bg-[#6366F1]'}`} />
-                      <h5 className="text-[0.625rem] font-bold uppercase tracking-wider text-ink-muted">{cat}</h5>
+                      <div className={`w-1.5 h-1.5 rounded-full ${catKey === 'vitamins' ? 'bg-[#F59E0B]' : 'bg-[#6366F1]'}`} />
+                      <h5 className="text-[0.625rem] font-bold uppercase tracking-wider text-ink-muted">{catLabel}</h5>
                     </div>
 
                     <div className="flex flex-col gap-0.5">
                       {list.map(([name, { value, unit }]) => {
-                        const target = dynamicMicros[name];
+                        const target = normalizedDynamic[name];
                         const safeTarget = target || Math.max(value, 100);
                         const pct = calcPercentSafe(value, safeTarget);
                         const level = getMicroLevel(pct);
@@ -415,9 +390,9 @@ export default function GlycemicSurfPanel({
                             {/* Middle Info */}
                             <div className="flex-1 flex flex-col justify-center min-w-0 pr-1">
                               <div className="flex items-end justify-between leading-none mb-1.5 mt-0.5">
-                                <span className="text-[0.875rem] font-[700] text-ink truncate mr-2">{name}</span>
+                                <span className="text-[0.875rem] font-[700] text-ink truncate mr-2">{tNutrients.has(name) ? tNutrients(name) : name}</span>
                                 <span className="text-[0.8125rem] font-bold text-ink shrink-0">
-                                  {Number(value.toFixed(1))} <span className="text-ink-muted font-medium text-[0.75rem]">/ {target || '—'} {unit}</span>
+                                  {Number(value.toFixed(1))} <span className="text-ink-muted font-medium text-[0.75rem]">/ {target || '—'} {translateUnit(unit, tUnits)}</span>
                                 </span>
                               </div>
                               <div className="w-full h-[6px] bg-black/5 rounded-full overflow-hidden">
@@ -433,7 +408,7 @@ export default function GlycemicSurfPanel({
                               {level.isOverdose && (
                                 <div
                                   className="w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-[0.75rem] font-bold shadow-sm animate-pulse cursor-help"
-                                  title={OVERDOSE_INFO[name] || 'Превышение нормы может быть токсичным для организма'}
+                                  title={OVERDOSE_KEYS[name] && tNutrients.has(OVERDOSE_KEYS[name]) ? tNutrients(OVERDOSE_KEYS[name]) : t('overdoseDefault')}
                                 >
                                   !
                                 </div>
@@ -458,7 +433,7 @@ export default function GlycemicSurfPanel({
                   ))}
                 </div>
                 <span className="text-[0.625rem] font-bold text-primary-600">
-                  ✧ Гликемический сёрфинг
+                  ✧ {t("glycemicSurfingFooter")}
                 </span>
               </div>
             </div>
@@ -471,47 +446,45 @@ export default function GlycemicSurfPanel({
           <DialogHeader className="mb-4">
             <DialogTitle className="flex items-center gap-2 text-ink">
               <Activity className="w-5 h-5 text-blue-500" />
-              Что такое Инсулиновый Сёрфинг?
+              {t("infoModalTitle")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 text-sm text-ink leading-relaxed max-h-[70vh] overflow-y-auto pr-2">
-            <p>
-              <strong>Инсулиновый сёрфинг</strong> — это метафоричное название для контроля уровней глюкозы и инсулина в крови. Наша цель — гладко скользить по плавным «волнам», избегая опасных сахарных цунами и резких провалов, вызванных высокоуглеводной едой.
-            </p>
+            <p dangerouslySetInnerHTML={{ __html: t.raw("infoModalDesc1") }} />
 
             <div>
-              <h5 className="font-bold mb-1">Почему это крайне важно?</h5>
-              <p>Резкие скачки сахара разрушают сосуды изнутри, вызывают системное воспаление, ускоряют старение и в итоге ведут к инсулинорезистентности. Плавные, управляемые волны сохраняют стабильный уровень энергии, защищают мозг от «тумана» и дают вам контроль над эмоциональным перееданием.</p>
+              <h5 className="font-bold mb-1">{t("infoModalWhyTitle")}</h5>
+              <p>{t("infoModalWhyDesc")}</p>
             </div>
 
             <div>
-              <h5 className="font-bold mb-1">Почему мы отказались от подсчета калорий (КБЖУ)?</h5>
-              <p>Калория — это единица тепла, а не физиологии. 500 ккал из торта и 500 ккал из стейка с зеленью вызывают абсолютно разные гормональные реакции. Слепой подсчет граммов белков, жиров и углеводов (БЖУ) не отвечает на главный вопрос: пустит ли ваше тело эту еду на энергию, или из-за скачка инсулина немедленно запрет её в жировых депо. Фокусируясь на гликемическом отклике, мы работаем с реальным метаболизмом, а не сухой математикой. Это единственный способ устойчиво регулировать вес и нормализовать гормональный баланс, естественным путем возвращая вам стабильную энергию, чувство сытости и ясность ума.</p>
+              <h5 className="font-bold mb-1">{t("infoModalCaloriesTitle")}</h5>
+              <p>{t("infoModalCaloriesDesc")}</p>
             </div>
 
             <div>
-              <h5 className="font-bold mb-2">Как читать график?</h5>
+              <h5 className="font-bold mb-2">{t("infoModalHowToReadTitle")}</h5>
               <ul className="space-y-2">
                 <li className="flex gap-2">
                   <span className="shrink-0 mt-0.5 text-[#059669]">🟢</span>
-                  <span><strong>Зелёная зона (до 110 мг/дл):</strong> Зона спокойной воды и идеального серфинга. Вы стройнеете, чувствуете долгую энергию и ясность ума.</span>
+                  <span><strong>{t("infoModalGreenZone")}</strong> {t("infoModalGreenDesc")}</span>
                 </li>
                 <li className="flex gap-2">
                   <span className="shrink-0 mt-0.5 text-[#D97706]">🟡</span>
-                  <span><strong>Жёлтая зона (до 140 мг/дл):</strong> Предупреждение. Волна набирает опасную высоту. Печень напряглась, выброшен инсулин.</span>
+                  <span><strong>{t("infoModalYellowZone")}</strong> {t("infoModalYellowDesc")}</span>
                 </li>
                 <li className="flex gap-2">
                   <span className="shrink-0 mt-0.5 text-[#DC2626]">🔴</span>
-                  <span><strong>Красная зона (выше 140):</strong> Сахарное цунами. Сосуды повреждаются, организм экстренно останавливает сжигание жира и начинает запасать углеводы в бока. Скоро вас накроет усталость.</span>
+                  <span><strong>{t("infoModalRedZone")}</strong> {t("infoModalRedDesc")}</span>
                 </li>
               </ul>
             </div>
 
             <div className="bg-[#EFF6FF] p-3.5 rounded-[14px] border border-[#BFDBFE]/50 relative overflow-hidden mt-2">
               <div className="absolute -right-4 -bottom-4 opacity-10 text-6xl">🏄</div>
-              <h5 className="font-bold mb-1 text-[#2563EB] relative z-10">Что это дает вам?</h5>
+              <h5 className="font-bold mb-1 text-[#2563EB] relative z-10">{t("infoModalBenefitTitle")}</h5>
               <p className="text-[0.8125rem] text-[#1D4ED8] relative z-10">
-                Соблюдая правила «сёрфинга» и удерживаясь в зелёных зонах, вы избавляетесь от вечернего жора, спонтанной усталости после обеда и получаете ровную, предсказуемую энергию 24/7. Ваше тело из режима паники переходит в естественный режим жиросжигания.
+                {t("infoModalBenefitDesc")}
               </p>
             </div>
           </div>

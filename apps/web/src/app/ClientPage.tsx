@@ -4,10 +4,11 @@ import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import TabSwitcher from "@/components/ui/TabSwitcher";
 import MedicalResultsView from "@/components/medical/MedicalResultsView";
-import FoodDiaryView from "@/components/diary/FoodDiaryView";
 import AiAssistantView from "@/components/assistant/AiAssistantView";
 import OnboardingWizard from "@/components/onboarding/OnboardingWizard";
 import Logo from "@/components/ui/Logo";
+import { useTranslations } from "next-intl";
+import FoodDiaryView from "@/components/diary/FoodDiaryView";
 
 /* ── SVG Icons ────────────────────────────────────────────── */
 
@@ -49,19 +50,24 @@ function AssistantIcon() {
 
 /* ── Tabs config ──────────────────────────────────────────── */
 
-const TABS = [
-  { id: "medical", label: "Анализы", icon: <MedicalIcon /> },
-  { id: "diary", label: "Дневник", icon: <DiaryIcon /> },
-  { id: "assistant", label: "Ассистент", icon: <AssistantIcon /> },
-];
+/* ── Tabs config ──────────────────────────────────────────── */
+
+// TABS moved inside HomeContent for translation
 
 function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; userId: string }) {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
   const defaultTab = ["diary", "medical", "assistant"].includes(tabParam || "") ? tabParam! : "medical";
   const [activeTab, setActiveTab] = useState(defaultTab);
+  const t = useTranslations("diary");
 
   const router = useRouter();
+
+  const TABS = [
+    { id: "medical", label: t("tabMedical"), icon: <MedicalIcon /> },
+    { id: "diary", label: t("tabDiary"), icon: <DiaryIcon /> },
+    { id: "assistant", label: t("tabAssistant"), icon: <AssistantIcon /> },
+  ];
 
   if (needsOnboarding) {
     return <OnboardingWizard userId={userId} />;

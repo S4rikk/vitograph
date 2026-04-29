@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslations } from 'next-intl';
 
 interface MealScoreBadgeProps {
     score?: number;
@@ -6,6 +7,7 @@ interface MealScoreBadgeProps {
 }
 
 export function MealScoreBadge({ score, reason }: MealScoreBadgeProps) {
+    const t = useTranslations("diary.mealScore");
     if (typeof score !== 'number') return null;
 
     let gradientClass = 'bg-gradient-to-r from-red-400 to-orange-400';
@@ -20,7 +22,7 @@ export function MealScoreBadge({ score, reason }: MealScoreBadgeProps) {
     return (
         <div className="flex flex-col gap-1.5 mt-2 w-full max-w-[200px]">
             <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>Полезность для твоего организма</span>
+                <span>{t("healthScoreLabel")}</span>
                 <span className="font-semibold text-gray-700">{score}/100</span>
             </div>
 

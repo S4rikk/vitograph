@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Target, X, Loader2, Sparkles, ChevronDown } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { createClient } from "@/lib/supabase/client";
+import { useTranslations } from "next-intl";
 
 interface ActiveSkill {
   id: string;
@@ -11,6 +12,7 @@ interface ActiveSkill {
 }
 
 export default function HealthGoalsWidget() {
+  const t = useTranslations("shared.healthGoals");
   const [goals, setGoals] = useState<ActiveSkill[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
@@ -53,7 +55,7 @@ export default function HealthGoalsWidget() {
 
   const handleRemoveGoal = async (goalId: string) => {
     if (!userId) return;
-    if (!window.confirm("Завершить эту цель? Поздравляем с достижением! 🎉")) return;
+    if (!window.confirm(t("completeGoalConfirm"))) return;
     
     setIsDeleting(goalId);
     try {
@@ -91,10 +93,10 @@ export default function HealthGoalsWidget() {
           </div>
           <div className="flex flex-col">
             <p className="text-[0.75rem] font-semibold text-slate-700 leading-tight">
-              У вас пока нет целей
+              {t("noGoalsTitle")}
             </p>
             <p className="text-[0.6875rem] text-slate-500 italic mt-0.5 leading-snug">
-              Напишите в чат: «Хочу похудеть на 5 кг»
+              {t("noGoalsPrompt")}
             </p>
           </div>
         </div>
@@ -119,11 +121,11 @@ export default function HealthGoalsWidget() {
           <div className="flex-1 text-left min-w-0">
             {isExpanded ? (
               <span className="text-sm font-semibold text-emerald-800">
-                {goals.length} {goals.length === 1 ? 'активная цель' : goals.length < 5 ? 'активные цели' : 'активных целей'}
+                {goals.length} {goals.length === 1 ? t("activeGoal_one") : goals.length < 5 ? t("activeGoal_few") : t("activeGoal_many")}
               </span>
             ) : (
               <span className="text-sm font-semibold text-emerald-800 block truncate">
-                {goals.length === 1 ? goals[0].title : `${goals.length} цели · ${goals[0].title}`}
+                {goals.length === 1 ? goals[0].title : `${goals.length} ${t("goalsLabel")} · ${goals[0].title}`}
               </span>
             )}
           </div>
@@ -154,7 +156,7 @@ export default function HealthGoalsWidget() {
                   }}
                   disabled={isDeleting === g.id}
                   className="shrink-0 flex items-center justify-center w-6 h-6 rounded-full text-emerald-400 hover:bg-emerald-100 hover:text-emerald-700 transition-all disabled:opacity-30"
-                  title="Завершить цель"
+                  title={t("completeGoal")}
                 >
                   {isDeleting === g.id ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />

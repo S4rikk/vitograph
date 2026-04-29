@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import {
     User,
     X,
@@ -40,46 +42,86 @@ import type {
     WearableMetrics,
 } from "@/types/wearable-types";
 import { DEFAULT_WEARABLE_METRICS } from "@/types/wearable-types";
+import {
+    getSleepFields,
+    getCardioFields,
+    getBodyFields,
+    getMetabolicFields,
+    getStressFields
+} from "@/lib/wearable-field-defs";
 
-// ── Field definitions for each wearable card's manual entry dialog ──
+const LEGACY_SEX_MAP: Record<string, string> = {
+    "Мужской": "male",
+    "Женский": "female",
+    "Другое": "other",
+};
 
-const SLEEP_FIELDS: MetricFieldDefinition[] = [
-    { key: "sleepDurationHours", label: "Длительность сна", unit: "ч", type: "number", step: "0.1", placeholder: "7.5" },
-    { key: "deepSleepPercent", label: "Глубокий сон", unit: "%", type: "number", step: "1", placeholder: "20" },
-    { key: "remSleepPercent", label: "Быстрый сон (REM)", unit: "%", type: "number", step: "1", placeholder: "22" },
-    { key: "readinessScore", label: "Индекс готовности", unit: "0-100", type: "number", step: "1", placeholder: "82" },
-    { key: "hrvMs", label: "HRV (во сне)", unit: "мс", type: "number", step: "1", placeholder: "45" },
-    { key: "respiratoryRateBrpm", label: "Частота дыхания", unit: "вд/мин", type: "number", step: "0.1", placeholder: "15" },
-];
+const LEGACY_ACTIVITY_MAP: Record<string, string> = {
+    "Сидячий": "sedentary",
+    "Лёгкий": "light",
+    "Умеренный": "moderate",
+    "Активный": "active",
+    "Очень активный": "very_active",
+};
 
-const CARDIO_FIELDS: MetricFieldDefinition[] = [
-    { key: "restingHeartRateBpm", label: "Пульс покоя (RHR)", unit: "уд/мин", type: "number", step: "1", placeholder: "62" },
-    { key: "vo2MaxMlKgMin", label: "VO2 Max", unit: "мл/кг/мин", type: "number", step: "0.1", placeholder: "42.5" },
-    { key: "steps", label: "Шаги", unit: "шагов", type: "number", step: "1", placeholder: "8500" },
-    { key: "activeCaloriesKcal", label: "Активные калории", unit: "ккал", type: "number", step: "1", placeholder: "420" },
-    { key: "bloodPressureSystolic", label: "АД систолическое", unit: "мм рт.ст.", type: "number", step: "1", placeholder: "120" },
-    { key: "bloodPressureDiastolic", label: "АД диастолическое", unit: "мм рт.ст.", type: "number", step: "1", placeholder: "80" },
-];
+const LEGACY_DIET_MAP: Record<string, string> = {
+    "Всеядная (Omnivore)": "omnivore",
+    "Вегетарианская": "vegetarian",
+    "Веганская": "vegan",
+    "Пескатарианская": "pescatarian",
+    "Кето": "keto",
+    "Другое (Диета)": "other",
+};
 
-const BODY_FIELDS: MetricFieldDefinition[] = [
-    { key: "weightKg", label: "Вес", unit: "кг", type: "number", step: "0.1", placeholder: "72.5" },
-    { key: "bodyFatPercent", label: "Процент жира", unit: "%", type: "number", step: "0.1", placeholder: "18.5" },
-    { key: "muscleMassPercent", label: "Мышечная масса", unit: "%", type: "number", step: "0.1", placeholder: "42" },
-    { key: "bmrKcal", label: "Базальный метаболизм", unit: "ккал", type: "number", step: "1", placeholder: "1680" },
-    { key: "visceralFatIndex", label: "Висцеральный жир", unit: "индекс", type: "number", step: "1", placeholder: "8" },
-];
+const LEGACY_CLIMATE_MAP: Record<string, string> = {
+    "Умеренный": "temperate",
+    "Тропический": "tropical",
+    "Сухой": "dry",
+    "Континентальный": "continental",
+    "Полярный": "polar",
+};
 
-const METABOLIC_FIELDS: MetricFieldDefinition[] = [
-    { key: "glucoseMmol", label: "Глюкоза", unit: "ммоль/л", type: "number", step: "0.1", placeholder: "5.2" },
-    { key: "timeInRangePercent", label: "Время в целев. диапазоне (TIR)", unit: "%", type: "number", step: "1", placeholder: "85" },
-    { key: "glucoseVariabilityPercent", label: "Вариабельность глюкозы", unit: "%", type: "number", step: "0.1", placeholder: "18" },
-];
+const LEGACY_SUN_MAP: Record<string, string> = {
+    "Минимальный": "minimal",
+    "Умеренный": "moderate",
+    "Высокий": "high",
+};
 
-const STRESS_FIELDS: MetricFieldDefinition[] = [
-    { key: "stressScore", label: "Уровень стресса", unit: "0-100", type: "number", step: "1", placeholder: "35" },
-    { key: "bodyTemperatureVariationC", label: "Отклонение температуры", unit: "°C", type: "number", step: "0.01", placeholder: "0.15" },
-    { key: "spo2Percent", label: "Кислород в крови (SpO2)", unit: "%", type: "number", step: "0.1", placeholder: "97.5" },
-];
+const LEGACY_ALCOHOL_MAP: Record<string, string> = {
+    "Не употребляю": "none",
+    "Иногда": "occasional",
+    "Умеренно": "moderate",
+    "Часто": "heavy",
+};
+
+const LEGACY_WORK_MAP: Record<string, string> = {
+    "Офис (сидячая)": "office_sedentary",
+    "Офис (активная)": "office_active",
+    "Удалёнка": "remote_flexible",
+    "Физический труд": "manual_labor",
+    "Сменная работа": "shift_work",
+};
+
+const LEGACY_PREGNANCY_MAP: Record<string, string> = {
+    "Не применимо": "not_applicable",
+    "Беременна": "pregnant",
+    "Кормление грудью": "breastfeeding",
+};
+
+const LEGACY_STRESS_MAP: Record<string, string> = {
+    "Низкий": "low",
+    "Средний": "moderate",
+    "Очень высокий": "very_high",
+};
+
+const mapLegacyValue = (val: unknown, fieldMap?: Record<string, string>): string | unknown => {
+    if (typeof val === 'string' && fieldMap && fieldMap[val]) {
+        return fieldMap[val];
+    }
+    return val;
+};
+
+
 
 // ── Card category type for tracking which dialog is open ──
 
@@ -120,9 +162,17 @@ export default function UserProfileSheet({
     userEmail,
 }: UserProfileSheetProps) {
     const [isOpen, setIsOpen] = useState(false);
+    const tProfile = useTranslations("profile");
+    const tLifestyle = useTranslations("lifestyle");
+    const tWearables = useTranslations("wearables");
+    const tMedical = useTranslations("medical");
     const [activeTab, setActiveTab] = useState("overview");
     const [mounted, setMounted] = useState(false);
     const { scale, setScale } = useFontScale();
+    const router = useRouter();
+    const currentLocale = useLocale();
+    const [locale, setLocale] = useState(currentLocale);
+    const [isChangingLocale, setIsChangingLocale] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -239,21 +289,21 @@ export default function UserProfileSheet({
                 date_of_birth: data.date_of_birth
                     ? new Date(data.date_of_birth as string).toISOString().split("T")[0]
                     : "",
-                biological_sex: data.biological_sex ?? "",
+                biological_sex: mapLegacyValue(data.biological_sex ?? "", LEGACY_SEX_MAP),
                 weight_kg: data.weight_kg ?? "",
                 height_cm: data.height_cm ?? "",
-                activity_level: data.activity_level ?? "sedentary",
-                diet_type: data.diet_type ?? "omnivore",
-                stress_level: data.stress_level ?? "low",
-                climate_zone: data.climate_zone ?? "temperate",
-                sun_exposure: data.sun_exposure ?? "moderate",
-                alcohol_frequency: data.alcohol_frequency ?? "none",
-                work_lifestyle: data.work_lifestyle ?? "office_sedentary",
+                activity_level: mapLegacyValue(data.activity_level ?? "sedentary", LEGACY_ACTIVITY_MAP),
+                diet_type: mapLegacyValue(data.diet_type ?? "omnivore", LEGACY_DIET_MAP),
+                stress_level: mapLegacyValue(data.stress_level ?? "low", LEGACY_STRESS_MAP),
+                climate_zone: mapLegacyValue(data.climate_zone ?? "temperate", LEGACY_CLIMATE_MAP),
+                sun_exposure: mapLegacyValue(data.sun_exposure ?? "moderate", LEGACY_SUN_MAP),
+                alcohol_frequency: mapLegacyValue(data.alcohol_frequency ?? "none", LEGACY_ALCOHOL_MAP),
+                work_lifestyle: mapLegacyValue(data.work_lifestyle ?? "office_sedentary", LEGACY_WORK_MAP),
                 physical_activity_minutes_weekly:
                     data.physical_activity_minutes_weekly ?? "",
                 sleep_hours_avg: data.sleep_hours_avg ?? "",
                 is_smoker: data.is_smoker ?? false,
-                pregnancy_status: data.pregnancy_status ?? "not_applicable",
+                pregnancy_status: mapLegacyValue(data.pregnancy_status ?? "not_applicable", LEGACY_PREGNANCY_MAP),
                 chronic_conditions: Array.isArray(data.chronic_conditions)
                     ? data.chronic_conditions
                     : [],
@@ -348,10 +398,10 @@ export default function UserProfileSheet({
             : null;
 
     const bmiCategory = (v: number): string => {
-        if (v < 18.5) return "Дефицит";
-        if (v < 25) return "Норма";
-        if (v < 30) return "Избыток";
-        return "Ожирение";
+        if (v < 18.5) return tProfile("bmiDeficit");
+        if (v < 25) return tProfile("bmiNormal");
+        if (v < 30) return tProfile("bmiExcess");
+        return tProfile("bmiObese");
     };
 
     // ── Tag helpers ──
@@ -436,12 +486,12 @@ export default function UserProfileSheet({
 
     const sleepMetrics: MetricItem[] = toMetricItems(
         [
-            ["sleepDurationHours", "Длительность сна", "ч"],
-            ["deepSleepPercent", "Глубокий сон", "%"],
-            ["remSleepPercent", "Быстрый сон (REM)", "%"],
-            ["readinessScore", "Индекс готовности", ""],
-            ["hrvMs", "HRV (во сне)", "мс"],
-            ["respiratoryRateBrpm", "Частота дыхания", "вд/мин"],
+            ["sleepDurationHours", tWearables("sleepDuration"), tWearables("units.h")],
+            ["deepSleepPercent", tWearables("deepSleep"), "%"],
+            ["remSleepPercent", tWearables("remSleep"), "%"],
+            ["readinessScore", tWearables("readinessIndex"), ""],
+            ["hrvMs", tWearables("hrv"), tWearables("units.ms")],
+            ["respiratoryRateBrpm", tWearables("respiratoryRate"), tWearables("units.brpm")],
         ],
         wearableMetrics.sleepRecovery as unknown as Record<string, unknown>,
     );
@@ -453,46 +503,46 @@ export default function UserProfileSheet({
                 ? `${ca.bloodPressureSystolic}/${ca.bloodPressureDiastolic}`
                 : null;
         return [
-            { label: "Пульс покоя (RHR)", value: ca.restingHeartRateBpm, unit: "уд/мин" },
-            { label: "VO2 Max", value: ca.vo2MaxMlKgMin, unit: "мл/кг/мин" },
+            { label: tWearables("restingHR"), value: ca.restingHeartRateBpm, unit: tWearables("units.bpm") },
+            { label: tWearables("vo2max"), value: ca.vo2MaxMlKgMin, unit: tWearables("units.mlKgMin") },
             {
-                label: "Шаги",
+                label: tWearables("steps"),
                 value:
                     ca.steps !== null
                         ? `${ca.steps}${ca.stepsGoal ? ` / ${ca.stepsGoal}` : ""}`
                         : null,
                 unit: "",
             },
-            { label: "Активные калории", value: ca.activeCaloriesKcal, unit: "ккал" },
-            { label: "Артериальное давление", value: bpValue, unit: "мм рт.ст." },
+            { label: tWearables("activeCalories"), value: ca.activeCaloriesKcal, unit: tWearables("units.kcal") },
+            { label: tWearables("bloodPressureLabel"), value: bpValue, unit: tWearables("units.mmHg") },
         ];
     })();
 
     const bodyMetrics: MetricItem[] = toMetricItems(
         [
-            ["weightKg", "Вес", "кг"],
-            ["bodyFatPercent", "Процент жира", "%"],
-            ["muscleMassPercent", "Мышечная масса", "%"],
-            ["bmrKcal", "Базальный метаболизм", "ккал"],
-            ["visceralFatIndex", "Висцеральный жир", "индекс"],
+            ["weightKg", tWearables("weightLabel"), tWearables("units.kg")],
+            ["bodyFatPercent", tWearables("bodyFat"), "%"],
+            ["muscleMassPercent", tWearables("muscleMass"), "%"],
+            ["bmrKcal", tWearables("basalMetabolism"), tWearables("units.kcal")],
+            ["visceralFatIndex", tWearables("visceralFat"), tWearables("units.index")],
         ],
         wearableMetrics.bodyComposition as unknown as Record<string, unknown>,
     );
 
     const metabolicMetrics: MetricItem[] = toMetricItems(
         [
-            ["glucoseMmol", "Глюкоза", "ммоль/л"],
-            ["timeInRangePercent", "Время в целев. диапазоне", "%"],
-            ["glucoseVariabilityPercent", "Вариабельность глюкозы", "%"],
+            ["glucoseMmol", tWearables("glucose"), tWearables("units.mmolL")],
+            ["timeInRangePercent", tWearables("timeInRange"), "%"],
+            ["glucoseVariabilityPercent", tWearables("glucoseVariability"), "%"],
         ],
         wearableMetrics.metabolic as unknown as Record<string, unknown>,
     );
 
     const stressMetrics: MetricItem[] = toMetricItems(
         [
-            ["stressScore", "Уровень стресса", ""],
-            ["bodyTemperatureVariationC", "Откл. температуры", "°C"],
-            ["spo2Percent", "SpO2", "%"],
+            ["stressScore", tWearables("stressScore"), ""],
+            ["bodyTemperatureVariationC", tWearables("tempVariation"), "°C"],
+            ["spo2Percent", tWearables("spo2"), "%"],
         ],
         wearableMetrics.stressFemaleHealth as unknown as Record<string, unknown>,
     );
@@ -503,11 +553,11 @@ export default function UserProfileSheet({
         string,
         { title: string; fields: MetricFieldDefinition[] }
     > = {
-        sleep: { title: "Сон и Восстановление", fields: SLEEP_FIELDS },
-        cardio: { title: "Кардио и Активность", fields: CARDIO_FIELDS },
-        body: { title: "Состав Тела", fields: BODY_FIELDS },
-        metabolic: { title: "Метаболизм (CGM)", fields: METABOLIC_FIELDS },
-        stress: { title: "Стресс и Здоровье", fields: STRESS_FIELDS },
+        sleep: { title: tProfile("sleepRecoveryTab"), fields: getSleepFields(tWearables) },
+        cardio: { title: tProfile("cardioActivityTab"), fields: getCardioFields(tWearables) },
+        body: { title: tProfile("bodyCompositionTab"), fields: getBodyFields(tWearables) },
+        metabolic: { title: tProfile("metabolicTab"), fields: getMetabolicFields(tWearables) },
+        stress: { title: tProfile("stressHealthTab"), fields: getStressFields(tWearables) },
     };
 
     // ── Render ──
@@ -544,7 +594,7 @@ export default function UserProfileSheet({
                     {/* Header */}
                     <div className="px-6 py-5 border-b border-border flex items-center justify-between bg-white z-10 relative">
                         <div>
-                            <h2 className="text-xl font-bold text-ink-main">Профиль здоровья</h2>
+                            <h2 className="text-xl font-bold text-ink-main">{tProfile("title")}</h2>
                             <p className="text-sm text-ink-muted mt-0.5">{userEmail}</p>
                         </div>
                         <button
@@ -576,10 +626,10 @@ export default function UserProfileSheet({
                                     {/* ── Custom Glassmorphism Overlapping Tabs ── */}
                                     <div className="flex items-end pl-4 overflow-visible w-full -mb-[3px]">
                                         {[
-                                            { id: "overview", label: "Обзор", icon: User },
-                                            { id: "lifestyle", label: "Образ жизни", icon: Leaf },
-                                            { id: "medical", label: "Медицина", icon: Activity },
-                                            { id: "wearables", label: "Устройства", icon: Watch },
+                                            { id: "overview", label: tProfile("tabs.overview"), icon: User },
+                                            { id: "lifestyle", label: tProfile("tabs.lifestyle"), icon: Leaf },
+                                            { id: "medical", label: tProfile("tabs.medical"), icon: Activity },
+                                            { id: "wearables", label: tProfile("tabs.wearables"), icon: Watch },
                                         ].map((tab, idx) => {
                                             const isActive = activeTab === tab.id;
                                             const zIndex = isActive ? 20 : 5 - idx;
@@ -612,17 +662,13 @@ export default function UserProfileSheet({
                                     >
                                         {/* Personal Info */}
                                         <div className="bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-4">
-                                            <h3 className="font-semibold text-ink-main border-b border-divider pb-3">
-                                                Личная информация
-                                            </h3>
+                                            <h3 className="font-semibold text-ink-main border-b border-divider pb-3">{tProfile("aboutSection")}</h3>
                                             <div className="space-y-4">
                                                 <div className="flex flex-col h-full">
                                                     <label
                                                         htmlFor="display_name"
                                                         className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
-                                                    >
-                                                        Имя
-                                                    </label>
+                                                    >{tProfile("name")}</label>
                                                     <input
                                                         id="display_name"
                                                         type="text"
@@ -631,7 +677,7 @@ export default function UserProfileSheet({
                                                             setFormData({ ...formData, display_name: e.target.value })
                                                         }
                                                         className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
-                                                        placeholder="Не указано"
+                                                        placeholder={tProfile("noData")}
                                                     />
                                                 </div>
 
@@ -639,9 +685,7 @@ export default function UserProfileSheet({
                                                     <label
                                                         htmlFor="ai_name"
                                                         className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
-                                                    >
-                                                        Имя ассистента
-                                                    </label>
+                                                    >{tProfile("aiName")}</label>
                                                     <input
                                                         id="ai_name"
                                                         type="text"
@@ -650,7 +694,7 @@ export default function UserProfileSheet({
                                                             setFormData({ ...formData, ai_name: e.target.value })
                                                         }
                                                         className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
-                                                        placeholder="Например: Maya Pro"
+                                                        placeholder={tProfile("aiNamePlaceholder")}
                                                     />
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-5">
@@ -658,9 +702,7 @@ export default function UserProfileSheet({
                                                         <label
                                                             htmlFor="date_of_birth"
                                                             className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
-                                                        >
-                                                            Дата рождения
-                                                        </label>
+                                                        >{tProfile("dateOfBirth")}</label>
                                                         <input
                                                             id="date_of_birth"
                                                             type="date"
@@ -678,9 +720,7 @@ export default function UserProfileSheet({
                                                         <label
                                                             htmlFor="biological_sex"
                                                             className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
-                                                        >
-                                                            Пол
-                                                        </label>
+                                                        >{tProfile("sex")}</label>
                                                         <select
                                                             id="biological_sex"
                                                             value={String(formData.biological_sex ?? "")}
@@ -692,10 +732,10 @@ export default function UserProfileSheet({
                                                             }
                                                             className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                                         >
-                                                            <option value="">Не указано</option>
-                                                            <option value="male">Мужской</option>
-                                                            <option value="female">Женский</option>
-                                                            <option value="other">Другое</option>
+                                                            <option value="">{tProfile("noData")}</option>
+                                                            <option value="male">{tProfile("sexOptions.male")}</option>
+                                                            <option value="female">{tProfile("sexOptions.female")}</option>
+                                                            <option value="other">{tProfile("sexOptions.other")}</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -705,12 +745,10 @@ export default function UserProfileSheet({
                                         {/* Physical Parameters */}
                                         <div className="bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-4">
                                             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-divider pb-3">
-                                                <h3 className="font-semibold text-ink-main">
-                                                    Физические параметры
-                                                </h3>
+                                                <h3 className="font-semibold text-ink-main">{tProfile("physicalParams")}</h3>
                                                 {bmi && (
                                                     <div className="px-2.5 py-1 text-xs font-bold rounded-full bg-primary-50 text-primary-700 border border-primary-100">
-                                                        ИМТ: {bmi} ({bmiCategory(parseFloat(bmi))})
+                                                        {tProfile("bmi")}: {bmi} ({bmiCategory(parseFloat(bmi))})
                                                     </div>
                                                 )}
                                             </div>
@@ -719,9 +757,7 @@ export default function UserProfileSheet({
                                                     <label
                                                         htmlFor="weight_kg"
                                                         className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
-                                                    >
-                                                        Вес (кг)
-                                                    </label>
+                                                    >{tProfile("weight")} (кг)</label>
                                                     <input
                                                         id="weight_kg"
                                                         type="number"
@@ -731,16 +767,14 @@ export default function UserProfileSheet({
                                                             setFormData({ ...formData, weight_kg: e.target.value })
                                                         }
                                                         className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
-                                                        placeholder="Не указано"
+                                                        placeholder={tProfile("noData")}
                                                     />
                                                 </div>
                                                 <div className="flex flex-col h-full">
                                                     <label
                                                         htmlFor="height_cm"
                                                         className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
-                                                    >
-                                                        Рост (см)
-                                                    </label>
+                                                    >{tProfile("height")} (см)</label>
                                                     <input
                                                         id="height_cm"
                                                         type="number"
@@ -749,7 +783,7 @@ export default function UserProfileSheet({
                                                             setFormData({ ...formData, height_cm: e.target.value })
                                                         }
                                                         className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
-                                                        placeholder="Не указано"
+                                                        placeholder={tProfile("noData")}
                                                     />
                                                 </div>
                                             </div>
@@ -758,9 +792,7 @@ export default function UserProfileSheet({
                                                     <label
                                                         htmlFor="city"
                                                         className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
-                                                    >
-                                                        Город
-                                                    </label>
+                                                    >{tProfile("city")}</label>
                                                     <input
                                                         id="city"
                                                         type="text"
@@ -769,16 +801,14 @@ export default function UserProfileSheet({
                                                             setFormData({ ...formData, city: e.target.value })
                                                         }
                                                         className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
-                                                        placeholder="Не указано"
+                                                        placeholder={tProfile("noData")}
                                                     />
                                                 </div>
                                                 <div className="flex flex-col h-full">
                                                     <label
                                                         htmlFor="timezone"
                                                         className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
-                                                    >
-                                                        Часовой пояс
-                                                    </label>
+                                                    >{tProfile("timezone")}</label>
                                                     <div className="relative">
                                                         <input
                                                             id="timezone"
@@ -828,7 +858,7 @@ export default function UserProfileSheet({
                                                                         </button>
                                                                     ))
                                                                 ) : (
-                                                                    <div className="px-3 py-2 text-xs text-ink-muted italic"> Ничего не найдено </div>
+                                                                    <div className="px-3 py-2 text-xs text-ink-muted italic">{tProfile("nothingFound")}</div>
                                                                 )}
                                                             </div>
                                                         )}
@@ -839,22 +869,56 @@ export default function UserProfileSheet({
 
                                         {/* App Settings */}
                                         <div className="mt-8 bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-4">
-                                            <h3 className="font-semibold text-ink-main border-b border-divider pb-3">
-                                                Настройки приложения
-                                            </h3>
-                                            <div className="flex flex-col h-full">
-                                                <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
-                                                    Масштаб интерфейса
-                                                </label>
-                                                <select
-                                                    value={scale}
-                                                    onChange={(e) => setScale(e.target.value as "small" | "medium" | "large")}
-                                                    className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
-                                                >
-                                                    <option value="small">Мелкий</option>
-                                                    <option value="medium">Средний</option>
-                                                    <option value="large">Крупный</option>
-                                                </select>
+                                            <h3 className="font-semibold text-ink-main border-b border-divider pb-3">{tProfile("appSettings")}</h3>
+                                            <div className="grid grid-cols-2 gap-5">
+                                                <div className="flex flex-col h-full">
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">{tProfile("language")}</label>
+                                                    <select
+                                                        value={locale}
+                                                        disabled={isChangingLocale}
+                                                        onChange={async (e) => {
+                                                            const newLocale = e.target.value;
+                                                            setLocale(newLocale);
+                                                            setIsChangingLocale(true);
+                                                            try {
+                                                                const supabase = createClient();
+                                                                await supabase.from('profiles').update({ locale: newLocale }).eq('id', userId);
+                                                                document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
+                                                                window.location.reload();
+                                                            } catch (error) {
+                                                                console.error("Failed to update locale:", error);
+                                                            } finally {
+                                                                // Always re-enable to prevent freezing if refresh throws or takes too long
+                                                                setTimeout(() => setIsChangingLocale(false), 500);
+                                                            }
+                                                        }}
+                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main disabled:opacity-50"
+                                                    >
+                                                        <option value="ru">Русский</option>
+                                                        <option value="en">English</option>
+                                                        <option value="es">Español</option>
+                                                        <option value="fr">Français</option>
+                                                        <option value="de">Deutsch</option>
+                                                        <option value="pt">Português</option>
+                                                        <option value="zh">中文</option>
+                                                        <option value="ja">日本語</option>
+                                                        <option value="ko">한국어</option>
+                                                        <option value="tr">Türkçe</option>
+                                                        <option value="ar">العربية</option>
+                                                    </select>
+                                                </div>
+                                                <div className="flex flex-col h-full">
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">{tProfile("fontSize")}</label>
+                                                    <select
+                                                        value={scale}
+                                                        onChange={(e) => setScale(e.target.value as "small" | "medium" | "large")}
+                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                    >
+                                                        <option value="small">{tProfile("fontSizes.compact")}</option>
+                                                        <option value="medium">{tProfile("fontSizes.medium")}</option>
+                                                        <option value="large">{tProfile("fontSizes.xlarge")}</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -863,7 +927,7 @@ export default function UserProfileSheet({
                                             <div className="bg-white rounded-2xl border border-divider shadow-sm overflow-hidden">
                                                 <details className="group">
                                                     <summary className="flex items-center justify-between p-5 font-semibold text-ink-main cursor-pointer list-none hover:bg-surface-muted transition-colors [&::-webkit-details-marker]:hidden">
-                                                        <span>Часто задаваемые вопросы (FAQ)</span>
+                                                        <span>{tProfile("faq.faqTitle")}</span>
                                                         <span className="transition group-open:-rotate-180">
                                                             <svg className="w-5 h-5 text-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -873,81 +937,80 @@ export default function UserProfileSheet({
                                                     <div className="p-5 pt-0 space-y-4 border-t border-divider mt-2">
                                                         <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
                                                             <div className="font-semibold text-ink-main flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
-                                                                <span>В чем главная суперсила Vitograph?</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.question")}</span>
+                                                                <span>{tProfile("faq.q1")}</span>
                                                             </div>
                                                             <div className="text-[0.875rem] text-ink-muted leading-relaxed flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
-                                                                <span>Vitograph — это не просто трекер калорий или папка для анализов. Это единый ИИ-мозг, который «видит» картину целиком. Приложение связывает то, что вы едите (Дневник), с тем, как вы себя чувствуете (Симптомы), и тем, что происходит внутри вашего организма (Анализы). На основе этих данных Ассистент выстраивает персональную стратегию здоровья.</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.answer")}</span>
+                                                                <span>{tProfile("faq.a1")}</span>
                                                             </div>
                                                         </div>
 
                                                         <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
                                                             <div className="font-semibold text-ink-main flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
-                                                                <span>Чем вкладка «Дневник» отличается от «Ассистента»?</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.question")}</span>
+                                                                <span>{tProfile("faq.q2")}</span>
                                                             </div>
                                                             <div className="text-[0.875rem] text-ink-muted leading-relaxed flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.answer")}</span>
                                                                 <div className="space-y-2">
-                                                                    <p>Дневник — это ваш умный калькулятор питания. Сюда нужно писать (или скидывать фото) того, что вы съели. Например: "Яичница из 3 яиц с беконом и кофе". ИИ сам распознает блюдо, просчитает гликемический отклик и микронутриенты (витамины, минералы).</p>
-                                                                    <p>Ассистент (Айболит) — это ваш персональный коуч по здоровью. С ним можно советоваться, обсуждать ваши анализы, просить составить меню на день или жаловаться на звон в ушах. Он помнит ваш контекст и профиль.</p>
+                                                                    {tProfile.rich("faq.a2", { p: (chunks) => <p>{chunks}</p> })}
                                                                 </div>
                                                             </div>
                                                         </div>
 
                                                         <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
                                                             <div className="font-semibold text-ink-main flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
-                                                                <span>Я загрузил анализы, но нормы отличаются от тех, что были на бланке Инвитро/Гемотеста. Почему?</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.question")}</span>
+                                                                <span>{tProfile("faq.q3")}</span>
                                                             </div>
                                                             <div className="text-[0.875rem] text-ink-muted leading-relaxed flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
-                                                                <span>Референсные значения лабораторий показывают «среднюю температуру по больнице» — норму для людей всех возрастов и состояний от 18 до 99 лет. Vitograph использует динамические персонализированные нормы (оптимумы). Они рассчитываются индивидуально под ваш возраст, пол, текущие заболевания и цели. Поэтому показатель, который лаборатория считает «нормальным», у нас может подсвечиваться желтым как требующий внимания.</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.answer")}</span>
+                                                                <span>{tProfile("faq.a3")}</span>
                                                             </div>
                                                         </div>
 
                                                         <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
                                                             <div className="font-semibold text-ink-main flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
-                                                                <span>Как работает загрузка анализов?</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.question")}</span>
+                                                                <span>{tProfile("faq.q4")}</span>
                                                             </div>
                                                             <div className="text-[0.875rem] text-ink-muted leading-relaxed flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
-                                                                <span>Вы можете перетащить PDF-файл или загрузить пачку фотографий ваших бланков (до 10 штук за раз). Важно: ИИ нужно время, чтобы внимательно «прочитать» каждое фото. Этот процесс может занять от 30 секунд до 2 минут. Вы увидите шкалу прогресса: просто подождите завершения анализа, и результаты превратятся в интерактивные карточки. Вы всегда сможете скорректировать цифру вручную, если ИИ ошибся.</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.answer")}</span>
+                                                                <span>{tProfile("faq.a4")}</span>
                                                             </div>
                                                         </div>
 
                                                         <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
                                                             <div className="font-semibold text-ink-main flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
-                                                                <span>Зачем нужны фото ногтей, кожи и языка во вкладке Анализов?</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.question")}</span>
+                                                                <span>{tProfile("faq.q5")}</span>
                                                             </div>
                                                             <div className="text-[0.875rem] text-ink-muted leading-relaxed flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
-                                                                <span>Это соматическая диагностика. Наше тело часто подает визуальные сигналы о дефицитах витаминов или проблемах с ЖКТ еще до того, как они отразятся в биохимии крови. ИИ обучен распознавать паттерны (например, белые пятна на ногтях или налет на языке) и сопоставлять их с недостатком конкретных нутриентов.</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.answer")}</span>
+                                                                <span>{tProfile("faq.a5")}</span>
                                                             </div>
                                                         </div>
 
                                                         <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
                                                             <div className="font-semibold text-ink-main flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
-                                                                <span>Заменяет ли Vitograph поход к врачу?</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.question")}</span>
+                                                                <span>{tProfile("faq.q6")}</span>
                                                             </div>
                                                             <div className="text-[0.875rem] text-ink-muted leading-relaxed flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
-                                                                <span>Нет. Vitograph — это мощный аналитический инструмент и ваш личный навигатор по здоровью, но он не ставит медицинские диагнозы и не назначает лечение. Все инсайты и AI-рекомендации созданы для того, чтобы вы могли предметно обсудить их со своим лечащим врачом.</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.answer")}</span>
+                                                                <span>{tProfile("faq.a6")}</span>
                                                             </div>
                                                         </div>
 
                                                         <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
                                                             <div className="font-semibold text-ink-main flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Вопрос</span>
-                                                                <span>Конфиденциальны ли мои данные?</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.question")}</span>
+                                                                <span>{tProfile("faq.q7")}</span>
                                                             </div>
                                                             <div className="text-[0.875rem] text-ink-muted leading-relaxed flex gap-2 items-start">
-                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">Ответ</span>
-                                                                <span>Да. Ваши медицинские данные, анализы и анкеты хранятся в защищенной базе. ИИ использует их исключительно для персонализации рекомендаций в рамках ваших защищенных сессий.</span>
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.answer")}</span>
+                                                                <span>{tProfile("faq.a7")}</span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -958,7 +1021,7 @@ export default function UserProfileSheet({
                                                 <details className="group">
                                                     <summary className="flex items-center justify-between p-5 font-semibold text-ink-main cursor-pointer list-none hover:bg-surface-muted transition-colors [&::-webkit-details-marker]:hidden">
                                                         <div className="flex items-center gap-2">
-                                                            <span>О приложении (About)</span>
+                                                            <span>{tProfile("about.title")}</span>
                                                             <span className="px-2 py-0.5 rounded-full bg-primary-100 text-primary-700 text-[0.625rem] font-bold uppercase tracking-widest border border-primary-200/50">v2.0</span>
                                                         </div>
                                                         <span className="transition group-open:-rotate-180">
@@ -975,32 +1038,32 @@ export default function UserProfileSheet({
                                                         </div>
 
                                                         <div className="space-y-3 leading-relaxed">
-                                                            <p>Современная медицина привыкла лечить симптомы, когда механизм уже сломался. Мы в Vitograph верим в другой подход: <strong className="text-ink-main">здоровье начинается на клеточном уровне, задолго до появления болезней.</strong></p>
-                                                            <p>Vitograph — это ваш умный цифровой архитектор здоровья. Мы создали платформу, которая объединяет передовые ИИ-технологии с принципами доказательной медицины, нутрициологии и биохакинга.</p>
+                                                            <p>{tProfile("about.intro1")} <strong className="text-ink-main">{tProfile("about.intro2")}</strong></p>
+                                                            <p>{tProfile("about.description")}</p>
                                                         </div>
 
                                                         {/* How we do it list */}
                                                         <div className="space-y-4">
-                                                            <h4 className="font-bold text-ink-main text-[1rem] border-b border-divider pb-2">Как мы это делаем?</h4>
+                                                            <h4 className="font-bold text-ink-main text-[1rem] border-b border-divider pb-2">{tProfile("about.howTitle")}</h4>
                                                             <ul className="space-y-4">
                                                                 <li className="flex gap-4">
                                                                     <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-[0.8125rem] shadow-sm">1</div>
-                                                                    <p className="leading-relaxed mt-1"><strong className="text-ink-main">Собираем пазл воедино.</strong> Ваши анализы крови, качество сна, уровень стресса и каждая съеденная тарелка еды — больше не разрозненные данные. Vitograph анализирует их в комплексе 24/7.</p>
+                                                                    <p className="leading-relaxed mt-1"><strong className="text-ink-main">{tProfile("about.pillar1Title")}</strong> {tProfile("about.pillar1Desc")}</p>
                                                                 </li>
                                                                 <li className="flex gap-4">
                                                                     <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-[0.8125rem] shadow-sm">2</div>
-                                                                    <p className="leading-relaxed mt-1"><strong className="text-ink-main">Ищем оптимум, а не "норму".</strong> Мы не опираемся на усредненные лабораторные референсы. Мы рассчитываем ваши идеальные показатели (динамические нормы) с учетом вашего возраста, профиля и генетических особенностей.</p>
+                                                                    <p className="leading-relaxed mt-1"><strong className="text-ink-main">{tProfile("about.pillar2Title")}</strong> {tProfile("about.pillar2Desc")}</p>
                                                                 </li>
                                                                 <li className="flex gap-4">
                                                                     <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-[0.8125rem] shadow-sm">3</div>
-                                                                    <p className="leading-relaxed mt-1"><strong className="text-ink-main">Действуем на опережение.</strong> ИИ-ассистент замечает скрытые дефициты и корреляции в вашем дневнике питания еще до того, как они превратятся в проблему, помогая корректировать состояние точечными изменениями в еде и добавках.</p>
+                                                                    <p className="leading-relaxed mt-1"><strong className="text-ink-main">{tProfile("about.pillar3Title")}</strong> {tProfile("about.pillar3Desc")}</p>
                                                                 </li>
                                                             </ul>
                                                         </div>
                                                         
                                                         {/* Disclaimer footer */}
                                                         <div className="bg-blue-50 border border-blue-100 text-blue-800 rounded-xl p-4 mt-6 text-[0.8125rem] leading-relaxed font-medium">
-                                                            Мы не заменяем врачей. Мы даем вам инструмент, чтобы понимать свой организм, кормить свои клетки тем, что им действительно нужно, и находить свой идеальный баланс. Начните с профиля — и позвольте науке и данным работать на ваше долголетие.
+                                                            {tProfile("about.closing")}
                                                         </div>
                                                     </div>
                                                 </details>
@@ -1010,17 +1073,17 @@ export default function UserProfileSheet({
                                         {/* Danger Zone */}
                                         <div className="mt-8 pt-8 border-t-2 border-red-100 space-y-4">
                                             <h3 className="text-sm font-bold text-red-600 flex items-center gap-2 uppercase tracking-tight">
-                                                <AlertTriangle size={16} /> Опасная зона
+                                                <AlertTriangle size={16} /> {tProfile("dangerZone")}
                                             </h3>
                                             <div className="bg-red-50 p-5 rounded-2xl border border-red-100 shadow-sm">
                                                 <p className="text-[0.8125rem] text-red-700 leading-relaxed font-medium mb-4">
-                                                    Удаление аккаунта приведет к безвозвратной потере всех ваших данных, включая анализы, историю чатов и настройки профиля.
+                                                    {tProfile("dangerZoneDesc")}
                                                 </p>
                                                 <button
                                                     onClick={() => setShowDeleteConfirm(true)}
                                                     className="mt-auto w-full sm:w-auto px-5 py-2.5 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                                                 >
-                                                    <Trash2 size={16} /> Удалить мой аккаунт и данные
+                                                    <Trash2 size={16} /> {tProfile("deleteAccountBtn")}
                                                 </button>
                                             </div>
                                         </div>
@@ -1034,12 +1097,12 @@ export default function UserProfileSheet({
                                         {/* Nutrition & Environment */}
                                         <div className="bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-4">
                                             <h3 className="font-semibold text-ink-main border-b border-divider pb-3">
-                                                Питание и Среда
+                                                {tLifestyle("nutritionEnvironment")}
                                             </h3>
                                             <div className="grid grid-cols-2 gap-5">
                                                 <div className="flex flex-col h-full">
                                                     <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
-                                                        Тип диеты
+                                                        {tLifestyle("dietType")}
                                                     </label>
                                                     <select
                                                         value={String(formData.diet_type)}
@@ -1048,18 +1111,16 @@ export default function UserProfileSheet({
                                                         }
                                                         className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                                     >
-                                                        <option value="omnivore">Omnivore</option>
-                                                        <option value="vegetarian">Vegetarian</option>
-                                                        <option value="vegan">Vegan</option>
+                                                        <option value="omnivore">{tLifestyle("dietOptions.omnivore")}</option>
+                                                        <option value="vegetarian">{tLifestyle("dietOptions.vegetarian")}</option>
+                                                        <option value="vegan">{tLifestyle("dietOptions.vegan")}</option>
                                                         <option value="pescatarian">Pescatarian</option>
-                                                        <option value="keto">Keto</option>
-                                                        <option value="other">Other</option>
+                                                        <option value="keto">{tLifestyle("dietOptions.keto")}</option>
+                                                        <option value="other">{tLifestyle("dietOptions.other")}</option>
                                                     </select>
                                                 </div>
                                                 <div className="flex flex-col h-full">
-                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
-                                                        Алкоголь
-                                                    </label>
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">{tLifestyle("alcohol")}</label>
                                                     <select
                                                         value={String(formData.alcohol_frequency)}
                                                         onChange={(e) =>
@@ -1070,15 +1131,15 @@ export default function UserProfileSheet({
                                                         }
                                                         className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                                     >
-                                                        <option value="none">Не употребляю</option>
-                                                        <option value="occasional">Иногда</option>
-                                                        <option value="moderate">Умеренно</option>
-                                                        <option value="heavy">Часто</option>
+                                                        <option value="none">{tLifestyle("alcoholOptions.none")}</option>
+                                                        <option value="occasional">{tLifestyle("alcoholOccasional")}</option>
+                                                        <option value="moderate">{tLifestyle("alcoholOptions.moderate")}</option>
+                                                        <option value="heavy">{tLifestyle("alcoholOptions.frequent")}</option>
                                                     </select>
                                                 </div>
                                                 <div className="flex flex-col h-full">
                                                     <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
-                                                        Климат
+                                                        {tLifestyle("climateLabel")}
                                                     </label>
                                                     <select
                                                         value={String(formData.climate_zone)}
@@ -1090,16 +1151,16 @@ export default function UserProfileSheet({
                                                         }
                                                         className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                                     >
-                                                        <option value="temperate">Умеренный</option>
-                                                        <option value="tropical">Тропический</option>
-                                                        <option value="dry">Сухой</option>
-                                                        <option value="continental">Континентальный</option>
-                                                        <option value="polar">Полярный</option>
+                                                        <option value="temperate">{tLifestyle("climateOptions.temperate")}</option>
+                                                        <option value="tropical">{tLifestyle("climateTropical")}</option>
+                                                        <option value="dry">{tLifestyle("climateDry")}</option>
+                                                        <option value="continental">{tLifestyle("climateContinental")}</option>
+                                                        <option value="polar">{tLifestyle("climatePolar")}</option>
                                                     </select>
                                                 </div>
                                                 <div className="flex flex-col h-full">
                                                     <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
-                                                        Уровень солнца
+                                                        {tLifestyle("sunExposure")}
                                                     </label>
                                                     <select
                                                         value={String(formData.sun_exposure)}
@@ -1111,9 +1172,9 @@ export default function UserProfileSheet({
                                                         }
                                                         className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                                     >
-                                                        <option value="minimal">Минимальный</option>
-                                                        <option value="moderate">Умеренный</option>
-                                                        <option value="high">Высокий</option>
+                                                        <option value="minimal">{tLifestyle("sunMinimal")}</option>
+                                                        <option value="moderate">{tLifestyle("sunModerate")}</option>
+                                                        <option value="high">{tLifestyle("sunHigh")}</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -1122,13 +1183,11 @@ export default function UserProfileSheet({
                                         {/* Activity & Recovery */}
                                         <div className="bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-4">
                                             <h3 className="font-semibold text-ink-main border-b border-divider pb-3">
-                                                Активность и Восстановление
+                                                {tLifestyle("activityRecovery")}
                                             </h3>
                                             <div className="grid grid-cols-2 gap-5">
                                                 <div className="flex flex-col h-full">
-                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
-                                                        Уровень активности
-                                                    </label>
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">{tLifestyle("activityLevel")}</label>
                                                     <select
                                                         value={String(formData.activity_level)}
                                                         onChange={(e) =>
@@ -1139,16 +1198,16 @@ export default function UserProfileSheet({
                                                         }
                                                         className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                                     >
-                                                        <option value="sedentary">Сидячий</option>
-                                                        <option value="light">Лёгкий</option>
-                                                        <option value="moderate">Умеренный</option>
-                                                        <option value="active">Активный</option>
-                                                        <option value="very_active">Очень активный</option>
+                                                        <option value="sedentary">{tLifestyle("activityOptions.sedentary")}</option>
+                                                        <option value="light">{tLifestyle("activityOptions.light")}</option>
+                                                        <option value="moderate">{tLifestyle("activityOptions.moderate")}</option>
+                                                        <option value="active">{tLifestyle("activityOptions.active")}</option>
+                                                        <option value="very_active">{tLifestyle("activityVeryActive")}</option>
                                                     </select>
                                                 </div>
                                                 <div className="flex flex-col h-full">
                                                     <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
-                                                        Тип работы
+                                                        {tLifestyle("workType")}
                                                     </label>
                                                     <select
                                                         value={String(formData.work_lifestyle)}
@@ -1160,16 +1219,16 @@ export default function UserProfileSheet({
                                                         }
                                                         className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                                     >
-                                                        <option value="office_sedentary">Офис (сидячая)</option>
-                                                        <option value="office_active">Офис (активная)</option>
-                                                        <option value="remote_flexible">Удалёнка</option>
-                                                        <option value="manual_labor">Физический труд</option>
-                                                        <option value="shift_work">Сменная работа</option>
+                                                        <option value="office_sedentary">{tLifestyle("workOfficeSedentary")}</option>
+                                                        <option value="office_active">{tLifestyle("workOfficeActive")}</option>
+                                                        <option value="remote_flexible">{tLifestyle("workRemote")}</option>
+                                                        <option value="manual_labor">{tLifestyle("workManualLabor")}</option>
+                                                        <option value="shift_work">{tLifestyle("workShift")}</option>
                                                     </select>
                                                 </div>
                                                 <div className="flex flex-col h-full">
                                                     <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
-                                                        Кардио в нед. (мин)
+                                                        {tLifestyle("cardioWeekly")}
                                                     </label>
                                                     <input
                                                         type="number"
@@ -1183,13 +1242,11 @@ export default function UserProfileSheet({
                                                             })
                                                         }
                                                         className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
-                                                        placeholder="Не указано"
+                                                        placeholder={tProfile("noData")}
                                                     />
                                                 </div>
                                                 <div className="flex flex-col h-full">
-                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
-                                                        Среднее время сна (ч)
-                                                    </label>
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">{tLifestyle("sleepHours")}</label>
                                                     <input
                                                         type="number"
                                                         step="0.5"
@@ -1201,7 +1258,7 @@ export default function UserProfileSheet({
                                                             })
                                                         }
                                                         className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
-                                                        placeholder="Не указано"
+                                                        placeholder={tProfile("noData")}
                                                     />
                                                 </div>
                                             </div>
@@ -1210,11 +1267,11 @@ export default function UserProfileSheet({
                                         {/* Sleep & Stress */}
                                         <div className="bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-4">
                                             <h3 className="font-semibold text-ink-main border-b border-divider pb-3">
-                                                Сон и Стресс
+                                                {tLifestyle("sleepStress")}
                                             </h3>
                                             <div className="flex flex-col h-full">
                                                 <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
-                                                    Базовый уровень стресса
+                                                    {tLifestyle("baseStressLevel")}
                                                 </label>
                                                 <select
                                                     value={String(formData.stress_level)}
@@ -1226,10 +1283,10 @@ export default function UserProfileSheet({
                                                     }
                                                     className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                                 >
-                                                    <option value="low">Низкий</option>
-                                                    <option value="moderate">Средний</option>
-                                                    <option value="high">Высокий</option>
-                                                    <option value="very_high">Очень высокий</option>
+                                                    <option value="low">{tLifestyle("stressOptions.low")}</option>
+                                                    <option value="moderate">{tLifestyle("stressOptions.moderate")}</option>
+                                                    <option value="high">{tLifestyle("stressOptions.high")}</option>
+                                                    <option value="very_high">{tLifestyle("stressOptions.veryHigh")}</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -1259,12 +1316,12 @@ export default function UserProfileSheet({
                                                         htmlFor="isSmoker"
                                                         className="text-[0.8125rem] font-semibold text-ink-main"
                                                     >
-                                                        Курение / Вейпинг
+                                                        {tLifestyle("smoking")}
                                                     </label>
                                                 </div>
                                                 <div className="flex flex-col h-full">
                                                     <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
-                                                        Беременность
+                                                        {tLifestyle("pregnancy")}
                                                     </label>
                                                     <select
                                                         value={String(formData.pregnancy_status)}
@@ -1276,18 +1333,16 @@ export default function UserProfileSheet({
                                                         }
                                                         className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
                                                     >
-                                                        <option value="not_applicable">Не применимо</option>
-                                                        <option value="pregnant">Беременна</option>
-                                                        <option value="breastfeeding">Кормление грудью</option>
+                                                        <option value="not_applicable">{tLifestyle("pregnancyNotApplicable")}</option>
+                                                        <option value="pregnant">{tLifestyle("pregnancyPregnant")}</option>
+                                                        <option value="breastfeeding">{tLifestyle("pregnancyBreastfeeding")}</option>
                                                     </select>
                                                 </div>
                                             </div>
 
                                             {/* Chronic Conditions */}
                                             <div className="pt-2 border-t border-divider">
-                                                <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
-                                                    Хронические заболевания и Аллергии
-                                                </label>
+                                                <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">{tLifestyle("chronicConditions")}</label>
                                                 <div className="flex flex-wrap gap-2 mb-3">
                                                     {conditions.length > 0 ? (
                                                         conditions.map((c: string, i: number) => (
@@ -1305,9 +1360,7 @@ export default function UserProfileSheet({
                                                             </span>
                                                         ))
                                                     ) : (
-                                                        <span className="text-sm font-medium text-ink-muted bg-surface-muted px-3 py-1.5 rounded-md">
-                                                            Не указано
-                                                        </span>
+                                                        <span className="text-sm font-medium text-ink-muted bg-surface-muted px-3 py-1.5 rounded-md">{tProfile("noData")}</span>
                                                     )}
                                                 </div>
                                                 <div className="flex gap-2">
@@ -1318,7 +1371,7 @@ export default function UserProfileSheet({
                                                         onKeyDown={(e) =>
                                                             e.key === "Enter" && addCondition()
                                                         }
-                                                        placeholder="Например: Астма, Аллергия"
+                                                        placeholder={tProfile("manualEntry")}
                                                         className="flex-1 px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
                                                     />
                                                     <button
@@ -1333,7 +1386,7 @@ export default function UserProfileSheet({
                                             {/* Medications */}
                                             <div className="pt-2 border-t border-divider">
                                                 <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
-                                                    Медикаменты и Добавки
+                                                    {tLifestyle("medicationsSupplements")}
                                                 </label>
                                                 <div className="flex flex-wrap gap-2 mb-3">
                                                     {meds.length > 0 ? (
@@ -1352,9 +1405,7 @@ export default function UserProfileSheet({
                                                             </span>
                                                         ))
                                                     ) : (
-                                                        <span className="text-sm font-medium text-ink-muted bg-surface-muted px-3 py-1.5 rounded-md">
-                                                            Не указано
-                                                        </span>
+                                                        <span className="text-sm font-medium text-ink-muted bg-surface-muted px-3 py-1.5 rounded-md">{tProfile("noData")}</span>
                                                     )}
                                                 </div>
                                                 <div className="flex gap-2">
@@ -1365,7 +1416,7 @@ export default function UserProfileSheet({
                                                         onKeyDown={(e) =>
                                                             e.key === "Enter" && addMedication()
                                                         }
-                                                        placeholder="Например: Vitamin D 2000IU"
+                                                        placeholder={tLifestyle("medPlaceholder")}
                                                         className="flex-1 px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
                                                     />
                                                     <button
@@ -1390,45 +1441,45 @@ export default function UserProfileSheet({
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             {/* Card 1: Sleep & Recovery */}
                                             <DeviceWidgetCard
-                                                title="Сон и Восстановление"
+                                                title={tProfile("sleepRecoveryTab")}
                                                 icon={<Moon size={20} />}
                                                 metrics={sleepMetrics}
                                                 onManualEntry={() => setActiveManualEntry("sleep")}
                                                 onScreenshotUpload={() =>
-                                                    alert("OCR для скриншотов Oura / Apple Health — скоро!")
+                                                    alert(tProfile("screenshotOCRSoon"))
                                                 }
                                             />
 
                                             {/* Card 2: Cardio & Activity */}
                                             <DeviceWidgetCard
-                                                title="Кардио и Активность"
+                                                title={tProfile("cardioActivityTab")}
                                                 icon={<Heart size={20} />}
                                                 metrics={cardioMetrics}
                                                 onManualEntry={() => setActiveManualEntry("cardio")}
                                                 onScreenshotUpload={() =>
-                                                    alert("OCR для скриншотов Garmin / Whoop — скоро!")
+                                                    alert(tProfile("screenshotOCRSoon"))
                                                 }
                                             />
 
                                             {/* Card 3: Body Composition */}
                                             <DeviceWidgetCard
-                                                title="Состав Тела"
+                                                title={tProfile("bodyCompositionTab")}
                                                 icon={<Scale size={20} />}
                                                 metrics={bodyMetrics}
                                                 onManualEntry={() => setActiveManualEntry("body")}
                                                 onScreenshotUpload={() =>
-                                                    alert("OCR для скриншотов весов — скоро!")
+                                                    alert(tProfile("screenshotOCRSoon"))
                                                 }
                                             />
 
                                             {/* Card 4: Metabolic (CGM) */}
                                             <DeviceWidgetCard
-                                                title="Метаболизм (CGM)"
+                                                title={tProfile("metabolicTab")}
                                                 icon={<Droplets size={20} />}
                                                 metrics={metabolicMetrics}
                                                 onManualEntry={() => setActiveManualEntry("metabolic")}
                                                 onScreenshotUpload={() =>
-                                                    alert("OCR для Nutrisense / Levels — скоро!")
+                                                    alert(tProfile("screenshotOCRSoon"))
                                                 }
                                             />
 
@@ -1456,7 +1507,7 @@ export default function UserProfileSheet({
                     {/* Footer */}
                     <div className="p-5 border-t border-divider bg-white z-10 flex items-center justify-between">
                         <span className="text-sm text-success font-semibold transition-opacity min-w-[150px]">
-                            {saveSuccess ? "✓ Профиль сохранён" : ""}
+                            {saveSuccess ? tProfile("profileSaved") : ""}
                         </span>
                         <button
                             onClick={() => handleSaveProfile()}
@@ -1485,10 +1536,10 @@ export default function UserProfileSheet({
                                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                         />
                                     </svg>
-                                    Сохраняю...
+                                    {tProfile("saving")}
                                 </>
                             ) : (
-                                "Сохранить"
+                                tProfile("save")
                             )}
                         </button>
                     </div>
@@ -1514,10 +1565,10 @@ export default function UserProfileSheet({
                             <AlertTriangle size={32} />
                         </div>
                         <h2 className="text-2xl font-bold text-ink-main text-center mb-3">
-                            Вы абсолютно уверены?
+                            {tProfile("areYouSure")}
                         </h2>
                         <p className="text-ink-muted text-center leading-relaxed mb-8">
-                            Это действие необратимо. Все ваши анализы, история чата и фотографии будут удалены навсегда.
+                            {tProfile("deleteWarning")}
                         </p>
                         <div className="flex flex-col gap-3">
                             <button
@@ -1530,11 +1581,9 @@ export default function UserProfileSheet({
                                         <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                        </svg>
-                                        Удаление...
-                                    </>
+                                        </svg>{tProfile("deleting")}</>
                                 ) : (
-                                    "Да, удалить аккаунт навсегда"
+                                    tProfile("deleteForever")
                                 )}
                             </button>
                             <button
@@ -1542,7 +1591,7 @@ export default function UserProfileSheet({
                                 disabled={isDeleting}
                                 className="mt-auto w-full py-4 bg-surface-muted text-ink-main font-bold rounded-2xl hover:bg-surface-hover disabled:opacity-50 transition-all border border-divider cursor-pointer"
                             >
-                                Отмена
+                                {tProfile("cancel")}
                             </button>
                         </div>
                     </div>
@@ -1556,23 +1605,23 @@ export default function UserProfileSheet({
                             <AlertTriangle size={32} />
                         </div>
                         <h2 className="text-2xl font-bold text-ink-main text-center mb-3">
-                            Закрыть профиль?
+                            {tProfile("closeProfile")}
                         </h2>
                         <p className="text-ink-muted text-center leading-relaxed mb-8">
-                            У вас есть несохраненные изменения. Если вы выйдете сейчас, они будут потеряны.
+                            {tProfile("unsavedWarning")}
                         </p>
                         <div className="flex flex-col gap-3">
                             <button
                                 onClick={handleForceClose}
                                 className="mt-auto w-full py-4 bg-amber-600 text-white font-bold rounded-2xl hover:bg-amber-700 transition-all shadow-lg shadow-amber-200 active:scale-[0.98] cursor-pointer"
                             >
-                                Выйти без сохранения
+                                {tProfile("leaveWithout")}
                             </button>
                             <button
                                 onClick={() => setShowUnsavedConfirm(false)}
                                 className="mt-auto w-full py-4 bg-surface-muted text-ink-main font-bold rounded-2xl hover:bg-surface-hover transition-all border border-divider cursor-pointer"
                             >
-                                Остаться и продолжить
+                                {tProfile("stayAndContinue")}
                             </button>
                         </div>
                     </div>

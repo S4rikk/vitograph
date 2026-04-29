@@ -1,6 +1,7 @@
-import React from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import { getMicronutrientColor } from "@/lib/food-diary/nutrient-colors";
+import { useTranslations } from "next-intl";
+import { normalizeMicronutrientKey, translateValueWithUnit } from "@/lib/food-diary/nutrient-utils";
 
 interface FoodCardProps {
   name: string;
@@ -117,11 +118,11 @@ function getHealthScoreStyle(score: number) {
 }
 
 /** Maps response type to visual badge */
-function getResponseBadge(type: string | null) {
+function getResponseBadge(type: string | null, t: any) {
   switch (type) {
     case 'flat':
       return { 
-        label: 'Плавная волна', 
+        label: t('responseFlat'), 
         icon: (
           <svg width="20" height="16" viewBox="0 0 20 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M2 12 Q 6 9, 10 12 T 18 12" />
@@ -131,7 +132,7 @@ function getResponseBadge(type: string | null) {
       };
     case 'spike':
       return { 
-        label: 'Сахарная игла', 
+        label: t('responseSpike'), 
         icon: (
           <svg width="20" height="16" viewBox="0 0 20 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M2 12 L 8 4 L 13 10 L 18 11" />
@@ -142,7 +143,7 @@ function getResponseBadge(type: string | null) {
     case 'moderate':
     default:
       return { 
-        label: 'Умеренный отклик', 
+        label: t('responseModerate'), 
         icon: (
           <svg width="20" height="16" viewBox="0 0 20 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M2 12 Q 7 5, 12 9 T 18 11" />
@@ -154,11 +155,11 @@ function getResponseBadge(type: string | null) {
 }
 
 /** Maps GI value to color */
-function getGIColor(gi: number | null) {
+function getGIColor(gi: number | null, t: any) {
   if (gi === null) return { bg: 'bg-[#F1F5F9]', text: 'text-[#64748B]', label: '?', emoji: '⚪' };
-  if (gi <= 55) return { bg: 'bg-[#ECFDF5]', text: 'text-[#059669]', label: 'Низкий', emoji: '🟢' };
-  if (gi <= 69) return { bg: 'bg-[#FFFBEB]', text: 'text-[#D97706]', label: 'Средний', emoji: '🟡' };
-  return { bg: 'bg-[#FEF2F2]', text: 'text-[#DC2626]', label: 'Высокий', emoji: '🔴' };
+  if (gi <= 55) return { bg: 'bg-[#ECFDF5]', text: 'text-[#059669]', label: t('giLow'), emoji: '🟢' };
+  if (gi <= 69) return { bg: 'bg-[#FFFBEB]', text: 'text-[#D97706]', label: t('giMedium'), emoji: '🟡' };
+  return { bg: 'bg-[#FEF2F2]', text: 'text-[#DC2626]', label: t('giHigh'), emoji: '🔴' };
 }
 
 
@@ -182,7 +183,13 @@ export default function FoodCard({
   onDelete,
   onEdit,
 }: FoodCardProps) {
+  const tDiary = useTranslations("diary");
+  const tGlycemic = useTranslations("glycemic");
+  const tNutrients = useTranslations("nutrients");
+  const tUnits = useTranslations("units");
+
   const finalEmoji = emoji && emoji !== "🍽️" ? emoji : getEmojiForFood(name);
+  const giStyle = getGIColor(gi, tGlycemic);
 
   return (
     <div className="bg-white border border-border shadow-sm rounded-2xl overflow-hidden w-full flex flex-col max-w-[320px] sm:max-w-[400px]">
@@ -191,7 +198,7 @@ export default function FoodCard({
         <div className="w-full overflow-hidden" style={{ maxHeight: "140px" }}>
           <img
             src={imageUrl}
-            alt="Фото еды"
+            alt={tDiary('foodPhotoAlt')}
             className="w-full object-cover"
             style={{ maxHeight: "140px", objectFit: "cover" }}
           />
@@ -203,7 +210,9 @@ export default function FoodCard({
         <div className="flex items-start gap-2">
             <div className="flex flex-col items-center justify-center shrink-0">
                 <span className="text-[1.5rem] leading-none">{finalEmoji}</span>
-                <span className="text-[0.6875rem] text-ink-muted font-medium whitespace-nowrap mt-0.5">{weight} г</span>
+                <span className="text-[0.6875rem] text-ink-muted font-medium whitespace-nowrap mt-0.5">
+                  {tDiary('weightGram', { weight })}
+                </span>
             </div>
             <span className="font-bold text-ink text-[0.875rem] leading-tight line-clamp-2 max-w-[160px] sm:max-w-[220px] pt-0.5" title={name}>
                 {name}
@@ -217,16 +226,16 @@ export default function FoodCard({
       {/* ── Glycemic Response (3 pills) ── */}
       <div className="flex gap-1.5 mb-2 justify-between">
         {/* GI Value */}
-        <div className={`flex-1 flex flex-col items-center justify-center ${getGIColor(gi).bg} border border-border/40 rounded-xl py-1.5 px-1 min-w-0`}>
-          <span className={`font-[800] text-[1.125rem] ${getGIColor(gi).text} leading-none mb-1`}>{gi ?? '?'}</span>
-          <span className={`text-[0.5625rem] ${getGIColor(gi).text} opacity-80 flex items-center gap-0.5`}>
-            ГИ <span className="text-[0.625rem] mx-0.5 leading-none">{getGIColor(gi).emoji}</span> {getGIColor(gi).label}
+        <div className={`flex-1 flex flex-col items-center justify-center ${giStyle.bg} border border-border/40 rounded-xl py-1.5 px-1 min-w-0`}>
+          <span className={`font-[800] text-[1.125rem] ${giStyle.text} leading-none mb-1`}>{gi ?? '?'}</span>
+          <span className={`text-[0.5625rem] ${giStyle.text} opacity-80 flex items-center gap-0.5`}>
+            {tGlycemic('giLabel')} <span className="text-[0.625rem] mx-0.5 leading-none">{giStyle.emoji}</span> {giStyle.label}
           </span>
         </div>
 
         {/* Response Type */}
         {responseType && (() => {
-          const badge = getResponseBadge(responseType);
+          const badge = getResponseBadge(responseType, tGlycemic);
           return (
             <div className={`flex-1 flex flex-col items-center justify-center ${badge.bg} border ${badge.border} rounded-xl py-1.5 px-1 min-w-0 text-center`}>
               <div className={`mb-1 ${badge.text}`}>{badge.icon}</div>
@@ -239,9 +248,9 @@ export default function FoodCard({
         {energyHours && (
           <div className="flex-1 flex flex-col items-center justify-center bg-[#EFF6FF] border border-[#BFDBFE] rounded-xl py-1.5 px-1 min-w-0">
             <span className="font-[800] text-[1.0625rem] text-[#2563EB] leading-none mb-1 flex items-baseline justify-center whitespace-nowrap">
-              {energyHours}<span className="text-[0.75rem] font-bold ml-[1px]">ч</span>
+              {energyHours}<span className="text-[0.75rem] font-bold ml-[1px]">{tGlycemic('energyUnit')}</span>
             </span>
-            <span className="text-[0.5625rem] text-[#2563EB] opacity-70 whitespace-nowrap">энергии</span>
+            <span className="text-[0.5625rem] text-[#2563EB] opacity-70 whitespace-nowrap">{tGlycemic('energyLabel')}</span>
           </div>
         )}
       </div>
@@ -249,14 +258,17 @@ export default function FoodCard({
       {/* Micros */}
       {micros && micros.length > 0 && (
           <div className="mb-1 pt-1.5 border-t border-border/50">
-             <div className="text-[0.5625rem] text-ink-faint uppercase font-bold tracking-wider mb-1">Микронутриенты</div>
+             <div className="text-[0.5625rem] text-ink-faint uppercase font-bold tracking-wider mb-1">{tDiary('micronutrients')}</div>
              <div className="flex flex-wrap gap-1">
                  {micros.map((micro, idx) => {
+                     const normalizedName = normalizeMicronutrientKey(micro.name);
+                     const displayName = tNutrients.has(normalizedName) ? tNutrients(normalizedName) : micro.name;
+                     const displayValue = translateValueWithUnit(micro.value, tUnits);
                      const colorSpace = getMicronutrientColor(micro.name);
                      return (
                          <div key={idx} className="flex items-center gap-1 px-1.5 py-0.5 bg-surface-subtle border border-border/60 rounded-full text-[0.6875rem] leading-tight">
                              <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${colorSpace.dot}`}></div>
-                             <span className={colorSpace.text}>{micro.name} <span className="opacity-60 ml-0.5">{micro.value}</span></span>
+                             <span className={colorSpace.text}>{displayName} <span className="opacity-60 ml-0.5">{displayValue}</span></span>
                          </div>
                      );
                  })}
@@ -271,14 +283,14 @@ export default function FoodCard({
                   <button 
                       onClick={() => onEdit?.(mealId)}
                       className="text-blue-500 hover:text-blue-600 transition-colors p-1 rounded-md hover:bg-blue-50"
-                      title="Изменить вес"
+                      title={tDiary('editWeight')}
                   >
                       <Pencil size={16} />
                   </button>
                   <button 
                       onClick={() => onDelete?.(mealId)}
                       className="text-red-500 hover:text-red-600 transition-colors p-1 rounded-md hover:bg-red-50"
-                      title="Удалить"
+                      title={tDiary('delete')}
                   >
                       <Trash2 size={16} />
                   </button>

@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { compressImage } from "@/lib/image-utils";
 import { apiClient } from "@/lib/api-client";
+import { useTranslations } from "next-intl";
 
 interface SomaticAnalysisResult {
   markers: string[];
@@ -20,31 +21,29 @@ interface PhotoUploaderProps {
 const UPLOADER_CONFIG = {
   nails: {
     icon: "✋",
-    title: "Ногти на ногах или руках",
-    description: "Узнай скрытые дефициты витаминов и минералов. Делайте фото без лака, при хорошем освещении.",
-    buttonLabel: "Сделать фото",
+    titleKey: "nailsTitle",
+    descriptionKey: "nailsDescription",
     bgColor: "bg-[#f5eefc]",
     iconColor: "text-[#a855f7]",
   },
   tongue: {
     icon: "👅",
-    title: "Фотография языка",
-    description: "Налет, трещины и отпечатки зубов могут говорить о проблемах с ЖКТ и дефиците B-витаминов.",
-    buttonLabel: "Сделать фото",
+    titleKey: "tongueTitle",
+    descriptionKey: "tongueDescription",
     bgColor: "bg-[#fef2f2]",
     iconColor: "text-[#ef4444]",
   },
   skin: {
     icon: "🎭",
-    title: "Лицо или проблемная кожа",
-    description: "Сухость, акне или бледность могут быть признаками дефицита Омега-3, железа или гормонального дисбаланса.",
-    buttonLabel: "Сделать фото",
+    titleKey: "skinTitle",
+    descriptionKey: "skinDescription",
     bgColor: "bg-[#f0fdf4]",
     iconColor: "text-[#22c55e]",
   },
 };
 
 export default function PhotoUploader({ type, onSuccess, onAnalysisComplete }: PhotoUploaderProps) {
+  const t = useTranslations("medical");
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -56,7 +55,7 @@ export default function PhotoUploader({ type, onSuccess, onAnalysisComplete }: P
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      setError("Пожалуйста, загрузите изображение (JPEG, PNG).");
+      setError(t("invalidImageFormat"));
       return;
     }
 
@@ -84,7 +83,7 @@ export default function PhotoUploader({ type, onSuccess, onAnalysisComplete }: P
       }
     } catch (err: any) {
       console.error("Upload failed", err);
-      setError(err.message || "Ошибка при анализе фото. Попробуйте еще раз.");
+      setError(err.message || t("analysisError"));
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -102,7 +101,7 @@ export default function PhotoUploader({ type, onSuccess, onAnalysisComplete }: P
         </div>
         <div className="flex-1">
           <h3 className="text-[1.0625rem] font-extrabold text-[#001d3d] leading-tight">
-            {config.title}
+            {t(config.titleKey)}
           </h3>
         </div>
       </div>
@@ -110,7 +109,7 @@ export default function PhotoUploader({ type, onSuccess, onAnalysisComplete }: P
       {/* Description */}
       <div className="flex-1 mb-8">
         <p className="text-[0.875rem] text-slate-500 leading-relaxed font-medium">
-          {config.description}
+          {t(config.descriptionKey)}
         </p>
       </div>
 
@@ -143,7 +142,7 @@ export default function PhotoUploader({ type, onSuccess, onAnalysisComplete }: P
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            Анализ...
+            {t("analyzing")}
           </span>
         ) : (
           <span className="flex items-center gap-2">
@@ -151,7 +150,7 @@ export default function PhotoUploader({ type, onSuccess, onAnalysisComplete }: P
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            {config.buttonLabel}
+            {t("takePhoto")}
           </span>
         )}
       </label>

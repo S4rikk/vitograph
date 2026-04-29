@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 type Status = "optimal" | "low" | "high" | "critical_low" | "critical_high";
 
 type ResultCardProps = {
@@ -11,34 +13,34 @@ type ResultCardProps = {
 
 const STATUS_CONFIG: Record<
   Status,
-  { label: string; color: string; bg: string; icon: string }
+  { labelKey: string; color: string; bg: string; icon: string }
 > = {
   optimal: {
-    label: "Норма",
+    labelKey: "optimal",
     color: "text-success",
     bg: "bg-green-50",
     icon: "✓",
   },
   low: {
-    label: "Ниже нормы",
+    labelKey: "low",
     color: "text-warning",
     bg: "bg-amber-50",
     icon: "↓",
   },
   high: {
-    label: "Выше нормы",
+    labelKey: "high",
     color: "text-warning",
     bg: "bg-amber-50",
     icon: "↑",
   },
   critical_low: {
-    label: "Критический",
+    labelKey: "critical",
     color: "text-error",
     bg: "bg-red-50",
     icon: "↓↓",
   },
   critical_high: {
-    label: "Критический",
+    labelKey: "critical",
     color: "text-error",
     bg: "bg-red-50",
     icon: "↑↑",
@@ -59,6 +61,7 @@ export default function ResultCard({
   refMin,
   refMax,
 }: ResultCardProps) {
+  const t = useTranslations("medical");
   const cfg = STATUS_CONFIG[status];
 
   return (
@@ -88,7 +91,7 @@ export default function ResultCard({
           </p>
           {refMin !== undefined && refMax !== undefined && (
             <p className="mt-1 text-xs text-ink-faint">
-              Реф. диапазон: {refMin}–{refMax} {unit}
+              {t("refRange")}: {refMin}–{refMax} {unit}
             </p>
           )}
         </div>
@@ -101,7 +104,7 @@ export default function ResultCard({
           `}
         >
           <span aria-hidden="true">{cfg.icon}</span>
-          {cfg.label}
+          {t(`statuses.${cfg.labelKey}`)}
         </span>
       </div>
     </article>

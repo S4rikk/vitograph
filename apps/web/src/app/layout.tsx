@@ -5,17 +5,23 @@ import { createClient } from "@/lib/supabase/server";
 import UserProfileSheet from "@/components/profile/UserProfileSheet";
 import Logo from "@/components/ui/Logo";
 import { FontScaleProvider } from "@/components/providers/FontScaleProvider";
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages, getLocale } from 'next-intl/server';
 
-export const metadata: Metadata = {
-  title: "VITOGRAPH — Feed your cells, find balance",
-  description:
-    "Personal health tracker: medical results analysis and food diary.",
-  icons: {
-    icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-    ],
-  },
-};
+import { getTranslations } from 'next-intl/server';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('auth');
+  return {
+    title: t('title') + " — Feed your cells, find balance",
+    description: t('subtitle'),
+    icons: {
+      icon: [
+        { url: "/icon.svg", type: "image/svg+xml" },
+      ],
+    },
+  };
+}
 
 export default async function RootLayout({
   children,
@@ -27,8 +33,11 @@ export default async function RootLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="ru" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{
           __html: `
@@ -46,6 +55,7 @@ export default async function RootLayout({
         />
       </head>
       <body className="h-[100dvh] flex flex-col bg-surface-muted sm:h-auto sm:min-h-screen sm:block">
+        <NextIntlClientProvider messages={messages}>
         <FontScaleProvider>
           {user && (
             <header className="shrink-0 bg-white border-b border-border px-4 py-2 sm:px-6 sm:py-3 flex items-center justify-between">
@@ -58,6 +68,7 @@ export default async function RootLayout({
           )}
           <main className="flex-1 flex flex-col min-h-0">{children}</main>
         </FontScaleProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

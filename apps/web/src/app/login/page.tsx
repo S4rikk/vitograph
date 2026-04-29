@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -11,6 +12,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
+  const t = useTranslations('auth');
 
   // Handle Capacitor background session restoration
   useEffect(() => {
@@ -59,17 +61,17 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-xl">
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-ink">
-            VITOGRAPH
+            {t('title')}
           </h2>
           <p className="mt-2 text-sm text-ink-muted">
-            Sign in to your account
+            {t('subtitle')}
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
           <div className="-space-y-px rounded-md shadow-sm">
             <div>
               <label htmlFor="email-address" className="sr-only">
-                Email address
+                {t('email')}
               </label>
               <input
                 id="email-address"
@@ -80,12 +82,12 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="relative block w-full rounded-t-md border border-border px-3 py-2 text-ink placeholder-ink-muted focus:z-10 focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm"
-                placeholder="Email address"
+                placeholder={t('email')}
               />
             </div>
             <div>
               <label htmlFor="password" className="sr-only">
-                Password
+                {t('password')}
               </label>
               <input
                 id="password"
@@ -96,7 +98,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="relative block w-full rounded-b-md border border-border px-3 py-2 text-ink placeholder-ink-muted focus:z-10 focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm"
-                placeholder="Password"
+                placeholder={t('password')}
               />
             </div>
           </div>
@@ -113,7 +115,7 @@ export default function LoginPage() {
               disabled={loading}
               className="group relative flex w-full justify-center rounded-md border border-transparent bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50"
             >
-              {loading ? "Signing in..." : "Sign in"}
+              {loading ? t('signingIn') : t('signIn')}
             </button>
           </div>
         </form>

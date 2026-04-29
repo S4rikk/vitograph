@@ -145,7 +145,7 @@ async function lookupCachedNotes(
     }
 
     if (data) {
-        for (const row of data) {
+        for (const row of data as any[]) {
             cache.set(`${row.standardized_slug}::${row.flag}`, row.clinical_note);
         }
     }
@@ -163,14 +163,14 @@ async function saveCachedNotes(
     if (entries.length === 0) return;
 
     try {
-        await supabase
-            .from("biomarker_note_cache")
+        await (supabase
+            .from("biomarker_note_cache") as any)
             .upsert(
                 entries.map((e) => ({
                     standardized_slug: e.slug,
                     flag: e.flag,
                     clinical_note: e.note,
-                })),
+                })) as any[],
                 { onConflict: "standardized_slug,flag" },
             );
     } catch (err) {
@@ -185,6 +185,7 @@ export async function runLabReportAnalyzer(
     userContext: string,
     userId: string,
     token: string,
+    locale: string = "ru"
 ): Promise<LabDiagnosticReport> {
     const currentHash = generateBiomarkersHash(biomarkerResults);
     const supabaseUrl = process.env.SUPABASE_URL;
@@ -290,7 +291,7 @@ SUPPLEMENTS: ${JSON.stringify(supps ? supps : [])}
     const result = await callLlmStructured({
         schema: LabDiagnosticReportSchema,
         schemaName: "lab_diagnostic_report",
-        systemPrompt: LAB_DIAGNOSTIC_PROMPT.template.replace("{userContext}", userContext),
+        systemPrompt: LAB_DIAGNOSTIC_PROMPT.template.replace("{userContext}", userContext).replace("{locale}", locale).replace("{locale}", locale),
         userMessage,
         model: labAnalysisModel,
         temperature: LAB_ANALYSIS_TEMPERATURE,

@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { apiClient } from "@/lib/api-client";
 import { Bug, Send, Image as ImageIcon, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useTranslations } from "next-intl";
 
 export function FeedbackButton({ className }: { className?: string }) {
     const [open, setOpen] = useState(false);
@@ -13,12 +14,13 @@ export function FeedbackButton({ className }: { className?: string }) {
     const [file, setFile] = useState<File | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const t = useTranslations("diary.feedback");
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selected = e.target.files?.[0];
         if (selected) {
             if (selected.size > 5 * 1024 * 1024) {
-                alert("Файл слишком большой. Максимальный размер 5MB.");
+                alert(t("fileTooLarge"));
                 return;
             }
             setFile(selected);
@@ -50,7 +52,7 @@ export function FeedbackButton({ className }: { className?: string }) {
                     .upload(fileName, file);
 
                 if (error) {
-                    throw new Error("Не удалось загрузить изображение");
+                    throw new Error(t("uploadFailed"));
                 }
 
                 const { data: publicData } = supabase.storage
@@ -66,12 +68,12 @@ export function FeedbackButton({ className }: { className?: string }) {
             setOpen(false);
             setMessage("");
             setFile(null);
-            alert("Спасибо за обратную связь!");
+            alert(t("thanks"));
         } catch (err: any) {
             if (err.message === "429") {
-                alert("Вы отправляете отзывы слишком часто. Подождите немного.");
+                alert(t("tooManyRequests"));
             } else {
-                alert(err.message || "Произошла ошибка при отправке отзыва.");
+                alert(err.message || t("genericError"));
             }
         } finally {
             setIsSubmitting(false);
@@ -89,7 +91,7 @@ export function FeedbackButton({ className }: { className?: string }) {
                     className="relative flex items-center justify-center gap-2 rounded-full bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:bg-indigo-700 hover:-translate-y-1 hover:shadow-xl active:scale-95"
                 >
                     <Bug className="h-5 w-5 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
-                    <span className="hidden sm:inline">Сообщить об ошибке</span>
+                    <span className="hidden sm:inline">{t("reportBug")}</span>
                 </button>
             </div>
 
@@ -99,9 +101,9 @@ export function FeedbackButton({ className }: { className?: string }) {
                     onPointerDownOutside={(e) => e.preventDefault()}
                 >
                     <DialogHeader className="mb-4">
-                        <DialogTitle>Обратная связь 🚀</DialogTitle>
+                        <DialogTitle>{t("dialogTitle")}</DialogTitle>
                         <DialogDescription>
-                            Нашли ошибку или есть идея как улучшить приложение? Напишите нам, мы все читаем!
+                            {t("dialogDesc")}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -113,14 +115,14 @@ export function FeedbackButton({ className }: { className?: string }) {
                                 onClick={() => setCategory("bug")}
                                 className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${category === "bug" ? "bg-white text-ink shadow-sm" : "text-ink-muted hover:text-ink"}`}
                             >
-                                Баг (Ошибка)
+                                {t("categoryBug")}
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setCategory("suggestion")}
                                 className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${category === "suggestion" ? "bg-white text-ink shadow-sm" : "text-ink-muted hover:text-ink"}`}
                             >
-                                Предложение
+                                {t("categorySuggestion")}
                             </button>
                         </div>
 
@@ -129,7 +131,7 @@ export function FeedbackButton({ className }: { className?: string }) {
                             <textarea
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
-                                placeholder="Подробно опишите, что случилось..."
+                                placeholder={t("placeholder")}
                                 maxLength={2000}
                                 required
                                 className="min-h-[120px] w-full resize-y rounded-xl border border-border bg-surface-muted p-3 text-sm text-ink placeholder:text-ink-faint focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100"
@@ -151,7 +153,7 @@ export function FeedbackButton({ className }: { className?: string }) {
                                         className="flex items-center gap-1.5 text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors"
                                     >
                                         <ImageIcon className="w-4 h-4" />
-                                        Прикрепить скриншот
+                                        {t("attachScreenshot")}
                                     </button>
                                 </div>
                                 <div className="text-right text-xs text-ink-muted">
@@ -184,7 +186,7 @@ export function FeedbackButton({ className }: { className?: string }) {
                                 disabled={isSubmitting}
                                 className="w-full rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-ink-muted transition-colors hover:bg-surface-hover hover:text-ink disabled:opacity-50 sm:w-auto"
                             >
-                                Отмена
+                                {t("cancel")}
                             </button>
                             <button
                                 type="submit"
@@ -197,12 +199,12 @@ export function FeedbackButton({ className }: { className?: string }) {
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                         </svg>
-                                        Отправка...
+                                        {t("sending")}
                                     </>
                                 ) : (
                                     <>
                                         <Send className="h-4 w-4" />
-                                        Отправить
+                                        {t("send")}
                                     </>
                                 )}
                             </button>

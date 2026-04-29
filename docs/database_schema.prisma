@@ -340,6 +340,7 @@ model Profile {
   activeNutritionTargets Json @default("{}") @map("active_nutrition_targets") @db.JsonB
 
   aiName    String?  @map("ai_name")
+  locale    String   @default("ru")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 

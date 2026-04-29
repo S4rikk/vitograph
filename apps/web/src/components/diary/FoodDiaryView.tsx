@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Info, ChevronUp } from "lucide-react";
+import { useTranslations } from "next-intl";
 import ChatMessage from "./ChatMessage";
 import { detectAndParseFoodLog } from "./food-log-parser";
 import { nutrientColors } from "@/lib/food-diary/nutrient-colors";
@@ -23,17 +24,20 @@ type Message = {
   imageUrl?: string;
 };
 
-const INITIAL_MESSAGES: Message[] = [
-  {
-    id: 0,
-    variant: "system",
-    text: "Привет! Я помогу вести дневник питания. Введите название блюда и его вес — я всё запомню 📋",
-    time: "09:00",
-  },
-];
-
 export default function FoodDiaryView() {
-  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
+  const t = useTranslations('diary');
+  const tCommon = useTranslations('common');
+
+  const initialMessages: Message[] = useMemo(() => ([
+    {
+      id: 0,
+      variant: "system",
+      text: t('greeting'),
+      time: "09:00",
+    }
+  ]), [t]);
+
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isThinking, setIsThinking] = useState(false);
   
   // Weight Modal State
@@ -130,10 +134,10 @@ export default function FoodDiaryView() {
               imageUrl,
             };
           });
-          setMessages([...INITIAL_MESSAGES, ...mapped]);
+          setMessages([...initialMessages, ...mapped]);
         } else {
           // If no history for this date, just show the greeting
-          setMessages([...INITIAL_MESSAGES]);
+          setMessages([...initialMessages]);
         }
       } catch (err) {
         console.error("Failed to load diary history:", err);
@@ -268,7 +272,7 @@ export default function FoodDiaryView() {
         const errorMsg: Message = {
           id: nextId.current++,
           variant: "system",
-          text: `⚠️ Ошибка связи с AI: ${(err as Error).message}`,
+          text: `⚠️ ${t('aiError')}${(err as Error).message}`,
           time,
         };
         setMessages((prev) => [...prev, errorMsg]);
@@ -283,7 +287,7 @@ export default function FoodDiaryView() {
   const handleRedZoneConfirm = useCallback((food: string, weight: string) => {
     const now = new Date();
     const time = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
-    const textPayload = `Да, записывай ${food} — ${weight}г`;
+    const textPayload = t('redZoneConfirm', { food, weight });
     const userMsg: Message = { id: nextId.current++, variant: "user", text: textPayload, time };
     setMessages((prev) => [...prev, userMsg]);
     setIsThinking(true);
@@ -303,7 +307,7 @@ export default function FoodDiaryView() {
         triggerRefresh();
       })
       .catch((err) => {
-        setMessages((prev) => [...prev, { id: nextId.current++, variant: "system", text: `⚠️ Ошибка: ${(err as Error).message}`, time }]);
+        setMessages((prev) => [...prev, { id: nextId.current++, variant: "system", text: `⚠️ ${t('aiError')}${(err as Error).message}`, time }]);
       })
       .finally(() => setIsThinking(false));
   }, [threadId, fetchDailyMicros, selectedDate, supabase]);
@@ -311,7 +315,7 @@ export default function FoodDiaryView() {
   const handleRedZoneReject = useCallback(() => {
     const now = new Date();
     const time = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
-    const textPayload = "Нет, не надо. Подберёшь здоровую альтернативу?";
+    const textPayload = t('redZoneReject');
     const userMsg: Message = { id: nextId.current++, variant: "user", text: textPayload, time };
     setMessages((prev) => [...prev, userMsg]);
     setIsThinking(true);
@@ -321,14 +325,14 @@ export default function FoodDiaryView() {
         setMessages((prev) => [...prev, { id: nextId.current++, variant: "system", text: payload.response, time }]);
       })
       .catch((err) => {
-        setMessages((prev) => [...prev, { id: nextId.current++, variant: "system", text: `⚠️ Ошибка: ${(err as Error).message}`, time }]);
+        setMessages((prev) => [...prev, { id: nextId.current++, variant: "system", text: `⚠️ ${t('aiError')}${(err as Error).message}`, time }]);
       })
       .finally(() => setIsThinking(false));
   }, [threadId]);
   // ── Meal Actions ──────────────────────────────────────────────────
 
   const handleDeleteMeal = useCallback(async (id: string) => {
-    if (!window.confirm("Вы уверены, что хотите удалить этот приём пищи?")) return;
+    if (!window.confirm(t('deleteConfirm'))) return;
 
     try {
       await apiClient.deleteMealLog(id);
@@ -422,7 +426,7 @@ export default function FoodDiaryView() {
             time: `${dateStr.getHours().toString().padStart(2, "0")}:${dateStr.getMinutes().toString().padStart(2, "0")}`,
           };
         });
-        setMessages([...INITIAL_MESSAGES, ...mapped]);
+        setMessages([...initialMessages, ...mapped]);
       }
 
       setEditingMealId(null);
@@ -483,7 +487,7 @@ export default function FoodDiaryView() {
           {isThinking && (
             <div className="flex justify-start animate-pulse">
               <div className="bg-surface-muted text-ink-muted rounded-2xl rounded-tl-none px-4 py-2 text-sm">
-                Думаю... 🧠
+                {t('thinking')}
               </div>
             </div>
           )}
@@ -516,9 +520,9 @@ export default function FoodDiaryView() {
       {editingMealId && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
               <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[320px] p-6 flex flex-col gap-4 animate-in zoom-in-95 duration-200">
-                  <h3 className="text-lg font-bold text-ink">Изменить вес</h3>
+                  <h3 className="text-lg font-bold text-ink">{t('editWeight')}</h3>
                   <div className="flex flex-col gap-1">
-                      <label className="text-xs text-ink-muted uppercase font-bold tracking-wider">Новый вес (граммы)</label>
+                      <label className="text-xs text-ink-muted uppercase font-bold tracking-wider">{t('newWeight')}</label>
                       <input 
                           type="number" 
                           value={editWeight} 
@@ -533,14 +537,14 @@ export default function FoodDiaryView() {
                           onClick={() => setEditingMealId(null)}
                           className="flex-1 px-4 py-2.5 rounded-xl border border-border text-ink font-semibold hover:bg-surface-muted transition-colors"
                       >
-                          Отмена
+                          {tCommon('cancel')}
                       </button>
                       <button 
                           onClick={handleUpdateWeight}
                           disabled={isUpdating}
                           className="flex-1 px-4 py-2.5 rounded-xl bg-primary-600 text-white font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50"
                       >
-                          {isUpdating ? "Сохраняю..." : "Сохранить"}
+                          {isUpdating ? tCommon('saving') : tCommon('save')}
                       </button>
                   </div>
               </div>

@@ -6,6 +6,7 @@ import { apiClient } from "@/lib/api-client";
 import type { FoodRecognitionResult, LabelScannerOutput } from "@/lib/api-client";
 import { MealScoreBadge } from "./MealScoreBadge";
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 type FoodInputFormProps = {
   /** Called when the form is submitted with valid data. */
   onSubmit: (name: string, weight: number, nutritionalContext?: any) => void;
@@ -27,6 +28,8 @@ const REACTION_STYLES: Record<string, { bg: string; border: string; text: string
  * - "Вес (г)" (weight in grams)
  */
 export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputFormProps) {
+  const t = useTranslations('diary');
+  const tCommon = useTranslations('common');
   const [name, setName] = useState("");
   const [weight, setWeight] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -184,7 +187,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
               setWeight("");
             }}
             className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-black/5 text-gray-500 hover:text-gray-700 transition-colors"
-            title="Отменить и очистить"
+            title={t('cancelAndClear')}
           >
             <X className="w-4 h-4" />
           </button>
@@ -198,7 +201,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
               <div className="rounded-lg overflow-hidden shrink-0 mt-auto max-w-[120px]">
                 <img
                   src={photoResult.imageUrl}
-                  alt="Фото еды"
+                  alt={t('takePhoto')}
                   className="w-full object-cover rounded-lg aspect-[3/4]"
                 />
               </div>
@@ -299,7 +302,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
-          Анализирую еду…
+          {t('analyzingFood')}
         </div>
       )}
 
@@ -309,7 +312,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
-          Чтение состава…
+          {t('analyzingLabel')}
         </div>
       )}
 
@@ -321,7 +324,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
         {/* Row 1: Dish name — full width */}
         <div className="w-full">
           <label htmlFor="food-name" className="block text-xs font-medium text-ink-muted mb-1">
-            Блюдо
+            {t('dishName')}
           </label>
           {/* Camera — with capture (forces camera on mobile) */}
           <input
@@ -367,7 +370,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
           <textarea
             ref={nameRef}
             id="food-name"
-            placeholder="Овсянка"
+            placeholder={t('dishName')}
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => {
@@ -386,13 +389,13 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
         <div className="flex items-end gap-2">
           {/* Camera button */}
           <div className="flex-1 flex flex-col gap-0.5">
-            <span className="text-xs font-medium text-ink-muted">Блюдо</span>
+            <span className="text-xs font-medium text-ink-muted">{t('dishName')}</span>
             <button
               type="button"
               onClick={handleCameraClick}
               disabled={isAnalyzing || isAnalyzingLabel}
               className={`h-[30px] w-full rounded-xl bg-primary-50 text-primary-600 hover:bg-primary-100 hover:text-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-200 shadow-sm flex items-center justify-center ${isAnalyzing || isAnalyzingLabel ? "opacity-50 cursor-not-allowed" : ""}`}
-              title="Сфотографировать еду"
+              title={t('takePhoto')}
             >
               <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <path stroke="currentColor" strokeLinejoin="round" strokeWidth="2" d="M4 18V8a1 1 0 0 1 1-1h1.5l1.707-1.707A1 1 0 0 1 8.914 5h6.172a1 1 0 0 1 .707.293L17.5 7H19a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z" />
@@ -403,13 +406,13 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
 
           {/* Label Scanner button */}
           <div className="flex-1 flex flex-col gap-0.5">
-            <span className="text-xs font-medium text-ink-muted">Этикетка</span>
+            <span className="text-xs font-medium text-ink-muted">{t('labelScanner')}</span>
             <button
               type="button"
               onClick={handleLabelClick}
               disabled={isAnalyzing || isAnalyzingLabel}
               className={`h-[30px] w-full rounded-xl bg-purple-50 text-purple-600 hover:bg-purple-100 hover:text-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-200 shadow-sm flex items-center justify-center ${isAnalyzing || isAnalyzingLabel ? "opacity-50 cursor-not-allowed" : ""}`}
-              title="Отсканировать состав"
+              title={t('scanLabel')}
             >
               <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 12h14M5 16h14m-3.5 4H19a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4.5"/>
@@ -420,7 +423,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
           {/* Weight input */}
           <div className="flex-1 flex flex-col gap-0.5">
             <label htmlFor="food-weight" className="text-xs font-medium text-ink-muted">
-              Вес (г)
+              {t('weightLabel')}
             </label>
             <input
               id="food-weight"
@@ -437,7 +440,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
           <button
             type="submit"
             disabled={!isValid}
-            aria-label="Отправить"
+            aria-label={t('send')}
             className={`cursor-pointer flex-shrink-0 rounded-xl transition-all duration-200 min-h-[30px] min-w-[30px] flex items-center justify-center self-end ${isValid ? "bg-primary-600 text-white shadow-sm hover:bg-primary-700 hover:shadow-md active:scale-95" : "bg-surface-hover text-ink-faint cursor-not-allowed"}`}
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -458,7 +461,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
           <div className="photo-action-sheet relative z-10 w-full max-w-md rounded-t-2xl bg-white p-4 pb-8 shadow-2xl animate-slide-up">
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-gray-300" />
             <h3 className="text-center text-sm font-semibold text-ink mb-4">
-              Добавить фото еды
+              {t('photoMenuTitle')}
             </h3>
             <button
               type="button"
@@ -468,7 +471,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
               }}
               className="w-full rounded-xl bg-primary-50 p-4 text-left text-sm font-medium text-primary-700 hover:bg-primary-100 mb-2 flex items-center gap-3"
             >
-              📸 Сделать снимок
+              {t('takePicture')}
             </button>
             <button
               type="button"
@@ -478,14 +481,14 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
               }}
               className="w-full rounded-xl bg-surface-muted p-4 text-left text-sm font-medium text-ink hover:bg-surface-hover mb-2 flex items-center gap-3"
             >
-              🖼️ Выбрать из галереи
+              {t('chooseGallery')}
             </button>
             <button
               type="button"
               onClick={() => setShowPhotoMenu(false)}
               className="w-full rounded-xl p-3 text-center text-sm text-ink-muted hover:bg-surface-hover"
             >
-              Отмена
+              {tCommon('cancel')}
             </button>
           </div>
         </div>
@@ -503,7 +506,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
           <div className="photo-action-sheet relative z-10 w-full max-w-md rounded-t-2xl bg-white p-4 pb-8 shadow-2xl animate-slide-up">
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-gray-300" />
             <h3 className="text-center text-sm font-semibold text-ink mb-4">
-              Сканировать этикетку
+              {t('labelMenuTitle')}
             </h3>
             <button
               type="button"
@@ -513,7 +516,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
               }}
               className="w-full rounded-xl bg-purple-50 p-4 text-left text-sm font-medium text-purple-700 hover:bg-purple-100 mb-2 flex items-center gap-3"
             >
-              📸 Сделать снимок
+              {t('takePicture')}
             </button>
             <button
               type="button"
@@ -523,14 +526,14 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
               }}
               className="w-full rounded-xl bg-surface-muted p-4 text-left text-sm font-medium text-ink hover:bg-surface-hover mb-2 flex items-center gap-3"
             >
-              🖼️ Выбрать из галереи
+              {t('chooseGallery')}
             </button>
             <button
               type="button"
               onClick={() => setShowLabelMenu(false)}
               className="w-full rounded-xl p-3 text-center text-sm text-ink-muted hover:bg-surface-hover"
             >
-              Отмена
+              {tCommon('cancel')}
             </button>
           </div>
         </div>

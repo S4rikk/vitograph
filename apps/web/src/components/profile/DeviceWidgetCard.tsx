@@ -3,6 +3,7 @@
 import { ReactNode } from "react";
 import { Pencil, Camera } from "lucide-react";
 import type { MetricItem } from "@/types/wearable-types";
+import { useTranslations } from "next-intl";
 
 interface DeviceWidgetCardProps {
     /** Card title (e.g. "Sleep & Recovery"). */
@@ -33,11 +34,12 @@ export default function DeviceWidgetCard({
     onManualEntry,
     onScreenshotUpload,
 }: DeviceWidgetCardProps) {
+    const t = useTranslations("profile");
     const hasAnyData = metrics.some(
         (m) => m.value !== null && m.value !== undefined && m.value !== "",
     );
 
-    const displayStatus = statusText ?? (hasAnyData ? "Обновлено" : "Нет данных");
+    const displayStatus = statusText ?? (hasAnyData ? t("updated") : t("noData"));
 
     return (
         <div className="flex flex-col rounded-2xl border border-divider bg-white p-5 shadow-sm transition-all hover:shadow-md hover:border-primary-100 group">
@@ -102,14 +104,14 @@ export default function DeviceWidgetCard({
                     className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-surface-muted px-3 py-2 text-[0.8125rem] font-semibold text-ink-main transition-colors hover:bg-surface-hover active:scale-95 cursor-pointer"
                 >
                     <Pencil size={14} />
-                    Ввести вручную
+                    {t("manualEntry")}
                 </button>
                 <button
                     onClick={onScreenshotUpload}
                     className="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-divider bg-white px-3 py-2 text-[0.8125rem] font-semibold text-primary-600 shadow-sm transition-colors hover:bg-primary-50 hover:border-primary-100 active:scale-95 cursor-pointer"
                 >
                     <Camera size={14} />
-                    Скриншот
+                    {t("screenshot")}
                 </button>
             </div>
         </div>

@@ -73,7 +73,7 @@ export async function fetchKnowledgeBaseContext(
     if (!response.ok) {
       throw new Error(`Failed to generate query embedding: ${response.statusText}`);
     }
-    const { embedding: queryEmbedding } = await response.json();
+    const { embedding: queryEmbedding } = await response.json() as any;
 
     // Call RPC hybrid_search_kb
     const supabase = createClient(supabaseUrl, supabaseKey, {

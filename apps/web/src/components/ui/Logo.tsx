@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslations } from 'next-intl';
 
 interface LogoProps {
   size?: 'sm' | 'lg';
@@ -6,6 +7,7 @@ interface LogoProps {
 }
 
 export default function Logo({ size = 'sm', showSubtitle = false }: LogoProps) {
+  const t = useTranslations('common');
   return (
     <div className="flex flex-col items-center">
       <div className="flex items-center">

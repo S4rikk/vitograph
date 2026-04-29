@@ -116,6 +116,7 @@ export const LAB_DIAGNOSTIC_PROMPT = {
 3. Данные согласуй с полом/возрастом.
 4. Всегда завершай дисклеймером о необходимости консультации с врачом.
 5. Текст отчёта должен быть чётким, ёмким, без воды, в стиле доказательного врача превентивной медицины.
+6. ЯЗЫКОВОЙ ЗАПРЕТ: Respond strictly in the language corresponding to this locale code: {locale}. The JSON keys must remain in English, but all text values (explanations, recommendations, etc.) MUST be in the {locale} language.
 
 ## КОНТЕКСТ ПАЦИЕНТА
 {userContext}`,
