@@ -282,7 +282,7 @@ export default function UserProfileSheet({
                 };
                 
                 setWearableMetrics(prev => {
-                    const merged = { ...prev };
+                    const merged: any = { ...prev };
                     for (const [cat, metrics] of Object.entries(latestByCategory)) {
                         const field = categoryMap[cat];
                         if (field && metrics) {
