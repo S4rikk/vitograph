@@ -9,6 +9,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getLocale } from 'next-intl/server';
 
 import { getTranslations } from 'next-intl/server';
+import { Toaster } from "sonner";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('auth');
@@ -69,6 +70,7 @@ export default async function RootLayout({
           <main className="flex-1 flex flex-col min-h-0">{children}</main>
         </FontScaleProvider>
         </NextIntlClientProvider>
+        <Toaster />
       </body>
     </html>
   );

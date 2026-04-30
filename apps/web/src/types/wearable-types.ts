@@ -5,11 +5,23 @@
  * Each category maps to a DeviceWidgetCard in the profile sheet.
  */
 
+/** A single historical data point for a metric. */
+export interface MetricHistoryPoint {
+  value: number | null;
+  date: string; // ISO date string (e.g., "2026-04-28T12:00:00Z")
+}
+
 /** Generic metric tuple used by DeviceWidgetCard for rendering rows. */
 export interface MetricItem {
+  /** Unique metric key, e.g. "sleepDurationHours", "restingHeartRateBpm". Used for trend color logic. */
+  id: string;
   label: string;
   value: string | number | null;
   unit: string;
+  /** Last 2-3 PREVIOUS historical values (newest first). Does NOT include the current value. */
+  history?: MetricHistoryPoint[];
+  /** Optional custom formatter for history values. Overrides default "value + unit" display. */
+  historyValueFormatter?: (val: number) => string;
 }
 
 /** Field definition for ManualEntryDialog form generation. */

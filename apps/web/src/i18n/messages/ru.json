@@ -96,7 +96,8 @@
     "yesterday": "Вчера",
     "returnToToday": "Вернуться к сегодня",
     "chatMessage": {
-      "thinkAboutIt": "Подумаю над этим..."
+      "thinkAboutIt": "Подумаю над этим...",
+      "addFood": "{food}"
     },
     "feedback": {
       "fileTooLarge": "Файл слишком большой",
@@ -266,6 +267,13 @@
     "dangerZone": "Опасная зона",
     "dangerZoneDesc": "Удаление аккаунта приведет к безвозвратной потере всех ваших данных, включая анализы, историю чатов и настройки профиля.",
     "wearablesSyncSoon": "Автоматическая синхронизация с Apple Health и Google Fit — скоро.",
+    "ocrUnknownCategory": "Не удалось распознать показатели на фото",
+    "ocrSuccess": "Данные считаны. Проверьте результат.",
+    "ocrError": "Ошибка при обработке скриншота",
+    "clearMemoryBtn": "Очистить память ИИ",
+    "clearMemoryConfirm": "Вы уверены? ИИ забудет все факты о вас, ваши предпочтения и эмоциональный профиль.",
+    "clearMemorySuccess": "Долговременная память очищена",
+    "clearMemoryError": "Ошибка при очистке памяти",
     "screenshotOCRSoon": "OCR для скриншотов Apple Health — скоро!",
     "aboutTitle": "О приложении (About)",
     "nothingFound": "Ничего не найдено",
@@ -302,7 +310,24 @@
       "pillar3Desc": "ИИ-ассистент замечает скрытые дефициты и корреляции в вашем дневнике питания еще до того, как они превратятся в проблему, помогая корректировать состояние точечными изменениями в еде и добавках.",
       "closing": "Мы не заменяем врачей. Мы даем вам знания, инструменты и ежедневную поддержку, чтобы вы могли взять контроль над своей биологией в собственные руки."
     },
-    "aboutSection": "О вас"
+    "aboutSection": "О вас",
+    "changePassword": {
+      "title": "Безопасность",
+      "currentPassword": "Текущий пароль",
+      "newPassword": "Новый пароль",
+      "confirmPassword": "Подтвердите пароль",
+      "submit": "Изменить пароль",
+      "submitting": "Изменение...",
+      "success": "Пароль успешно изменён ✓",
+      "errorMismatch": "Пароли не совпадают",
+      "errorMinLength": "Минимум 8 символов",
+      "errorCurrentRequired": "Введите текущий пароль",
+      "strengthWeak": "Слабый",
+      "strengthMedium": "Средний",
+      "strengthStrong": "Надёжный"
+    },
+    "hoursShort": "ч",
+    "minsShort": "мин"
   },
   "lifestyle": {
     "activityLevel": "Уровень активности",
@@ -426,6 +451,7 @@
     "tempVariation": "Отклонение температуры",
     "spo2": "Кислород в крови (SpO2)",
     "bloodPressureLabel": "Давление",
+    "screenshotComingSoon": "OCR для скриншотов — скоро!",
     "units": {
       "h": "ч",
       "ms": "мс",

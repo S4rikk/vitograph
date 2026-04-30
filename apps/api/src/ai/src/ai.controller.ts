@@ -17,12 +17,13 @@ import {
   analyzeSymptomCorrelation,
   generateDiagnosticHypothesis,
 } from "./ai-triggers.js";
-import { uploadAndRotateNailPhoto, uploadAndRotateFoodPhoto } from "./lib/storage.js";
+import { uploadNailPhoto, uploadFoodPhoto, uploadTonguePhoto } from "./lib/storage.js";
 import { sendFcmNotification } from "./lib/fcm-sender.js";
 import { runSomaticVisionAnalyzer } from "./graph/vision-analyzer.js";
 import { runFoodVisionAnalyzer } from "./graph/food-vision-analyzer.js";
 import { runLabReportAnalyzer } from "./graph/lab-report-analyzer.js";
 import { runLabelScanner } from "./graph/label-scanner.js";
+import { runWearableVisionAnalyzer } from "./graph/wearable-vision-analyzer.js";
 import * as fs from "fs";
 import type {
   FoodContext,
@@ -36,6 +37,7 @@ import type {
   AnalyzeSomaticRequest,
   AnalyzeFoodRequest,
   AnalyzeLabelRequest,
+  AnalyzeWearableRequest,
 } from "./request-schemas.js";
 
 import { HumanMessage, SystemMessage, isAIMessageChunk } from "@langchain/core/messages";
@@ -1194,7 +1196,7 @@ export async function handleChat(
     if (req.user?.id) {
       const token = req.headers.authorization?.split(" ")[1];
       if (body.imageBase64 && token) {
-        finalImageUrl = await uploadAndRotateFoodPhoto(req.user.id, body.imageBase64, token);
+        finalImageUrl = await uploadFoodPhoto(req.user.id, body.imageBase64, token);
       }
 
       if (token) {
@@ -1512,7 +1514,7 @@ export async function handleChatStream(
     if (req.user?.id) {
       const token = req.headers.authorization?.split(" ")[1];
       if (body.imageBase64 && token) {
-        finalImageUrl = await uploadAndRotateFoodPhoto(req.user.id, body.imageBase64, token);
+        finalImageUrl = await uploadFoodPhoto(req.user.id, body.imageBase64, token);
       }
 
       if (token) {
@@ -1714,7 +1716,7 @@ export async function handleChatStream(
           redZoneConfirm: body.redZoneConfirm
         },
         streamMode: "messages",
-        recursionLimit: 5,
+        recursionLimit: 25,
       }
     );
 
@@ -1900,8 +1902,13 @@ export async function handleAnalyzeSomatic(
       return;
     }
 
-    // 1. Upload the base64 photo to Supabase Storage and rotate
-    const imageUrl = await uploadAndRotateNailPhoto(userId, body.imageBase64, token);
+    // 1. Upload the base64 photo to Supabase Storage with TTL
+    let imageUrl: string;
+    if (body.type === "tongue") {
+      imageUrl = await uploadTonguePhoto(userId, body.imageBase64, token);
+    } else {
+      imageUrl = await uploadNailPhoto(userId, body.imageBase64, token);
+    }
 
     // 2. Pass the public URL to the LangGraph Vision Node, alongside the target body part
     const result = await runSomaticVisionAnalyzer(imageUrl, userId, token, body.type);
@@ -2053,8 +2060,8 @@ export async function handleAnalyzeFood(
       return;
     }
 
-    // 1. Upload the base64 photo to Supabase Storage (food_photos bucket)
-    const imageUrl = await uploadAndRotateFoodPhoto(userId, body.imageBase64, token);
+    // 1. Upload the base64 photo to Supabase Storage (food_photos bucket) with TTL
+    const imageUrl = await uploadFoodPhoto(userId, body.imageBase64, token);
 
     // 2. Fetch user context (profile, deficits, dietary restrictions)
     const dbContext = await fetchUserContext(token, userId);
@@ -2524,6 +2531,63 @@ export async function handleClearChatHistory(
 }
 
 /**
+ * Endpoint to clear the long-term memory of the user.
+ * Deletes from user_memory_vectors, user_emotional_profile, and memory_consolidation_log.
+ */
+export async function handleClearLongTermMemory(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const userId = req.user?.id;
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!userId || !token) {
+      res.status(401).json({ success: false, error: "Unauthorized" });
+      return;
+    }
+
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error("Supabase credentials missing");
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    });
+
+    console.log(`[handleClearLongTermMemory] Clearing long-term memory for user ${userId}`);
+
+    const tables = ["user_memory_vectors", "user_emotional_profile", "memory_consolidation_log"];
+
+    for (const table of tables) {
+      const { error: dbError } = await supabase
+        .from(table)
+        .delete()
+        .eq("user_id", userId);
+
+      if (dbError) {
+        console.error(`[handleClearLongTermMemory] DB Error deleting from ${table}:`, dbError);
+        throw dbError;
+      }
+    }
+
+    res.json({
+      success: true,
+      message: "Long-term memory cleared successfully",
+    });
+  } catch (error: unknown) {
+    next(error);
+  }
+}
+
+/**
  * Deletes the current user's account and all associated data.
  * 1. Storage buckets (nail_photos, food_photos, lab_reports)
  * 2. Database records (via cascading delete on Profile)
@@ -2554,7 +2618,7 @@ export async function handleDeleteAccount(
     console.log(`[handleDeleteAccount] Beginning deletion for user: ${userId}`);
 
     // 1. Storage Cleanup
-    const buckets = ["lab_reports", "nail_photos", "food_photos"];
+    const buckets = ["nail_photos", "food_photos"]; // lab_reports no longer stored in buckets
     for (const bucket of buckets) {
       try {
         const { data: files, error: listError } = await supabaseAdmin.storage
@@ -3461,3 +3525,96 @@ export async function handlePushUnsubscribe(req: Request, res: Response, next: N
     next(err);
   }
 }
+
+/**
+ * Nightly Cron Job: Garbage Collector for temporary media files.
+ * Deletes expired files from Supabase Storage and corresponding rows from media_cleanup.
+ */
+export async function handleMediaCleanupCron(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error("Missing Supabase Service Role configuration");
+    }
+
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    // 1. Fetch expired records (limit 500 for safe batching)
+    const { data: expiredRecords, error: fetchError } = await supabaseAdmin
+      .from("media_cleanup")
+      .select("id, file_path, bucket_name")
+      .lt("expires_at", new Date().toISOString())
+      .limit(500);
+
+    if (fetchError) {
+      console.error("[MediaCleanup] Error fetching expired records:", fetchError);
+      throw fetchError;
+    }
+
+    if (!expiredRecords || expiredRecords.length === 0) {
+      res.json({ success: true, message: "No expired media to clean up." });
+      return;
+    }
+
+    console.log(`[MediaCleanup] Found ${expiredRecords.length} expired media records.`);
+
+    // 2. Group by bucket
+    const bucketGroups: Record<string, { ids: string[]; files: string[] }> = {};
+    for (const record of expiredRecords) {
+      if (!bucketGroups[record.bucket_name]) {
+        bucketGroups[record.bucket_name] = { ids: [], files: [] };
+      }
+      bucketGroups[record.bucket_name].ids.push(record.id);
+      bucketGroups[record.bucket_name].files.push(record.file_path);
+    }
+
+    let deletedCount = 0;
+
+    // 3. Delete from Storage and Database
+    for (const [bucket, group] of Object.entries(bucketGroups)) {
+      const { error: storageError } = await supabaseAdmin.storage
+        .from(bucket)
+        .remove(group.files);
+
+      if (storageError) {
+        console.error(`[MediaCleanup] Failed to delete files from bucket ${bucket}:`, storageError);
+        // Continue to the next bucket, don't delete these from DB so they are retried next time
+      } else {
+        // Only delete from DB if storage deletion succeeded
+        const { error: dbDeleteError } = await supabaseAdmin
+          .from("media_cleanup")
+          .delete()
+          .in("id", group.ids);
+
+        if (dbDeleteError) {
+          console.error(`[MediaCleanup] Failed to delete DB records for bucket ${bucket}:`, dbDeleteError);
+        } else {
+          deletedCount += group.ids.length;
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Media cleanup completed. Removed ${deletedCount} files.`,
+    });
+  } catch (error: unknown) {
+    next(error);
+  }
+}
+
+export const handleAnalyzeWearable = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { imageBase64 } = req.body as AnalyzeWearableRequest;
+    const result = await runWearableVisionAnalyzer(imageBase64);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -96,7 +96,8 @@
     "yesterday": "昨天",
     "returnToToday": "返回今天",
     "chatMessage": {
-      "thinkAboutIt": "Let me think about it..."
+      "thinkAboutIt": "Let me think about it...",
+      "addFood": "{food}"
     },
     "feedback": {
       "fileTooLarge": "File is too large",
@@ -266,6 +267,13 @@
     "dangerZone": "危险区域",
     "dangerZoneDesc": "删除账户将导致所有数据（包括化验、聊天记录和配置文件设置）的不可恢复丢失。",
     "wearablesSyncSoon": "与Apple Health和Google Fit的自动同步即将推出。",
+    "ocrUnknownCategory": "无法识别照片中的指标",
+    "ocrSuccess": "数据读取成功。请检查结果。",
+    "ocrError": "处理屏幕截图时出错",
+    "clearMemoryBtn": "清除AI记忆",
+    "clearMemoryConfirm": "您确定吗？AI将忘记关于您的所有事实、您的偏好和您的情感档案。",
+    "clearMemorySuccess": "长期记忆已清除",
+    "clearMemoryError": "清除记忆时出错",
     "screenshotOCRSoon": "Apple Health截图OCR即将推出！",
     "aboutTitle": "关于应用",
     "nothingFound": "没有找到",
@@ -302,7 +310,24 @@
       "pillar3Desc": "AI助手会在您的饮食日志中注意到隐藏的缺陷和关系，并在它们成为问题之前帮助通过食品和补充品的微调来纠正状况。",
       "closing": "我们不替代医生。我们为您提供工具来理解自己的身体，为细胞提供真正需要的东西，并找到理想的平衡。从您的档案开始，让科学和数据为您的长寿服务。"
     },
-    "aboutSection": "关于您"
+    "aboutSection": "关于您",
+    "changePassword": {
+      "title": "安全",
+      "currentPassword": "当前密码",
+      "newPassword": "新密码",
+      "confirmPassword": "确认密码",
+      "submit": "更改密码",
+      "submitting": "更改中...",
+      "success": "密码更改成功 ✓",
+      "errorMismatch": "密码不匹配",
+      "errorMinLength": "至少8个字符",
+      "errorCurrentRequired": "请输入当前密码",
+      "strengthWeak": "弱",
+      "strengthMedium": "中",
+      "strengthStrong": "强"
+    },
+    "hoursShort": "小时",
+    "minsShort": "分钟"
   },
   "lifestyle": {
     "activityLevel": "活动水平",

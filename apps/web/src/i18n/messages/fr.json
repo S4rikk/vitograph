@@ -96,7 +96,8 @@
     "yesterday": "Hier",
     "returnToToday": "Retourner à aujourd'hui",
     "chatMessage": {
-      "thinkAboutIt": "Let me think about it..."
+      "thinkAboutIt": "Let me think about it...",
+      "addFood": "{food}"
     },
     "feedback": {
       "fileTooLarge": "File is too large",
@@ -266,6 +267,13 @@
     "dangerZone": "Zone dangereuse",
     "dangerZoneDesc": "La suppression du compte entraînera la perte permanente de toutes vos données, y compris les analyses, l'historique des chats et les paramètres de profil.",
     "wearablesSyncSoon": "Synchronisation automatique avec Apple Health et Google Fit — bientôt.",
+    "ocrUnknownCategory": "Impossible de reconnaître les mesures sur la photo",
+    "ocrSuccess": "Données lues avec succès. Veuillez vérifier le résultat.",
+    "ocrError": "Erreur lors du traitement de la capture d'écran",
+    "clearMemoryBtn": "Effacer la mémoire de l'IA",
+    "clearMemoryConfirm": "Êtes-vous sûr ? L'IA oubliera tous les faits vous concernant, vos préférences et votre profil émotionnel.",
+    "clearMemorySuccess": "Mémoire à long terme effacée",
+    "clearMemoryError": "Erreur lors de l'effacement de la mémoire",
     "screenshotOCRSoon": "OCR pour captures d'Apple Health — bientôt!",
     "aboutTitle": "À propos de l'application",
     "nothingFound": "Aucun résultat trouvé",
@@ -302,7 +310,24 @@
       "pillar3Desc": "L'assistant AI détecte les carences cachées et les corrélations dans votre journal alimentaire avant qu'elles ne deviennent un problème, aidant à ajuster l'état par des changements ciblés dans l'alimentation et les suppléments.",
       "closing": "Nous ne remplaçons pas les médecins. Nous vous fournissons un outil pour comprendre votre corps, nourrir vos cellules avec ce dont elles ont réellement besoin et trouver votre équilibre idéal. Commencez par un profil - et laissez la science et les données œuvrer pour votre longévité."
     },
-    "aboutSection": "À propos de vous"
+    "aboutSection": "À propos de vous",
+    "changePassword": {
+      "title": "Sécurité",
+      "currentPassword": "Mot de passe actuel",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "submit": "Changer le mot de passe",
+      "submitting": "Modification...",
+      "success": "Mot de passe modifié avec succès ✓",
+      "errorMismatch": "Les mots de passe ne correspondent pas",
+      "errorMinLength": "Minimum 8 caractères",
+      "errorCurrentRequired": "Entrez le mot de passe actuel",
+      "strengthWeak": "Faible",
+      "strengthMedium": "Moyen",
+      "strengthStrong": "Fort"
+    },
+    "hoursShort": "h",
+    "minsShort": "m"
   },
   "lifestyle": {
     "activityLevel": "Niveau d'activité",

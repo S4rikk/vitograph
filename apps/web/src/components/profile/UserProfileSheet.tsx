@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -18,9 +18,13 @@ import {
     AlertTriangle,
     Trash2,
     MapPin,
+    Lock,
+    BrainCircuit,
 } from "lucide-react";
 import SupplementChecklistWidget from "@/components/shared/SupplementChecklistWidget";
 import Logo from "@/components/ui/Logo";
+import ChangePasswordForm from "./ChangePasswordForm";
+import { toast } from "sonner";
 
 const COMMON_TIMEZONES = [
     "UTC",
@@ -32,12 +36,14 @@ const COMMON_TIMEZONES = [
 
 import { apiClient } from "@/lib/api-client";
 import { createClient } from "@/lib/supabase/client";
+import { compressImage } from "@/lib/image-utils";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import DeviceWidgetCard from "./DeviceWidgetCard";
 import ManualEntryDialog from "./ManualEntryDialog";
 import { useFontScale } from "@/components/providers/FontScaleProvider";
 import type {
     MetricItem,
+    MetricHistoryPoint,
     MetricFieldDefinition,
     WearableMetrics,
 } from "@/types/wearable-types";
@@ -138,12 +144,24 @@ type WearableCardCategory =
 function toMetricItems(
     entries: [string, string, string][],
     data: Record<string, unknown>,
+    history?: { metrics: Record<string, number | null>; date: string }[],
 ): MetricItem[] {
-    return entries.map(([key, label, unit]) => ({
-        label,
-        value: (data[key] as string | number | null) ?? null,
-        unit,
-    }));
+    return entries.map(([key, label, unit]) => {
+        // Берём предыдущие значения (пропускаем первый = текущий)
+        const previousPoints: MetricHistoryPoint[] | undefined = history && history.length > 1
+            ? history.slice(1) // Пропускаем [0] = current
+                .map(h => ({ value: h.metrics[key] ?? null, date: h.date }))
+                .filter(h => h.value !== null)
+            : undefined;
+
+        return {
+            id: key,
+            label,
+            value: (data[key] as string | number | null) ?? null,
+            unit,
+            history: previousPoints && previousPoints.length > 0 ? previousPoints : undefined,
+        };
+    });
 }
 
 // ── Props ──
@@ -191,11 +209,97 @@ export default function UserProfileSheet({
     const [conditionInput, setConditionInput] = useState("");
     const [medicationInput, setMedicationInput] = useState("");
 
-    // ── Wearable metrics (mocked — frontend only) ──
+    // ── Wearable metrics ──
+    const [wearablesLoaded, setWearablesLoaded] = useState(false);
     const [wearableMetrics, setWearableMetrics] =
         useState<WearableMetrics>(DEFAULT_WEARABLE_METRICS);
+    const [wearableHistory, setWearableHistory] = useState<
+        Record<string, { metrics: Record<string, number | null>; date: string }[]>
+    >({});
     const [activeManualEntry, setActiveManualEntry] =
         useState<WearableCardCategory>(null);
+
+    const [isOcrLoading, setIsOcrLoading] = useState(false);
+    const [activeOcrCategory, setActiveOcrCategory] = useState<WearableCardCategory>(null);
+    const [ocrInitialValues, setOcrInitialValues] = useState<Record<string, string>>({});
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (activeTab !== 'wearables' || wearablesLoaded) return;
+        
+        const loadWearables = async () => {
+            try {
+                const supabase = createClient();
+                const { data, error } = await supabase
+                    .from('wearable_manual_metrics')
+                    .select('category, metrics, recorded_at')
+                    .eq('user_id', userId)
+                    .order('recorded_at', { ascending: false });
+                
+                if (error || !data) return;
+                
+                const historyByCategory: Record<string, { metrics: Record<string, number | null>; date: string }[]> = {};
+                for (const row of data) {
+                    const category = row.category;
+                    if (!historyByCategory[category]) {
+                        historyByCategory[category] = [];
+                    }
+                    if (historyByCategory[category].length < 3) {
+                        historyByCategory[category].push({
+                            metrics: row.metrics,
+                            date: row.recorded_at,
+                        });
+                    }
+                }
+                
+                // Сохраняем полную историю для UI
+                setWearableHistory(historyByCategory);
+                
+                // Для основных значений — мержим все записи, non-null wins (freshest first)
+                const latestByCategory: Record<string, Record<string, unknown>> = {};
+                for (const [cat, entries] of Object.entries(historyByCategory)) {
+                    const merged: Record<string, unknown> = {};
+                    // entries отсортированы от новой к старой
+                    // Проходим в обратном порядке (от старой к новой),
+                    // чтобы свежие non-null значения перезаписывали старые
+                    for (let i = entries.length - 1; i >= 0; i--) {
+                        const metricsObj = entries[i].metrics as Record<string, unknown>;
+                        for (const [key, val] of Object.entries(metricsObj)) {
+                            if (val !== null && val !== undefined) {
+                                merged[key] = val;
+                            }
+                        }
+                    }
+                    latestByCategory[cat] = merged;
+                }
+                
+                const categoryMap: Record<string, keyof WearableMetrics> = {
+                    sleep: 'sleepRecovery',
+                    cardio: 'cardioActivity',
+                    body: 'bodyComposition',
+                    metabolic: 'metabolic',
+                    stress: 'stressFemaleHealth',
+                };
+                
+                setWearableMetrics(prev => {
+                    const merged = { ...prev };
+                    for (const [cat, metrics] of Object.entries(latestByCategory)) {
+                        const field = categoryMap[cat];
+                        if (field && metrics) {
+                            merged[field] = { ...prev[field], ...(metrics as Record<string, unknown>) };
+                        }
+                    }
+                    return merged;
+                });
+                
+                setWearablesLoaded(true);
+            } catch (err) {
+                console.error('[Wearables] Load failed:', err);
+            }
+        };
+        
+        loadWearables();
+    }, [activeTab, wearablesLoaded, userId]);
 
     const [showDropdown, setShowDropdown] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -222,6 +326,19 @@ export default function UserProfileSheet({
             setError(message);
             setIsDeleting(false);
             setShowDeleteConfirm(false);
+        }
+    };
+
+    const handleClearLongTermMemory = async () => {
+        if (window.confirm(tProfile("clearMemoryConfirm"))) {
+            try {
+                await apiClient.clearLongTermMemory();
+                toast.success(tProfile("clearMemorySuccess"));
+            } catch (err: unknown) {
+                const message = err instanceof Error ? err.message : "Clear memory failed";
+                console.error("[ClearMemory] Error:", err);
+                toast.error(tProfile("clearMemoryError"));
+            }
         }
     };
 
@@ -454,7 +571,7 @@ export default function UserProfileSheet({
     // ── Wearable manual entry handler ──
 
     const handleWearableSave = useCallback(
-        (category: WearableCardCategory, values: Record<string, string>) => {
+        async (category: WearableCardCategory, values: Record<string, string>) => {
             if (!category) return;
 
             const parsed: Record<string, number | null> = {};
@@ -462,59 +579,222 @@ export default function UserProfileSheet({
                 parsed[key] = val ? parseFloat(val) : null;
             }
 
-            setWearableMetrics((prev) => {
-                const categoryMap: Record<string, keyof WearableMetrics> = {
-                    sleep: "sleepRecovery",
-                    cardio: "cardioActivity",
-                    body: "bodyComposition",
-                    metabolic: "metabolic",
-                    stress: "stressFemaleHealth",
-                };
-                const field = categoryMap[category];
-                if (!field) return prev;
+            const categoryMap: Record<string, keyof WearableMetrics> = {
+                sleep: "sleepRecovery",
+                cardio: "cardioActivity",
+                body: "bodyComposition",
+                metabolic: "metabolic",
+                stress: "stressFemaleHealth",
+            };
+            const field = categoryMap[category];
+            if (!field) return;
 
-                return {
-                    ...prev,
-                    [field]: { ...prev[field], ...parsed },
-                };
-            });
+            // ── Duplicate guard: skip if values are identical to current state ──
+            const currentMetrics = wearableMetrics[field] as unknown as Record<string, unknown>;
+            const isDuplicate = Object.keys(parsed).every(
+                key => parsed[key] === (currentMetrics[key] as number | null)
+            );
+            if (isDuplicate) {
+                // Данные идентичны — тихо закрываем диалог, ничего не сохраняем
+                setActiveManualEntry(null);
+                return;
+            }
+
+            setWearableMetrics((prev) => ({
+                ...prev,
+                [field]: { ...prev[field], ...parsed },
+            }));
+
+            try {
+                const supabase = createClient();
+                const { error } = await supabase
+                    .from('wearable_manual_metrics')
+                    .insert({
+                        user_id: userId,
+                        category: category,
+                        metrics: parsed,
+                        recorded_at: new Date().toISOString(),
+                    });
+                
+                if (error) {
+                    console.error('[Wearable] Save failed:', error);
+                } else {
+                    // Принудительно перезагружаем данные, чтобы обновить историю
+                    setWearablesLoaded(false);
+                }
+            } catch (err) {
+                console.error('[Wearable] Save failed:', err);
+            }
         },
-        [],
+        [userId, wearableMetrics],
     );
+
+    const handleScreenshotTrigger = (category: WearableCardCategory) => {
+        setActiveOcrCategory(category);
+        fileInputRef.current?.click();
+    };
+
+    const handleScreenshotChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !activeOcrCategory) return;
+        
+        try {
+            setIsOcrLoading(true);
+            const base64 = await compressImage(file, 1536);
+            
+            const parsedResult = await apiClient.analyzeWearableScreenshot(base64);
+            
+            if (parsedResult.detectedCategory === "unknown" || !parsedResult.metrics) {
+                toast.error(tProfile("ocrUnknownCategory"));
+                return;
+            }
+
+            const stringValues: Record<string, string> = {};
+            for (const [k, v] of Object.entries(parsedResult.metrics)) {
+                if (v !== null && v !== undefined) {
+                    stringValues[k] = String(v);
+                }
+            }
+            
+            setOcrInitialValues(stringValues);
+            // АВТО-ПЕРЕКЛЮЧЕНИЕ: открываем окно той категории, которую нашел ИИ!
+            setActiveManualEntry(parsedResult.detectedCategory as WearableCardCategory);
+            toast.success(tProfile("ocrSuccess"));
+        } catch (err) {
+            console.error("OCR Error:", err);
+            toast.error(tProfile("ocrError"));
+        } finally {
+            setIsOcrLoading(false);
+            setActiveOcrCategory(null);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+    };
 
     // ── Build MetricItem arrays for each card ──
 
-    const sleepMetrics: MetricItem[] = toMetricItems(
-        [
-            ["sleepDurationHours", tWearables("sleepDuration"), tWearables("units.h")],
-            ["deepSleepPercent", tWearables("deepSleep"), "%"],
-            ["remSleepPercent", tWearables("remSleep"), "%"],
-            ["readinessScore", tWearables("readinessIndex"), ""],
-            ["hrvMs", tWearables("hrv"), tWearables("units.ms")],
-            ["respiratoryRateBrpm", tWearables("respiratoryRate"), tWearables("units.brpm")],
-        ],
-        wearableMetrics.sleepRecovery as unknown as Record<string, unknown>,
-    );
+    const sleepMetrics: MetricItem[] = (() => {
+        const sr = wearableMetrics.sleepRecovery;
+        const sleepHistory = wearableHistory['sleep'];
+
+        const buildHistory = (key: string): MetricHistoryPoint[] | undefined => {
+            if (!sleepHistory || sleepHistory.length <= 1) return undefined;
+            const points = sleepHistory.slice(1)
+                .map(h => ({ value: h.metrics[key] ?? null, date: h.date }))
+                .filter(h => h.value !== null);
+            return points.length > 0 ? points : undefined;
+        };
+
+        // Конвертация % → "Xч Yмин"
+        const percentToHM = (percent: number | null, totalHours: number | null): string | null => {
+            if (percent === null || totalHours === null) return null;
+            const totalMin = Math.round(totalHours * 60 * (percent / 100));
+            const h = Math.floor(totalMin / 60);
+            const m = totalMin % 60;
+            if (h === 0) return `${m}${tProfile("minsShort")}`;
+            return m === 0 ? `${h}${tProfile("hoursShort")}` : `${h}${tProfile("hoursShort")} ${m}${tProfile("minsShort")}`;
+        };
+
+        // Форматтер для истории: минуты → "Xч Yмин"
+        const minutesToHM = (totalMin: number): string => {
+            const h = Math.floor(totalMin / 60);
+            const m = totalMin % 60;
+            if (h === 0) return `${m}${tProfile("minsShort")}`;
+            return m === 0 ? `${h}${tProfile("hoursShort")}` : `${h}${tProfile("hoursShort")} ${m}${tProfile("minsShort")}`;
+        };
+
+        // История в минутах (для deep/REM)
+        const buildHistoryMinutes = (percentKey: string): MetricHistoryPoint[] | undefined => {
+            if (!sleepHistory || sleepHistory.length <= 1) return undefined;
+            const points = sleepHistory.slice(1)
+                .map(h => {
+                    const pct = h.metrics[percentKey];
+                    const dur = h.metrics["sleepDurationHours"];
+                    if (pct === null || pct === undefined || dur === null || dur === undefined) {
+                        return { value: null, date: h.date };
+                    }
+                    return { value: Math.round(dur * 60 * (pct / 100)), date: h.date };
+                })
+                .filter(h => h.value !== null);
+            return points.length > 0 ? points : undefined;
+        };
+
+        return [
+            {
+                id: "sleepDurationHours",
+                label: tWearables("sleepDuration"),
+                value: sr.sleepDurationHours,
+                unit: tWearables("units.h"),
+                history: buildHistory("sleepDurationHours"),
+            },
+            {
+                id: "deepSleepPercent",
+                label: tWearables("deepSleep"),
+                value: percentToHM(sr.deepSleepPercent, sr.sleepDurationHours),
+                unit: "",
+                history: buildHistoryMinutes("deepSleepPercent"),
+                historyValueFormatter: minutesToHM,
+            },
+            {
+                id: "remSleepPercent",
+                label: tWearables("remSleep"),
+                value: percentToHM(sr.remSleepPercent, sr.sleepDurationHours),
+                unit: "",
+                history: buildHistoryMinutes("remSleepPercent"),
+                historyValueFormatter: minutesToHM,
+            },
+            {
+                id: "readinessScore",
+                label: tWearables("readinessIndex"),
+                value: sr.readinessScore,
+                unit: "",
+                history: buildHistory("readinessScore"),
+            },
+            {
+                id: "hrvMs",
+                label: tWearables("hrv"),
+                value: sr.hrvMs,
+                unit: tWearables("units.ms"),
+                history: buildHistory("hrvMs"),
+            },
+            {
+                id: "respiratoryRateBrpm",
+                label: tWearables("respiratoryRate"),
+                value: sr.respiratoryRateBrpm,
+                unit: tWearables("units.brpm"),
+                history: buildHistory("respiratoryRateBrpm"),
+            },
+        ];
+    })();
 
     const cardioMetrics: MetricItem[] = (() => {
         const ca = wearableMetrics.cardioActivity;
+        const cardioHistory = wearableHistory['cardio'];
+        
         const bpValue =
             ca.bloodPressureSystolic !== null && ca.bloodPressureDiastolic !== null
                 ? `${ca.bloodPressureSystolic}/${ca.bloodPressureDiastolic}`
                 : null;
+        
+        const buildHistory = (key: string): MetricHistoryPoint[] | undefined => {
+            if (!cardioHistory || cardioHistory.length <= 1) return undefined;
+            const points = cardioHistory.slice(1)
+                .map(h => ({ value: h.metrics[key] ?? null, date: h.date }))
+                .filter(h => h.value !== null);
+            return points.length > 0 ? points : undefined;
+        };
+        
         return [
-            { label: tWearables("restingHR"), value: ca.restingHeartRateBpm, unit: tWearables("units.bpm") },
-            { label: tWearables("vo2max"), value: ca.vo2MaxMlKgMin, unit: tWearables("units.mlKgMin") },
+            { id: "restingHeartRateBpm", label: tWearables("restingHR"), value: ca.restingHeartRateBpm, unit: tWearables("units.bpm"), history: buildHistory("restingHeartRateBpm") },
+            { id: "vo2MaxMlKgMin", label: tWearables("vo2max"), value: ca.vo2MaxMlKgMin, unit: tWearables("units.mlKgMin"), history: buildHistory("vo2MaxMlKgMin") },
             {
+                id: "steps",
                 label: tWearables("steps"),
-                value:
-                    ca.steps !== null
-                        ? `${ca.steps}${ca.stepsGoal ? ` / ${ca.stepsGoal}` : ""}`
-                        : null,
+                value: ca.steps !== null ? `${ca.steps}${ca.stepsGoal ? ` / ${ca.stepsGoal}` : ""}` : null,
                 unit: "",
+                history: buildHistory("steps"),
             },
-            { label: tWearables("activeCalories"), value: ca.activeCaloriesKcal, unit: tWearables("units.kcal") },
-            { label: tWearables("bloodPressureLabel"), value: bpValue, unit: tWearables("units.mmHg") },
+            { id: "activeCaloriesKcal", label: tWearables("activeCalories"), value: ca.activeCaloriesKcal, unit: tWearables("units.kcal"), history: buildHistory("activeCaloriesKcal") },
+            { id: "bloodPressure", label: tWearables("bloodPressureLabel"), value: bpValue, unit: tWearables("units.mmHg"), history: undefined },
         ];
     })();
 
@@ -527,6 +807,7 @@ export default function UserProfileSheet({
             ["visceralFatIndex", tWearables("visceralFat"), tWearables("units.index")],
         ],
         wearableMetrics.bodyComposition as unknown as Record<string, unknown>,
+        wearableHistory['body'],
     );
 
     const metabolicMetrics: MetricItem[] = toMetricItems(
@@ -536,6 +817,7 @@ export default function UserProfileSheet({
             ["glucoseVariabilityPercent", tWearables("glucoseVariability"), "%"],
         ],
         wearableMetrics.metabolic as unknown as Record<string, unknown>,
+        wearableHistory['metabolic'],
     );
 
     const stressMetrics: MetricItem[] = toMetricItems(
@@ -545,6 +827,7 @@ export default function UserProfileSheet({
             ["spo2Percent", tWearables("spo2"), "%"],
         ],
         wearableMetrics.stressFemaleHealth as unknown as Record<string, unknown>,
+        wearableHistory['stress'],
     );
 
     // ── Dialog field definitions by category ──
@@ -922,6 +1205,26 @@ export default function UserProfileSheet({
                                             </div>
                                         </div>
 
+                                        {/* Security — Change Password */}
+                                        <div className="mt-8 bg-white rounded-2xl border border-divider shadow-sm overflow-hidden">
+                                            <details className="group">
+                                                <summary className="flex items-center justify-between p-5 font-semibold text-ink-main cursor-pointer list-none hover:bg-surface-muted transition-colors [&::-webkit-details-marker]:hidden">
+                                                    <div className="flex items-center gap-2">
+                                                        <Lock size={18} className="text-ink-muted" />
+                                                        <span>{tProfile("changePassword.title")}</span>
+                                                    </div>
+                                                    <span className="transition group-open:-rotate-180">
+                                                        <svg className="w-5 h-5 text-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    </span>
+                                                </summary>
+                                                <div className="p-5 pt-0 border-t border-divider mt-2">
+                                                    <ChangePasswordForm />
+                                                </div>
+                                            </details>
+                                        </div>
+
                                         {/* FAQ & About */}
                                         <div className="mt-8 space-y-4">
                                             <div className="bg-white rounded-2xl border border-divider shadow-sm overflow-hidden">
@@ -1081,9 +1384,19 @@ export default function UserProfileSheet({
                                                 </p>
                                                 <button
                                                     onClick={() => setShowDeleteConfirm(true)}
-                                                    className="mt-auto w-full sm:w-auto px-5 py-2.5 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                                                    className="mt-auto w-full sm:w-auto px-5 py-2.5 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 cursor-pointer mb-3"
                                                 >
                                                     <Trash2 size={16} /> {tProfile("deleteAccountBtn")}
+                                                </button>
+
+                                                <p className="text-[0.8125rem] text-red-700 leading-relaxed font-medium mb-4 border-t border-red-200 pt-4">
+                                                    Очистка памяти ИИ удалит все факты, эмоциональный профиль и историю ваших предпочтений.
+                                                </p>
+                                                <button
+                                                    onClick={handleClearLongTermMemory}
+                                                    className="mt-auto w-full sm:w-auto px-5 py-2.5 bg-transparent border border-red-600 text-red-600 text-sm font-bold rounded-xl hover:bg-red-50 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                                                >
+                                                    <BrainCircuit size={16} /> {tProfile("clearMemoryBtn")}
                                                 </button>
                                             </div>
                                         </div>
@@ -1444,10 +1757,12 @@ export default function UserProfileSheet({
                                                 title={tProfile("sleepRecoveryTab")}
                                                 icon={<Moon size={20} />}
                                                 metrics={sleepMetrics}
-                                                onManualEntry={() => setActiveManualEntry("sleep")}
-                                                onScreenshotUpload={() =>
-                                                    alert(tProfile("screenshotOCRSoon"))
-                                                }
+                                                onManualEntry={() => {
+                                                    setOcrInitialValues({});
+                                                    setActiveManualEntry("sleep");
+                                                }}
+                                                onScreenshotUpload={() => handleScreenshotTrigger("sleep")}
+                                                isUploading={isOcrLoading && activeOcrCategory === "sleep"}
                                             />
 
                                             {/* Card 2: Cardio & Activity */}
@@ -1455,10 +1770,12 @@ export default function UserProfileSheet({
                                                 title={tProfile("cardioActivityTab")}
                                                 icon={<Heart size={20} />}
                                                 metrics={cardioMetrics}
-                                                onManualEntry={() => setActiveManualEntry("cardio")}
-                                                onScreenshotUpload={() =>
-                                                    alert(tProfile("screenshotOCRSoon"))
-                                                }
+                                                onManualEntry={() => {
+                                                    setOcrInitialValues({});
+                                                    setActiveManualEntry("cardio");
+                                                }}
+                                                onScreenshotUpload={() => handleScreenshotTrigger("cardio")}
+                                                isUploading={isOcrLoading && activeOcrCategory === "cardio"}
                                             />
 
                                             {/* Card 3: Body Composition */}
@@ -1466,10 +1783,12 @@ export default function UserProfileSheet({
                                                 title={tProfile("bodyCompositionTab")}
                                                 icon={<Scale size={20} />}
                                                 metrics={bodyMetrics}
-                                                onManualEntry={() => setActiveManualEntry("body")}
-                                                onScreenshotUpload={() =>
-                                                    alert(tProfile("screenshotOCRSoon"))
-                                                }
+                                                onManualEntry={() => {
+                                                    setOcrInitialValues({});
+                                                    setActiveManualEntry("body");
+                                                }}
+                                                onScreenshotUpload={() => handleScreenshotTrigger("body")}
+                                                isUploading={isOcrLoading && activeOcrCategory === "body"}
                                             />
 
                                             {/* Card 4: Metabolic (CGM) */}
@@ -1477,26 +1796,30 @@ export default function UserProfileSheet({
                                                 title={tProfile("metabolicTab")}
                                                 icon={<Droplets size={20} />}
                                                 metrics={metabolicMetrics}
-                                                onManualEntry={() => setActiveManualEntry("metabolic")}
-                                                onScreenshotUpload={() =>
-                                                    alert(tProfile("screenshotOCRSoon"))
-                                                }
+                                                onManualEntry={() => {
+                                                    setOcrInitialValues({});
+                                                    setActiveManualEntry("metabolic");
+                                                }}
+                                                onScreenshotUpload={() => handleScreenshotTrigger("metabolic")}
+                                                isUploading={isOcrLoading && activeOcrCategory === "metabolic"}
                                             />
 
                                             {/* Card 5: Stress & Female Health */}
                                             <DeviceWidgetCard
-                                                title="Стресс и Здоровье"
+                                                title={tProfile("stressHealthTab")}
                                                 icon={<Brain size={20} />}
                                                 metrics={stressMetrics}
-                                                onManualEntry={() => setActiveManualEntry("stress")}
-                                                onScreenshotUpload={() =>
-                                                    alert("OCR для скриншотов Apple Health — скоро!")
-                                                }
+                                                onManualEntry={() => {
+                                                    setOcrInitialValues({});
+                                                    setActiveManualEntry("stress");
+                                                }}
+                                                onScreenshotUpload={() => handleScreenshotTrigger("stress")}
+                                                isUploading={isOcrLoading && activeOcrCategory === "stress"}
                                             />
                                         </div>
 
                                         <p className="mt-4 text-xs text-center font-medium text-ink-muted bg-surface-muted py-2.5 px-4 rounded-full">
-                                            Автоматическая синхронизация с Apple Health и Google Fit — скоро.
+                                            {tProfile("wearablesSyncSoon")}
                                         </p>
                                     </TabsContent>
                                 </Tabs>
@@ -1553,6 +1876,7 @@ export default function UserProfileSheet({
                     onClose={() => setActiveManualEntry(null)}
                     title={dialogConfig[activeManualEntry].title}
                     fields={dialogConfig[activeManualEntry].fields}
+                    initialValues={ocrInitialValues}
                     onSave={(values) => handleWearableSave(activeManualEntry, values)}
                 />
             )}
@@ -1627,6 +1951,14 @@ export default function UserProfileSheet({
                     </div>
                 </div>
             )}
+            {/* OCR File Input */}
+            <input 
+                type="file" 
+                accept="image/*" 
+                ref={fileInputRef} 
+                className="hidden" 
+                onChange={handleScreenshotChange} 
+            />
         </>
     );
 }

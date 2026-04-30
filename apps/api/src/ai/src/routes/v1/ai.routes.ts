@@ -19,6 +19,7 @@ import {
   AnalyzeLabelRequestSchema,
   AnalyzeLabReportRequestSchema,
   UpdateMealLogSchema,
+  AnalyzeWearableRequestSchema,
 } from "../../request-schemas.js";
 import {
   handleChat,
@@ -30,6 +31,7 @@ import {
   handleAnalyzeLabel,
   handleGetChatHistory,
   handleClearChatHistory,
+  handleClearLongTermMemory,
   handleAnalyzeLabReport,
   handleGetLabReportsHistory,
   handleDeleteLabReport,
@@ -44,6 +46,7 @@ import {
   handlePushSubscribe,
   handleWaterCronPush,
   handlePushUnsubscribe,
+  handleAnalyzeWearable,
 } from "../../ai.controller.js";
 
 /** AI engine router — mount at /api/v1/ai */
@@ -54,6 +57,7 @@ aiRouter.post("/chat", validate(ChatRequestSchema), handleChat);
 aiRouter.post("/chat/stream", validate(ChatRequestSchema), handleChatStream);
 aiRouter.get("/chat/history", handleGetChatHistory);
 aiRouter.delete("/chat/history", handleClearChatHistory);
+aiRouter.delete("/memory/long-term", handleClearLongTermMemory);
 
 aiRouter.post("/push/subscribe", handlePushSubscribe);
 aiRouter.post("/push/unsubscribe", handlePushUnsubscribe);
@@ -63,6 +67,7 @@ aiRouter.post("/diagnose", validate(DiagnoseRequestSchema), handleDiagnose);
 aiRouter.post("/analyze-somatic", validate(AnalyzeSomaticRequestSchema), handleAnalyzeSomatic);
 aiRouter.post("/analyze-food", validate(AnalyzeFoodRequestSchema), handleAnalyzeFood);
 aiRouter.post("/vision/label", validate(AnalyzeLabelRequestSchema), handleAnalyzeLabel);
+aiRouter.post("/vision/wearable", validate(AnalyzeWearableRequestSchema), handleAnalyzeWearable);
 aiRouter.post("/analyze-lab-report", validate(AnalyzeLabReportRequestSchema), handleAnalyzeLabReport);
 aiRouter.get("/lab-reports/history", handleGetLabReportsHistory);
 aiRouter.delete("/lab-reports/history/:timestamp", handleDeleteLabReport);

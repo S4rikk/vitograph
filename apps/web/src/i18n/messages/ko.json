@@ -96,7 +96,8 @@
     "yesterday": "어제",
     "returnToToday": "오늘로 돌아가기",
     "chatMessage": {
-      "thinkAboutIt": "Let me think about it..."
+      "thinkAboutIt": "Let me think about it...",
+      "addFood": "{food}"
     },
     "feedback": {
       "fileTooLarge": "File is too large",
@@ -266,6 +267,13 @@
     "dangerZone": "위험 구역",
     "dangerZoneDesc": "계정 삭제는 모든 데이터를 영구적으로 손실되게 합니다. 분석, 채팅 기록 및 프로필 설정이 영원히 사라집니다.",
     "wearablesSyncSoon": "Apple Health 및 Google Fit과의 자동 동기화 — 곧 제공됩니다.",
+    "ocrUnknownCategory": "사진에서 지표를 인식할 수 없습니다",
+    "ocrSuccess": "데이터를 성공적으로 읽었습니다. 결과를 확인해 주세요.",
+    "ocrError": "스크린샷 처리 중 오류 발생",
+    "clearMemoryBtn": "AI 메모리 지우기",
+    "clearMemoryConfirm": "확실합니까? AI는 당신에 대한 모든 사실, 선호도 및 감정 프로필을 잊게 됩니다.",
+    "clearMemorySuccess": "장기 메모리가 지워졌습니다",
+    "clearMemoryError": "메모리 지우기 오류",
     "screenshotOCRSoon": "Apple Health 스크린샷을 위한 OCR — 곧 제공됩니다!",
     "aboutTitle": "앱 정보 (About)",
     "nothingFound": "찾을 수 없음",
@@ -302,7 +310,24 @@
       "pillar3Desc": "AI 도우미는 식단일지의 숨겨진 결핍과 상관관계를 문제로 발전하기 전에 발견하여, 음식 및 보충제를 통한 정밀한 변화를 돕습니다.",
       "closing": "우리는 의사들을 대체하지 않습니다. 우리는 귀하의 신체를 이해하고, 세포에 필요한 것을 제공하며, 이상적인 균형을 찾을 수 있는 도구를 제공합니다. 프로필로 시작하고, 과학과 데이터가 당신의 장수에 기여하도록 하세요."
     },
-    "aboutSection": "당신에 대해"
+    "aboutSection": "당신에 대해",
+    "changePassword": {
+      "title": "보안",
+      "currentPassword": "현재 비밀번호",
+      "newPassword": "새 비밀번호",
+      "confirmPassword": "비밀번호 확인",
+      "submit": "비밀번호 변경",
+      "submitting": "변경 중...",
+      "success": "비밀번호가 성공적으로 변경되었습니다 ✓",
+      "errorMismatch": "비밀번호가 일치하지 않습니다",
+      "errorMinLength": "최소 8자",
+      "errorCurrentRequired": "현재 비밀번호를 입력하세요",
+      "strengthWeak": "약함",
+      "strengthMedium": "보통",
+      "strengthStrong": "강함"
+    },
+    "hoursShort": "시간",
+    "minsShort": "분"
   },
   "lifestyle": {
     "activityLevel": "활동 수준",

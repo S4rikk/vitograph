@@ -98,7 +98,7 @@ export const LLM_RETRIES = {
 type AnyZodObject = z.ZodObject<any, any, any>;
 
 /** Options for a structured LLM call. */
-export interface LlmCallOptions<T extends AnyZodObject> {
+export interface LlmCallOptions<T extends z.ZodTypeAny> {
   /** Zod schema defining the expected output structure. */
   readonly schema: T;
   /** Human-readable name for the schema (improves OpenAI output). */
@@ -147,7 +147,7 @@ export interface LlmCallResult<T> {
  * Calls an LLM with structured output validation via Zod.
  * Uses official OpenAI API directly (no external router).
  */
-export async function callLlmStructured<T extends AnyZodObject>(
+export async function callLlmStructured<T extends z.ZodTypeAny>(
   options: LlmCallOptions<T>,
 ): Promise<LlmCallResult<z.infer<T>>> {
   const startTime = Date.now();

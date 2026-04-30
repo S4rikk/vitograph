@@ -96,7 +96,8 @@
     "yesterday": "Gestern",
     "returnToToday": "Zurück zu heute",
     "chatMessage": {
-      "thinkAboutIt": "Let me think about it..."
+      "thinkAboutIt": "Let me think about it...",
+      "addFood": "{food}"
     },
     "feedback": {
       "fileTooLarge": "File is too large",
@@ -266,6 +267,13 @@
     "dangerZone": "Gefahrenzone",
     "dangerZoneDesc": "Das Löschen des Kontos führt zum unwiderruflichen Verlust aller Daten, einschließlich Analysen, Chat-Verlauf und Profileinstellungen.",
     "wearablesSyncSoon": "Automatische Synchronisation mit Apple Health und Google Fit — bald.",
+    "ocrUnknownCategory": "Messwerte auf dem Foto konnten nicht erkannt werden",
+    "ocrSuccess": "Daten erfolgreich gelesen. Bitte überprüfen Sie das Ergebnis.",
+    "ocrError": "Fehler beim Verarbeiten des Screenshots",
+    "clearMemoryBtn": "KI-Speicher löschen",
+    "clearMemoryConfirm": "Sind Sie sicher? Die KI wird alle Fakten über Sie, Ihre Vorlieben und Ihr emotionales Profil vergessen.",
+    "clearMemorySuccess": "Langzeitgedächtnis gelöscht",
+    "clearMemoryError": "Fehler beim Löschen des Speichers",
     "screenshotOCRSoon": "OCR für Apple Health Screenshots — bald!",
     "aboutTitle": "Über die App (About)",
     "nothingFound": "Nichts gefunden",
@@ -302,7 +310,24 @@
       "pillar3Desc": "Der AI-Assistent erkennt versteckte Defizite und Korrelationen in Ihrem Ernährungsprotokoll, bevor sie zu Problemen werden, und hilft, Ihren Zustand durch gezielte Änderungen in der Ernährung und Nahrungsergänzungsmitteln zu korrigieren.",
       "closing": "Wir ersetzen keine Ärzte. Wir geben Ihnen das Werkzeug, um Ihren Körper zu verstehen, Ihre Zellen mit dem zu versorgen, was sie wirklich benötigen, und Ihren idealen Balance zu finden. Beginnen Sie mit dem Profil – und lassen Sie Wissenschaft und Daten an Ihrem langen Leben arbeiten."
     },
-    "aboutSection": "Über Sie"
+    "aboutSection": "Über Sie",
+    "changePassword": {
+      "title": "Sicherheit",
+      "currentPassword": "Aktuelles Passwort",
+      "newPassword": "Neues Passwort",
+      "confirmPassword": "Passwort bestätigen",
+      "submit": "Passwort ändern",
+      "submitting": "Änderung...",
+      "success": "Passwort erfolgreich geändert ✓",
+      "errorMismatch": "Passwörter stimmen nicht überein",
+      "errorMinLength": "Mindestens 8 Zeichen",
+      "errorCurrentRequired": "Aktuelles Passwort eingeben",
+      "strengthWeak": "Schwach",
+      "strengthMedium": "Mittel",
+      "strengthStrong": "Stark"
+    },
+    "hoursShort": "Std",
+    "minsShort": "Min"
   },
   "lifestyle": {
     "activityLevel": "Aktivitätslevel",

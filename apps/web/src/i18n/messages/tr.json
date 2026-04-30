@@ -96,7 +96,8 @@
     "yesterday": "Dün",
     "returnToToday": "Bugüne Dön",
     "chatMessage": {
-      "thinkAboutIt": "Let me think about it..."
+      "thinkAboutIt": "Let me think about it...",
+      "addFood": "{food}"
     },
     "feedback": {
       "fileTooLarge": "File is too large",
@@ -266,6 +267,13 @@
     "dangerZone": "Tehlikeli Alan",
     "dangerZoneDesc": "Hesabın silinmesi tüm verilerinizi, analizleri, sohbet geçmişini ve profil ayarlarını geri alınamaz şekilde kaybettirecektir.",
     "wearablesSyncSoon": "Apple Health ve Google Fit ile otomatik senkronizasyon — yakında.",
+    "ocrUnknownCategory": "Fotoğraftaki ölçümler tanınamadı",
+    "ocrSuccess": "Veriler başarıyla okundu. Lütfen sonucu kontrol edin.",
+    "ocrError": "Ekran görüntüsü işlenirken hata oluştu",
+    "clearMemoryBtn": "Yapay Zeka Belleğini Temizle",
+    "clearMemoryConfirm": "Emin misiniz? Yapay Zeka hakkınızdaki tüm gerçekleri, tercihlerinizi ve duygusal profilinizi unutacak.",
+    "clearMemorySuccess": "Uzun vadeli bellek temizlendi",
+    "clearMemoryError": "Bellek temizlenirken hata oluştu",
     "screenshotOCRSoon": "Apple Health için OCR — yakında!",
     "aboutTitle": "Uygulama Hakkında",
     "nothingFound": "Hiçbir şey bulunamadı",
@@ -302,7 +310,24 @@
       "pillar3Desc": "AI asistanı, beslenme günlüğünüzdeki gizli eksiklikleri ve korelasyonları onlar bir sorun haline gelmeden önce fark eder, yiyecek ve takviyelerdeki hassas değişikliklerle durumu düzeltmeye yardımcı olur.",
       "closing": "Doktorların yerini almıyoruz. Vücudunuzu anlamak, hücrelerinizi gerçekten ihtiyaç duydukları şeylerle beslemek ve ideal dengenizi bulmak için size bir araç sunuyoruz. Profile başlayın – bilim ve verilerin uzun ömürlülüğünüze çalışmasına izin verin."
     },
-    "aboutSection": "Hakkınızda"
+    "aboutSection": "Hakkınızda",
+    "changePassword": {
+      "title": "Güvenlik",
+      "currentPassword": "Mevcut şifre",
+      "newPassword": "Yeni şifre",
+      "confirmPassword": "Şifreyi onaylayın",
+      "submit": "Şifreyi değiştir",
+      "submitting": "Değiştiriliyor...",
+      "success": "Şifre başarıyla değiştirildi ✓",
+      "errorMismatch": "Şifreler eşleşmiyor",
+      "errorMinLength": "En az 8 karakter",
+      "errorCurrentRequired": "Mevcut şifreyi girin",
+      "strengthWeak": "Zayıf",
+      "strengthMedium": "Orta",
+      "strengthStrong": "Güçlü"
+    },
+    "hoursShort": "sa",
+    "minsShort": "dk"
   },
   "lifestyle": {
     "activityLevel": "Aktivite Düzeyi",

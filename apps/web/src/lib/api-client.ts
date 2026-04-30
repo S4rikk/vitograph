@@ -770,6 +770,13 @@ class AiApiClient {
   }
 
   /**
+   * Analyzes a wearable screenshot (Apple Health, Oura, Garmin, etc.) for automated data entry.
+   */
+  async analyzeWearableScreenshot(imageBase64: string): Promise<{ detectedCategory: string; metrics: Record<string, number | null> }> {
+    return this.post<{ detectedCategory: string; metrics: Record<string, number | null> }>("/vision/wearable", { imageBase64 });
+  }
+
+  /**
    * Runs GPT-5.4 premium diagnostic analysis on parsed biomarkers.
    * Uses DIRECT backend URL to bypass Next.js proxy timeout (~30s).
    */
@@ -984,6 +991,27 @@ class AiApiClient {
    */
   async deleteAccount(): Promise<void> {
     const url = `${this.baseUrl}/users/me`;
+    const token = await getAuthToken();
+    const headers: HeadersInit = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const response = await fetch(url, {
+      method: "DELETE",
+      headers,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const message = errorData.error || errorData.message || `API Error: ${response.status}`;
+      throw new Error(message);
+    }
+  }
+
+  /**
+   * Clears the user's long-term memory.
+   */
+  async clearLongTermMemory(): Promise<void> {
+    const url = `${this.baseUrl}/memory/long-term`;
     const token = await getAuthToken();
     const headers: HeadersInit = { "Content-Type": "application/json" };
     if (token) headers["Authorization"] = `Bearer ${token}`;

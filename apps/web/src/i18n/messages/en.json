@@ -96,7 +96,8 @@
     "yesterday": "Yesterday",
     "returnToToday": "Return to today",
     "chatMessage": {
-      "thinkAboutIt": "Let me think about it..."
+      "thinkAboutIt": "Let me think about it...",
+      "addFood": "{food}"
     },
     "feedback": {
       "fileTooLarge": "File is too large",
@@ -266,6 +267,13 @@
     "dangerZone": "Danger zone",
     "dangerZoneDesc": "Deleting the account will result in the irrevocable loss of all your data, including tests, chat history, and profile settings.",
     "wearablesSyncSoon": "Automatic sync with Apple Health and Google Fit — coming soon.",
+    "ocrUnknownCategory": "Could not recognize metrics from the photo",
+    "ocrSuccess": "Data read successfully. Please review the result.",
+    "ocrError": "Error processing screenshot",
+    "clearMemoryBtn": "Clear AI Memory",
+    "clearMemoryConfirm": "Are you sure? AI will forget all facts about you, your preferences, and your emotional profile.",
+    "clearMemorySuccess": "Long-term memory cleared",
+    "clearMemoryError": "Error clearing memory",
     "screenshotOCRSoon": "OCR for Apple Health screenshots — coming soon!",
     "aboutTitle": "About the app (About)",
     "nothingFound": "Nothing found",
@@ -302,7 +310,24 @@
       "pillar3Desc": "The AI Assistant notices hidden deficiencies and correlations in your food diary even before they become a problem, helping to correct the condition with precise changes in food and supplements.",
       "closing": "We do not replace doctors. We provide you with a tool to understand your body, feed your cells what they really need, and find your ideal balance. Start with your profile – and let science and data work for your longevity."
     },
-    "aboutSection": "About You"
+    "aboutSection": "About You",
+    "changePassword": {
+      "title": "Security",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "submit": "Change password",
+      "submitting": "Changing...",
+      "success": "Password changed successfully ✓",
+      "errorMismatch": "Passwords do not match",
+      "errorMinLength": "Minimum 8 characters",
+      "errorCurrentRequired": "Enter current password",
+      "strengthWeak": "Weak",
+      "strengthMedium": "Medium",
+      "strengthStrong": "Strong"
+    },
+    "hoursShort": "h",
+    "minsShort": "m"
   },
   "lifestyle": {
     "activityLevel": "Activity Level",
@@ -426,6 +451,7 @@
     "tempVariation": "Temperature Variation",
     "spo2": "Blood Oxygen (SpO2)",
     "bloodPressureLabel": "Pressure",
+    "screenshotComingSoon": "OCR for screenshots — coming soon!",
     "units": {
       "h": "h",
       "ms": "ms",

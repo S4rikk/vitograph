@@ -96,7 +96,8 @@
     "yesterday": "昨日",
     "returnToToday": "今日に戻る",
     "chatMessage": {
-      "thinkAboutIt": "Let me think about it..."
+      "thinkAboutIt": "Let me think about it...",
+      "addFood": "{food}"
     },
     "feedback": {
       "fileTooLarge": "File is too large",
@@ -266,6 +267,13 @@
     "dangerZone": "危険ゾーン",
     "dangerZoneDesc": "アカウントの削除により、すべてのデータ（検査、チャット履歴、プロフィール設定）が永久に失われます。",
     "wearablesSyncSoon": "Apple HealthおよびGoogle Fitとの自動同期はまもなく開始されます。",
+    "ocrUnknownCategory": "写真から指標を認識できませんでした",
+    "ocrSuccess": "データを正常に読み込みました。結果を確認してください。",
+    "ocrError": "スクリーンショットの処理中にエラーが発生しました",
+    "clearMemoryBtn": "AIメモリをクリア",
+    "clearMemoryConfirm": "本当によろしいですか？AIはあなたに関するすべての事実、好み、感情プロファイルを忘れます。",
+    "clearMemorySuccess": "長期記憶がクリアされました",
+    "clearMemoryError": "メモリのクリア中にエラーが発生しました",
     "screenshotOCRSoon": "Apple Healthのスクリーンショットに対するOCRはまもなく開始！",
     "aboutTitle": "アプリについて",
     "nothingFound": "何も見つかりませんでした",
@@ -302,7 +310,24 @@
       "pillar3Desc": "AIアシスタントは、能動的な栄養改善や栄養補助で状態を調整することで、潜在的な欠乏や日記の相関を問題になる前に特定します。",
       "closing": "私たちは医師を代替しません。健康を理解し、細胞に本当に必要なものを提供し、あなたの理想的なバランスを見つけるためのツールを提供します。プロファイルから始めて、長寿のために科学とデータが役立つようにしましょう。"
     },
-    "aboutSection": "あなたについて"
+    "aboutSection": "あなたについて",
+    "changePassword": {
+      "title": "セキュリティ",
+      "currentPassword": "現在のパスワード",
+      "newPassword": "新しいパスワード",
+      "confirmPassword": "パスワードを確認",
+      "submit": "パスワードを変更",
+      "submitting": "変更中...",
+      "success": "パスワードが正常に変更されました ✓",
+      "errorMismatch": "パスワードが一致しません",
+      "errorMinLength": "8文字以上",
+      "errorCurrentRequired": "現在のパスワードを入力してください",
+      "strengthWeak": "弱い",
+      "strengthMedium": "普通",
+      "strengthStrong": "強い"
+    },
+    "hoursShort": "時間",
+    "minsShort": "分"
   },
   "lifestyle": {
     "activityLevel": "活動レベル",

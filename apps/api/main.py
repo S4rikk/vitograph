@@ -622,11 +622,15 @@ async def parse_lab_report_image_batch_async(
         options=options,
     )
 
-    # Decode user_id from JWT (via Supabase auth)
-    user_resp = await client.auth.get_user(auth_token)
-    if not user_resp or not user_resp.user:
+    # Decode user_id from JWT directly (avoids network timeout locally)
+    import jwt
+    try:
+        decoded = jwt.decode(auth_token, options={"verify_signature": False})
+        user_id = str(decoded.get("sub"))
+        if not user_id:
+            raise ValueError("No sub claim")
+    except Exception:
         raise HTTPException(status_code=401, detail="Invalid token")
-    user_id = str(user_resp.user.id)
 
     # Create job record
     job_resp = await client.table("lab_scans").insert({

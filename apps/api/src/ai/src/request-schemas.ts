@@ -171,3 +171,11 @@ export const UpdateMealLogSchema = z.object({
 });
 
 export type UpdateMealLogRequest = z.infer<typeof UpdateMealLogSchema>;
+
+// ── POST /api/v1/ai/vision/wearable ─────────────────────────────────
+
+export const AnalyzeWearableRequestSchema = z.object({
+  imageBase64: z.string().min(100, "Base64 image is required"),
+});
+export type AnalyzeWearableRequest = z.infer<typeof AnalyzeWearableRequestSchema>;
+

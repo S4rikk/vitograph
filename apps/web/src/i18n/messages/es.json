@@ -96,7 +96,8 @@
     "yesterday": "Ayer",
     "returnToToday": "Volver a hoy",
     "chatMessage": {
-      "thinkAboutIt": "Let me think about it..."
+      "thinkAboutIt": "Let me think about it...",
+      "addFood": "{food}"
     },
     "feedback": {
       "fileTooLarge": "File is too large",
@@ -266,6 +267,13 @@
     "dangerZone": "Zona de peligro",
     "dangerZoneDesc": "Eliminar la cuenta resultará en la pérdida irreversible de todos sus datos, incluidos exámenes, historial de chat y configuración del perfil.",
     "wearablesSyncSoon": "Sincronización automática con Apple Health y Google Fit — pronto.",
+    "ocrUnknownCategory": "No se pudieron reconocer métricas en la foto",
+    "ocrSuccess": "Datos leídos con éxito. Por favor, revise el resultado.",
+    "ocrError": "Error al procesar captura de pantalla",
+    "clearMemoryBtn": "Borrar memoria de IA",
+    "clearMemoryConfirm": "¿Estás seguro? La IA olvidará todos los hechos sobre ti, tus preferencias y tu perfil emocional.",
+    "clearMemorySuccess": "Memoria a largo plazo borrada",
+    "clearMemoryError": "Error al borrar la memoria",
     "screenshotOCRSoon": "OCR para capturas de pantalla de Apple Health — pronto.",
     "aboutTitle": "Acerca de la aplicación",
     "nothingFound": "No se encontró nada",
@@ -302,7 +310,24 @@
       "pillar3Desc": "El asistente AI detecta deficiencias ocultas y correlaciones en tu diario alimentario antes de que se conviertan en un problema, ayudando a corregirlas con cambios dietéticos y suplementos.",
       "closing": "No reemplazamos a los médicos. Proporcionamos la herramienta para entender tu cuerpo, nutrirlo con lo que necesita y encontrar tu equilibrio ideal. Comienza con tu perfil y deja que la ciencia y los datos trabajen para tu longevidad."
     },
-    "aboutSection": "Sobre ti"
+    "aboutSection": "Sobre ti",
+    "changePassword": {
+      "title": "Seguridad",
+      "currentPassword": "Contraseña actual",
+      "newPassword": "Nueva contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "submit": "Cambiar contraseña",
+      "submitting": "Cambiando...",
+      "success": "Contraseña cambiada exitosamente ✓",
+      "errorMismatch": "Las contraseñas no coinciden",
+      "errorMinLength": "Mínimo 8 caracteres",
+      "errorCurrentRequired": "Ingrese la contraseña actual",
+      "strengthWeak": "Débil",
+      "strengthMedium": "Media",
+      "strengthStrong": "Fuerte"
+    },
+    "hoursShort": "h",
+    "minsShort": "m"
   },
   "lifestyle": {
     "activityLevel": "Nivel de actividad",

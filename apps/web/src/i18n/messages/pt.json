@@ -96,7 +96,8 @@
     "yesterday": "Ontem",
     "returnToToday": "Voltar para hoje",
     "chatMessage": {
-      "thinkAboutIt": "Let me think about it..."
+      "thinkAboutIt": "Let me think about it...",
+      "addFood": "{food}"
     },
     "feedback": {
       "fileTooLarge": "File is too large",
@@ -266,6 +267,13 @@
     "dangerZone": "Zona de perigo",
     "dangerZoneDesc": "Excluir a conta resultará na perda irreversível de todos os seus dados, incluindo exames, histórico de chats e configurações de perfil.",
     "wearablesSyncSoon": "Sincronização automática com Apple Health e Google Fit — em breve.",
+    "ocrUnknownCategory": "Não foi possível reconhecer as métricas na foto",
+    "ocrSuccess": "Dados lidos com sucesso. Verifique o resultado.",
+    "ocrError": "Erro ao processar captura de tela",
+    "clearMemoryBtn": "Limpar memória da IA",
+    "clearMemoryConfirm": "Tem certeza? A IA esquecerá todos os fatos sobre você, suas preferências e seu perfil emocional.",
+    "clearMemorySuccess": "Memória de longo prazo limpa",
+    "clearMemoryError": "Erro ao limpar a memória",
     "screenshotOCRSoon": "OCR para capturas de tela do Apple Health — em breve!",
     "aboutTitle": "Sobre o aplicativo",
     "nothingFound": "Nada encontrado",
@@ -302,7 +310,24 @@
       "pillar3Desc": "O assistente de IA detecta deficiências ocultas e correlações em seu diário alimentar antes que elas se tornem um problema, ajudando a ajustar o estado por meio de mudanças pontuais na alimentação e suplementos.",
       "closing": "Não substituímos os médicos. Oferecemos a você uma ferramenta para entender seu corpo, alimentar suas células com o que realmente precisam e encontrar seu equilíbrio ideal. Comece com o perfil — e permita que a ciência e os dados trabalhem para sua longevidade."
     },
-    "aboutSection": "Sobre você"
+    "aboutSection": "Sobre você",
+    "changePassword": {
+      "title": "Segurança",
+      "currentPassword": "Senha atual",
+      "newPassword": "Nova senha",
+      "confirmPassword": "Confirmar senha",
+      "submit": "Alterar senha",
+      "submitting": "Alterando...",
+      "success": "Senha alterada com sucesso ✓",
+      "errorMismatch": "As senhas não coincidem",
+      "errorMinLength": "Mínimo 8 caracteres",
+      "errorCurrentRequired": "Digite a senha atual",
+      "strengthWeak": "Fraca",
+      "strengthMedium": "Média",
+      "strengthStrong": "Forte"
+    },
+    "hoursShort": "h",
+    "minsShort": "m"
   },
   "lifestyle": {
     "activityLevel": "Nível de atividade",
