@@ -61,7 +61,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
         <FontScaleProvider>
           {user && (
-            <header className="shrink-0 bg-surface border-b border-border px-4 py-2 sm:px-6 sm:py-3 flex items-center justify-between">
+            <header className="shrink-0 bg-surface border-b border-border px-4 py-2 sm:px-6 sm:py-3 flex items-center justify-between shadow-sm relative z-50">
               <Logo size="sm" showSubtitle={false} />
               <div className="flex items-center gap-4">
                 <UserProfileSheet userId={user.id} userEmail={user.email || "User"} />

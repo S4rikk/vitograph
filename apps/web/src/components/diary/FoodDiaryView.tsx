@@ -7,7 +7,6 @@ import ChatMessage from "./ChatMessage";
 import { detectAndParseFoodLog } from "./food-log-parser";
 import { nutrientColors } from "@/lib/food-diary/nutrient-colors";
 import FoodInputForm from "./FoodInputForm";
-import { FeedbackButton } from "./FeedbackButton";
 import GlycemicSurfPanel from "./GlycemicSurfPanel";
 import DatePaginator from "./DatePaginator";
 import WaterTracker from "./WaterTracker";
@@ -445,8 +444,9 @@ export default function FoodDiaryView() {
 
   return (
     <>
-      <FeedbackButton className="z-30" />
-      <div className="relative flex flex-col h-[100dvh] sm:h-[85vh] sm:max-h-[1000px] sm:min-h-[750px] sm:rounded-2xl border-x sm:border border-border bg-surface overflow-hidden shadow-sm">
+      <div className="relative flex flex-col h-[100dvh] sm:h-[85vh] sm:max-h-[1000px] sm:min-h-[750px] sm:rounded-2xl border-x sm:border border-white/70 dark:border-white/30 bg-surface/80 backdrop-blur-2xl shadow-[0_10px_20px_-10px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_-10px_rgba(0,0,0,0.5)] overflow-hidden">
+        {/* Premium Glass Edge Overlay */}
+        <div className="pointer-events-none absolute inset-0 sm:rounded-2xl shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_1px_0_2px_rgba(255,255,255,0.5),inset_-1px_0_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.2)] dark:shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_1px_0_2px_rgba(255,255,255,0.15),inset_-1px_0_2px_rgba(255,255,255,0.15),inset_0_-1px_2px_rgba(255,255,255,0.05)] z-50"></div>
         {/* ── Header & Time Machine ──────────────────────── */}
         <div className="flex flex-col bg-surface-muted px-5 pt-0 sm:pt-5 pb-2 shrink-0 z-10 border-b border-border/50">
           <DatePaginator selectedDate={selectedDate} onChange={setSelectedDate} userTimezone={userTimezone} />

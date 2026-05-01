@@ -82,16 +82,16 @@ export function FeedbackButton({ className }: { className?: string }) {
 
     return (
         <>
-            <div className={`fixed top-24 right-4 sm:right-8 z-40 group ${className || ""}`}>
+            <div className={`relative group w-full ${className || ""}`}>
                 {/* Glowing pulse aura */}
                 <div className="absolute inset-0 rounded-full bg-indigo-500/60 blur-md animate-pulse pointer-events-none"></div>
 
                 <button
                     onClick={() => setOpen(true)}
-                    className="relative flex items-center justify-center gap-2 rounded-full bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:bg-indigo-700 hover:-translate-y-1 hover:shadow-xl active:scale-95"
+                    className="relative w-full flex items-center justify-center gap-1.5 sm:gap-2 rounded-full bg-indigo-600 px-2 sm:px-4 py-3 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:bg-indigo-700 hover:-translate-y-1 hover:shadow-xl active:scale-95 whitespace-nowrap"
                 >
-                    <Bug className="h-5 w-5 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
-                    <span className="hidden sm:inline">{t("reportBug")}</span>
+                    <Bug className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110 shrink-0" />
+                    <span className="truncate">{t("reportBug")}</span>
                 </button>
             </div>
 

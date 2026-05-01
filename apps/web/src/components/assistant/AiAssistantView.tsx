@@ -473,9 +473,11 @@ export default function AiAssistantView({ userId }: { userId: string }) {
   };
 
   return (
-    <div className="flex flex-1 sm:flex-none flex-col overflow-hidden rounded-xl border border-cloud-dark bg-surface shadow-sm sm:h-[750px] mb-[env(safe-area-inset-bottom)]">
+    <div className="relative flex flex-1 sm:flex-none flex-col overflow-hidden sm:rounded-2xl sm:border border-white/70 dark:border-white/30 bg-surface/80 backdrop-blur-2xl shadow-[0_10px_20px_-10px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_-10px_rgba(0,0,0,0.5)] sm:h-[750px] mb-[env(safe-area-inset-bottom)]">
+      {/* Premium Glass Edge Overlay */}
+      <div className="pointer-events-none absolute inset-0 sm:rounded-2xl shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_1px_0_2px_rgba(255,255,255,0.5),inset_-1px_0_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.2)] dark:shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_1px_0_2px_rgba(255,255,255,0.15),inset_-1px_0_2px_rgba(255,255,255,0.15),inset_0_-1px_2px_rgba(255,255,255,0.05)] z-50"></div>
       {/* Header with Clear Button */}
-      <div className="flex items-center justify-between border-b border-cloud px-4 py-1 sm:py-1.5 bg-surface">
+      <div className="flex items-center justify-between border-b border-border/50 px-4 py-1 sm:py-1.5 bg-surface">
         <h3 className="text-[0.6875rem] sm:text-xs font-semibold text-ink-muted uppercase tracking-widest">
           {profile?.ai_name || t("defaultAssistantName")}
         </h3>
@@ -497,7 +499,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
       <div 
         ref={scrollRef}
         id="ai-chat-scroll-container"
-        className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4"
+        className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4 scrollbar-thin scrollbar-thumb-ink-muted/20 scrollbar-track-transparent"
       >
         {messages.map((msg) => (
           <div
@@ -555,7 +557,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-cloud p-3 sm:p-6 bg-cloud-light/30">
+      <div className="border-t border-border/50 p-3 sm:p-6 bg-cloud-light/30">
         {selectedImageBase64 && (
           <div className="relative inline-block mb-3 border border-cloud rounded-lg overflow-hidden shadow-sm">
             <img src={selectedImageBase64} alt="Selected" className="h-20 w-auto object-cover" />
@@ -601,7 +603,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
                 handleSubmit(e);
               }
             }}
-            className="flex-1 rounded-xl border-cloud-dark bg-surface px-4 py-3 text-[0.9375rem] text-ink shadow-sm transition-all focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 max-h-[150px] min-h-[44px] overflow-y-auto resize-none"
+            className="flex-1 rounded-xl border-cloud-dark bg-surface px-4 py-3 text-[0.9375rem] text-ink shadow-sm transition-all focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 max-h-[150px] min-h-[44px] overflow-y-auto resize-none scrollbar-thin scrollbar-thumb-ink-muted/20 scrollbar-track-transparent"
           />
           <button
             type="submit"

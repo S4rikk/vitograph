@@ -873,11 +873,11 @@ export default function UserProfileSheet({
             {/* Slide-out Sheet */}
             {mounted && (
                 <div
-                    className={`fixed inset-y-0 right-0 z-50 w-full sm:w-[520px] bg-surface shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${isOpen ? "translate-x-0" : "translate-x-full"
+                    className={`fixed inset-y-0 right-0 z-50 w-full sm:w-[520px] bg-transparent shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${isOpen ? "translate-x-0" : "translate-x-full"
                         }`}
                 >
                     {/* Header */}
-                    <div className="px-6 py-5 border-b border-border flex items-center justify-between bg-surface z-10 relative">
+                    <div className="px-6 py-5 border-b border-border flex items-center justify-between bg-white dark:bg-surface z-10 relative">
                         <div>
                             <h2 className="text-xl font-bold text-ink">{tProfile("title")}</h2>
                             <p className="text-sm text-ink-muted mt-0.5">{userEmail}</p>
@@ -891,7 +891,7 @@ export default function UserProfileSheet({
                     </div>
 
                     {/* Content Area */}
-                    <div className="flex-1 overflow-y-auto bg-surface">
+                    <div className="flex-1 overflow-y-auto bg-transparent">
                         {loadingProfile ? (
                             <div className="p-6 space-y-4 animate-pulse">
                                 <div className="h-10 bg-surface-hover rounded-md w-full" />
@@ -925,8 +925,8 @@ export default function UserProfileSheet({
                                                     style={{ zIndex, borderBottom: 'none' }}
                                                     className={`relative -ml-4 px-4 pt-3 rounded-t-2xl transition-all duration-300 flex items-center gap-2 text-xs font-semibold cursor-pointer min-w-0 ${
                                                         isActive
-                                                            ? "bg-surface/60 text-primary-800 backdrop-blur-xl border border-white/70 shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_1px_0_2px_rgba(255,255,255,0.5),inset_-1px_0_2px_rgba(255,255,255,0.5),0_-4px_10px_rgba(0,0,0,0.05)] pb-4"
-                                                            : "bg-surface-muted/50 text-ink-muted backdrop-blur-md border border-white/30 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-2px_4px_rgba(0,0,0,0.05)] hover:bg-surface/40 pb-2"
+                                                            ? "bg-white/60 dark:bg-surface/60 text-primary-800 backdrop-blur-xl border border-white/70 shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_1px_0_2px_rgba(255,255,255,0.5),inset_-1px_0_2px_rgba(255,255,255,0.5),0_-4px_10px_rgba(0,0,0,0.05)] pb-4"
+                                                            : "bg-surface-muted/50 text-ink-muted backdrop-blur-md border border-white/30 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-2px_4px_rgba(0,0,0,0.05)] hover:bg-white/40 dark:hover:bg-surface/40 pb-2"
                                                     }`}
                                                     aria-selected={isActive}
                                                     role="tab"
@@ -943,10 +943,10 @@ export default function UserProfileSheet({
                                     {/* ═══ TAB 1: OVERVIEW ═══ */}
                                     <TabsContent
                                         value="overview"
-                                        className="!mt-0 relative z-10 bg-surface/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-6 focus:outline-none"
+                                        className="!mt-0 relative z-10 bg-white/60 dark:bg-surface/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-6 focus:outline-none"
                                     >
                                         {/* Personal Info */}
-                                        <div className="bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-4">
+                                        <div className="bg-white dark:bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-4">
                                             <h3 className="font-semibold text-ink border-b border-border pb-3">{tProfile("aboutSection")}</h3>
                                             <div className="space-y-4">
                                                 <div className="flex flex-col h-full">
@@ -1028,7 +1028,7 @@ export default function UserProfileSheet({
                                         </div>
 
                                         {/* Physical Parameters */}
-                                        <div className="bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-4">
+                                        <div className="bg-white dark:bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-4">
                                             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
                                                 <h3 className="font-semibold text-ink">{tProfile("physicalParams")}</h3>
                                                 {bmi && (
@@ -1153,7 +1153,7 @@ export default function UserProfileSheet({
                                         </div>
 
                                         {/* App Settings */}
-                                        <div className="mt-8 bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-4">
+                                        <div className="mt-8 bg-white dark:bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-4">
                                             <h3 className="font-semibold text-ink border-b border-border pb-3">{tProfile("appSettings")}</h3>
                                             <div className="grid grid-cols-2 gap-5">
                                                 <div className="flex flex-col h-full">
@@ -1220,7 +1220,7 @@ export default function UserProfileSheet({
                                         </div>
 
                                         {/* Security — Change Password */}
-                                        <div className="mt-8 bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
+                                        <div className="mt-8 bg-white dark:bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
                                             <details className="group">
                                                 <summary className="flex items-center justify-between p-5 font-semibold text-ink cursor-pointer list-none hover:bg-surface-muted transition-colors [&::-webkit-details-marker]:hidden">
                                                     <div className="flex items-center gap-2">
@@ -1241,7 +1241,7 @@ export default function UserProfileSheet({
 
                                         {/* FAQ & About */}
                                         <div className="mt-8 space-y-4">
-                                            <div className="bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
+                                            <div className="bg-white dark:bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
                                                 <details className="group">
                                                     <summary className="flex items-center justify-between p-5 font-semibold text-ink cursor-pointer list-none hover:bg-surface-muted transition-colors [&::-webkit-details-marker]:hidden">
                                                         <span>{tProfile("faq.faqTitle")}</span>
@@ -1334,7 +1334,7 @@ export default function UserProfileSheet({
                                                 </details>
                                             </div>
 
-                                            <div className="bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
+                                            <div className="bg-white dark:bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
                                                 <details className="group">
                                                     <summary className="flex items-center justify-between p-5 font-semibold text-ink cursor-pointer list-none hover:bg-surface-muted transition-colors [&::-webkit-details-marker]:hidden">
                                                         <div className="flex items-center gap-2">
@@ -1419,10 +1419,10 @@ export default function UserProfileSheet({
                                     {/* ═══ TAB 2: LIFESTYLE ═══ */}
                                     <TabsContent
                                         value="lifestyle"
-                                        className="!mt-0 relative z-10 bg-surface/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-6 focus:outline-none"
+                                        className="!mt-0 relative z-10 bg-white/60 dark:bg-surface/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-6 focus:outline-none"
                                     >
                                         {/* Nutrition & Environment */}
-                                        <div className="bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-4">
+                                        <div className="bg-white dark:bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-4">
                                             <h3 className="font-semibold text-ink border-b border-border pb-3">
                                                 {tLifestyle("nutritionEnvironment")}
                                             </h3>
@@ -1508,7 +1508,7 @@ export default function UserProfileSheet({
                                         </div>
 
                                         {/* Activity & Recovery */}
-                                        <div className="bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-4">
+                                        <div className="bg-white dark:bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-4">
                                             <h3 className="font-semibold text-ink border-b border-border pb-3">
                                                 {tLifestyle("activityRecovery")}
                                             </h3>
@@ -1592,7 +1592,7 @@ export default function UserProfileSheet({
                                         </div>
 
                                         {/* Sleep & Stress */}
-                                        <div className="bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-4">
+                                        <div className="bg-white dark:bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-4">
                                             <h3 className="font-semibold text-ink border-b border-border pb-3">
                                                 {tLifestyle("sleepStress")}
                                             </h3>
@@ -1622,9 +1622,9 @@ export default function UserProfileSheet({
                                     {/* ═══ TAB 3: MEDICAL CONTEXT ═══ */}
                                     <TabsContent
                                         value="medical"
-                                        className="!mt-0 relative z-10 bg-surface/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-6 focus:outline-none"
+                                        className="!mt-0 relative z-10 bg-white/60 dark:bg-surface/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-6 focus:outline-none"
                                     >
-                                        <div className="bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-5">
+                                        <div className="bg-white dark:bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-5">
                                             <div className="grid grid-cols-2 gap-5">
                                                 <div className="flex items-center gap-2">
                                                     <input
@@ -1763,7 +1763,7 @@ export default function UserProfileSheet({
                                     {/* ═══ TAB 4: WEARABLES HUB ═══ */}
                                     <TabsContent
                                         value="wearables"
-                                        className="!mt-0 relative z-10 bg-surface/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-4 focus:outline-none"
+                                        className="!mt-0 relative z-10 bg-white/60 dark:bg-surface/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-4 focus:outline-none"
                                     >
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             {/* Card 1: Sleep & Recovery */}
@@ -1898,7 +1898,7 @@ export default function UserProfileSheet({
             {/* Delete Confirmation Modal */}
             {showDeleteConfirm && (
                 <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
-                    <div className="bg-surface rounded-3xl max-w-md w-full p-8 shadow-2xl border border-red-100 animate-in fade-in zoom-in duration-300">
+                    <div className="bg-white dark:bg-surface rounded-3xl max-w-md w-full p-8 shadow-2xl border border-red-100 animate-in fade-in zoom-in duration-300">
                         <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
                             <AlertTriangle size={32} />
                         </div>
@@ -1938,7 +1938,7 @@ export default function UserProfileSheet({
             {/* Unsaved Changes Confirmation Modal */}
             {showUnsavedConfirm && (
                 <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
-                    <div className="bg-surface rounded-3xl max-w-sm w-full p-8 shadow-2xl border border-border animate-in fade-in zoom-in duration-300">
+                    <div className="bg-white dark:bg-surface rounded-3xl max-w-sm w-full p-8 shadow-2xl border border-border animate-in fade-in zoom-in duration-300">
                         <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6">
                             <AlertTriangle size={32} />
                         </div>

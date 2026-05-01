@@ -300,7 +300,9 @@
       "q6": "Does Vitograph replace going to the doctor?",
       "a6": "No. Vitograph is a powerful analytical tool and your personal health navigator, but it does not diagnose medical conditions or prescribe treatments. All insights and AI recommendations are created for you to discuss them substantively with your doctor.",
       "q7": "Are my data confidential?",
-      "a7": "Yes. Your medical data, tests, and questionnaires are stored in a secure database. The AI uses them exclusively for personalizing recommendations within your protected sessions."
+      "a7": "Yes. Your medical data, tests, and questionnaires are stored in a secure database. The AI uses them exclusively for personalizing recommendations within your protected sessions.",
+      "q8": "How do goals work and how can I create them?",
+      "a8": "Goals are created through a simple chat request (e.g., 'I want to lose 5 kg'). It's important to understand: Vitograph doesn't just give you a static schedule. A unique virtual AI specialist is created for your specific goal. This agent takes responsibility for your progress: they will track execution daily, analyze your data, and proactively adjust the plan to ensure you reach the result."
     },
     "about": {
       "title": "About the App",

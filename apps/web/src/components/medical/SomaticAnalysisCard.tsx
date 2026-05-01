@@ -56,7 +56,9 @@ export default function SomaticAnalysisCard({ title, items, onDismiss }: Somatic
 
     return (
         <>
-            <div className="rounded-2xl border border-border bg-surface shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="relative rounded-2xl border border-white/70 dark:border-white/30 bg-surface/80 backdrop-blur-2xl shadow-[0_10px_20px_-10px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_-10px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
+                {/* Premium Glass Edge Overlay */}
+                <div className="pointer-events-none absolute inset-0 rounded-2xl shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_1px_0_2px_rgba(255,255,255,0.5),inset_-1px_0_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.2)] dark:shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_1px_0_2px_rgba(255,255,255,0.15),inset_-1px_0_2px_rgba(255,255,255,0.15),inset_0_-1px_2px_rgba(255,255,255,0.05)] z-50"></div>
                 {/* Header */}
                 <div className="flex items-center justify-between bg-gradient-to-r from-primary-50 to-violet-50 px-5 py-3 border-b border-border">
                     <div className="flex items-center gap-2">

@@ -854,7 +854,12 @@ class AiApiClient {
 
       const response = await fetch(url, { method: "GET", headers });
       if (!response.ok) throw new Error(`API Error: ${response.status}`);
-      return await response.json();
+      const text = await response.text();
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        throw new Error(`Invalid JSON: ${text.slice(0, 100)}`);
+      }
     } catch (error) {
       console.error("[ApiClient] getProfile error:", error);
       throw error;
@@ -879,7 +884,12 @@ class AiApiClient {
       });
 
       if (!response.ok) throw new Error(`API Error: ${response.status}`);
-      return await response.json();
+      const text = await response.text();
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        throw new Error(`Invalid JSON: ${text.slice(0, 100)}`);
+      }
     } catch (error) {
       console.error("[ApiClient] updateProfile error:", error);
       throw error;

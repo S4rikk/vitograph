@@ -319,7 +319,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
       {/* ── Form ────────────────────────────────────────────────── */}
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-1.5 rounded-2xl border border-border bg-surface px-3 py-2 shadow-sm"
+        className="flex flex-col gap-1.5 rounded-2xl border border-white/70 dark:border-white/30 bg-surface/80 backdrop-blur-2xl shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_1px_0_2px_rgba(255,255,255,0.5),inset_-1px_0_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.2),0_10px_20px_-10px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_1px_0_2px_rgba(255,255,255,0.15),inset_-1px_0_2px_rgba(255,255,255,0.15),inset_0_-1px_2px_rgba(255,255,255,0.05),0_10px_20px_-10px_rgba(0,0,0,0.5)] px-3 py-2"
       >
         {/* Row 1: Dish name — full width */}
         <div className="w-full">

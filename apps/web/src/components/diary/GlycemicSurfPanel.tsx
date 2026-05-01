@@ -46,10 +46,10 @@ const calcPercentSafe = (val: number, max: number) => Math.max(0, (val / Math.ma
 // ── Zone colors ─────────────────────────
 
 const ZONE_COLORS = {
-  green:  { bg: "#ECFDF5", text: "#059669", stroke: "#10B981" },
-  yellow: { bg: "#FFFBEB", text: "#D97706", stroke: "#F59E0B" },
-  red:    { bg: "#FEF2F2", text: "#DC2626", stroke: "#EF4444" },
-  blue:   { bg: "#EFF6FF", text: "#2563EB", stroke: "#3B82F6" },
+  green:  { bg: "#ECFDF5", text: "#059669", stroke: "#10B981", bgClass: "bg-emerald-50 dark:bg-emerald-500/15", textClass: "text-emerald-600 dark:text-emerald-400", borderClass: "border-emerald-200 dark:border-emerald-500/20" },
+  yellow: { bg: "#FFFBEB", text: "#D97706", stroke: "#F59E0B", bgClass: "bg-amber-50 dark:bg-amber-500/15", textClass: "text-amber-600 dark:text-amber-400", borderClass: "border-amber-200 dark:border-amber-500/20" },
+  red:    { bg: "#FEF2F2", text: "#DC2626", stroke: "#EF4444", bgClass: "bg-red-50 dark:bg-red-500/15", textClass: "text-red-600 dark:text-red-400", borderClass: "border-red-200 dark:border-red-500/20" },
+  blue:   { bg: "#EFF6FF", text: "#2563EB", stroke: "#3B82F6", bgClass: "bg-blue-50 dark:bg-blue-500/15", textClass: "text-blue-600 dark:text-blue-400", borderClass: "border-blue-200 dark:border-blue-500/20" },
 };
 
 // ── Props ──────────────────────────────────────────
@@ -182,11 +182,9 @@ export default function GlycemicSurfPanel({
                 return (
                     <div
                       key={zone.key}
-                      className="flex items-center justify-center gap-1 text-[0.6875rem] font-bold transition-all duration-500 min-w-[56px] px-1 whitespace-nowrap"
+                      className={`flex items-center justify-center gap-1 text-[0.6875rem] font-bold transition-all duration-500 min-w-[56px] px-1 whitespace-nowrap ${colors.bgClass} ${colors.textClass}`}
                       style={{
                         width: `${pct}%`,
-                        backgroundColor: colors.bg,
-                        color: colors.text,
                       }}
                     >
                       <span>{zone.emoji}</span>
@@ -252,53 +250,53 @@ export default function GlycemicSurfPanel({
 
         {/* Quick Stats Cards */}
         {stats && hasData && (
-          <div className="flex gap-2.5 px-4 pb-4">
+          <div className="flex gap-2 px-3 pb-3">
             {/* Max Spike */}
-            <div
-              className="flex-1 rounded-[14px] p-2.5 text-center transition-transform hover:-translate-y-0.5 hover:shadow-md cursor-default flex flex-col items-center"
-              style={{ backgroundColor: getSpikeZone(stats.max_spike_mg_dl).bg }}
-            >
-              <TrendingUp className="w-5 h-5 mb-0.5 opacity-80" strokeWidth={2.5} color={getSpikeZone(stats.max_spike_mg_dl).text} />
-              <span
-                className="text-[0.5625rem] font-semibold uppercase tracking-wide"
-                style={{ color: getSpikeZone(stats.max_spike_mg_dl).text }}
-              >
-                {t("maxSpike")}
-              </span>
-              <span className="text-[1.125rem] font-[800] text-ink leading-none mt-1">
-                {Math.round(stats.max_spike_mg_dl)}
-              </span>
-              <span className="text-[0.5625rem] text-ink-muted">{t("mgDl")}</span>
+            <div className={`flex-1 rounded-[10px] p-1.5 flex flex-col items-center justify-center border ${getSpikeZone(stats.max_spike_mg_dl).bgClass} ${getSpikeZone(stats.max_spike_mg_dl).borderClass}`}>
+              <div className="flex items-center gap-1 mb-0.5">
+                <TrendingUp className={`w-3 h-3 opacity-80 ${getSpikeZone(stats.max_spike_mg_dl).textClass}`} strokeWidth={2.5} />
+                <span className={`text-[0.5rem] font-semibold uppercase tracking-wide ${getSpikeZone(stats.max_spike_mg_dl).textClass}`}>
+                  {t("maxSpike")}
+                </span>
+              </div>
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-[0.875rem] font-[800] text-ink leading-none">
+                  {Math.round(stats.max_spike_mg_dl)}
+                </span>
+                <span className="text-[0.5rem] text-ink-muted leading-none">{t("mgDl")}</span>
+              </div>
             </div>
 
             {/* Hours in Green */}
-            <div
-              className="flex-1 rounded-[14px] p-2.5 text-center transition-transform hover:-translate-y-0.5 hover:shadow-md cursor-default flex flex-col items-center"
-              style={{ backgroundColor: ZONE_COLORS.green.bg }}
-            >
-              <Timer className="w-5 h-5 mb-0.5 opacity-80" strokeWidth={2.5} color={ZONE_COLORS.green.text} />
-              <span className="text-[0.5625rem] font-semibold uppercase tracking-wide" style={{ color: ZONE_COLORS.green.text }}>
-                {t("inGreenZone")}
-              </span>
-              <span className="text-[1.125rem] font-[800] text-ink leading-none mt-1">
-                {stats.hours_in_green}
-              </span>
-              <span className="text-[0.5625rem] text-ink-muted">{t("hours")}</span>
+            <div className={`flex-1 rounded-[10px] p-1.5 flex flex-col items-center justify-center border ${ZONE_COLORS.green.bgClass} ${ZONE_COLORS.green.borderClass}`}>
+              <div className="flex items-center gap-1 mb-0.5">
+                <Timer className={`w-3 h-3 opacity-80 ${ZONE_COLORS.green.textClass}`} strokeWidth={2.5} />
+                <span className={`text-[0.5rem] font-semibold uppercase tracking-wide ${ZONE_COLORS.green.textClass}`}>
+                  {t("inGreenZone")}
+                </span>
+              </div>
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-[0.875rem] font-[800] text-ink leading-none">
+                  {stats.hours_in_green}
+                </span>
+                <span className="text-[0.5rem] text-ink-muted leading-none">{t("hours")}</span>
+              </div>
             </div>
 
             {/* Average Glucose */}
-            <div
-              className="flex-1 rounded-[14px] p-2.5 text-center transition-transform hover:-translate-y-0.5 hover:shadow-md cursor-default flex flex-col items-center"
-              style={{ backgroundColor: getSpikeZone(stats.average_glucose_mg_dl).bg }}
-            >
-              <Target className="w-5 h-5 mb-0.5 opacity-80" strokeWidth={2.5} color={getSpikeZone(stats.average_glucose_mg_dl).text} />
-              <span className="text-[0.5625rem] font-semibold uppercase tracking-wide" style={{ color: getSpikeZone(stats.average_glucose_mg_dl).text }}>
-                {t("averageValue")}
-              </span>
-              <span className="text-[1.125rem] font-[800] text-ink leading-none mt-1">
-                {stats.average_glucose_mg_dl}
-              </span>
-              <span className="text-[0.5625rem] text-ink-muted">{t("mgDl")}</span>
+            <div className={`flex-1 rounded-[10px] p-1.5 flex flex-col items-center justify-center border ${getSpikeZone(stats.average_glucose_mg_dl).bgClass} ${getSpikeZone(stats.average_glucose_mg_dl).borderClass}`}>
+              <div className="flex items-center gap-1 mb-0.5">
+                <Target className={`w-3 h-3 opacity-80 ${getSpikeZone(stats.average_glucose_mg_dl).textClass}`} strokeWidth={2.5} />
+                <span className={`text-[0.5rem] font-semibold uppercase tracking-wide ${getSpikeZone(stats.average_glucose_mg_dl).textClass}`}>
+                  {t("averageValue")}
+                </span>
+              </div>
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-[0.875rem] font-[800] text-ink leading-none">
+                  {stats.average_glucose_mg_dl}
+                </span>
+                <span className="text-[0.5rem] text-ink-muted leading-none">{t("mgDl")}</span>
+              </div>
             </div>
           </div>
         )}
@@ -319,7 +317,7 @@ export default function GlycemicSurfPanel({
       </div>
 
       {/* ── Micronutrients Expansion Panel (reused from DailyAllowancesPanel) ──── */}
-      <div className="bg-surface rounded-[20px] shadow-sm border border-border mt-3.5 mx-1">
+      <div className="bg-surface rounded-[20px] shadow-sm border border-border mt-3.5 mx-1 overflow-hidden">
         {/* Header */}
         <button
           onClick={() => setIsMicrosExpanded(!isMicrosExpanded)}
