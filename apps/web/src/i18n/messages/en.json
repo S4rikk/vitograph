@@ -46,16 +46,29 @@
     "tempVariation": "Temperature Variation",
     "spo2": "SpO2",
     "slogan": "Feed your cells, find balance",
-    "notSpecifiedPlaceholder": "Not specified"
+    "notSpecifiedPlaceholder": "Not specified",
+    "skipOnboarding": "Fill later"
   },
   "auth": {
     "title": "VITOGRAPH",
     "subtitle": "Sign in to your account",
+    "subtitleRegister": "Create account",
     "signIn": "Sign in",
     "signingIn": "Signing in...",
     "email": "Email address",
     "password": "Password",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "signUp": "Sign up",
+    "signingUp": "Signing up...",
+    "noAccount": "No account? Sign up",
+    "hasAccount": "Already have an account? Sign in",
+    "registerSuccessTitle": "Registration successful!",
+    "registerSuccessDesc": "We have generated a secure password for your account. Please save it in a safe place.",
+    "copyPassword": "Copy password",
+    "passwordCopied": "Copied",
+    "registerWarning": "You will not be able to recover this password if you forget it now. You can change it later in settings.",
+    "confirmEmailWarning": "Make sure to confirm your email via the received letter before logging in.",
+    "backToLogin": "Back to login"
   },
   "water": {
     "title": "Water",
@@ -697,7 +710,12 @@
     "mcg": "mcg",
     "g": "g",
     "iu": "IU",
-    "kcal": "kcal"
+    "kcal": "kcal",
+    "cm": "cm",
+    "kg": "kg",
+    "ft": "ft",
+    "in": "in",
+    "lbs": "lbs"
   },
   "assistant": {
     "chat": {

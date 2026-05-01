@@ -1,6 +1,6 @@
 import { getRequestConfig } from 'next-intl/server';
-import { cookies } from 'next/headers';
-import { defaultLocale, locales, type Locale } from './config';
+import { cookies, headers } from 'next/headers';
+import { locales, type Locale } from './config';
 
 // Explicit mapping — Turbopack cannot resolve dynamic imports with variables
 const messageImports: Record<Locale, () => Promise<{ default: Record<string, unknown> }>> = {
@@ -17,12 +17,42 @@ const messageImports: Record<Locale, () => Promise<{ default: Record<string, unk
   ar: () => import('./messages/ar.json'),
 };
 
+function negotiateLocale(header: string | null): string {
+  if (!header) return 'en';
+
+  const parts = header.split(',').map(part => {
+    const trimmed = part.trim();
+    if (!trimmed) return { lang: '', q: 0 };
+    const [lang, qStr] = trimmed.split(';q=');
+    return {
+      lang: lang.trim().split('-')[0].toLowerCase(),
+      q: qStr ? parseFloat(qStr) : 1.0,
+    };
+  }).filter(p => p.lang.length > 0);
+
+  parts.sort((a, b) => b.q - a.q);
+
+  for (const { lang } of parts) {
+    if ((locales as readonly string[]).includes(lang)) {
+      return lang;
+    }
+  }
+
+  return 'en';
+}
+
 export default getRequestConfig(async () => {
   const store = await cookies();
   const raw = store.get('NEXT_LOCALE')?.value;
-  const locale: Locale = raw && (locales as readonly string[]).includes(raw)
-    ? (raw as Locale)
-    : defaultLocale;
+  
+  let locale: Locale;
+  if (raw && (locales as readonly string[]).includes(raw)) {
+    locale = raw as Locale;
+  } else {
+    const headersList = await headers();
+    const acceptLanguage = headersList.get('accept-language');
+    locale = negotiateLocale(acceptLanguage) as Locale;
+  }
 
   return {
     locale,

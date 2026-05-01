@@ -46,16 +46,29 @@
     "tempVariation": "温度变化",
     "spo2": "血氧饱和度",
     "slogan": "Feed your cells, find balance",
-    "notSpecifiedPlaceholder": "未指定"
+    "notSpecifiedPlaceholder": "未指定",
+    "skipOnboarding": "稍后填写"
   },
   "auth": {
     "title": "VITOGRAPH",
-    "subtitle": "Sign in to your account",
+    "subtitle": "登录您的账户",
+    "subtitleRegister": "创建账户",
     "signIn": "Sign in",
     "signingIn": "Signing in...",
     "email": "Email address",
     "password": "Password",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "signUp": "注册",
+    "signingUp": "正在注册...",
+    "noAccount": "没有账户？注册",
+    "hasAccount": "已有账户？登录",
+    "registerSuccessTitle": "注册成功！",
+    "registerSuccessDesc": "我们已为您的账户生成安全密码。请将其保存在安全的地方。",
+    "copyPassword": "复制密码",
+    "passwordCopied": "已复制",
+    "registerWarning": "如果您现在忘记，无法恢复此密码。您可以稍后在设置中更改。",
+    "confirmEmailWarning": "在登录前，请通过收到的邮件确认您的电子邮件。",
+    "backToLogin": "返回登录"
   },
   "water": {
     "title": "水",
@@ -223,6 +236,12 @@
       "obesity": "肥胖"
     },
     "language": "界面语言",
+    "theme": "Theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
     "appSettings": "应用设置",
     "fontSize": "字体大小",
     "fontSizes": {
@@ -294,7 +313,9 @@
       "q6": "Vitograph能替代看医生吗？",
       "a6": "不。Vitograph是一个强大的分析工具和您健康的私人导航仪，但它不进行医疗诊断或开具治疗方案。所有见解和AI建议都是为了让您能和您的医生一起详细讨论。",
       "q7": "我的数据是保密的吗？",
-      "a7": "是的。您的医学数据、分析和问卷都储存在安全的数据库中。AI仅用于在您受保护的会话内个性化推荐。"
+      "a7": "是的。您的医学数据、分析和问卷都储存在安全的数据库中。AI仅用于在您受保护的会话内个性化推荐。",
+      "q8": "目标如何工作，如何创建？",
+      "a8": "目标通过聊天中的普通请求创建（例如，“我想减掉 5 公斤”）。重要的是要理解：Vitograph 将为您提供独特的虚拟 AI 专家，而不仅仅是简单地帮助您安排一个静态时间表。这个代理会负责您的进展：它每天都会跟踪您的执行情况、分析您的数据，并主动调整计划，以确保您能达到目标。"
     },
     "about": {
       "title": "关于应用程序",
@@ -327,13 +348,7 @@
       "strengthStrong": "强"
     },
     "hoursShort": "小时",
-    "minsShort": "分钟",
-    "theme": "Theme",
-    "themes": {
-      "light": "Light",
-      "dark": "Dark",
-      "system": "System"
-    }
+    "minsShort": "分钟"
   },
   "lifestyle": {
     "activityLevel": "活动水平",
@@ -457,6 +472,7 @@
     "tempVariation": "温度变化",
     "spo2": "血氧（SpO2）",
     "bloodPressureLabel": "血压",
+    "screenshotComingSoon": "截图 OCR — 即将上线！",
     "units": {
       "h": "小时",
       "ms": "毫秒",
@@ -694,7 +710,12 @@
     "mcg": "微克",
     "g": "克",
     "iu": "IU",
-    "kcal": "大卡"
+    "kcal": "大卡",
+    "cm": "厘米",
+    "kg": "公斤",
+    "ft": "英尺",
+    "in": "英寸",
+    "lbs": "磅"
   },
   "assistant": {
     "chat": {

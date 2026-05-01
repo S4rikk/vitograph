@@ -46,16 +46,29 @@
     "tempVariation": "온도 변화",
     "spo2": "산소 포화도",
     "slogan": "Feed your cells, find balance",
-    "notSpecifiedPlaceholder": "지정되지 않음"
+    "notSpecifiedPlaceholder": "지정되지 않음",
+    "skipOnboarding": "나중에 완료하기"
   },
   "auth": {
     "title": "VITOGRAPH",
-    "subtitle": "Sign in to your account",
+    "subtitle": "계정에 로그인하세요",
+    "subtitleRegister": "계정 생성하기",
     "signIn": "Sign in",
     "signingIn": "Signing in...",
     "email": "Email address",
     "password": "Password",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "signUp": "가입하기",
+    "signingUp": "가입 중...",
+    "noAccount": "계정이 없으신가요? 가입하기",
+    "hasAccount": "이미 계정이 있으신가요? 로그인하기",
+    "registerSuccessTitle": "가입 성공!",
+    "registerSuccessDesc": "귀하의 계정을 위한 안전한 비밀번호가 생성되었습니다. 안전한 곳에 저장하세요.",
+    "copyPassword": "비밀번호 복사",
+    "passwordCopied": "복사됨",
+    "registerWarning": "지금 비밀번호를 잊으면 복구할 수 없습니다. 설정에서 나중에 변경할 수 있습니다.",
+    "confirmEmailWarning": "로그인 전에 받으신 이메일로 반드시 메일 확인을 해주세요.",
+    "backToLogin": "로그인으로 돌아가기"
   },
   "water": {
     "title": "물",
@@ -223,6 +236,12 @@
       "obesity": "비만"
     },
     "language": "인터페이스 언어",
+    "theme": "Theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
     "appSettings": "앱 설정",
     "fontSize": "글꼴 크기",
     "fontSizes": {
@@ -294,7 +313,9 @@
       "q6": "Vitograph는 의사를 대체합니까?",
       "a6": "아니요. Vitograph는 강력한 분석 도구이자 개인 건강 내비게이터이지만, 의료 진단이나 치료를 제공하지 않습니다. AI의 통찰력과 추천은 주치의와의 토론을 위해 준비되었습니다.",
       "q7": "제 데이터는 안전한가요?",
-      "a7": "네. 귀하의 의료 데이터, 검사 및 설문지는 안전한 데이터베이스에 저장됩니다. AI는 귀하의 보호된 세션 내에서만 맞춤 추천을 위해 데이터를 사용합니다."
+      "a7": "네. 귀하의 의료 데이터, 검사 및 설문지는 안전한 데이터베이스에 저장됩니다. AI는 귀하의 보호된 세션 내에서만 맞춤 추천을 위해 데이터를 사용합니다.",
+      "q8": "목표와 목표를 어떻게 설정하나요?",
+      "a8": "채팅에서 요청을 통해 목표를 설정합니다 (예: “5kg 감량하고 싶습니다”). 목표를 달성하기 위해 생성된 특정 AI 전문가가 귀하의 진전을 책임집니다: 일일 추적, 데이터 분석 및 계획을 능동적으로 조정하여 목표를 달성하도록 보장합니다."
     },
     "about": {
       "title": "앱 정보 (About)",
@@ -327,13 +348,7 @@
       "strengthStrong": "강함"
     },
     "hoursShort": "시간",
-    "minsShort": "분",
-    "theme": "Theme",
-    "themes": {
-      "light": "Light",
-      "dark": "Dark",
-      "system": "System"
-    }
+    "minsShort": "분"
   },
   "lifestyle": {
     "activityLevel": "활동 수준",
@@ -457,6 +472,7 @@
     "tempVariation": "온도 변동",
     "spo2": "혈중 산소 (SpO2)",
     "bloodPressureLabel": "혈압",
+    "screenshotComingSoon": "스크린샷에 대한 OCR — 곧 출시됩니다!",
     "units": {
       "h": "시간",
       "ms": "ms",
@@ -694,7 +710,12 @@
     "mcg": "mcg",
     "g": "g",
     "iu": "IU",
-    "kcal": "kcal"
+    "kcal": "kcal",
+    "cm": "센티미터",
+    "kg": "킬로그램",
+    "ft": "피트",
+    "in": "인치",
+    "lbs": "파운드"
   },
   "assistant": {
     "chat": {

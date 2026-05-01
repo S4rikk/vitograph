@@ -9,7 +9,7 @@ import { locales, defaultLocale } from "./i18n/config";
  * 1. Detect locale from Accept-Language → set NEXT_LOCALE cookie
  * 2. Run Supabase auth session refresh + route protection
  */
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   // ── Step 1: Locale detection (lightweight, no async) ──
   const existingLocale = request.cookies.get('NEXT_LOCALE')?.value;
   const needsLocaleCookie = !existingLocale || !(locales as readonly string[]).includes(existingLocale);
@@ -37,7 +37,7 @@ export async function proxy(request: NextRequest) {
  * Parses "ru-RU,ru;q=0.9,en-US;q=0.8" → matches against supported locales.
  */
 function negotiateLocale(header: string): string {
-  if (!header) return defaultLocale;
+  if (!header) return 'en';
 
   const parts = header.split(',').map(part => {
     const trimmed = part.trim();
@@ -57,7 +57,7 @@ function negotiateLocale(header: string): string {
     }
   }
 
-  return defaultLocale;
+  return 'en';
 }
 
 export const config = {

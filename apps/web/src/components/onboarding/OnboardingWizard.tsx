@@ -108,6 +108,25 @@ export default function OnboardingWizard({ userId }: { userId: string }) {
     }
   };
 
+  const skipOnboarding = async () => {
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .upsert({ 
+           id: userId, 
+           lifestyle_markers: { onboarding_skipped: true },
+           locale: locale
+        });
+      if (error) throw error;
+      router.refresh(); 
+    } catch (err) {
+      console.error("Failed to skip onboarding:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const updateField = (key: string, value: any) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
@@ -229,14 +248,23 @@ export default function OnboardingWizard({ userId }: { userId: string }) {
 
         </div>
 
-        <div className="mt-8 flex justify-between">
-          <button
-            onClick={handleBack}
-            disabled={currentStep === 0 || isSubmitting}
-            className="rounded-lg px-4 py-2 text-ink-muted hover:bg-cloud disabled:opacity-50"
-          >
-            {tCommon("back")}
-          </button>
+        <div className="mt-8 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleBack}
+              disabled={currentStep === 0 || isSubmitting}
+              className="rounded-lg px-4 py-2 text-ink-muted hover:bg-cloud disabled:opacity-50"
+            >
+              {tCommon("back")}
+            </button>
+            <button
+              onClick={skipOnboarding}
+              disabled={isSubmitting}
+              className="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors disabled:opacity-50"
+            >
+              {tCommon("skipOnboarding")}
+            </button>
+          </div>
           <button
             onClick={handleNext}
             disabled={isSubmitting}

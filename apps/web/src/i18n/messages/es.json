@@ -46,16 +46,29 @@
     "tempVariation": "Variación de temperatura",
     "spo2": "SpO2",
     "slogan": "Feed your cells, find balance",
-    "notSpecifiedPlaceholder": "No especificado"
+    "notSpecifiedPlaceholder": "No especificado",
+    "skipOnboarding": "Completar más tarde"
   },
   "auth": {
     "title": "VITOGRAPH",
-    "subtitle": "Sign in to your account",
+    "subtitle": "Ingrese a su cuenta",
+    "subtitleRegister": "Cree una cuenta",
     "signIn": "Sign in",
     "signingIn": "Signing in...",
     "email": "Email address",
     "password": "Password",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "signUp": "Registrarse",
+    "signingUp": "Registrando...",
+    "noAccount": "¿No tiene cuenta? Regístrate",
+    "hasAccount": "¿Ya tienes cuenta? Inicia sesión",
+    "registerSuccessTitle": "¡Registro exitoso!",
+    "registerSuccessDesc": "Hemos generado una contraseña segura para su cuenta. Por favor, guárdela en un lugar seguro.",
+    "copyPassword": "Copiar contraseña",
+    "passwordCopied": "Copiado",
+    "registerWarning": "No podrá recuperar esta contraseña si la olvida ahora. Podrá cambiarla más tarde en la configuración.",
+    "confirmEmailWarning": "Asegúrese de confirmar su correo a través del enlace recibido antes de iniciar sesión.",
+    "backToLogin": "Volver a iniciar sesión"
   },
   "water": {
     "title": "Agua",
@@ -223,6 +236,12 @@
       "obesity": "Obesidad"
     },
     "language": "Idioma de la interfaz",
+    "theme": "Theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
     "appSettings": "Configuración de la aplicación",
     "fontSize": "Tamaño de fuente",
     "fontSizes": {
@@ -294,7 +313,9 @@
       "q6": "¿Vitograph reemplaza una visita al médico?",
       "a6": "No. Vitograph es una poderosa herramienta analítica y tu navegador personal de salud, pero no ofrece diagnósticos médicos ni tratamientos. Todos sus análisis y recomendaciones AI están diseñados para que puedas discutirlos en detalle con tu médico.",
       "q7": "¿Mis datos son confidenciales?",
-      "a7": "Sí. Tus datos médicos, análisis y cuestionarios están almacenados en una base segura. La IA los utiliza exclusivamente para personalizar recomendaciones dentro de tus sesiones protegidas."
+      "a7": "Sí. Tus datos médicos, análisis y cuestionarios están almacenados en una base segura. La IA los utiliza exclusivamente para personalizar recomendaciones dentro de tus sesiones protegidas.",
+      "q8": "¿Cómo funcionan los objetivos y cómo se crean?",
+      "a8": "Se crean a través de una solicitud ordinaria en el chat (por ejemplo, 'Quiero perder 5 kg'). Es importante entender: Vitograph no solo le dará un cronograma estático. Se crea un especialista AI único bajo su objetivo específico. Este agente toma responsabilidad por su progreso: monitoreará el cumplimiento diario, analizará sus datos y corregirá su plan proactivamente para asegurar que logre su resultado."
     },
     "about": {
       "title": "Acerca de la aplicación (About)",
@@ -327,13 +348,7 @@
       "strengthStrong": "Fuerte"
     },
     "hoursShort": "h",
-    "minsShort": "m",
-    "theme": "Theme",
-    "themes": {
-      "light": "Light",
-      "dark": "Dark",
-      "system": "System"
-    }
+    "minsShort": "m"
   },
   "lifestyle": {
     "activityLevel": "Nivel de actividad",
@@ -457,6 +472,7 @@
     "tempVariation": "Variación de temperatura",
     "spo2": "Oxígeno en sangre (SpO2)",
     "bloodPressureLabel": "Presión",
+    "screenshotComingSoon": "OCR para capturas de pantalla — pronto!",
     "units": {
       "h": "h",
       "ms": "ms",
@@ -694,7 +710,12 @@
     "mcg": "mcg",
     "g": "g",
     "iu": "UI",
-    "kcal": "kcal"
+    "kcal": "kcal",
+    "cm": "cm",
+    "kg": "kg",
+    "ft": "ft",
+    "in": "plg",
+    "lbs": "lb"
   },
   "assistant": {
     "chat": {

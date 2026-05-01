@@ -46,16 +46,29 @@
     "tempVariation": "تغير الحرارة",
     "spo2": "SpO2",
     "slogan": "Feed your cells, find balance",
-    "notSpecifiedPlaceholder": "غير محدد"
+    "notSpecifiedPlaceholder": "غير محدد",
+    "skipOnboarding": "TODO"
   },
   "auth": {
     "title": "VITOGRAPH",
     "subtitle": "تسجيل الدخول إلى حسابك",
+    "subtitleRegister": "TODO",
     "signIn": "تسجيل الدخول",
     "signingIn": "جارٍ تسجيل الدخول...",
     "email": "البريد الإلكتروني",
     "password": "كلمة المرور",
-    "signOut": "تسجيل الخروج"
+    "signOut": "تسجيل الخروج",
+    "signUp": "TODO",
+    "signingUp": "TODO",
+    "noAccount": "TODO",
+    "hasAccount": "TODO",
+    "registerSuccessTitle": "TODO",
+    "registerSuccessDesc": "TODO",
+    "copyPassword": "TODO",
+    "passwordCopied": "TODO",
+    "registerWarning": "TODO",
+    "confirmEmailWarning": "TODO",
+    "backToLogin": "TODO"
   },
   "water": {
     "title": "الماء",
@@ -223,6 +236,12 @@
       "obesity": "سمنة"
     },
     "language": "لغة الواجهة",
+    "theme": "Theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
     "appSettings": "إعدادات التطبيق",
     "fontSize": "حجم الخط",
     "fontSizes": {
@@ -294,7 +313,9 @@
       "q6": "هل يحل Vitograph محل زيارة الطبيب؟",
       "a6": "لا. Vitograph أداة تحليلية قوية ومرشدك الصحي الشخصي، لكنه لا يشخص الحالات الطبية ولا يصف العلاجات. جميع التوصيات مصممة لمناقشتها مع طبيبك.",
       "q7": "هل بياناتي سرية؟",
-      "a7": "نعم. بياناتك الطبية وتحاليلك واستبياناتك مخزنة في قاعدة بيانات آمنة. يستخدمها الذكاء الاصطناعي حصرياً لتخصيص التوصيات ضمن جلساتك المحمية."
+      "a7": "نعم. بياناتك الطبية وتحاليلك واستبياناتك مخزنة في قاعدة بيانات آمنة. يستخدمها الذكاء الاصطناعي حصرياً لتخصيص التوصيات ضمن جلساتك المحمية.",
+      "q8": "TODO",
+      "a8": "TODO"
     },
     "about": {
       "title": "حول التطبيق",
@@ -327,13 +348,7 @@
       "strengthStrong": "قوية"
     },
     "hoursShort": "س",
-    "minsShort": "د",
-    "theme": "Theme",
-    "themes": {
-      "light": "Light",
-      "dark": "Dark",
-      "system": "System"
-    }
+    "minsShort": "د"
   },
   "lifestyle": {
     "activityLevel": "مستوى النشاط",
@@ -457,6 +472,7 @@
     "tempVariation": "تغير الحرارة",
     "spo2": "أكسجين الدم (SpO2)",
     "bloodPressureLabel": "الضغط",
+    "screenshotComingSoon": "TODO",
     "units": {
       "h": "س",
       "ms": "ملي ثانية",
@@ -694,7 +710,12 @@
     "mcg": "مكغ",
     "g": "جم",
     "iu": "وحدة دولية",
-    "kcal": "سعرة"
+    "kcal": "سعرة",
+    "cm": "TODO",
+    "kg": "TODO",
+    "ft": "TODO",
+    "in": "TODO",
+    "lbs": "TODO"
   },
   "assistant": {
     "chat": {

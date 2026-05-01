@@ -46,16 +46,29 @@
     "tempVariation": "Sıcaklık Değişimi",
     "spo2": "SpO2",
     "slogan": "Feed your cells, find balance",
-    "notSpecifiedPlaceholder": "Belirtilmedi"
+    "notSpecifiedPlaceholder": "Belirtilmedi",
+    "skipOnboarding": "TODO"
   },
   "auth": {
     "title": "VITOGRAPH",
-    "subtitle": "Sign in to your account",
+    "subtitle": "TODO",
+    "subtitleRegister": "TODO",
     "signIn": "Sign in",
     "signingIn": "Signing in...",
     "email": "Email address",
     "password": "Password",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "signUp": "TODO",
+    "signingUp": "TODO",
+    "noAccount": "TODO",
+    "hasAccount": "TODO",
+    "registerSuccessTitle": "TODO",
+    "registerSuccessDesc": "TODO",
+    "copyPassword": "TODO",
+    "passwordCopied": "TODO",
+    "registerWarning": "TODO",
+    "confirmEmailWarning": "TODO",
+    "backToLogin": "TODO"
   },
   "water": {
     "title": "Su",
@@ -223,6 +236,12 @@
       "obesity": "Obezite"
     },
     "language": "Arayüz Dili",
+    "theme": "Theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
     "appSettings": "Uygulama Ayarları",
     "fontSize": "Yazı Tipi Boyutu",
     "fontSizes": {
@@ -294,7 +313,9 @@
       "q6": "Vitograph doktor ziyaretini değiştirir mi?",
       "a6": "Hayır. Vitograph, güçlü bir analitik araç ve sağlık yolculuğunuzda kişisel bir navigatördür, ancak tıbbi teşhis koymaz ve tedavi önermez. Tüm içgörüler ve AI önerileri, bunları doktorunuzla somut bir şekilde tartışabilmeniz için tasarlanmıştır.",
       "q7": "Verilerim gizli mi?",
-      "a7": "Evet. Tıbbi verileriniz, analizleriniz ve anketleriniz güvenli bir veritabanında saklanmaktadır. AI, bunları yalnızca korunan oturumlarınız kapsamında kişiselleştirilmiş önerilerde bulunmak için kullanır."
+      "a7": "Evet. Tıbbi verileriniz, analizleriniz ve anketleriniz güvenli bir veritabanında saklanmaktadır. AI, bunları yalnızca korunan oturumlarınız kapsamında kişiselleştirilmiş önerilerde bulunmak için kullanır.",
+      "q8": "TODO",
+      "a8": "TODO"
     },
     "about": {
       "title": "Hakkında (About)",
@@ -327,13 +348,7 @@
       "strengthStrong": "Güçlü"
     },
     "hoursShort": "sa",
-    "minsShort": "dk",
-    "theme": "Theme",
-    "themes": {
-      "light": "Light",
-      "dark": "Dark",
-      "system": "System"
-    }
+    "minsShort": "dk"
   },
   "lifestyle": {
     "activityLevel": "Aktivite Düzeyi",
@@ -457,6 +472,7 @@
     "tempVariation": "Sıcaklık Değişimi",
     "spo2": "Kandaki Oksijen (SpO2)",
     "bloodPressureLabel": "Basınç",
+    "screenshotComingSoon": "TODO",
     "units": {
       "h": "sa",
       "ms": "ms",
@@ -694,7 +710,12 @@
     "mcg": "mcg",
     "g": "g",
     "iu": "IU",
-    "kcal": "kcal"
+    "kcal": "kcal",
+    "cm": "TODO",
+    "kg": "TODO",
+    "ft": "TODO",
+    "in": "TODO",
+    "lbs": "TODO"
   },
   "assistant": {
     "chat": {

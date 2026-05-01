@@ -46,16 +46,29 @@
     "tempVariation": "Изменение температуры",
     "spo2": "SpO2",
     "slogan": "Feed your cells, find balance",
-    "notSpecifiedPlaceholder": "Не указано"
+    "notSpecifiedPlaceholder": "Не указано",
+    "skipOnboarding": "Заполнить позже"
   },
   "auth": {
     "title": "VITOGRAPH",
-    "subtitle": "Sign in to your account",
+    "subtitle": "Войдите в свой аккаунт",
+    "subtitleRegister": "Создайте аккаунт",
     "signIn": "Войти",
     "signingIn": "Вход...",
     "email": "Email адрес",
     "password": "Пароль",
-    "signOut": "Выйти"
+    "signOut": "Выйти",
+    "signUp": "Зарегистрироваться",
+    "signingUp": "Регистрация...",
+    "noAccount": "Нет аккаунта? Зарегистрироваться",
+    "hasAccount": "Уже есть аккаунт? Войти",
+    "registerSuccessTitle": "Регистрация успешна!",
+    "registerSuccessDesc": "Мы сгенерировали безопасный пароль для вашего аккаунта. Пожалуйста, сохраните его в надежном месте.",
+    "copyPassword": "Копировать пароль",
+    "passwordCopied": "Скопировано",
+    "registerWarning": "Вы не сможете восстановить этот пароль, если забудете его сейчас. Вы сможете сменить его позже в настройках.",
+    "confirmEmailWarning": "Обязательно подтвердите почту через полученное письмо перед входом.",
+    "backToLogin": "Вернуться к логину"
   },
   "water": {
     "title": "Вода",
@@ -697,7 +710,12 @@
     "mcg": "мкг",
     "g": "г",
     "iu": "МЕ",
-    "kcal": "ккал"
+    "kcal": "ккал",
+    "cm": "см",
+    "kg": "кг",
+    "ft": "фт",
+    "in": "дюйм",
+    "lbs": "фунт"
   },
   "assistant": {
     "chat": {

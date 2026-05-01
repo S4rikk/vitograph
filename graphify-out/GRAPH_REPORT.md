@@ -1,11 +1,11 @@
 # Graph Report - VITOGRAPH  (2026-05-01)
 
 ## Corpus Check
-- 197 files · ~133,669 words
+- 198 files · ~202,782 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 838 nodes · 1330 edges · 30 communities detected
+- 839 nodes · 1330 edges · 30 communities detected
 - Extraction: 67% EXTRACTED · 33% INFERRED · 0% AMBIGUOUS · INFERRED: 436 edges (avg confidence: 0.61)
 - Token cost: 0 input · 0 output
 
@@ -38,8 +38,8 @@
 - [[_COMMUNITY_Community 36|Community 36]]
 - [[_COMMUNITY_Community 39|Community 39]]
 - [[_COMMUNITY_Community 40|Community 40]]
-- [[_COMMUNITY_Community 90|Community 90]]
 - [[_COMMUNITY_Community 91|Community 91]]
+- [[_COMMUNITY_Community 92|Community 92]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `DatabaseError` - 59 edges
@@ -179,11 +179,11 @@ Nodes (1): run()
 Cohesion: 1.0
 Nodes (2): set(), unflatten()
 
-### Community 90 - "Community 90"
+### Community 91 - "Community 91"
 Cohesion: 1.0
 Nodes (1): Extract all text from a PDF file.          Reads every page of the PDF and con
 
-### Community 91 - "Community 91"
+### Community 92 - "Community 92"
 Cohesion: 1.0
 Nodes (1): Parse extracted text into structured biomarker data.          Uses OpenAI ``As
 
@@ -202,9 +202,9 @@ Nodes (1): Parse extracted text into structured biomarker data.          Uses Op
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 40`** (3 nodes): `unflatten-json.js`, `set()`, `unflatten()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 90`** (1 nodes): `Extract all text from a PDF file.          Reads every page of the PDF and con`
+- **Thin community `Community 91`** (1 nodes): `Extract all text from a PDF file.          Reads every page of the PDF and con`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 91`** (1 nodes): `Parse extracted text into structured biomarker data.          Uses OpenAI ``As`
+- **Thin community `Community 92`** (1 nodes): `Parse extracted text into structured biomarker data.          Uses OpenAI ``As`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
