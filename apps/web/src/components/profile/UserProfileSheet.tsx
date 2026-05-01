@@ -42,6 +42,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import DeviceWidgetCard from "./DeviceWidgetCard";
 import ManualEntryDialog from "./ManualEntryDialog";
 import { useFontScale } from "@/components/providers/FontScaleProvider";
+import { FeedbackButton } from "../diary/FeedbackButton";
 import type {
     MetricItem,
     MetricHistoryPoint,
@@ -1216,6 +1217,9 @@ export default function UserProfileSheet({
                                                         <option value="dark">{tProfile("themes.dark")}</option>
                                                     </select>
                                                 </div>
+                                                <div className="flex flex-col h-full justify-end pt-5">
+                                                    <FeedbackButton />
+                                                </div>
                                             </div>
                                         </div>
 
@@ -1328,6 +1332,17 @@ export default function UserProfileSheet({
                                                             <div className="text-[0.875rem] text-ink-muted leading-relaxed flex gap-2 items-start">
                                                                 <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.answer")}</span>
                                                                 <span>{tProfile("faq.a7")}</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="space-y-1.5 border-b border-border pb-4 last:border-0 last:pb-0">
+                                                            <div className="font-semibold text-ink flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.question")}</span>
+                                                                <span>{tProfile("faq.q8")}</span>
+                                                            </div>
+                                                            <div className="text-[0.875rem] text-ink-muted leading-relaxed flex gap-2 items-start">
+                                                                <span className="shrink-0 px-2 py-0.5 rounded bg-surface-muted text-ink-muted text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.answer")}</span>
+                                                                <span>{tProfile("faq.a8")}</span>
                                                             </div>
                                                         </div>
                                                     </div>
