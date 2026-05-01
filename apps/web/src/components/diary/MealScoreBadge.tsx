@@ -21,9 +21,9 @@ export function MealScoreBadge({ score, reason }: MealScoreBadgeProps) {
 
     return (
         <div className="flex flex-col gap-1.5 mt-2 w-full max-w-[200px]">
-            <div className="flex items-center justify-between text-xs text-gray-500">
+            <div className="flex items-center justify-between text-xs text-ink-muted">
                 <span>{t("healthScoreLabel")}</span>
-                <span className="font-semibold text-gray-700">{score}/100</span>
+                <span className="font-semibold text-ink">{score}/100</span>
             </div>
 
             <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
@@ -34,7 +34,7 @@ export function MealScoreBadge({ score, reason }: MealScoreBadgeProps) {
             </div>
 
             {reason && (
-                <p className="text-[0.6875rem] text-gray-500 italic leading-relaxed mt-0.5">
+                <p className="text-[0.6875rem] text-ink-muted italic leading-relaxed mt-0.5">
                     {reason}
                 </p>
             )}

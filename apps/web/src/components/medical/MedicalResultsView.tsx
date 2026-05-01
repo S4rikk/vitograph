@@ -383,7 +383,7 @@ export default function MedicalResultsView() {
             {editableBiomarkers.map((marker, index) => (
               <div
                 key={`${marker.standardized_slug}_${index}`}
-                className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-300 hover:shadow-md flex flex-col justify-between"
+                className="group relative overflow-hidden rounded-2xl border border-border bg-surface p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-300 hover:shadow-md flex flex-col justify-between"
               >
                 {/* Accent line top */}
                 <div className={`absolute left-0 top-0 h-1 w-full ${marker.flag === 'Normal' ? 'bg-emerald-400' : marker.flag ? 'bg-rose-400' : 'bg-slate-200'} opacity-70 transition-opacity group-hover:opacity-100`} />
@@ -391,12 +391,12 @@ export default function MedicalResultsView() {
                 <div>
                   {/* Название */}
                   <div className="flex justify-between items-start gap-3 mt-1">
-                    <h3 className="font-semibold text-slate-800 leading-tight" title={marker.original_name}>{marker.original_name}</h3>
+                    <h3 className="font-semibold text-ink leading-tight" title={marker.original_name}>{marker.original_name}</h3>
                     {/* Бейдж статуса (Flag) */}
                     {marker.flag && (
                       <span className={`flex-shrink-0 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium tracking-wide ${marker.flag === 'Normal'
-                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                        : 'bg-rose-50 text-rose-700 border border-rose-100'
+                        ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20'
+                        : 'bg-rose-500/10 text-rose-700 border border-rose-500/20'
                         }`}>
                         {marker.flag === 'Normal' ? (
                           <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
@@ -420,18 +420,18 @@ export default function MedicalResultsView() {
                           step="any"
                           className={`w-full max-w-[120px] rounded-lg px-2 py-1 text-2xl font-bold tracking-tight focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all ${
                             isValueMissing 
-                              ? "bg-rose-50 border-2 border-rose-400 text-rose-900 animate-pulse shadow-[0_0_10px_rgba(251,113,133,0.3)]" 
-                              : "bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white"
+                              ? "bg-rose-500/10 border-2 border-rose-400 text-rose-900 animate-pulse shadow-[0_0_10px_rgba(251,113,133,0.3)]" 
+                              : "bg-surface-muted border border-border text-ink focus:bg-surface"
                           }`}
                         />
                       );
                     })()}
-                    {marker.unit && <span className="text-sm font-medium text-slate-500">{marker.unit}</span>}
+                    {marker.unit && <span className="text-sm font-medium text-ink-muted">{marker.unit}</span>}
                   </div>
 
                   {/* Референс */}
                   <div className="mt-3 flex items-center gap-2">
-                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("normLabel")}</span>
+                    <span className="text-xs font-semibold text-ink-faint uppercase tracking-wider">{t("normLabel")}</span>
                     {(() => {
                       const isNormMissing = !marker.reference_range?.text || marker.reference_range?.text === t("noData");
                       return (
@@ -442,8 +442,8 @@ export default function MedicalResultsView() {
                           placeholder={t("noData")}
                           className={`flex-1 border-b px-1 py-0.5 text-sm transition-all focus:outline-none ${
                             isNormMissing
-                              ? "bg-rose-50/50 border-rose-300 text-rose-700 animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite] placeholder:text-rose-300"
-                              : "bg-transparent border-slate-100 hover:border-slate-200 focus:border-cyan-400 text-slate-600"
+                              ? "bg-rose-500/10/50 border-rose-300 text-rose-700 animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite] placeholder:text-rose-300"
+                              : "bg-transparent border-border hover:border-border focus:border-cyan-400 text-ink-muted"
                           }`}
                         />
                       );
@@ -453,7 +453,7 @@ export default function MedicalResultsView() {
 
                 {/* Пояснение от ИИ */}
                 {marker.ai_clinical_note && (
-                  <div className="mt-5 rounded-xl bg-cyan-50/80 p-3.5 border border-cyan-100/50">
+                  <div className="mt-5 rounded-xl bg-cyan-500/10/80 p-3.5 border border-cyan-500/20/50">
                     <p className="text-sm leading-relaxed text-cyan-900">
                       <span className="font-semibold text-cyan-700 mr-1.5">AI:</span>
                       {marker.ai_clinical_note}
@@ -465,14 +465,14 @@ export default function MedicalResultsView() {
           </div>
 
           {/* ── Control Buttons ────────────────────────────────── */}
-          <div ref={controlsRef} className="mt-8 flex flex-wrap items-center gap-4 p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <div ref={controlsRef} className="mt-8 flex flex-wrap items-center gap-4 p-5 rounded-2xl bg-surface border border-border shadow-sm">
             <button
               onClick={handleRefreshNotes}
               disabled={!isDirty || isRefreshing}
               className={`flex-1 sm:flex-none px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
                 isDirty && !isRefreshing
                   ? "bg-cyan-500 text-white shadow-lg shadow-cyan-200 hover:bg-cyan-600 hover:-translate-y-0.5 active:translate-y-0" 
-                  : "bg-slate-100 text-slate-400 cursor-default"
+                  : "bg-slate-100 text-ink-faint cursor-default"
               }`}
             >
               {isRefreshing ? (
@@ -488,13 +488,13 @@ export default function MedicalResultsView() {
               className={`flex-1 sm:flex-none px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
                 !isDirty && !isDiagnosing && !isRefreshing && !reportAlreadyGenerated
                   ? "bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.6)] animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite] hover:bg-purple-700 hover:-translate-y-0.5 active:translate-y-0"
-                  : "bg-slate-100 text-slate-400 cursor-not-allowed opacity-70"
+                  : "bg-slate-100 text-ink-faint cursor-not-allowed opacity-70"
               }`}
             >
               {isDiagnosing ? t("analyzing") : t("generateReport")}
             </button>
             {isDirty ? (
-              <div className="ml-auto w-full lg:w-auto flex-1 max-w-md flex items-start gap-3 rounded-xl bg-amber-50/80 p-3.5 border border-amber-200 shadow-sm transition-all duration-300">
+              <div className="ml-auto w-full lg:w-auto flex-1 max-w-md flex items-start gap-3 rounded-xl bg-amber-500/10/80 p-3.5 border border-amber-500/20 shadow-sm transition-all duration-300">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 shadow-inner">
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -506,7 +506,7 @@ export default function MedicalResultsView() {
                 </div>
               </div>
             ) : (
-              <div className="ml-auto w-full lg:w-auto flex items-center justify-center rounded-xl bg-amber-50/50 px-5 py-3 border border-amber-200/30 transition-all duration-300 hover:bg-amber-50 hover:border-amber-200/60">
+              <div className="ml-auto w-full lg:w-auto flex items-center justify-center rounded-xl bg-amber-500/10/50 px-5 py-3 border border-amber-500/20/30 transition-all duration-300 hover:bg-amber-500/10 hover:border-amber-500/20/60">
                 <div className="text-sm font-semibold text-amber-700">
                   ⚠️ {t("verifyData")}
                 </div>
@@ -524,12 +524,12 @@ export default function MedicalResultsView() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900">{t("aiMedicalAnalysis")}</h3>
+                  <h3 className="text-xl font-bold text-ink">{t("aiMedicalAnalysis")}</h3>
                 </div>
 
                 <ul className="space-y-3">
                   {results.general_recommendations.map((rec, i) => (
-                    <li key={i} className="flex gap-3 text-slate-700 leading-relaxed">
+                    <li key={i} className="flex gap-3 text-ink leading-relaxed">
                       <span className="mt-1.5 flex h-1.5 w-1.5 flex-shrink-0 rounded-full bg-cyan-400"></span>
                       <span>{rec}</span>
                     </li>
@@ -548,9 +548,9 @@ export default function MedicalResultsView() {
 
       {/* ── GPT-5.4 Diagnostic Report ─────────────────────── */}
       {isDiagnosing && (
-        <div className="flex flex-col items-center gap-3 rounded-2xl border border-purple-200 bg-purple-50 p-8">
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-purple-500/20 bg-purple-500/10 p-8">
           <div className="relative h-10 w-10">
-            <div className="absolute inset-0 animate-spin rounded-full border-2 border-purple-200 border-t-purple-600" />
+            <div className="absolute inset-0 animate-spin rounded-full border-2 border-purple-500/20 border-t-purple-600" />
           </div>
           <p className="text-sm font-medium text-purple-700">
             {t("preparingReport")}
@@ -562,7 +562,7 @@ export default function MedicalResultsView() {
       )}
 
       {diagnosisError && !isDiagnosing && (
-        <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-6 shadow-sm">
+        <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-50 to-orange-50 p-6 shadow-sm">
           <div className="flex items-start gap-4">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -603,7 +603,7 @@ export default function MedicalResultsView() {
                       <button
                         key={dateStr}
                         onClick={() => firstReportOfDate && setSelectedTimestamp(firstReportOfDate.timestamp)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ${isSelectedDate ? 'bg-cyan-100 text-cyan-800 shadow-sm border border-cyan-200' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'}`}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ${isSelectedDate ? 'bg-cyan-100 text-cyan-800 shadow-sm border border-cyan-200' : 'bg-surface text-ink-muted border border-border hover:bg-surface-muted'}`}
                       >
                         {dateStr}
                       </button>
@@ -620,7 +620,7 @@ export default function MedicalResultsView() {
               const sessionsOnDate = reportHistory.filter(r => new Date(r.timestamp).toLocaleDateString("ru-RU", { day: 'numeric', month: 'long', year: 'numeric' }) === currentDateStr);
 
               return (
-                <div className="flex items-center justify-between rounded-2xl bg-white/60 p-2 backdrop-blur-md border border-white/40 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.05)]">
+                <div className="flex items-center justify-between rounded-2xl bg-surface/60 p-2 backdrop-blur-md border border-white/40 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.05)]">
                   <div className="flex gap-2 p-1 overflow-x-auto">
                     {sessionsOnDate.length > 1 ? sessionsOnDate.map((session, idx) => {
                       const timeStr = new Date(session.timestamp).toLocaleTimeString("ru-RU", { hour: '2-digit', minute: '2-digit' });
@@ -630,8 +630,8 @@ export default function MedicalResultsView() {
                           key={session.timestamp}
                           onClick={() => setSelectedTimestamp(session.timestamp)}
                           className={`relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${isActive
-                            ? "bg-white text-cyan-700 shadow-[inset_0_-2px_0_rgba(6,182,212,1),0_2px_8px_-2px_rgba(6,182,212,0.2)]"
-                            : "text-slate-500 hover:bg-white/50 hover:text-slate-700"
+                            ? "bg-surface text-cyan-700 shadow-[inset_0_-2px_0_rgba(6,182,212,1),0_2px_8px_-2px_rgba(6,182,212,0.2)]"
+                            : "text-ink-muted hover:bg-surface/50 hover:text-ink"
                             }`}
                         >
                           <span className="text-lg">{idx === 0 ? "🕒" : "⏱️"}</span>
@@ -639,7 +639,7 @@ export default function MedicalResultsView() {
                         </button>
                       );
                     }) : (
-                      <div className="px-4 py-2 text-sm font-medium text-slate-600 flex items-center gap-2">
+                      <div className="px-4 py-2 text-sm font-medium text-ink-muted flex items-center gap-2">
                         <span className="text-lg">🗓️</span>
                         {currentDateStr} • {new Date(currentReport.timestamp).toLocaleTimeString("ru-RU", { hour: '2-digit', minute: '2-digit' })}
                       </div>
@@ -649,7 +649,7 @@ export default function MedicalResultsView() {
                   <button
                     onClick={handleDeleteReport}
                     disabled={isDiagnosing}
-                    className="flex items-center gap-2 px-3 py-2 mr-2 rounded-xl text-xs font-medium text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 px-3 py-2 mr-2 rounded-xl text-xs font-medium text-red-500 hover:bg-red-500/10 hover:text-red-600 transition-colors disabled:opacity-50"
                     title={t("deleteSelectedReport")}
                   >
                     🗑️ {t("delete")}
@@ -668,7 +668,7 @@ export default function MedicalResultsView() {
       {/* Loading history state fallback */}
       {isLoadingHistory && reportHistory.length === 0 && (
         <div className="mt-8 flex justify-center">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-purple-200 border-t-purple-600" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-purple-500/20 border-t-purple-600" />
         </div>
       )}
     </div>

@@ -125,7 +125,7 @@ export default function OnboardingWizard({ userId }: { userId: string }) {
         </p>
       </div>
 
-      <div className="rounded-xl border border-border bg-white p-6 shadow-sm">
+      <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
         <h2 className="mb-6 text-xl font-semibold text-ink">
           {SECTIONS[currentStep].title}
         </h2>
@@ -274,7 +274,7 @@ function SelectField({ label, value, options, onChange, tCommon }: { label: stri
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-md border border-cloud-dark px-3 py-2 text-ink shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 bg-white"
+        className="w-full rounded-md border border-cloud-dark px-3 py-2 text-ink shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 bg-surface"
       >
         <option value="" disabled>{tCommon("select")}</option>
         {options.map((opt) => (

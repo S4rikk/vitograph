@@ -68,18 +68,18 @@ export default function ManualEntryDialog({
             {/* Dialog */}
             <div className="fixed inset-0 z-[61] flex items-center justify-center p-4">
                 <div
-                    className="relative w-full max-w-md rounded-2xl bg-white shadow-2xl animate-slide-up"
+                    className="relative w-full max-w-md rounded-2xl bg-surface shadow-2xl animate-slide-up"
                     onClick={(e) => e.stopPropagation()}
                     role="dialog"
                     aria-modal="true"
                     aria-label={title}
                 >
                     {/* Header */}
-                    <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-divider">
-                        <h3 className="text-lg font-bold text-ink-main">{title}</h3>
+                    <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-border">
+                        <h3 className="text-lg font-bold text-ink">{title}</h3>
                         <button
                             onClick={onClose}
-                            className="p-1.5 text-ink-muted hover:text-ink-main hover:bg-surface-muted rounded-full transition-colors cursor-pointer"
+                            className="p-1.5 text-ink-muted hover:text-ink hover:bg-surface-muted rounded-full transition-colors cursor-pointer"
                             aria-label={t("close")}
                         >
                             <X size={18} />
@@ -92,7 +92,7 @@ export default function ManualEntryDialog({
                             <div key={field.key}>
                                 <label
                                     htmlFor={`manual-${field.key}`}
-                                    className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
+                                    className="block text-[0.8125rem] font-semibold text-ink mb-1.5"
                                 >
                                     {field.label}
                                     {field.unit && (
@@ -108,18 +108,18 @@ export default function ManualEntryDialog({
                                     value={values[field.key] ?? ""}
                                     onChange={(e) => handleChange(field.key, e.target.value)}
                                     placeholder={field.placeholder ?? `${t("enterValue")} ${field.label.toLowerCase()}`}
-                                    className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                    className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm text-ink"
                                 />
                             </div>
                         ))}
                     </form>
 
                     {/* Footer */}
-                    <div className="px-6 py-4 border-t border-divider flex justify-end gap-3">
+                    <div className="px-6 py-4 border-t border-border flex justify-end gap-3">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 text-sm font-semibold text-ink-muted hover:text-ink-main rounded-lg hover:bg-surface-muted transition-colors cursor-pointer"
+                            className="px-4 py-2 text-sm font-semibold text-ink-muted hover:text-ink rounded-lg hover:bg-surface-muted transition-colors cursor-pointer"
                         >
                             {t("cancel")}
                         </button>

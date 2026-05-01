@@ -104,11 +104,11 @@ export default function UploadZone({
 
   /* ── Styles per state ──────────────────────────────────── */
   const stateStyles: Record<UploadState, string> = {
-    idle: "border-border bg-white hover:border-primary-400 hover:bg-primary-50/40",
-    hover: "border-primary-500 bg-primary-50 scale-[1.01]",
-    loading: "border-primary-400 bg-primary-50/60 pointer-events-none",
-    done: "border-success bg-green-50",
-    error: "border-error bg-red-50",
+    idle: "border-border bg-surface hover:border-primary-400 hover:bg-primary-500/5",
+    hover: "border-primary-500 bg-primary-500/10 scale-[1.01]",
+    loading: "border-primary-400 bg-primary-500/10 pointer-events-none",
+    done: "border-success bg-success/10",
+    error: "border-error bg-error/10",
   };
 
   return (
@@ -186,7 +186,7 @@ export default function UploadZone({
               {t("dragDropSubtitle")}
             </p>
           </div>
-          <span className="inline-block rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary-700">
+          <span className="inline-block rounded-full bg-primary-500/10 px-3 py-1 text-xs font-medium text-primary-700">
             {t("acceptedFormats")}
           </span>
 
@@ -228,7 +228,7 @@ export default function UploadZone({
       {/* ── Done ──────────────────────────────────────────── */}
       {effectiveState === "done" && (
         <div className="flex flex-col items-center gap-4 relative z-10">
-          <div className="flex items-center gap-3 bg-white/60 px-5 py-2.5 rounded-full border border-success/30 shadow-sm mb-2">
+          <div className="flex items-center gap-3 bg-surface/60 px-5 py-2.5 rounded-full border border-success/30 shadow-sm mb-2">
             <svg
               className="h-5 w-5 text-success"
               fill="none"
@@ -242,16 +242,16 @@ export default function UploadZone({
           </div>
           
           <div className="text-center">
-            <p className="text-base font-bold text-slate-800">
+            <p className="text-base font-bold text-ink">
               {t("uploadNewResults")}
             </p>
-            <p className="mt-1 text-[0.8125rem] text-slate-500 max-w-xs mx-auto">
+            <p className="mt-1 text-[0.8125rem] text-ink-muted max-w-xs mx-auto">
               {t("uploadNewResultsSub")}
             </p>
           </div>
 
-          <div className="mt-2 inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-6 py-3 text-[0.875rem] font-bold text-slate-700 shadow-sm transition-all hover:border-cyan-300 hover:text-cyan-700 hover:shadow-md group">
-            <svg className="h-5 w-5 text-slate-400 group-hover:text-cyan-500 transition-colors" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <div className="mt-2 inline-flex items-center gap-2 rounded-xl bg-surface border border-border px-6 py-3 text-[0.875rem] font-bold text-ink shadow-sm transition-all hover:border-cyan-300 hover:text-cyan-700 hover:shadow-md group">
+            <svg className="h-5 w-5 text-ink-faint group-hover:text-cyan-500 transition-colors" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
             {t("addNewAnalysis")}

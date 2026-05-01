@@ -113,14 +113,14 @@ export function FeedbackButton({ className }: { className?: string }) {
                             <button
                                 type="button"
                                 onClick={() => setCategory("bug")}
-                                className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${category === "bug" ? "bg-white text-ink shadow-sm" : "text-ink-muted hover:text-ink"}`}
+                                className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${category === "bug" ? "bg-surface text-ink shadow-sm" : "text-ink-muted hover:text-ink"}`}
                             >
                                 {t("categoryBug")}
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setCategory("suggestion")}
-                                className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${category === "suggestion" ? "bg-white text-ink shadow-sm" : "text-ink-muted hover:text-ink"}`}
+                                className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${category === "suggestion" ? "bg-surface text-ink shadow-sm" : "text-ink-muted hover:text-ink"}`}
                             >
                                 {t("categorySuggestion")}
                             </button>
@@ -134,7 +134,7 @@ export function FeedbackButton({ className }: { className?: string }) {
                                 placeholder={t("placeholder")}
                                 maxLength={2000}
                                 required
-                                className="min-h-[120px] w-full resize-y rounded-xl border border-border bg-surface-muted p-3 text-sm text-ink placeholder:text-ink-faint focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100"
+                                className="min-h-[120px] w-full resize-y rounded-xl border border-border bg-surface-muted p-3 text-sm text-ink placeholder:text-ink-faint focus:border-primary-400 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-100"
                             />
 
                             {/* File Upload & Preview Section */}
@@ -171,7 +171,7 @@ export function FeedbackButton({ className }: { className?: string }) {
                                     <button
                                         type="button"
                                         onClick={removeFile}
-                                        className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow border border-border text-ink-muted hover:text-red-500 transition-colors"
+                                        className="absolute -top-2 -right-2 bg-surface rounded-full p-1 shadow border border-border text-ink-muted hover:text-red-500 transition-colors"
                                     >
                                         <X className="w-3.5 h-3.5" />
                                     </button>

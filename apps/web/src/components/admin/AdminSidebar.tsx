@@ -43,7 +43,7 @@ export default function AdminSidebar({ currentUserId }: { currentUserId: string 
         </div>
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className="text-slate-400 hover:text-slate-200 transition-colors p-1"
+          className="text-ink-faint hover:text-slate-200 transition-colors p-1"
         >
           {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
@@ -69,10 +69,10 @@ export default function AdminSidebar({ currentUserId }: { currentUserId: string 
             </div>
             <div>
               <h2 className="font-semibold text-slate-100 tracking-wide text-sm">VITOGRAPH</h2>
-              <p className="text-[0.625rem] uppercase font-mono text-slate-500 tracking-widest">Admin Console</p>
+              <p className="text-[0.625rem] uppercase font-mono text-ink-muted tracking-widest">Admin Console</p>
             </div>
           </div>
-          <button className="md:hidden text-slate-400 hover:text-white p-1" onClick={() => setIsOpen(false)}>
+          <button className="md:hidden text-ink-faint hover:text-white p-1" onClick={() => setIsOpen(false)}>
              <X className="w-5 h-5"/>
           </button>
         </div>
@@ -87,11 +87,11 @@ export default function AdminSidebar({ currentUserId }: { currentUserId: string 
               className={clsx(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group",
                 isActive 
-                  ? "bg-white/10 text-white shadow-sm ring-1 ring-white/5" 
-                  : "text-slate-400 hover:text-slate-100 hover:bg-white/5"
+                  ? "bg-surface/10 text-white shadow-sm ring-1 ring-white/5" 
+                  : "text-ink-faint hover:text-slate-100 hover:bg-surface/5"
               )}
             >
-              <item.icon className={clsx("w-4 h-4 transition-transform duration-200", isActive ? "scale-110 text-blue-400" : "text-slate-500 group-hover:text-slate-300")} />
+              <item.icon className={clsx("w-4 h-4 transition-transform duration-200", isActive ? "scale-110 text-blue-400" : "text-ink-muted group-hover:text-slate-300")} />
               {item.name}
             </Link>
           );
@@ -101,9 +101,9 @@ export default function AdminSidebar({ currentUserId }: { currentUserId: string 
       <div className="pt-4 border-t border-white/10 mt-auto space-y-1">
         <Link 
           href="/"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-slate-100 hover:bg-white/5 transition-all duration-200 group"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-ink-faint hover:text-slate-100 hover:bg-surface/5 transition-all duration-200 group"
         >
-          <ChevronLeft className="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-transform duration-200 group-hover:-translate-x-1" />
+          <ChevronLeft className="w-4 h-4 text-ink-muted group-hover:text-slate-300 transition-transform duration-200 group-hover:-translate-x-1" />
           Back to App
         </Link>
       </div>

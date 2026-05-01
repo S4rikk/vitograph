@@ -18,31 +18,31 @@ const STATUS_CONFIG: Record<
   optimal: {
     labelKey: "optimal",
     color: "text-success",
-    bg: "bg-green-50",
+    bg: "bg-green-500/10",
     icon: "✓",
   },
   low: {
     labelKey: "low",
     color: "text-warning",
-    bg: "bg-amber-50",
+    bg: "bg-amber-500/10",
     icon: "↓",
   },
   high: {
     labelKey: "high",
     color: "text-warning",
-    bg: "bg-amber-50",
+    bg: "bg-amber-500/10",
     icon: "↑",
   },
   critical_low: {
     labelKey: "critical",
     color: "text-error",
-    bg: "bg-red-50",
+    bg: "bg-red-500/10",
     icon: "↓↓",
   },
   critical_high: {
     labelKey: "critical",
     color: "text-error",
-    bg: "bg-red-50",
+    bg: "bg-red-500/10",
     icon: "↑↑",
   },
 };
@@ -68,7 +68,7 @@ export default function ResultCard({
     <article
       className={`
         group relative overflow-hidden rounded-xl border border-border
-        bg-white p-5 shadow-sm transition-shadow duration-200
+        bg-surface p-5 shadow-sm transition-shadow duration-200
         hover:shadow-md
       `}
     >

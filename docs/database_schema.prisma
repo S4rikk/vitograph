@@ -1170,3 +1170,18 @@ model KbSearchLog {
   @@index([userId, createdAt(sort: Desc)])
   @@map("kb_search_log")
 }
+
+/// Table for tracking TTL of media files (Garbage Collection)
+model MediaCleanup {
+  id               Int      @id @default(autoincrement())
+  userId           String   @map("user_id") @db.Uuid
+  bucket           String
+  filePath         String   @map("file_path")
+  mediaType        String   @map("media_type") // 'food', 'lab_report', 'somatic'
+  expiresAt        DateTime @map("expires_at") @db.Timestamptz
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([expiresAt])
+  @@index([userId])
+  @@map("media_cleanup")
+}

@@ -140,7 +140,7 @@ export default function GlycemicSurfPanel({
   return (
     <div className="bg-surface-muted border-b border-border pb-1 px-1 pt-1">
       {/* ── Main Glycemic Panel ────────────────────────── */}
-      <div className="bg-white rounded-[16px] shadow-sm border border-border mx-0 mt-0 mb-1">
+      <div className="bg-surface rounded-[16px] shadow-sm border border-border mx-0 mt-0 mb-1">
         {/* Header */}
         <div className="flex items-center justify-between px-3 pt-2 pb-1">
           <div className="flex items-center gap-2.5">
@@ -201,7 +201,7 @@ export default function GlycemicSurfPanel({
               <button 
                 onClick={() => setShowThresholds((p) => !p)}
                 onBlur={() => setShowThresholds(false)}
-                className="relative flex items-center cursor-pointer pointer-events-auto bg-white/95 backdrop-blur-md rounded-t-[10px] px-2 py-[3px] border-x border-t border-border/50 shadow-[0_-2px_4px_-3px_rgba(0,0,0,0.1)] outline-none"
+                className="relative flex items-center cursor-pointer pointer-events-auto bg-surface/95 backdrop-blur-md rounded-t-[10px] px-2 py-[3px] border-x border-t border-border/50 shadow-[0_-2px_4px_-3px_rgba(0,0,0,0.1)] outline-none"
               >
                 <Info className="w-[10px] h-[10px] text-ink-muted opacity-80" />
                 <span className="text-[0.5625rem] text-ink-muted ml-1 font-semibold uppercase tracking-wider">{t("thresholds")}</span>
@@ -306,20 +306,20 @@ export default function GlycemicSurfPanel({
 
       {/* ── Mobile Supplements Block ────────────────────────────────── */}
       <div className="sm:hidden w-full px-1 mb-3.5">
-        <div className="bg-white rounded-[20px] shadow-sm border border-border p-3.5">
+        <div className="bg-surface rounded-[20px] shadow-sm border border-border p-3.5">
           <SupplementChecklistWidget variant="mobileStrip" startIso={startIso} endIso={endIso} />
         </div>
       </div>
 
       {/* ── Desktop Supplements (floating in header region) ────────── */}
       <div className="hidden sm:block px-1 mb-3.5">
-        <div className="bg-white rounded-[20px] shadow-sm border border-border p-3.5">
+        <div className="bg-surface rounded-[20px] shadow-sm border border-border p-3.5">
           <SupplementChecklistWidget variant="compact" startIso={startIso} endIso={endIso} />
         </div>
       </div>
 
       {/* ── Micronutrients Expansion Panel (reused from DailyAllowancesPanel) ──── */}
-      <div className="bg-white rounded-[20px] shadow-sm border border-border mt-3.5 mx-1">
+      <div className="bg-surface rounded-[20px] shadow-sm border border-border mt-3.5 mx-1">
         {/* Header */}
         <button
           onClick={() => setIsMicrosExpanded(!isMicrosExpanded)}
@@ -383,7 +383,7 @@ export default function GlycemicSurfPanel({
                         return (
                           <div key={name} className="flex items-center justify-between gap-3 py-1.5 px-0.5">
                             {/* Icon */}
-                            <div className={`aspect-square p-2 shrink-0 rounded-[0.75rem] flex items-center justify-center text-[1.25rem] leading-normal shadow-sm bg-white border border-border/50 ${isVitamin(name) ? 'bg-[#FFFBF2]' : 'bg-[#F8FAFC]'}`}>
+                            <div className={`aspect-square p-2 shrink-0 rounded-[0.75rem] flex items-center justify-center text-[1.25rem] leading-normal shadow-sm bg-surface border border-border/50 ${isVitamin(name) ? 'bg-[#FFFBF2]' : 'bg-[#F8FAFC]'}`}>
                               {NUTRIENT_EMOJI[name] || '💊'}
                             </div>
 

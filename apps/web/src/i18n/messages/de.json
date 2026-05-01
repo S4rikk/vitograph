@@ -327,7 +327,13 @@
       "strengthStrong": "Stark"
     },
     "hoursShort": "Std",
-    "minsShort": "Min"
+    "minsShort": "Min",
+    "theme": "Theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
   },
   "lifestyle": {
     "activityLevel": "Aktivitätslevel",

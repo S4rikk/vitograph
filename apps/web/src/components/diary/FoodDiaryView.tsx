@@ -446,7 +446,7 @@ export default function FoodDiaryView() {
   return (
     <>
       <FeedbackButton className="z-30" />
-      <div className="relative flex flex-col h-[100dvh] sm:h-[85vh] sm:max-h-[1000px] sm:min-h-[750px] sm:rounded-2xl border-x sm:border border-border bg-white overflow-hidden shadow-sm">
+      <div className="relative flex flex-col h-[100dvh] sm:h-[85vh] sm:max-h-[1000px] sm:min-h-[750px] sm:rounded-2xl border-x sm:border border-border bg-surface overflow-hidden shadow-sm">
         {/* ── Header & Time Machine ──────────────────────── */}
         <div className="flex flex-col bg-surface-muted px-5 pt-0 sm:pt-5 pb-2 shrink-0 z-10 border-b border-border/50">
           <DatePaginator selectedDate={selectedDate} onChange={setSelectedDate} userTimezone={userTimezone} />
@@ -458,7 +458,7 @@ export default function FoodDiaryView() {
           onScroll={handleScroll}
           className="flex-1 overflow-y-auto bg-surface-subtle flex flex-col"
         >
-          <div className="shrink-0 bg-white flex flex-col pt-0">
+          <div className="shrink-0 bg-surface flex flex-col pt-0">
             <GlycemicSurfPanel 
               startIso={getTzDayBoundaries(selectedDate, userTimezone || "UTC").startIso}
               endIso={getTzDayBoundaries(selectedDate, userTimezone || "UTC").endIso}
@@ -495,7 +495,7 @@ export default function FoodDiaryView() {
         </div>
 
         {/* ── Input ─────────────────────────────────────────── */}
-        <div className="sticky bottom-0 z-20 flex flex-col bg-white/80 backdrop-blur-md pb-[safe-area-inset-bottom]">
+        <div className="sticky bottom-0 z-20 flex flex-col bg-surface/80 backdrop-blur-md pb-[safe-area-inset-bottom]">
           <div className="w-full border-t border-border">
             <WaterTracker selectedDate={selectedDate} userTimezone={userTimezone} />
           </div>
@@ -508,7 +508,7 @@ export default function FoodDiaryView() {
         {showScrollTop && (
           <button
             onClick={scrollToTop}
-            className="absolute bottom-[210px] sm:bottom-64 right-0.5 sm:right-4 z-40 p-2 sm:p-3 bg-white border border-border shadow-md sm:shadow-xl rounded-full text-ink-muted hover:text-primary-500 hover:bg-surface-muted transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
+            className="absolute bottom-[210px] sm:bottom-64 right-0.5 sm:right-4 z-40 p-2 sm:p-3 bg-surface border border-border shadow-md sm:shadow-xl rounded-full text-ink-muted hover:text-primary-500 hover:bg-surface-muted transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
             aria-label="Наверх к графику"
           >
             <ChevronUp className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -519,7 +519,7 @@ export default function FoodDiaryView() {
       {/* ── Weight Modal ── */}
       {editingMealId && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[320px] p-6 flex flex-col gap-4 animate-in zoom-in-95 duration-200">
+              <div className="bg-surface rounded-2xl shadow-2xl w-full max-w-[320px] p-6 flex flex-col gap-4 animate-in zoom-in-95 duration-200">
                   <h3 className="text-lg font-bold text-ink">{t('editWeight')}</h3>
                   <div className="flex flex-col gap-1">
                       <label className="text-xs text-ink-muted uppercase font-bold tracking-wider">{t('newWeight')}</label>

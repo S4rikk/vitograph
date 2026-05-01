@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
 import {
     User,
     X,
@@ -191,6 +192,7 @@ export default function UserProfileSheet({
     const currentLocale = useLocale();
     const [locale, setLocale] = useState(currentLocale);
     const [isChangingLocale, setIsChangingLocale] = useState(false);
+    const { theme, setTheme } = useTheme();
 
     useEffect(() => {
         setMounted(true);
@@ -855,7 +857,7 @@ export default function UserProfileSheet({
                 <div className="bg-primary-100 p-1.5 rounded-full text-primary-600">
                     <User size={16} />
                 </div>
-                <span className="text-sm font-medium text-ink-main hidden sm:inline-block">
+                <span className="text-sm font-medium text-ink hidden sm:inline-block">
                     {userEmail.split("@")[0]}
                 </span>
             </button>
@@ -871,25 +873,25 @@ export default function UserProfileSheet({
             {/* Slide-out Sheet */}
             {mounted && (
                 <div
-                    className={`fixed inset-y-0 right-0 z-50 w-full sm:w-[520px] bg-surface-base shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${isOpen ? "translate-x-0" : "translate-x-full"
+                    className={`fixed inset-y-0 right-0 z-50 w-full sm:w-[520px] bg-surface shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${isOpen ? "translate-x-0" : "translate-x-full"
                         }`}
                 >
                     {/* Header */}
-                    <div className="px-6 py-5 border-b border-border flex items-center justify-between bg-white z-10 relative">
+                    <div className="px-6 py-5 border-b border-border flex items-center justify-between bg-surface z-10 relative">
                         <div>
-                            <h2 className="text-xl font-bold text-ink-main">{tProfile("title")}</h2>
+                            <h2 className="text-xl font-bold text-ink">{tProfile("title")}</h2>
                             <p className="text-sm text-ink-muted mt-0.5">{userEmail}</p>
                         </div>
                         <button
                             onClick={handleRequestClose}
-                            className="p-2 text-ink-muted hover:text-ink-main hover:bg-surface-muted rounded-full transition-colors cursor-pointer"
+                            className="p-2 text-ink-muted hover:text-ink hover:bg-surface-muted rounded-full transition-colors cursor-pointer"
                         >
                             <X size={20} />
                         </button>
                     </div>
 
                     {/* Content Area */}
-                    <div className="flex-1 overflow-y-auto bg-surface-base">
+                    <div className="flex-1 overflow-y-auto bg-surface">
                         {loadingProfile ? (
                             <div className="p-6 space-y-4 animate-pulse">
                                 <div className="h-10 bg-surface-hover rounded-md w-full" />
@@ -923,8 +925,8 @@ export default function UserProfileSheet({
                                                     style={{ zIndex, borderBottom: 'none' }}
                                                     className={`relative -ml-4 px-4 pt-3 rounded-t-2xl transition-all duration-300 flex items-center gap-2 text-xs font-semibold cursor-pointer min-w-0 ${
                                                         isActive
-                                                            ? "bg-white/60 text-primary-800 backdrop-blur-xl border border-white/70 shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_1px_0_2px_rgba(255,255,255,0.5),inset_-1px_0_2px_rgba(255,255,255,0.5),0_-4px_10px_rgba(0,0,0,0.05)] pb-4"
-                                                            : "bg-surface-muted/50 text-ink-muted backdrop-blur-md border border-white/30 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-2px_4px_rgba(0,0,0,0.05)] hover:bg-white/40 pb-2"
+                                                            ? "bg-surface/60 text-primary-800 backdrop-blur-xl border border-white/70 shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_1px_0_2px_rgba(255,255,255,0.5),inset_-1px_0_2px_rgba(255,255,255,0.5),0_-4px_10px_rgba(0,0,0,0.05)] pb-4"
+                                                            : "bg-surface-muted/50 text-ink-muted backdrop-blur-md border border-white/30 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-2px_4px_rgba(0,0,0,0.05)] hover:bg-surface/40 pb-2"
                                                     }`}
                                                     aria-selected={isActive}
                                                     role="tab"
@@ -941,16 +943,16 @@ export default function UserProfileSheet({
                                     {/* ═══ TAB 1: OVERVIEW ═══ */}
                                     <TabsContent
                                         value="overview"
-                                        className="!mt-0 relative z-10 bg-white/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-6 focus:outline-none"
+                                        className="!mt-0 relative z-10 bg-surface/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-6 focus:outline-none"
                                     >
                                         {/* Personal Info */}
-                                        <div className="bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-4">
-                                            <h3 className="font-semibold text-ink-main border-b border-divider pb-3">{tProfile("aboutSection")}</h3>
+                                        <div className="bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-4">
+                                            <h3 className="font-semibold text-ink border-b border-border pb-3">{tProfile("aboutSection")}</h3>
                                             <div className="space-y-4">
                                                 <div className="flex flex-col h-full">
                                                     <label
                                                         htmlFor="display_name"
-                                                        className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
+                                                        className="block text-[0.8125rem] font-semibold text-ink mb-1.5"
                                                     >{tProfile("name")}</label>
                                                     <input
                                                         id="display_name"
@@ -959,7 +961,7 @@ export default function UserProfileSheet({
                                                         onChange={(e) =>
                                                             setFormData({ ...formData, display_name: e.target.value })
                                                         }
-                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                        className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm"
                                                         placeholder={tProfile("noData")}
                                                     />
                                                 </div>
@@ -967,7 +969,7 @@ export default function UserProfileSheet({
                                                 <div className="flex flex-col h-full">
                                                     <label
                                                         htmlFor="ai_name"
-                                                        className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
+                                                        className="block text-[0.8125rem] font-semibold text-ink mb-1.5"
                                                     >{tProfile("aiName")}</label>
                                                     <input
                                                         id="ai_name"
@@ -976,7 +978,7 @@ export default function UserProfileSheet({
                                                         onChange={(e) =>
                                                             setFormData({ ...formData, ai_name: e.target.value })
                                                         }
-                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                        className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm"
                                                         placeholder={tProfile("aiNamePlaceholder")}
                                                     />
                                                 </div>
@@ -984,7 +986,7 @@ export default function UserProfileSheet({
                                                     <div className="flex flex-col h-full">
                                                         <label
                                                             htmlFor="date_of_birth"
-                                                            className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
+                                                            className="block text-[0.8125rem] font-semibold text-ink mb-1.5"
                                                         >{tProfile("dateOfBirth")}</label>
                                                         <input
                                                             id="date_of_birth"
@@ -996,13 +998,13 @@ export default function UserProfileSheet({
                                                                     date_of_birth: e.target.value,
                                                                 })
                                                             }
-                                                            className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                            className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm text-ink"
                                                         />
                                                     </div>
                                                     <div className="flex flex-col h-full">
                                                         <label
                                                             htmlFor="biological_sex"
-                                                            className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
+                                                            className="block text-[0.8125rem] font-semibold text-ink mb-1.5"
                                                         >{tProfile("sex")}</label>
                                                         <select
                                                             id="biological_sex"
@@ -1013,7 +1015,7 @@ export default function UserProfileSheet({
                                                                     biological_sex: e.target.value,
                                                                 })
                                                             }
-                                                            className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                            className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm text-ink"
                                                         >
                                                             <option value="">{tProfile("noData")}</option>
                                                             <option value="male">{tProfile("sexOptions.male")}</option>
@@ -1026,9 +1028,9 @@ export default function UserProfileSheet({
                                         </div>
 
                                         {/* Physical Parameters */}
-                                        <div className="bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-4">
-                                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-divider pb-3">
-                                                <h3 className="font-semibold text-ink-main">{tProfile("physicalParams")}</h3>
+                                        <div className="bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-4">
+                                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
+                                                <h3 className="font-semibold text-ink">{tProfile("physicalParams")}</h3>
                                                 {bmi && (
                                                     <div className="px-2.5 py-1 text-xs font-bold rounded-full bg-primary-50 text-primary-700 border border-primary-100">
                                                         {tProfile("bmi")}: {bmi} ({bmiCategory(parseFloat(bmi))})
@@ -1039,7 +1041,7 @@ export default function UserProfileSheet({
                                                 <div className="flex flex-col h-full">
                                                     <label
                                                         htmlFor="weight_kg"
-                                                        className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
+                                                        className="block text-[0.8125rem] font-semibold text-ink mb-1.5"
                                                     >{tProfile("weight")} (кг)</label>
                                                     <input
                                                         id="weight_kg"
@@ -1049,14 +1051,14 @@ export default function UserProfileSheet({
                                                         onChange={(e) =>
                                                             setFormData({ ...formData, weight_kg: e.target.value })
                                                         }
-                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                        className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm"
                                                         placeholder={tProfile("noData")}
                                                     />
                                                 </div>
                                                 <div className="flex flex-col h-full">
                                                     <label
                                                         htmlFor="height_cm"
-                                                        className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
+                                                        className="block text-[0.8125rem] font-semibold text-ink mb-1.5"
                                                     >{tProfile("height")} (см)</label>
                                                     <input
                                                         id="height_cm"
@@ -1065,7 +1067,7 @@ export default function UserProfileSheet({
                                                         onChange={(e) =>
                                                             setFormData({ ...formData, height_cm: e.target.value })
                                                         }
-                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                        className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm"
                                                         placeholder={tProfile("noData")}
                                                     />
                                                 </div>
@@ -1074,7 +1076,7 @@ export default function UserProfileSheet({
                                                 <div className="flex flex-col h-full">
                                                     <label
                                                         htmlFor="city"
-                                                        className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
+                                                        className="block text-[0.8125rem] font-semibold text-ink mb-1.5"
                                                     >{tProfile("city")}</label>
                                                     <input
                                                         id="city"
@@ -1083,14 +1085,14 @@ export default function UserProfileSheet({
                                                         onChange={(e) =>
                                                             setFormData({ ...formData, city: e.target.value })
                                                         }
-                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                        className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm"
                                                         placeholder={tProfile("noData")}
                                                     />
                                                 </div>
                                                 <div className="flex flex-col h-full">
                                                     <label
                                                         htmlFor="timezone"
-                                                        className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
+                                                        className="block text-[0.8125rem] font-semibold text-ink mb-1.5"
                                                     >{tProfile("timezone")}</label>
                                                     <div className="relative">
                                                         <input
@@ -1102,7 +1104,7 @@ export default function UserProfileSheet({
                                                             }
                                                             onFocus={() => setShowDropdown(true)}
                                                             onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                                                            className="mt-auto w-full pl-3 pr-10 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                            className="mt-auto w-full pl-3 pr-10 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm"
                                                             placeholder="Поиск часового пояса..."
                                                         />
                                                         <button
@@ -1118,7 +1120,7 @@ export default function UserProfileSheet({
                                                         </button>
 
                                                         {showDropdown && (
-                                                            <div className="absolute left-0 right-0 top-full mt-1.5 z-[100] max-h-60 overflow-y-auto rounded-xl border border-divider shadow-xl bg-surface-base/95 backdrop-blur-md py-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                                                            <div className="absolute left-0 right-0 top-full mt-1.5 z-[100] max-h-60 overflow-y-auto rounded-xl border border-border shadow-xl bg-surface/95 backdrop-blur-md py-1 animate-in fade-in slide-in-from-top-1 duration-200">
                                                                 {COMMON_TIMEZONES.filter(tz => 
                                                                     !formData.timezone || 
                                                                     tz.toLowerCase().includes(String(formData.timezone).toLowerCase())
@@ -1151,11 +1153,11 @@ export default function UserProfileSheet({
                                         </div>
 
                                         {/* App Settings */}
-                                        <div className="mt-8 bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-4">
-                                            <h3 className="font-semibold text-ink-main border-b border-divider pb-3">{tProfile("appSettings")}</h3>
+                                        <div className="mt-8 bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-4">
+                                            <h3 className="font-semibold text-ink border-b border-border pb-3">{tProfile("appSettings")}</h3>
                                             <div className="grid grid-cols-2 gap-5">
                                                 <div className="flex flex-col h-full">
-                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">{tProfile("language")}</label>
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink mb-1.5">{tProfile("language")}</label>
                                                     <select
                                                         value={locale}
                                                         disabled={isChangingLocale}
@@ -1175,7 +1177,7 @@ export default function UserProfileSheet({
                                                                 setTimeout(() => setIsChangingLocale(false), 500);
                                                             }
                                                         }}
-                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main disabled:opacity-50"
+                                                        className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm text-ink disabled:opacity-50"
                                                     >
                                                         <option value="ru">Русский</option>
                                                         <option value="en">English</option>
@@ -1191,24 +1193,36 @@ export default function UserProfileSheet({
                                                     </select>
                                                 </div>
                                                 <div className="flex flex-col h-full">
-                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">{tProfile("fontSize")}</label>
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink mb-1.5">{tProfile("fontSize")}</label>
                                                     <select
                                                         value={scale}
                                                         onChange={(e) => setScale(e.target.value as "small" | "medium" | "large")}
-                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                        className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm text-ink"
                                                     >
                                                         <option value="small">{tProfile("fontSizes.compact")}</option>
                                                         <option value="medium">{tProfile("fontSizes.medium")}</option>
                                                         <option value="large">{tProfile("fontSizes.xlarge")}</option>
                                                     </select>
                                                 </div>
+                                                <div className="flex flex-col h-full">
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink mb-1.5">{tProfile("theme")}</label>
+                                                    <select
+                                                        value={theme}
+                                                        onChange={(e) => setTheme(e.target.value)}
+                                                        className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm text-ink"
+                                                    >
+                                                        <option value="system">{tProfile("themes.system")}</option>
+                                                        <option value="light">{tProfile("themes.light")}</option>
+                                                        <option value="dark">{tProfile("themes.dark")}</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
 
                                         {/* Security — Change Password */}
-                                        <div className="mt-8 bg-white rounded-2xl border border-divider shadow-sm overflow-hidden">
+                                        <div className="mt-8 bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
                                             <details className="group">
-                                                <summary className="flex items-center justify-between p-5 font-semibold text-ink-main cursor-pointer list-none hover:bg-surface-muted transition-colors [&::-webkit-details-marker]:hidden">
+                                                <summary className="flex items-center justify-between p-5 font-semibold text-ink cursor-pointer list-none hover:bg-surface-muted transition-colors [&::-webkit-details-marker]:hidden">
                                                     <div className="flex items-center gap-2">
                                                         <Lock size={18} className="text-ink-muted" />
                                                         <span>{tProfile("changePassword.title")}</span>
@@ -1219,7 +1233,7 @@ export default function UserProfileSheet({
                                                         </svg>
                                                     </span>
                                                 </summary>
-                                                <div className="p-5 pt-0 border-t border-divider mt-2">
+                                                <div className="p-5 pt-0 border-t border-border mt-2">
                                                     <ChangePasswordForm />
                                                 </div>
                                             </details>
@@ -1227,9 +1241,9 @@ export default function UserProfileSheet({
 
                                         {/* FAQ & About */}
                                         <div className="mt-8 space-y-4">
-                                            <div className="bg-white rounded-2xl border border-divider shadow-sm overflow-hidden">
+                                            <div className="bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
                                                 <details className="group">
-                                                    <summary className="flex items-center justify-between p-5 font-semibold text-ink-main cursor-pointer list-none hover:bg-surface-muted transition-colors [&::-webkit-details-marker]:hidden">
+                                                    <summary className="flex items-center justify-between p-5 font-semibold text-ink cursor-pointer list-none hover:bg-surface-muted transition-colors [&::-webkit-details-marker]:hidden">
                                                         <span>{tProfile("faq.faqTitle")}</span>
                                                         <span className="transition group-open:-rotate-180">
                                                             <svg className="w-5 h-5 text-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1237,9 +1251,9 @@ export default function UserProfileSheet({
                                                             </svg>
                                                         </span>
                                                     </summary>
-                                                    <div className="p-5 pt-0 space-y-4 border-t border-divider mt-2">
-                                                        <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
-                                                            <div className="font-semibold text-ink-main flex gap-2 items-start">
+                                                    <div className="p-5 pt-0 space-y-4 border-t border-border mt-2">
+                                                        <div className="space-y-1.5 border-b border-border pb-4 last:border-0 last:pb-0">
+                                                            <div className="font-semibold text-ink flex gap-2 items-start">
                                                                 <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.question")}</span>
                                                                 <span>{tProfile("faq.q1")}</span>
                                                             </div>
@@ -1249,8 +1263,8 @@ export default function UserProfileSheet({
                                                             </div>
                                                         </div>
 
-                                                        <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
-                                                            <div className="font-semibold text-ink-main flex gap-2 items-start">
+                                                        <div className="space-y-1.5 border-b border-border pb-4 last:border-0 last:pb-0">
+                                                            <div className="font-semibold text-ink flex gap-2 items-start">
                                                                 <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.question")}</span>
                                                                 <span>{tProfile("faq.q2")}</span>
                                                             </div>
@@ -1262,8 +1276,8 @@ export default function UserProfileSheet({
                                                             </div>
                                                         </div>
 
-                                                        <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
-                                                            <div className="font-semibold text-ink-main flex gap-2 items-start">
+                                                        <div className="space-y-1.5 border-b border-border pb-4 last:border-0 last:pb-0">
+                                                            <div className="font-semibold text-ink flex gap-2 items-start">
                                                                 <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.question")}</span>
                                                                 <span>{tProfile("faq.q3")}</span>
                                                             </div>
@@ -1273,8 +1287,8 @@ export default function UserProfileSheet({
                                                             </div>
                                                         </div>
 
-                                                        <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
-                                                            <div className="font-semibold text-ink-main flex gap-2 items-start">
+                                                        <div className="space-y-1.5 border-b border-border pb-4 last:border-0 last:pb-0">
+                                                            <div className="font-semibold text-ink flex gap-2 items-start">
                                                                 <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.question")}</span>
                                                                 <span>{tProfile("faq.q4")}</span>
                                                             </div>
@@ -1284,8 +1298,8 @@ export default function UserProfileSheet({
                                                             </div>
                                                         </div>
 
-                                                        <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
-                                                            <div className="font-semibold text-ink-main flex gap-2 items-start">
+                                                        <div className="space-y-1.5 border-b border-border pb-4 last:border-0 last:pb-0">
+                                                            <div className="font-semibold text-ink flex gap-2 items-start">
                                                                 <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.question")}</span>
                                                                 <span>{tProfile("faq.q5")}</span>
                                                             </div>
@@ -1295,8 +1309,8 @@ export default function UserProfileSheet({
                                                             </div>
                                                         </div>
 
-                                                        <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
-                                                            <div className="font-semibold text-ink-main flex gap-2 items-start">
+                                                        <div className="space-y-1.5 border-b border-border pb-4 last:border-0 last:pb-0">
+                                                            <div className="font-semibold text-ink flex gap-2 items-start">
                                                                 <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.question")}</span>
                                                                 <span>{tProfile("faq.q6")}</span>
                                                             </div>
@@ -1306,8 +1320,8 @@ export default function UserProfileSheet({
                                                             </div>
                                                         </div>
 
-                                                        <div className="space-y-1.5 border-b border-divider pb-4 last:border-0 last:pb-0">
-                                                            <div className="font-semibold text-ink-main flex gap-2 items-start">
+                                                        <div className="space-y-1.5 border-b border-border pb-4 last:border-0 last:pb-0">
+                                                            <div className="font-semibold text-ink flex gap-2 items-start">
                                                                 <span className="shrink-0 px-2 py-0.5 rounded bg-primary-100 text-primary-700 text-[0.625rem] uppercase tracking-wider font-bold mt-0.5">{tProfile("faq.question")}</span>
                                                                 <span>{tProfile("faq.q7")}</span>
                                                             </div>
@@ -1320,9 +1334,9 @@ export default function UserProfileSheet({
                                                 </details>
                                             </div>
 
-                                            <div className="bg-white rounded-2xl border border-divider shadow-sm overflow-hidden">
+                                            <div className="bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
                                                 <details className="group">
-                                                    <summary className="flex items-center justify-between p-5 font-semibold text-ink-main cursor-pointer list-none hover:bg-surface-muted transition-colors [&::-webkit-details-marker]:hidden">
+                                                    <summary className="flex items-center justify-between p-5 font-semibold text-ink cursor-pointer list-none hover:bg-surface-muted transition-colors [&::-webkit-details-marker]:hidden">
                                                         <div className="flex items-center gap-2">
                                                             <span>{tProfile("about.title")}</span>
                                                             <span className="px-2 py-0.5 rounded-full bg-primary-100 text-primary-700 text-[0.625rem] font-bold uppercase tracking-widest border border-primary-200/50">v2.0</span>
@@ -1333,7 +1347,7 @@ export default function UserProfileSheet({
                                                             </svg>
                                                         </span>
                                                     </summary>
-                                                    <div className="p-5 pt-0 text-[0.875rem] text-ink-muted space-y-5 border-t border-divider mt-2">
+                                                    <div className="p-5 pt-0 text-[0.875rem] text-ink-muted space-y-5 border-t border-border mt-2">
                                                         {/* Header banner */}
                                                         <div className="text-center bg-surface-muted rounded-xl p-4 mt-2 flex flex-col items-center">
                                                             <Logo size="lg" />
@@ -1341,25 +1355,25 @@ export default function UserProfileSheet({
                                                         </div>
 
                                                         <div className="space-y-3 leading-relaxed">
-                                                            <p>{tProfile("about.intro1")} <strong className="text-ink-main">{tProfile("about.intro2")}</strong></p>
+                                                            <p>{tProfile("about.intro1")} <strong className="text-ink">{tProfile("about.intro2")}</strong></p>
                                                             <p>{tProfile("about.description")}</p>
                                                         </div>
 
                                                         {/* How we do it list */}
                                                         <div className="space-y-4">
-                                                            <h4 className="font-bold text-ink-main text-[1rem] border-b border-divider pb-2">{tProfile("about.howTitle")}</h4>
+                                                            <h4 className="font-bold text-ink text-[1rem] border-b border-border pb-2">{tProfile("about.howTitle")}</h4>
                                                             <ul className="space-y-4">
                                                                 <li className="flex gap-4">
                                                                     <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-[0.8125rem] shadow-sm">1</div>
-                                                                    <p className="leading-relaxed mt-1"><strong className="text-ink-main">{tProfile("about.pillar1Title")}</strong> {tProfile("about.pillar1Desc")}</p>
+                                                                    <p className="leading-relaxed mt-1"><strong className="text-ink">{tProfile("about.pillar1Title")}</strong> {tProfile("about.pillar1Desc")}</p>
                                                                 </li>
                                                                 <li className="flex gap-4">
                                                                     <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-[0.8125rem] shadow-sm">2</div>
-                                                                    <p className="leading-relaxed mt-1"><strong className="text-ink-main">{tProfile("about.pillar2Title")}</strong> {tProfile("about.pillar2Desc")}</p>
+                                                                    <p className="leading-relaxed mt-1"><strong className="text-ink">{tProfile("about.pillar2Title")}</strong> {tProfile("about.pillar2Desc")}</p>
                                                                 </li>
                                                                 <li className="flex gap-4">
                                                                     <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-[0.8125rem] shadow-sm">3</div>
-                                                                    <p className="leading-relaxed mt-1"><strong className="text-ink-main">{tProfile("about.pillar3Title")}</strong> {tProfile("about.pillar3Desc")}</p>
+                                                                    <p className="leading-relaxed mt-1"><strong className="text-ink">{tProfile("about.pillar3Title")}</strong> {tProfile("about.pillar3Desc")}</p>
                                                                 </li>
                                                             </ul>
                                                         </div>
@@ -1405,16 +1419,16 @@ export default function UserProfileSheet({
                                     {/* ═══ TAB 2: LIFESTYLE ═══ */}
                                     <TabsContent
                                         value="lifestyle"
-                                        className="!mt-0 relative z-10 bg-white/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-6 focus:outline-none"
+                                        className="!mt-0 relative z-10 bg-surface/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-6 focus:outline-none"
                                     >
                                         {/* Nutrition & Environment */}
-                                        <div className="bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-4">
-                                            <h3 className="font-semibold text-ink-main border-b border-divider pb-3">
+                                        <div className="bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-4">
+                                            <h3 className="font-semibold text-ink border-b border-border pb-3">
                                                 {tLifestyle("nutritionEnvironment")}
                                             </h3>
                                             <div className="grid grid-cols-2 gap-5">
                                                 <div className="flex flex-col h-full">
-                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink mb-1.5">
                                                         {tLifestyle("dietType")}
                                                     </label>
                                                     <select
@@ -1422,7 +1436,7 @@ export default function UserProfileSheet({
                                                         onChange={(e) =>
                                                             setFormData({ ...formData, diet_type: e.target.value })
                                                         }
-                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                        className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm text-ink"
                                                     >
                                                         <option value="omnivore">{tLifestyle("dietOptions.omnivore")}</option>
                                                         <option value="vegetarian">{tLifestyle("dietOptions.vegetarian")}</option>
@@ -1433,7 +1447,7 @@ export default function UserProfileSheet({
                                                     </select>
                                                 </div>
                                                 <div className="flex flex-col h-full">
-                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">{tLifestyle("alcohol")}</label>
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink mb-1.5">{tLifestyle("alcohol")}</label>
                                                     <select
                                                         value={String(formData.alcohol_frequency)}
                                                         onChange={(e) =>
@@ -1442,7 +1456,7 @@ export default function UserProfileSheet({
                                                                 alcohol_frequency: e.target.value,
                                                             })
                                                         }
-                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                        className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm text-ink"
                                                     >
                                                         <option value="none">{tLifestyle("alcoholOptions.none")}</option>
                                                         <option value="occasional">{tLifestyle("alcoholOccasional")}</option>
@@ -1451,7 +1465,7 @@ export default function UserProfileSheet({
                                                     </select>
                                                 </div>
                                                 <div className="flex flex-col h-full">
-                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink mb-1.5">
                                                         {tLifestyle("climateLabel")}
                                                     </label>
                                                     <select
@@ -1462,7 +1476,7 @@ export default function UserProfileSheet({
                                                                 climate_zone: e.target.value,
                                                             })
                                                         }
-                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                        className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm text-ink"
                                                     >
                                                         <option value="temperate">{tLifestyle("climateOptions.temperate")}</option>
                                                         <option value="tropical">{tLifestyle("climateTropical")}</option>
@@ -1472,7 +1486,7 @@ export default function UserProfileSheet({
                                                     </select>
                                                 </div>
                                                 <div className="flex flex-col h-full">
-                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink mb-1.5">
                                                         {tLifestyle("sunExposure")}
                                                     </label>
                                                     <select
@@ -1483,7 +1497,7 @@ export default function UserProfileSheet({
                                                                 sun_exposure: e.target.value,
                                                             })
                                                         }
-                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                        className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm text-ink"
                                                     >
                                                         <option value="minimal">{tLifestyle("sunMinimal")}</option>
                                                         <option value="moderate">{tLifestyle("sunModerate")}</option>
@@ -1494,13 +1508,13 @@ export default function UserProfileSheet({
                                         </div>
 
                                         {/* Activity & Recovery */}
-                                        <div className="bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-4">
-                                            <h3 className="font-semibold text-ink-main border-b border-divider pb-3">
+                                        <div className="bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-4">
+                                            <h3 className="font-semibold text-ink border-b border-border pb-3">
                                                 {tLifestyle("activityRecovery")}
                                             </h3>
                                             <div className="grid grid-cols-2 gap-5">
                                                 <div className="flex flex-col h-full">
-                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">{tLifestyle("activityLevel")}</label>
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink mb-1.5">{tLifestyle("activityLevel")}</label>
                                                     <select
                                                         value={String(formData.activity_level)}
                                                         onChange={(e) =>
@@ -1509,7 +1523,7 @@ export default function UserProfileSheet({
                                                                 activity_level: e.target.value,
                                                             })
                                                         }
-                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                        className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm text-ink"
                                                     >
                                                         <option value="sedentary">{tLifestyle("activityOptions.sedentary")}</option>
                                                         <option value="light">{tLifestyle("activityOptions.light")}</option>
@@ -1519,7 +1533,7 @@ export default function UserProfileSheet({
                                                     </select>
                                                 </div>
                                                 <div className="flex flex-col h-full">
-                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink mb-1.5">
                                                         {tLifestyle("workType")}
                                                     </label>
                                                     <select
@@ -1530,7 +1544,7 @@ export default function UserProfileSheet({
                                                                 work_lifestyle: e.target.value,
                                                             })
                                                         }
-                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                        className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm text-ink"
                                                     >
                                                         <option value="office_sedentary">{tLifestyle("workOfficeSedentary")}</option>
                                                         <option value="office_active">{tLifestyle("workOfficeActive")}</option>
@@ -1540,7 +1554,7 @@ export default function UserProfileSheet({
                                                     </select>
                                                 </div>
                                                 <div className="flex flex-col h-full">
-                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink mb-1.5">
                                                         {tLifestyle("cardioWeekly")}
                                                     </label>
                                                     <input
@@ -1554,12 +1568,12 @@ export default function UserProfileSheet({
                                                                 physical_activity_minutes_weekly: e.target.value,
                                                             })
                                                         }
-                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                        className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm"
                                                         placeholder={tProfile("noData")}
                                                     />
                                                 </div>
                                                 <div className="flex flex-col h-full">
-                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">{tLifestyle("sleepHours")}</label>
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink mb-1.5">{tLifestyle("sleepHours")}</label>
                                                     <input
                                                         type="number"
                                                         step="0.5"
@@ -1570,7 +1584,7 @@ export default function UserProfileSheet({
                                                                 sleep_hours_avg: e.target.value,
                                                             })
                                                         }
-                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                        className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm"
                                                         placeholder={tProfile("noData")}
                                                     />
                                                 </div>
@@ -1578,12 +1592,12 @@ export default function UserProfileSheet({
                                         </div>
 
                                         {/* Sleep & Stress */}
-                                        <div className="bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-4">
-                                            <h3 className="font-semibold text-ink-main border-b border-divider pb-3">
+                                        <div className="bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-4">
+                                            <h3 className="font-semibold text-ink border-b border-border pb-3">
                                                 {tLifestyle("sleepStress")}
                                             </h3>
                                             <div className="flex flex-col h-full">
-                                                <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
+                                                <label className="block text-[0.8125rem] font-semibold text-ink mb-1.5">
                                                     {tLifestyle("baseStressLevel")}
                                                 </label>
                                                 <select
@@ -1594,7 +1608,7 @@ export default function UserProfileSheet({
                                                             stress_level: e.target.value,
                                                         })
                                                     }
-                                                    className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                    className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm text-ink"
                                                 >
                                                     <option value="low">{tLifestyle("stressOptions.low")}</option>
                                                     <option value="moderate">{tLifestyle("stressOptions.moderate")}</option>
@@ -1608,9 +1622,9 @@ export default function UserProfileSheet({
                                     {/* ═══ TAB 3: MEDICAL CONTEXT ═══ */}
                                     <TabsContent
                                         value="medical"
-                                        className="!mt-0 relative z-10 bg-white/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-6 focus:outline-none"
+                                        className="!mt-0 relative z-10 bg-surface/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-6 focus:outline-none"
                                     >
-                                        <div className="bg-white p-5 rounded-2xl border border-divider shadow-sm space-y-5">
+                                        <div className="bg-surface p-5 rounded-2xl border border-border shadow-sm space-y-5">
                                             <div className="grid grid-cols-2 gap-5">
                                                 <div className="flex items-center gap-2">
                                                     <input
@@ -1623,17 +1637,17 @@ export default function UserProfileSheet({
                                                                 is_smoker: e.target.checked,
                                                             })
                                                         }
-                                                        className="w-4 h-4 rounded border-divider text-primary-600 focus:ring-primary-500"
+                                                        className="w-4 h-4 rounded border-border text-primary-600 focus:ring-primary-500"
                                                     />
                                                     <label
                                                         htmlFor="isSmoker"
-                                                        className="text-[0.8125rem] font-semibold text-ink-main"
+                                                        className="text-[0.8125rem] font-semibold text-ink"
                                                     >
                                                         {tLifestyle("smoking")}
                                                     </label>
                                                 </div>
                                                 <div className="flex flex-col h-full">
-                                                    <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
+                                                    <label className="block text-[0.8125rem] font-semibold text-ink mb-1.5">
                                                         {tLifestyle("pregnancy")}
                                                     </label>
                                                     <select
@@ -1644,7 +1658,7 @@ export default function UserProfileSheet({
                                                                 pregnancy_status: e.target.value,
                                                             })
                                                         }
-                                                        className="mt-auto w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm text-ink-main"
+                                                        className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm text-ink"
                                                     >
                                                         <option value="not_applicable">{tLifestyle("pregnancyNotApplicable")}</option>
                                                         <option value="pregnant">{tLifestyle("pregnancyPregnant")}</option>
@@ -1654,8 +1668,8 @@ export default function UserProfileSheet({
                                             </div>
 
                                             {/* Chronic Conditions */}
-                                            <div className="pt-2 border-t border-divider">
-                                                <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">{tLifestyle("chronicConditions")}</label>
+                                            <div className="pt-2 border-t border-border">
+                                                <label className="block text-[0.8125rem] font-semibold text-ink mb-1.5">{tLifestyle("chronicConditions")}</label>
                                                 <div className="flex flex-wrap gap-2 mb-3">
                                                     {conditions.length > 0 ? (
                                                         conditions.map((c: string, i: number) => (
@@ -1685,11 +1699,11 @@ export default function UserProfileSheet({
                                                             e.key === "Enter" && addCondition()
                                                         }
                                                         placeholder={tProfile("manualEntry")}
-                                                        className="flex-1 px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                        className="flex-1 px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm"
                                                     />
                                                     <button
                                                         onClick={addCondition}
-                                                        className="px-3 py-2 bg-surface-muted text-ink-main rounded-lg hover:bg-surface-hover transition-colors border border-divider cursor-pointer"
+                                                        className="px-3 py-2 bg-surface-muted text-ink rounded-lg hover:bg-surface-hover transition-colors border border-border cursor-pointer"
                                                     >
                                                         <Plus size={16} />
                                                     </button>
@@ -1697,8 +1711,8 @@ export default function UserProfileSheet({
                                             </div>
 
                                             {/* Medications */}
-                                            <div className="pt-2 border-t border-divider">
-                                                <label className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5">
+                                            <div className="pt-2 border-t border-border">
+                                                <label className="block text-[0.8125rem] font-semibold text-ink mb-1.5">
                                                     {tLifestyle("medicationsSupplements")}
                                                 </label>
                                                 <div className="flex flex-wrap gap-2 mb-3">
@@ -1730,11 +1744,11 @@ export default function UserProfileSheet({
                                                             e.key === "Enter" && addMedication()
                                                         }
                                                         placeholder={tLifestyle("medPlaceholder")}
-                                                        className="flex-1 px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                                                        className="flex-1 px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm"
                                                     />
                                                     <button
                                                         onClick={addMedication}
-                                                        className="px-3 py-2 bg-surface-muted text-ink-main rounded-lg hover:bg-surface-hover transition-colors border border-divider cursor-pointer"
+                                                        className="px-3 py-2 bg-surface-muted text-ink rounded-lg hover:bg-surface-hover transition-colors border border-border cursor-pointer"
                                                     >
                                                         <Plus size={16} />
                                                     </button>
@@ -1749,7 +1763,7 @@ export default function UserProfileSheet({
                                     {/* ═══ TAB 4: WEARABLES HUB ═══ */}
                                     <TabsContent
                                         value="wearables"
-                                        className="!mt-0 relative z-10 bg-white/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-4 focus:outline-none"
+                                        className="!mt-0 relative z-10 bg-surface/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-4 focus:outline-none"
                                     >
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             {/* Card 1: Sleep & Recovery */}
@@ -1828,7 +1842,7 @@ export default function UserProfileSheet({
                     </div>
 
                     {/* Footer */}
-                    <div className="p-5 border-t border-divider bg-white z-10 flex items-center justify-between">
+                    <div className="p-5 border-t border-border bg-surface z-10 flex items-center justify-between">
                         <span className="text-sm text-success font-semibold transition-opacity min-w-[150px]">
                             {saveSuccess ? tProfile("profileSaved") : ""}
                         </span>
@@ -1884,11 +1898,11 @@ export default function UserProfileSheet({
             {/* Delete Confirmation Modal */}
             {showDeleteConfirm && (
                 <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
-                    <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-red-100 animate-in fade-in zoom-in duration-300">
+                    <div className="bg-surface rounded-3xl max-w-md w-full p-8 shadow-2xl border border-red-100 animate-in fade-in zoom-in duration-300">
                         <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
                             <AlertTriangle size={32} />
                         </div>
-                        <h2 className="text-2xl font-bold text-ink-main text-center mb-3">
+                        <h2 className="text-2xl font-bold text-ink text-center mb-3">
                             {tProfile("areYouSure")}
                         </h2>
                         <p className="text-ink-muted text-center leading-relaxed mb-8">
@@ -1913,7 +1927,7 @@ export default function UserProfileSheet({
                             <button
                                 onClick={() => setShowDeleteConfirm(false)}
                                 disabled={isDeleting}
-                                className="mt-auto w-full py-4 bg-surface-muted text-ink-main font-bold rounded-2xl hover:bg-surface-hover disabled:opacity-50 transition-all border border-divider cursor-pointer"
+                                className="mt-auto w-full py-4 bg-surface-muted text-ink font-bold rounded-2xl hover:bg-surface-hover disabled:opacity-50 transition-all border border-border cursor-pointer"
                             >
                                 {tProfile("cancel")}
                             </button>
@@ -1924,11 +1938,11 @@ export default function UserProfileSheet({
             {/* Unsaved Changes Confirmation Modal */}
             {showUnsavedConfirm && (
                 <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
-                    <div className="bg-white rounded-3xl max-w-sm w-full p-8 shadow-2xl border border-divider animate-in fade-in zoom-in duration-300">
+                    <div className="bg-surface rounded-3xl max-w-sm w-full p-8 shadow-2xl border border-border animate-in fade-in zoom-in duration-300">
                         <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6">
                             <AlertTriangle size={32} />
                         </div>
-                        <h2 className="text-2xl font-bold text-ink-main text-center mb-3">
+                        <h2 className="text-2xl font-bold text-ink text-center mb-3">
                             {tProfile("closeProfile")}
                         </h2>
                         <p className="text-ink-muted text-center leading-relaxed mb-8">
@@ -1943,7 +1957,7 @@ export default function UserProfileSheet({
                             </button>
                             <button
                                 onClick={() => setShowUnsavedConfirm(false)}
-                                className="mt-auto w-full py-4 bg-surface-muted text-ink-main font-bold rounded-2xl hover:bg-surface-hover transition-all border border-divider cursor-pointer"
+                                className="mt-auto w-full py-4 bg-surface-muted text-ink font-bold rounded-2xl hover:bg-surface-hover transition-all border border-border cursor-pointer"
                             >
                                 {tProfile("stayAndContinue")}
                             </button>

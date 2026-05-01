@@ -23,22 +23,22 @@ const UPLOADER_CONFIG = {
     icon: "✋",
     titleKey: "nailsTitle",
     descriptionKey: "nailsDescription",
-    bgColor: "bg-[#f5eefc]",
-    iconColor: "text-[#a855f7]",
+    bgColor: "bg-purple-500/10",
+    iconColor: "text-purple-600",
   },
   tongue: {
     icon: "👅",
     titleKey: "tongueTitle",
     descriptionKey: "tongueDescription",
-    bgColor: "bg-[#fef2f2]",
-    iconColor: "text-[#ef4444]",
+    bgColor: "bg-red-500/10",
+    iconColor: "text-red-600",
   },
   skin: {
     icon: "🎭",
     titleKey: "skinTitle",
     descriptionKey: "skinDescription",
-    bgColor: "bg-[#f0fdf4]",
-    iconColor: "text-[#22c55e]",
+    bgColor: "bg-green-500/10",
+    iconColor: "text-green-600",
   },
 };
 
@@ -93,14 +93,14 @@ export default function PhotoUploader({ type, onSuccess, onAnalysisComplete }: P
   };
 
   return (
-    <div className="flex flex-col p-6 bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+    <div className="flex flex-col p-6 bg-surface rounded-3xl border border-border shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
       {/* Header section (Icon & Title) */}
       <div className="flex items-center gap-4 mb-5">
         <div className={`w-[52px] h-[52px] shrink-0 ${config.bgColor} ${config.iconColor} rounded-2xl flex items-center justify-center text-2xl shadow-sm`}>
           {config.icon}
         </div>
         <div className="flex-1">
-          <h3 className="text-[1.0625rem] font-extrabold text-[#001d3d] leading-tight">
+          <h3 className="text-[1.0625rem] font-extrabold text-ink leading-tight">
             {t(config.titleKey)}
           </h3>
         </div>
@@ -108,7 +108,7 @@ export default function PhotoUploader({ type, onSuccess, onAnalysisComplete }: P
       
       {/* Description */}
       <div className="flex-1 mb-8">
-        <p className="text-[0.875rem] text-slate-500 leading-relaxed font-medium">
+        <p className="text-[0.875rem] text-ink-muted leading-relaxed font-medium">
           {t(config.descriptionKey)}
         </p>
       </div>
@@ -124,7 +124,7 @@ export default function PhotoUploader({ type, onSuccess, onAnalysisComplete }: P
       />
 
       {error && (
-        <div className="text-red-500 text-[0.8125rem] font-medium mb-4 p-3 bg-red-50 border border-red-100 rounded-xl leading-tight text-center">
+        <div className="text-red-500 text-[0.8125rem] font-medium mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl leading-tight text-center">
           {error}
         </div>
       )}
@@ -133,12 +133,12 @@ export default function PhotoUploader({ type, onSuccess, onAnalysisComplete }: P
       <label
         htmlFor={`somatic-photo-upload-${type}`}
         className={isUploading
-          ? "cursor-wait opacity-80 flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-slate-50 border border-slate-100 px-5 font-bold text-slate-400 transition-all text-center mt-auto"
-          : "cursor-pointer flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-[#ecf9f8] hover:bg-[#dff5f3] active:scale-[0.98] px-5 font-bold text-[#009489] transition-all text-center mt-auto group"}
+          ? "cursor-wait opacity-80 flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-surface-muted border border-border px-5 font-bold text-ink-faint transition-all text-center mt-auto"
+          : "cursor-pointer flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-primary-500/10 hover:bg-primary-500/20 active:scale-[0.98] px-5 font-bold text-primary-600 transition-all text-center mt-auto group"}
       >
         {isUploading ? (
           <span className="flex items-center gap-2 justify-center">
-            <svg className="animate-spin h-5 w-5 text-[#009489]" fill="none" viewBox="0 0 24 24">
+            <svg className="animate-spin h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>

@@ -58,7 +58,7 @@ export default function DeviceWidgetCard({
     const displayStatus = statusText ?? (hasAnyData ? t("updated") : t("noData"));
 
     return (
-        <div className="flex flex-col rounded-2xl border border-divider bg-white p-2.5 shadow-sm transition-all hover:shadow-md hover:border-primary-100 group">
+        <div className="flex flex-col rounded-2xl border border-border bg-surface p-2.5 shadow-sm transition-all hover:shadow-md hover:border-primary-100 group">
             {/* ── Header ── */}
             <div className="flex items-start justify-between mb-1.5">
                 <div className="flex items-center gap-2">
@@ -66,7 +66,7 @@ export default function DeviceWidgetCard({
                         {icon}
                     </div>
                     <div>
-                        <h4 className="text-sm font-semibold text-ink-main leading-tight">
+                        <h4 className="text-sm font-semibold text-ink leading-tight">
                             {title}
                         </h4>
                         <p
@@ -111,7 +111,7 @@ export default function DeviceWidgetCard({
                     }
 
                     return (
-                        <div key={metric.label} className="border-b border-divider/50 last:border-b-0 py-0.5">
+                        <div key={metric.label} className="border-b border-border/50 last:border-b-0 py-0.5">
                             {/* ── Label + Value Row ── */}
                             <div className="flex items-baseline justify-between mb-0">
                                 <span className="text-[0.6875rem] text-ink-muted font-medium truncate mr-2">
@@ -165,10 +165,10 @@ export default function DeviceWidgetCard({
             </div>
 
             {/* ── Footer / Actions ── */}
-            <div className="flex items-center gap-1.5 mt-auto pt-1.5 border-t border-divider">
+            <div className="flex items-center gap-1.5 mt-auto pt-1.5 border-t border-border">
                 <button
                     onClick={onManualEntry}
-                    className="flex-1 flex min-w-0 items-center justify-center gap-1 rounded-lg bg-surface-muted px-2 py-1.5 text-[0.6875rem] font-semibold text-ink-main transition-colors hover:bg-surface-hover active:scale-95 cursor-pointer"
+                    className="flex-1 flex min-w-0 items-center justify-center gap-1 rounded-lg bg-surface-muted px-2 py-1.5 text-[0.6875rem] font-semibold text-ink transition-colors hover:bg-surface-hover active:scale-95 cursor-pointer"
                 >
                     <Pencil size={12} className="shrink-0" />
                     <span className="truncate">{t("manualEntry")}</span>
@@ -177,7 +177,7 @@ export default function DeviceWidgetCard({
                     <button
                         onClick={onScreenshotUpload}
                         disabled={isUploading}
-                        className="flex-1 flex min-w-0 items-center justify-center gap-1 rounded-lg border border-divider bg-white px-2 py-1.5 text-[0.6875rem] font-semibold text-primary-600 shadow-sm transition-colors hover:bg-primary-50 hover:border-primary-100 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                        className="flex-1 flex min-w-0 items-center justify-center gap-1 rounded-lg border border-border bg-surface px-2 py-1.5 text-[0.6875rem] font-semibold text-primary-600 shadow-sm transition-colors hover:bg-primary-50 hover:border-primary-100 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                     >
                         {isUploading ? (
                             <svg className="animate-spin h-3.5 w-3.5 text-primary-600 shrink-0" fill="none" viewBox="0 0 24 24">

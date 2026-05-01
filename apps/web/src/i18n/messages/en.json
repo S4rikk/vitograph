@@ -223,6 +223,12 @@
       "obesity": "Obesity"
     },
     "language": "Interface Language",
+    "theme": "Theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
     "appSettings": "App Settings",
     "fontSize": "Font Size",
     "fontSizes": {

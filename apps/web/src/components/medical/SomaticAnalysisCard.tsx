@@ -15,7 +15,7 @@ interface SomaticAnalysisCardProps {
 /** Marker severity color mapping for visual chips. */
 function getMarkerColor(index: number): string {
     const colors = [
-        "bg-amber-100 text-amber-800 border-amber-200",
+        "bg-amber-100 text-amber-800 border-amber-500/20",
         "bg-rose-100 text-rose-800 border-rose-200",
         "bg-violet-100 text-violet-800 border-violet-200",
         "bg-sky-100 text-sky-800 border-sky-200",
@@ -56,9 +56,9 @@ export default function SomaticAnalysisCard({ title, items, onDismiss }: Somatic
 
     return (
         <>
-            <div className="rounded-2xl border border-divider bg-white shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="rounded-2xl border border-border bg-surface shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
                 {/* Header */}
-                <div className="flex items-center justify-between bg-gradient-to-r from-primary-50 to-violet-50 px-5 py-3 border-b border-divider">
+                <div className="flex items-center justify-between bg-gradient-to-r from-primary-50 to-violet-50 px-5 py-3 border-b border-border">
                     <div className="flex items-center gap-2">
                         <span className="text-lg">🔬</span>
                         <h3 className="text-sm font-semibold text-ink">{title}</h3>
@@ -69,7 +69,7 @@ export default function SomaticAnalysisCard({ title, items, onDismiss }: Somatic
                     {onDismiss && (
                         <button
                             onClick={onDismiss}
-                            className="rounded-lg p-1 text-ink-muted hover:bg-white/60 hover:text-ink transition-colors"
+                            className="rounded-lg p-1 text-ink-muted hover:bg-surface/60 hover:text-ink transition-colors"
                             aria-label={t("close")}
                         >
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -95,7 +95,7 @@ export default function SomaticAnalysisCard({ title, items, onDismiss }: Somatic
                                         onClick={() => setSelectedIndex(idx)}
                                         className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${isSelected
                                             ? "bg-violet-100 text-violet-800 border-violet-200 border"
-                                            : "bg-surface bg-slate-50 text-slate-500 hover:bg-slate-100 border border-slate-200"
+                                            : "bg-surface bg-surface-muted text-ink-muted hover:bg-slate-100 border border-border"
                                             }`}
                                     >
                                         {idx === 0 ? t("fresh") : `${dateStr} ${timeStr}`}

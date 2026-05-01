@@ -1,0 +1,1324 @@
+{
+  "communities": {
+    "0": [
+      "apps_api_api_v1_endpoints_analysis_py",
+      "apps_api_api_v1_endpoints_norms_py",
+      "apps_api_api_v1_endpoints_profiles_py",
+      "apps_api_core_exceptions_py",
+      "apps_api_repositories_profile_repository_py",
+      "apps_api_schemas_analysis_schema_py",
+      "apps_api_schemas_profile_schema_py",
+      "apps_api_services_analysis_service_py",
+      "apps_api_services_dynamic_norm_service_py",
+      "core_exceptions_databaseconnectionerror_init",
+      "core_exceptions_databaseerror",
+      "core_exceptions_databaseerror_init",
+      "core_exceptions_rationale_1",
+      "core_exceptions_rationale_11",
+      "core_exceptions_rationale_19",
+      "core_exceptions_rationale_34",
+      "core_exceptions_recordalreadyexistserror",
+      "core_exceptions_recordalreadyexistserror_init",
+      "core_exceptions_recordnotfounderror",
+      "core_exceptions_recordnotfounderror_init",
+      "endpoints_analysis_analyze_session",
+      "endpoints_analysis_get_analysis_service",
+      "endpoints_analysis_rationale_1",
+      "endpoints_analysis_rationale_27",
+      "endpoints_analysis_rationale_56",
+      "endpoints_norms_calculate_norms",
+      "endpoints_norms_get_engine",
+      "endpoints_norms_rationale_1",
+      "endpoints_norms_rationale_27",
+      "endpoints_norms_rationale_54",
+      "endpoints_profiles_create_profile",
+      "endpoints_profiles_get_my_profile",
+      "endpoints_profiles_get_profile",
+      "endpoints_profiles_get_profile_repository",
+      "endpoints_profiles_rationale_1",
+      "endpoints_profiles_rationale_119",
+      "endpoints_profiles_rationale_168",
+      "endpoints_profiles_rationale_206",
+      "endpoints_profiles_rationale_244",
+      "endpoints_profiles_rationale_32",
+      "endpoints_profiles_rationale_54",
+      "endpoints_profiles_update_my_profile",
+      "endpoints_profiles_update_profile",
+      "repositories_profile_repository_profilerepository",
+      "repositories_profile_repository_profilerepository_create",
+      "repositories_profile_repository_profilerepository_delete",
+      "repositories_profile_repository_profilerepository_get_by_id",
+      "repositories_profile_repository_profilerepository_update",
+      "repositories_profile_repository_rationale_1",
+      "repositories_profile_repository_rationale_142",
+      "repositories_profile_repository_rationale_196",
+      "repositories_profile_repository_rationale_34",
+      "repositories_profile_repository_rationale_48",
+      "repositories_profile_repository_rationale_93",
+      "schemas_analysis_schema_analyzedbiomarkeritem",
+      "schemas_analysis_schema_rationale_1",
+      "schemas_analysis_schema_rationale_32",
+      "schemas_analysis_schema_rationale_69",
+      "schemas_analysis_schema_sessionanalysisresponse",
+      "schemas_profile_schema_profilebase",
+      "schemas_profile_schema_profilecreate",
+      "schemas_profile_schema_profileread",
+      "schemas_profile_schema_profileupdate",
+      "schemas_profile_schema_rationale_1",
+      "schemas_profile_schema_rationale_114",
+      "schemas_profile_schema_rationale_32",
+      "schemas_profile_schema_rationale_65",
+      "schemas_profile_schema_rationale_78",
+      "services_analysis_service_analysisservice",
+      "services_analysis_service_analysisservice_analyze_session",
+      "services_analysis_service_analysisservice_init",
+      "services_analysis_service_classify",
+      "services_analysis_service_fetch_biomarker_map",
+      "services_analysis_service_fetch_norms_map",
+      "services_analysis_service_fetch_session",
+      "services_analysis_service_fetch_session_results",
+      "services_analysis_service_rationale_1",
+      "services_analysis_service_rationale_191",
+      "services_analysis_service_rationale_248",
+      "services_analysis_service_rationale_275",
+      "services_analysis_service_rationale_305",
+      "services_analysis_service_rationale_331",
+      "services_analysis_service_rationale_70",
+      "services_analysis_service_rationale_87",
+      "services_dynamic_norm_service_apply_rules",
+      "services_dynamic_norm_service_dynamicnormengine",
+      "services_dynamic_norm_service_dynamicnormengine_calculate_dynamic_norms",
+      "services_dynamic_norm_service_dynamicnormengine_fetch_active_biomarkers",
+      "services_dynamic_norm_service_dynamicnormengine_fetch_matching_rules",
+      "services_dynamic_norm_service_dynamicnormengine_fetch_profile",
+      "services_dynamic_norm_service_dynamicnormengine_upsert_norm",
+      "services_dynamic_norm_service_extract_factors",
+      "services_dynamic_norm_service_rationale_1",
+      "services_dynamic_norm_service_rationale_150",
+      "services_dynamic_norm_service_rationale_177",
+      "services_dynamic_norm_service_rationale_195",
+      "services_dynamic_norm_service_rationale_250",
+      "services_dynamic_norm_service_rationale_278",
+      "services_dynamic_norm_service_rationale_390",
+      "services_dynamic_norm_service_rationale_66",
+      "services_dynamic_norm_service_rationale_80"
+    ],
+    "1": [
+      "admin_layout_adminlayout",
+      "ai_debug_goals_run",
+      "app_page_homepage",
+      "apps_api_src_ai_debug_goals_ts",
+      "apps_api_src_ai_src_ai_controller_ts",
+      "apps_api_src_ai_src_debug_profile_ts",
+      "apps_api_src_ai_src_graph_nutrition_analyzer_ts",
+      "apps_api_src_ai_src_lib_fcm_sender_ts",
+      "apps_api_src_ai_src_lib_storage_ts",
+      "apps_api_src_ai_src_request_schemas_ts",
+      "apps_api_src_ai_src_routes_v1_ai_routes_ts",
+      "apps_api_src_ai_src_services_kb_service_ts",
+      "apps_api_src_ai_src_services_memory_service_ts",
+      "apps_api_src_ai_src_services_skills_service_ts",
+      "apps_api_src_ai_src_weather_service_ts",
+      "apps_web_src_app_admin_feedback_actions_ts",
+      "apps_web_src_app_admin_layout_tsx",
+      "apps_web_src_app_page_tsx",
+      "apps_web_src_components_diary_feedbackbutton_tsx",
+      "apps_web_src_hooks_uselabscanjob_ts",
+      "apps_web_src_lib_supabase_server_ts",
+      "diary_feedbackbutton_handlefilechange",
+      "diary_feedbackbutton_handlesubmit",
+      "diary_feedbackbutton_removefile",
+      "feedback_actions_updatefeedbackstatus",
+      "graph_nutrition_analyzer_runnutritionanalyzer",
+      "hooks_uselabscanjob_getauthtoken",
+      "hooks_uselabscanjob_uselabscanjob",
+      "lib_fcm_sender_getauth",
+      "lib_fcm_sender_sendfcmnotification",
+      "lib_storage_uploadfoodphoto",
+      "lib_storage_uploadmediafile",
+      "lib_storage_uploadnailphoto",
+      "lib_storage_uploadtonguephoto",
+      "services_kb_service_fetchknowledgebasecontext",
+      "services_memory_service_fetchadvancedmemorycontext",
+      "services_memory_service_fetchemotionalprofile",
+      "services_memory_service_fetchpastactions",
+      "services_memory_service_fetchsemanticmemories",
+      "services_skills_service_fetchactiveskills",
+      "services_skills_service_fetchmatchingskilldocument",
+      "src_ai_controller_computedeterministicmacros",
+      "src_ai_controller_computedeterministicmicros",
+      "src_ai_controller_fetchusercontext",
+      "src_ai_controller_formatactiveknowledgebases",
+      "src_ai_controller_formatactivesupplementprotocol",
+      "src_ai_controller_formatchronicconditions",
+      "src_ai_controller_formatdietaryrestrictions",
+      "src_ai_controller_formatfoodcontraindicationzones",
+      "src_ai_controller_formathistorysynopsis",
+      "src_ai_controller_formatlabdiagnosticreport",
+      "src_ai_controller_formatlabreportdeep",
+      "src_ai_controller_formatleanprofile",
+      "src_ai_controller_formatmeallogs",
+      "src_ai_controller_formatnutritiontargets",
+      "src_ai_controller_formattestresults",
+      "src_ai_controller_formattodayprogress",
+      "src_ai_controller_formattodaysupplements",
+      "src_ai_controller_getleanusercontext",
+      "src_ai_controller_handleanalyzefood",
+      "src_ai_controller_handleanalyzelabel",
+      "src_ai_controller_handleanalyzelabreport",
+      "src_ai_controller_handleanalyzesomatic",
+      "src_ai_controller_handlechat",
+      "src_ai_controller_handlechatstream",
+      "src_ai_controller_handleclearchathistory",
+      "src_ai_controller_handleclearlongtermmemory",
+      "src_ai_controller_handlecorrelatesymptoms",
+      "src_ai_controller_handledeleteaccount",
+      "src_ai_controller_handledeletelabreport",
+      "src_ai_controller_handledeletemeallog",
+      "src_ai_controller_handlegetchathistory",
+      "src_ai_controller_handlegetdiarymacros",
+      "src_ai_controller_handlegetglycemictimeline",
+      "src_ai_controller_handlegetlabreportshistory",
+      "src_ai_controller_handlegetnutritiontargets",
+      "src_ai_controller_handlegetsomatichistory",
+      "src_ai_controller_handlemediacleanupcron",
+      "src_ai_controller_handlepushsubscribe",
+      "src_ai_controller_handlepushunsubscribe",
+      "src_ai_controller_handleupdatemeallog",
+      "src_ai_controller_handlewatercronpush",
+      "src_ai_controller_parsesupplementmicro",
+      "src_debug_profile_checkprofile",
+      "src_weather_service_calculatemaxpressuredrop",
+      "src_weather_service_getorfetchweathercontext",
+      "supabase_server_createclient"
+    ],
+    "2": [
+      "api_main_calculate_norm",
+      "api_main_enrich_biomarkers_with_insights",
+      "api_main_get_lab_scan_status",
+      "api_main_global_exception_handler",
+      "api_main_health_check",
+      "api_main_http_exception_handler",
+      "api_main_lifespan",
+      "api_main_parse_lab_report",
+      "api_main_parse_lab_report_image",
+      "api_main_parse_lab_report_image_batch",
+      "api_main_parse_lab_report_image_batch_async",
+      "api_main_process_ocr_job",
+      "api_main_rationale_1",
+      "api_main_rationale_162",
+      "api_main_rationale_214",
+      "api_main_rationale_382",
+      "api_main_rationale_403",
+      "api_main_rationale_433",
+      "api_main_rationale_468",
+      "api_main_rationale_49",
+      "api_main_rationale_525",
+      "api_main_rationale_586",
+      "api_main_rationale_657",
+      "api_main_rationale_680",
+      "api_main_rationale_700",
+      "api_main_rationale_85",
+      "api_main_rationale_94",
+      "api_main_recalculate_flag",
+      "api_main_refresh_biomarker_notes",
+      "api_main_refreshedmarker",
+      "api_main_refreshnotesrequest",
+      "api_main_refreshnotesresponse",
+      "apps_api_main_py",
+      "apps_api_services_file_parser_py",
+      "apps_api_services_norm_engine_py",
+      "apps_api_services_pdf_parser_py",
+      "basemodel",
+      "sentiment_extractor_index_jsonresponse",
+      "services_file_parser_biomarkerresult",
+      "services_file_parser_extract_biomarkers",
+      "services_file_parser_extract_biomarkers_from_image",
+      "services_file_parser_extract_biomarkers_from_image_batch",
+      "services_file_parser_extract_text_from_docx",
+      "services_file_parser_extract_text_from_pdf",
+      "services_file_parser_extract_text_from_txt",
+      "services_file_parser_labreportextraction",
+      "services_file_parser_rationale_1",
+      "services_file_parser_rationale_170",
+      "services_file_parser_rationale_24",
+      "services_file_parser_rationale_256",
+      "services_file_parser_rationale_31",
+      "services_file_parser_rationale_43",
+      "services_file_parser_rationale_57",
+      "services_file_parser_rationale_67",
+      "services_file_parser_rationale_84",
+      "services_file_parser_rationale_94",
+      "services_file_parser_referencerange",
+      "services_norm_engine_calculate_dynamic_norm",
+      "services_norm_engine_normresult",
+      "services_norm_engine_rationale_1",
+      "services_norm_engine_rationale_52",
+      "services_norm_engine_userprofile",
+      "services_pdf_parser_biomarkerresult",
+      "services_pdf_parser_extract_biomarkers",
+      "services_pdf_parser_rationale_1",
+      "services_pdf_parser_rationale_47"
+    ],
+    "3": [
+      "apps_api_src_ai_src_errors_ts",
+      "apps_api_src_ai_src_graph_builder_ts",
+      "apps_api_src_ai_src_graph_checkpointer_ts",
+      "apps_api_src_ai_src_graph_state_ts",
+      "apps_api_src_ai_src_graph_tools_ts",
+      "apps_api_src_ai_src_lib_gi_bioavailability_ts",
+      "apps_api_src_ai_src_lib_python_core_ts",
+      "apps_api_src_ai_src_middleware_auth_ts",
+      "apps_api_src_ai_src_middleware_error_handler_ts",
+      "apps_api_src_ai_src_middleware_validate_ts",
+      "apps_api_src_ai_src_routes_integration_ts",
+      "apps_api_src_ai_src_routes_v1_profiles_routes_ts",
+      "apps_api_src_ai_src_routes_v1_supplement_routes_ts",
+      "apps_api_src_ai_src_server_ts",
+      "apps_api_src_ai_src_supplement_supplement_controller_ts",
+      "apps_api_src_ai_src_test_graph_ts",
+      "apps_api_src_ai_src_test_integration_ts",
+      "graph_builder_callmodel",
+      "graph_builder_sanitizemessages",
+      "graph_builder_shouldcontinue",
+      "graph_checkpointer_initcheckpointer",
+      "lib_gi_bioavailability_applygibioavailability",
+      "lib_python_core_pythoncoreclient",
+      "lib_python_core_pythoncoreclient_calculatenorms",
+      "lib_python_core_pythoncoreclient_calculatenormsaction",
+      "lib_python_core_pythoncoreclient_constructor",
+      "lib_python_core_pythoncoreclient_getlabscanstatus",
+      "lib_python_core_pythoncoreclient_parseimage",
+      "lib_python_core_pythoncoreclient_parseimagebatch",
+      "lib_python_core_pythoncoreclient_parseimagebatchasync",
+      "lib_python_core_pythoncoreclient_parsepdf",
+      "lib_python_core_pythoncoreclient_refreshbiomarkernotesaction",
+      "lib_python_core_pythoncoreclient_request",
+      "middleware_auth_getsupabase",
+      "middleware_auth_requireauth",
+      "middleware_error_handler_errorhandler",
+      "middleware_validate_validate",
+      "src_errors_apperror",
+      "src_errors_apperror_constructor",
+      "src_errors_internalerror",
+      "src_errors_internalerror_constructor",
+      "src_errors_notfounderror",
+      "src_errors_notfounderror_constructor",
+      "src_errors_validationerror",
+      "src_errors_validationerror_constructor",
+      "src_server_startserver",
+      "src_test_graph_runtests",
+      "src_test_integration_testintegration",
+      "supplement_supplement_controller_getsupabaseadmin",
+      "supplement_supplement_controller_supplementcontroller",
+      "supplement_supplement_controller_supplementcontroller_deletesupplementlog",
+      "supplement_supplement_controller_supplementcontroller_gettodaysupplements",
+      "supplement_supplement_controller_supplementcontroller_logsupplement"
+    ],
+    "4": [
+      "apps_web_src_app_api_parse_image_batch_route_ts",
+      "apps_web_src_components_assistant_aiassistantview_tsx",
+      "apps_web_src_components_diary_chatmessage_tsx",
+      "apps_web_src_components_medical_photouploader_tsx",
+      "apps_web_src_components_onboarding_onboardingwizard_tsx",
+      "apps_web_src_components_profile_userprofilesheet_tsx",
+      "apps_web_src_components_shared_supplementchecklistwidget_tsx",
+      "apps_web_src_hooks_use_typewriter_ts",
+      "apps_web_src_lib_food_diary_nutrient_colors_ts",
+      "apps_web_src_lib_image_utils_ts",
+      "assistant_aiassistantview_activetypewriternode",
+      "assistant_aiassistantview_handleclearchat",
+      "assistant_aiassistantview_handleimageselect",
+      "assistant_aiassistantview_handlescroll",
+      "assistant_aiassistantview_handlesubmit",
+      "assistant_aiassistantview_handleupdate",
+      "assistant_aiassistantview_loadhistory",
+      "assistant_aiassistantview_nutrpill",
+      "assistant_aiassistantview_parseinline",
+      "diary_chatmessage_parsenutrienttags",
+      "food_diary_nutrient_colors_getmicronutrientcolor",
+      "hooks_use_typewriter_usetypewriter",
+      "lib_image_utils_compressimage",
+      "lib_image_utils_compressimagetoblob",
+      "medical_photouploader_handlefilechange",
+      "onboarding_onboardingwizard_cleanlabel",
+      "onboarding_onboardingwizard_handleback",
+      "onboarding_onboardingwizard_handlenext",
+      "onboarding_onboardingwizard_submitprofile",
+      "onboarding_onboardingwizard_updatefield",
+      "parse_image_batch_route_post",
+      "profile_userprofilesheet_addcondition",
+      "profile_userprofilesheet_addmedication",
+      "profile_userprofilesheet_async",
+      "profile_userprofilesheet_bmicategory",
+      "profile_userprofilesheet_handleclearlongtermmemory",
+      "profile_userprofilesheet_handledeleteaccount",
+      "profile_userprofilesheet_handleforceclose",
+      "profile_userprofilesheet_handlerequestclose",
+      "profile_userprofilesheet_handlesaveprofile",
+      "profile_userprofilesheet_handlescreenshotchange",
+      "profile_userprofilesheet_handlescreenshottrigger",
+      "profile_userprofilesheet_loadprofile",
+      "profile_userprofilesheet_loadwearables",
+      "profile_userprofilesheet_maplegacyvalue",
+      "profile_userprofilesheet_removecondition",
+      "profile_userprofilesheet_removemedication",
+      "profile_userprofilesheet_string",
+      "profile_userprofilesheet_tometricitems",
+      "shared_supplementchecklistwidget_handlesync",
+      "shared_supplementchecklistwidget_handletoggle",
+      "shared_supplementchecklistwidget_loadchecklist"
+    ],
+    "5": [
+      "apps_api_src_ai_src_ai_schemas_ts",
+      "apps_api_src_ai_src_ai_triggers_ts",
+      "apps_api_src_ai_src_graph_food_vision_analyzer_ts",
+      "apps_api_src_ai_src_graph_lab_report_analyzer_ts",
+      "apps_api_src_ai_src_graph_label_scanner_ts",
+      "apps_api_src_ai_src_graph_vision_analyzer_ts",
+      "apps_api_src_ai_src_graph_wearable_vision_analyzer_ts",
+      "apps_api_src_ai_src_llm_client_ts",
+      "apps_api_src_ai_src_prompts_food_vision_prompt_ts",
+      "apps_api_src_ai_src_prompts_lab_diagnostic_prompt_ts",
+      "apps_api_src_ai_src_prompts_psychological_prompt_ts",
+      "apps_api_src_ai_src_test_ai_ts",
+      "apps_api_src_ai_src_test_lab_ts",
+      "apps_api_src_ai_src_validators_response_validator_ts",
+      "apps_web_src_lib_food_diary_ai_triggers_ts",
+      "apps_web_src_lib_food_diary_llm_client_ts",
+      "food_diary_ai_triggers_analyzesymptomcorrelation",
+      "food_diary_ai_triggers_buildpsychologicalfallback",
+      "food_diary_ai_triggers_generatediagnostichypothesis",
+      "food_diary_ai_triggers_generatepsychologicalresponse",
+      "food_diary_ai_triggers_registeraitriggers",
+      "food_diary_llm_client_callllmstructured",
+      "graph_food_vision_analyzer_runfoodvisionanalyzer",
+      "graph_lab_report_analyzer_formatbiomarkersforllm",
+      "graph_lab_report_analyzer_generatebiomarkershash",
+      "graph_lab_report_analyzer_lookupcachednotes",
+      "graph_lab_report_analyzer_mapflagtostatus",
+      "graph_lab_report_analyzer_runlabreportanalyzer",
+      "graph_lab_report_analyzer_savecachednotes",
+      "graph_label_scanner_runlabelscanner",
+      "graph_vision_analyzer_runsomaticvisionanalyzer",
+      "graph_wearable_vision_analyzer_runwearablevisionanalyzer",
+      "src_ai_controller_handleanalyze",
+      "src_ai_controller_handleanalyzewearable",
+      "src_ai_controller_handlediagnose",
+      "src_ai_triggers_analyzesymptomcorrelation",
+      "src_ai_triggers_buildpsychologicalfallback",
+      "src_ai_triggers_generatediagnostichypothesis",
+      "src_ai_triggers_generatepsychologicalresponse",
+      "src_llm_client_callllmstructured",
+      "src_llm_client_finalizeresult",
+      "src_llm_client_getconfigllmmodel",
+      "src_llm_client_handlefinalfailure",
+      "src_test_ai_main",
+      "src_test_ai_separator",
+      "src_test_lab_main",
+      "validators_response_validator_validatechatresponse",
+      "validators_response_validator_validatefoodvision",
+      "validators_response_validator_validatelabreport"
+    ],
+    "6": [
+      "apps_web_src_lib_api_client_ts",
+      "lib_api_client_aiapiclient",
+      "lib_api_client_aiapiclient_analyze",
+      "lib_api_client_aiapiclient_analyzefood",
+      "lib_api_client_aiapiclient_analyzelabel",
+      "lib_api_client_aiapiclient_analyzelabreport",
+      "lib_api_client_aiapiclient_analyzesomatic",
+      "lib_api_client_aiapiclient_analyzewearablescreenshot",
+      "lib_api_client_aiapiclient_baseurl",
+      "lib_api_client_aiapiclient_chat",
+      "lib_api_client_aiapiclient_clearlongtermmemory",
+      "lib_api_client_aiapiclient_correlatesymptoms",
+      "lib_api_client_aiapiclient_deleteaccount",
+      "lib_api_client_aiapiclient_deletechathistory",
+      "lib_api_client_aiapiclient_deletelabreport",
+      "lib_api_client_aiapiclient_deletemeallog",
+      "lib_api_client_aiapiclient_deletesupplementlog",
+      "lib_api_client_aiapiclient_diagnose",
+      "lib_api_client_aiapiclient_get",
+      "lib_api_client_aiapiclient_getchathistory",
+      "lib_api_client_aiapiclient_getdiarydailymacros",
+      "lib_api_client_aiapiclient_getglycemictimeline",
+      "lib_api_client_aiapiclient_getlabreportshistory",
+      "lib_api_client_aiapiclient_getlabschedule",
+      "lib_api_client_aiapiclient_getmicronutrienttrends",
+      "lib_api_client_aiapiclient_getnutritiontargets",
+      "lib_api_client_aiapiclient_getprofile",
+      "lib_api_client_aiapiclient_getsomatichistory",
+      "lib_api_client_aiapiclient_gettodaysupplements",
+      "lib_api_client_aiapiclient_logsupplement",
+      "lib_api_client_aiapiclient_post",
+      "lib_api_client_aiapiclient_refreshbiomarkernotes",
+      "lib_api_client_aiapiclient_sendfeedback",
+      "lib_api_client_aiapiclient_updatemeallog",
+      "lib_api_client_aiapiclient_updateprofile",
+      "lib_api_client_aiapiclient_uploadfile",
+      "lib_api_client_aiapiclient_uploadimagefile",
+      "lib_api_client_aiapiclient_uploadimagefiles",
+      "lib_api_client_aiapiclient_uploadimagefilesasync",
+      "lib_api_client_getapibaseurl",
+      "lib_api_client_getauthtoken",
+      "lib_api_client_getdirectaiurl"
+    ],
+    "7": [
+      "apps_api_src_ai_src_prompts_chat_prompt_builder_ts",
+      "apps_api_src_ai_src_prompts_localized_personas_ts",
+      "prompts_chat_prompt_builder_chatpromptbuilder",
+      "prompts_chat_prompt_builder_chatpromptbuilder_build",
+      "prompts_chat_prompt_builder_chatpromptbuilder_constructor",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withactiveskills",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withassistantmode",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withchronicconditions",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withcoachingmode",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withdiarymode",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withdiarysecurityrule",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withdietaryrestrictions",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withemotionalcontext",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withfoodzones",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withglycemicawarerule",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withgoalmanagement",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withhealthgoals",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withhistorysynopsis",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withknowledgebase",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withknowledgebases",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withlabreport",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withlanguagedirective",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withmeallogs",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withnutritiontargets",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withpastactions",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withpersona",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withprofile",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withsemanticmemory",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withskilldocument",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withsupplementprotocol",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withtestresults",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withtodayprogress",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withtodaysupplements",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withwatercontext",
+      "prompts_chat_prompt_builder_chatpromptbuilder_withweatheralert",
+      "prompts_localized_personas_getlocalizedpersona"
+    ],
+    "8": [
+      "apps_web_src_app_api_meals_log_route_ts",
+      "apps_web_src_lib_errors_ts",
+      "apps_web_src_lib_food_diary_meal_service_ts",
+      "food_diary_meal_service_createmeallog",
+      "food_diary_meal_service_loaduserprofile",
+      "food_diary_meal_service_resolvefood",
+      "lib_errors_apperror",
+      "lib_errors_apperror_constructor",
+      "lib_errors_conflicterror",
+      "lib_errors_conflicterror_constructor",
+      "lib_errors_getstatuscode",
+      "lib_errors_notfounderror",
+      "lib_errors_notfounderror_constructor",
+      "lib_errors_toerrorresponse",
+      "lib_errors_unauthorizederror",
+      "lib_errors_unauthorizederror_constructor",
+      "lib_errors_validationerror",
+      "lib_errors_validationerror_constructor",
+      "log_route_getuserid",
+      "log_route_post"
+    ],
+    "9": [
+      "apps_api_core_database_py",
+      "core_database_get_supabase_client",
+      "core_database_rationale_1",
+      "core_database_rationale_100",
+      "core_database_rationale_47",
+      "core_database_rationale_59",
+      "core_database_rationale_83",
+      "core_database_supabaseclientmanager",
+      "core_database_supabaseclientmanager_close",
+      "core_database_supabaseclientmanager_get_client",
+      "core_database_supabaseclientmanager_init",
+      "core_exceptions_databaseconnectionerror",
+      "core_exceptions_rationale_49"
+    ],
+    "10": [
+      "memory_consolidator_index_clamp",
+      "memory_consolidator_index_jsonresponse",
+      "memory_consolidator_index_sanitizefacts",
+      "memory_consolidator_index_stripmarkdownfences",
+      "memory_consolidator_index_updateconsolidationlog",
+      "sentiment_extractor_index_clamp",
+      "sentiment_extractor_index_computemoodtrend",
+      "sentiment_extractor_index_stripmarkdownfences",
+      "supabase_functions_kb_embed_query_index_ts",
+      "supabase_functions_match_skill_context_index_ts",
+      "supabase_functions_memory_consolidator_index_ts",
+      "supabase_functions_sentiment_extractor_index_ts",
+      "supabase_functions_shared_cors_ts"
+    ],
+    "11": [
+      "apps_api_api_v1_endpoints_analytics_py",
+      "apps_api_schemas_analytics_schema_py",
+      "endpoints_analytics_get_lab_schedule",
+      "endpoints_analytics_get_micronutrient_trends",
+      "endpoints_analytics_rationale_1",
+      "endpoints_analytics_rationale_35",
+      "endpoints_analytics_rationale_90",
+      "schemas_analytics_schema_labscheduleitem",
+      "schemas_analytics_schema_micronutrienttrendday",
+      "schemas_analytics_schema_rationale_1",
+      "schemas_analytics_schema_rationale_16",
+      "schemas_analytics_schema_rationale_33"
+    ],
+    "12": [
+      "apps_api_services_pdf_service_py",
+      "exception",
+      "services_pdf_service_extract_text_from_pdf",
+      "services_pdf_service_llmparsingerror",
+      "services_pdf_service_parse_biomarkers_with_llm",
+      "services_pdf_service_pdfextractionerror",
+      "services_pdf_service_pdfextractorservice",
+      "services_pdf_service_rationale_1",
+      "services_pdf_service_rationale_36",
+      "services_pdf_service_rationale_40",
+      "services_pdf_service_rationale_83"
+    ],
+    "13": [
+      "apps_api_schemas_biomarker_schema_py",
+      "schemas_biomarker_schema_biomarkerbase",
+      "schemas_biomarker_schema_biomarkercreate",
+      "schemas_biomarker_schema_biomarkerread",
+      "schemas_biomarker_schema_biomarkerupdate",
+      "schemas_biomarker_schema_rationale_1",
+      "schemas_biomarker_schema_rationale_25",
+      "schemas_biomarker_schema_rationale_64",
+      "schemas_biomarker_schema_rationale_71",
+      "schemas_biomarker_schema_rationale_97"
+    ],
+    "14": [
+      "apps_web_src_components_diary_food_log_parser_ts",
+      "apps_web_src_components_diary_fooddiaryview_tsx",
+      "apps_web_src_lib_date_utils_ts",
+      "diary_food_log_parser_detectandparsefoodlog",
+      "diary_fooddiaryview_fetchuserpreferences",
+      "diary_fooddiaryview_handler",
+      "diary_fooddiaryview_handleupdateweight",
+      "diary_fooddiaryview_loadhistory",
+      "lib_date_utils_gettzdayboundaries",
+      "lib_date_utils_gettztoday"
+    ],
+    "15": [
+      "apps_web_src_lib_units_ts",
+      "lib_units_celsiustofahrenheit",
+      "lib_units_cmtoftin",
+      "lib_units_fahrenheittocelsius",
+      "lib_units_formatftin",
+      "lib_units_ftintocm",
+      "lib_units_kgtolbs",
+      "lib_units_lbstokg",
+      "lib_units_mgdltommol",
+      "lib_units_mmoltomgdl"
+    ],
+    "16": [
+      "kb_ingest_index_buildchunk",
+      "kb_ingest_index_chunksectioncontent",
+      "kb_ingest_index_enqueuenextbatch",
+      "kb_ingest_index_finalizedocument",
+      "kb_ingest_index_generateembedding",
+      "kb_ingest_index_getmodel",
+      "kb_ingest_index_jsonresponse",
+      "kb_ingest_index_parsemarkdownsections",
+      "supabase_functions_kb_ingest_index_ts"
+    ],
+    "17": [
+      "apps_api_schemas_dynamic_norm_schema_py",
+      "schemas_dynamic_norm_schema_dynamicnormrulebase",
+      "schemas_dynamic_norm_schema_dynamicnormrulecreate",
+      "schemas_dynamic_norm_schema_dynamicnormruleread",
+      "schemas_dynamic_norm_schema_rationale_1",
+      "schemas_dynamic_norm_schema_rationale_25",
+      "schemas_dynamic_norm_schema_rationale_65",
+      "schemas_dynamic_norm_schema_rationale_72"
+    ],
+    "18": [
+      "apps_api_schemas_user_dynamic_norm_schema_py",
+      "schemas_user_dynamic_norm_schema_rationale_1",
+      "schemas_user_dynamic_norm_schema_rationale_20",
+      "schemas_user_dynamic_norm_schema_rationale_42",
+      "schemas_user_dynamic_norm_schema_rationale_49",
+      "schemas_user_dynamic_norm_schema_userdynamicnormbase",
+      "schemas_user_dynamic_norm_schema_userdynamicnormread",
+      "schemas_user_dynamic_norm_schema_userdynamicnormupsert"
+    ],
+    "19": [
+      "apps_web_src_app_admin_users_actions_ts",
+      "apps_web_src_lib_supabase_admin_ts",
+      "supabase_admin_createadminclient",
+      "users_actions_banuser",
+      "users_actions_createuser",
+      "users_actions_deleteuser",
+      "users_actions_unbanuser",
+      "users_actions_updateuseremail"
+    ],
+    "20": [
+      "ai_settings_actions_getappconfigkeys",
+      "ai_settings_actions_updateappconfigitem",
+      "ai_settings_aisettingsform_handleupdate",
+      "ai_settings_page_aisettingspage",
+      "apps_web_src_app_admin_ai_settings_actions_ts",
+      "apps_web_src_app_admin_ai_settings_aisettingsform_tsx",
+      "apps_web_src_app_admin_ai_settings_page_tsx"
+    ],
+    "21": [
+      "apps_web_src_app_admin_knowledge_actions_ts",
+      "apps_web_src_app_admin_knowledge_adddocumentmodal_tsx",
+      "apps_web_src_app_admin_knowledge_deletedocumentbutton_tsx",
+      "knowledge_actions_createkbdocument",
+      "knowledge_actions_deleteknowledgedocument",
+      "knowledge_adddocumentmodal_handlesubmit",
+      "knowledge_deletedocumentbutton_handledelete"
+    ],
+    "22": [
+      "apps_web_src_components_medical_symptomtrackerwidget_tsx",
+      "medical_symptomtrackerwidget_addsymptom",
+      "medical_symptomtrackerwidget_fetchtodaysymptoms",
+      "medical_symptomtrackerwidget_generateinsights",
+      "medical_symptomtrackerwidget_removesymptom",
+      "medical_symptomtrackerwidget_saveday",
+      "medical_symptomtrackerwidget_updateseverity"
+    ],
+    "23": [
+      "apps_api_api_v1_endpoints_users_py",
+      "apps_api_schemas_feedback_schema_py",
+      "endpoints_users_rationale_1",
+      "endpoints_users_rationale_37",
+      "endpoints_users_submit_feedback",
+      "schemas_feedback_schema_feedbackcreate"
+    ],
+    "24": [
+      "apps_web_src_components_diary_glycemicsurfpanel_tsx",
+      "diary_glycemicsurfpanel_calcpercentsafe",
+      "diary_glycemicsurfpanel_fetchdata",
+      "diary_glycemicsurfpanel_getmicrolevel",
+      "diary_glycemicsurfpanel_getspikezone",
+      "diary_glycemicsurfpanel_isvitamin"
+    ],
+    "25": [
+      "apps_web_src_lib_wearable_field_defs_ts",
+      "lib_wearable_field_defs_getbodyfields",
+      "lib_wearable_field_defs_getcardiofields",
+      "lib_wearable_field_defs_getmetabolicfields",
+      "lib_wearable_field_defs_getsleepfields",
+      "lib_wearable_field_defs_getstressfields"
+    ],
+    "26": [
+      "apps_web_src_lib_food_diary_health_event_bus_ts",
+      "food_diary_health_event_bus_healtheventbus",
+      "food_diary_health_event_bus_healtheventbus_constructor",
+      "food_diary_health_event_bus_healtheventbus_emit",
+      "food_diary_health_event_bus_healtheventbus_on",
+      "food_diary_health_event_bus_healtheventbus_removealllisteners"
+    ],
+    "27": [
+      "apps_api_core_config_py",
+      "basesettings",
+      "core_config_rationale_1",
+      "core_config_rationale_13",
+      "core_config_settings"
+    ],
+    "28": [
+      "apps_web_src_components_diary_foodcard_tsx",
+      "diary_foodcard_getemojiforfood",
+      "diary_foodcard_getgicolor",
+      "diary_foodcard_gethealthscorestyle",
+      "diary_foodcard_getresponsebadge"
+    ],
+    "29": [
+      "apps_web_src_components_medical_medicalresultsview_tsx",
+      "medical_medicalresultsview_fetchhistory",
+      "medical_medicalresultsview_handledeletereport",
+      "medical_medicalresultsview_handlemarkerchange",
+      "medical_medicalresultsview_handlerefreshnotes"
+    ],
+    "30": [
+      "apps_web_src_hooks_usepushnotifications_ts",
+      "hooks_usepushnotifications_getcapacitorpush",
+      "hooks_usepushnotifications_iscapacitornative",
+      "hooks_usepushnotifications_urlbase64touint8array",
+      "hooks_usepushnotifications_usepushnotifications"
+    ],
+    "31": [
+      "apps_web_src_lib_supabase_middleware_ts",
+      "apps_web_src_proxy_ts",
+      "src_proxy_negotiatelocale",
+      "src_proxy_proxy",
+      "supabase_middleware_updatesession"
+    ],
+    "32": [
+      "apps_web_src_app_admin_users_useractions_tsx",
+      "users_useractions_handlebantoggle",
+      "users_useractions_handledelete",
+      "users_useractions_handleemailsubmit"
+    ],
+    "33": [
+      "apps_web_src_components_diary_datepaginator_tsx",
+      "diary_datepaginator_handlenext",
+      "diary_datepaginator_handleprev",
+      "diary_datepaginator_handletoday"
+    ],
+    "34": [
+      "apps_web_src_components_diary_glycemiccurvechart_tsx",
+      "diary_glycemiccurvechart_buildsmoothcurve",
+      "diary_glycemiccurvechart_tox",
+      "diary_glycemiccurvechart_toy"
+    ],
+    "35": [
+      "apps_web_src_components_shared_healthgoalswidget_tsx",
+      "shared_healthgoalswidget_handleremovegoal",
+      "shared_healthgoalswidget_handleupdate",
+      "shared_healthgoalswidget_loaddata"
+    ],
+    "36": [
+      "apps_web_src_lib_food_diary_nutrient_utils_ts",
+      "food_diary_nutrient_utils_normalizemicronutrientkey",
+      "food_diary_nutrient_utils_translateunit",
+      "food_diary_nutrient_utils_translatevaluewithunit"
+    ],
+    "37": [
+      "verify_fixes_py",
+      "vitograph_verify_fixes_test_patch_me",
+      "vitograph_verify_fixes_test_supabase_syntax_fix"
+    ],
+    "38": [
+      "api_verify_fixes_test_patch_me",
+      "api_verify_fixes_test_supabase_syntax_fix",
+      "apps_api_verify_fixes_py"
+    ],
+    "39": [
+      "ai_flush_queue_run",
+      "apps_api_src_ai_flush_queue_js",
+      "apps_api_src_ai_flush_queue_mjs"
+    ],
+    "40": [
+      "apps_web_unflatten_json_js",
+      "web_unflatten_json_set",
+      "web_unflatten_json_unflatten"
+    ],
+    "41": [
+      "app_clientpage_assistanticon",
+      "app_clientpage_medicalicon",
+      "apps_web_src_app_clientpage_tsx"
+    ],
+    "42": [
+      "apps_web_src_app_admin_feedback_page_tsx",
+      "feedback_page_getcategorybadge",
+      "feedback_page_getstatusbadge"
+    ],
+    "43": [
+      "apps_web_src_app_api_chat_route_ts",
+      "chat_route_delete",
+      "chat_route_post"
+    ],
+    "44": [
+      "apps_web_src_app_login_page_tsx",
+      "login_page_checksession",
+      "login_page_handlelogin"
+    ],
+    "45": [
+      "apps_web_src_components_providers_fontscaleprovider_tsx",
+      "providers_fontscaleprovider_fontscaleprovider",
+      "providers_fontscaleprovider_usefontscale"
+    ],
+    "46": [
+      "apps_web_src_lib_supabase_client_ts",
+      "supabase_client_createclient",
+      "supabase_client_dummylock"
+    ],
+    "47": [
+      "old_foodinputform_tsx",
+      "vitograph_old_foodinputform_f"
+    ],
+    "48": [
+      "api_check_run",
+      "apps_api_check_js"
+    ],
+    "49": [
+      "api_fetchmeals_run",
+      "apps_api_fetchmeals_ts"
+    ],
+    "50": [
+      "api_test_remote_chat_runtest",
+      "apps_api_test_remote_chat_mjs"
+    ],
+    "51": [
+      "ai_check_latest_goal_main",
+      "apps_api_src_ai_check_latest_goal_mjs"
+    ],
+    "52": [
+      "apps_api_src_ai_src_backfill_profiles_ts",
+      "src_backfill_profiles_main"
+    ],
+    "53": [
+      "apps_api_src_ai_src_debug_meals_ts",
+      "src_debug_meals_debug"
+    ],
+    "54": [
+      "apps_api_src_ai_src_migrate_threads_ts",
+      "src_migrate_threads_migratethreads"
+    ],
+    "55": [
+      "apps_api_src_ai_src_test_chat_mjs",
+      "src_test_chat_runtest"
+    ],
+    "56": [
+      "apps_api_src_ai_src_test_fetch_js",
+      "src_test_fetch_testfetch"
+    ],
+    "57": [
+      "app_layout_generatemetadata",
+      "apps_web_src_app_layout_tsx"
+    ],
+    "58": [
+      "admin_page_admindashboardoverview",
+      "apps_web_src_app_admin_page_tsx"
+    ],
+    "59": [
+      "apps_web_src_app_admin_feedback_statusselect_tsx",
+      "feedback_statusselect_statusselect"
+    ],
+    "60": [
+      "apps_web_src_app_admin_knowledge_page_tsx",
+      "knowledge_page_getstatusicon"
+    ],
+    "61": [
+      "apps_web_src_app_admin_users_addusermodal_tsx",
+      "users_addusermodal_addusermodal"
+    ],
+    "62": [
+      "apps_web_src_app_admin_users_copyemail_tsx",
+      "users_copyemail_copyemail"
+    ],
+    "63": [
+      "apps_web_src_app_admin_users_page_tsx",
+      "users_page_isbanned"
+    ],
+    "64": [
+      "analyze_lab_report_route_post",
+      "apps_web_src_app_api_analyze_lab_report_route_ts"
+    ],
+    "65": [
+      "apps_web_src_app_api_parse_image_route_ts",
+      "parse_image_route_post"
+    ],
+    "66": [
+      "apps_web_src_app_api_refresh_notes_route_ts",
+      "refresh_notes_route_post"
+    ],
+    "67": [
+      "apps_web_src_app_unauthorized_page_tsx",
+      "unauthorized_page_unauthorizedpage"
+    ],
+    "68": [
+      "apps_web_src_components_auth_signoutbutton_tsx",
+      "auth_signoutbutton_signoutbutton"
+    ],
+    "69": [
+      "apps_web_src_components_diary_watertracker_tsx",
+      "diary_watertracker_updatewater"
+    ],
+    "70": [
+      "apps_web_src_components_medical_nailanalysiscard_tsx",
+      "medical_nailanalysiscard_getmarkercolor"
+    ],
+    "71": [
+      "apps_web_src_components_medical_somaticanalysiscard_tsx",
+      "medical_somaticanalysiscard_getmarkercolor"
+    ],
+    "72": [
+      "apps_web_src_components_medical_uploadzone_tsx",
+      "medical_uploadzone_uploadzone"
+    ],
+    "73": [
+      "apps_web_src_components_profile_devicewidgetcard_tsx",
+      "profile_devicewidgetcard_gettrendcolor"
+    ],
+    "74": [
+      "apps_web_src_components_profile_manualentrydialog_tsx",
+      "profile_manualentrydialog_handlesubmit"
+    ],
+    "75": [
+      "apps_web_src_components_profile_metricsparkline_tsx",
+      "profile_metricsparkline_metricsparkline"
+    ],
+    "76": [
+      "apps_web_src_hooks_useunits_ts",
+      "hooks_useunits_useunits"
+    ],
+    "77": [
+      "apps_web_src_lib_prisma_ts",
+      "lib_prisma_prismaclientsingleton"
+    ],
+    "78": [
+      "apps_web_src_lib_utils_ts",
+      "lib_utils_cn"
+    ],
+    "79": [
+      "generate_skill_document_index_calculateage",
+      "supabase_functions_generate_skill_document_index_ts"
+    ],
+    "80": [
+      "old_foodinputform_utf8_tsx"
+    ],
+    "81": [
+      "prisma_config_ts"
+    ],
+    "82": [
+      "temp_fix_py"
+    ],
+    "83": [
+      "apps_api_api_init_py"
+    ],
+    "84": [
+      "apps_api_api_v1_init_py"
+    ],
+    "85": [
+      "apps_api_api_v1_endpoints_init_py"
+    ],
+    "86": [
+      "apps_api_core_init_py"
+    ],
+    "87": [
+      "apps_api_repositories_init_py"
+    ],
+    "88": [
+      "apps_api_schemas_init_py"
+    ],
+    "89": [
+      "services_pdf_service_rationale_93"
+    ],
+    "90": [
+      "services_pdf_service_rationale_145"
+    ],
+    "91": [
+      "apps_api_services_init_py"
+    ],
+    "92": [
+      "apps_api_src_ai_minimal_js"
+    ],
+    "93": [
+      "apps_api_src_ai_vitest_config_ts"
+    ],
+    "94": [
+      "apps_api_src_ai_src_prompts_index_ts"
+    ],
+    "95": [
+      "apps_web_eslint_config_mjs"
+    ],
+    "96": [
+      "apps_web_next_env_d_ts"
+    ],
+    "97": [
+      "apps_web_next_config_ts"
+    ],
+    "98": [
+      "apps_web_playwright_config_ts"
+    ],
+    "99": [
+      "apps_web_postcss_config_mjs"
+    ],
+    "100": [
+      "apps_web_src_components_admin_adminsidebar_tsx"
+    ],
+    "101": [
+      "apps_web_src_components_diary_foodinputform_tsx"
+    ],
+    "102": [
+      "apps_web_src_components_diary_mealscorebadge_tsx"
+    ],
+    "103": [
+      "apps_web_src_components_medical_diagnosticreportcard_tsx"
+    ],
+    "104": [
+      "apps_web_src_components_medical_resultcard_tsx"
+    ],
+    "105": [
+      "apps_web_src_i18n_config_ts"
+    ],
+    "106": [
+      "apps_web_src_i18n_request_ts"
+    ],
+    "107": [
+      "apps_web_src_lib_food_diary_ai_schemas_ts"
+    ],
+    "108": [
+      "apps_web_src_lib_food_diary_meal_schemas_ts"
+    ],
+    "109": [
+      "apps_web_src_lib_types_profile_ts"
+    ],
+    "110": [
+      "apps_web_src_types_health_core_ts"
+    ],
+    "111": [
+      "apps_web_src_types_wearable_types_ts"
+    ]
+  },
+  "cohesion": {
+    "0": 0.06,
+    "1": 0.05,
+    "2": 0.08,
+    "3": 0.05,
+    "4": 0.04,
+    "5": 0.07,
+    "6": 0.09,
+    "7": 0.06,
+    "8": 0.12,
+    "9": 0.24,
+    "10": 0.15,
+    "11": 0.26,
+    "12": 0.24,
+    "13": 0.24,
+    "14": 0.24,
+    "15": 0.2,
+    "16": 0.28,
+    "17": 0.32,
+    "18": 0.32,
+    "19": 0.39,
+    "20": 0.29,
+    "21": 0.29,
+    "22": 0.29,
+    "23": 0.4,
+    "24": 0.33,
+    "25": 0.33,
+    "26": 0.33,
+    "27": 0.4,
+    "28": 0.4,
+    "29": 0.4,
+    "30": 0.4,
+    "31": 0.5,
+    "32": 0.5,
+    "33": 0.5,
+    "34": 0.5,
+    "35": 0.67,
+    "36": 0.67,
+    "37": 0.67,
+    "38": 0.67,
+    "39": 0.67,
+    "40": 1.0,
+    "41": 0.67,
+    "42": 0.67,
+    "43": 0.67,
+    "44": 0.67,
+    "45": 0.67,
+    "46": 0.67,
+    "47": 1.0,
+    "48": 1.0,
+    "49": 1.0,
+    "50": 1.0,
+    "51": 1.0,
+    "52": 1.0,
+    "53": 1.0,
+    "54": 1.0,
+    "55": 1.0,
+    "56": 1.0,
+    "57": 1.0,
+    "58": 1.0,
+    "59": 1.0,
+    "60": 1.0,
+    "61": 1.0,
+    "62": 1.0,
+    "63": 1.0,
+    "64": 1.0,
+    "65": 1.0,
+    "66": 1.0,
+    "67": 1.0,
+    "68": 1.0,
+    "69": 1.0,
+    "70": 1.0,
+    "71": 1.0,
+    "72": 1.0,
+    "73": 1.0,
+    "74": 1.0,
+    "75": 1.0,
+    "76": 1.0,
+    "77": 1.0,
+    "78": 1.0,
+    "79": 1.0,
+    "80": 1.0,
+    "81": 1.0,
+    "82": 1.0,
+    "83": 1.0,
+    "84": 1.0,
+    "85": 1.0,
+    "86": 1.0,
+    "87": 1.0,
+    "88": 1.0,
+    "89": 1.0,
+    "90": 1.0,
+    "91": 1.0,
+    "92": 1.0,
+    "93": 1.0,
+    "94": 1.0,
+    "95": 1.0,
+    "96": 1.0,
+    "97": 1.0,
+    "98": 1.0,
+    "99": 1.0,
+    "100": 1.0,
+    "101": 1.0,
+    "102": 1.0,
+    "103": 1.0,
+    "104": 1.0,
+    "105": 1.0,
+    "106": 1.0,
+    "107": 1.0,
+    "108": 1.0,
+    "109": 1.0,
+    "110": 1.0,
+    "111": 1.0
+  },
+  "gods": [
+    {
+      "id": "core_exceptions_databaseerror",
+      "label": "DatabaseError",
+      "degree": 59
+    },
+    {
+      "id": "core_exceptions_recordnotfounderror",
+      "label": "RecordNotFoundError",
+      "degree": 48
+    },
+    {
+      "id": "supabase_server_createclient",
+      "label": "createClient()",
+      "degree": 47
+    },
+    {
+      "id": "lib_api_client_aiapiclient",
+      "label": "AiApiClient",
+      "degree": 38
+    },
+    {
+      "id": "prompts_chat_prompt_builder_chatpromptbuilder",
+      "label": "ChatPromptBuilder",
+      "degree": 33
+    },
+    {
+      "id": "lib_api_client_getauthtoken",
+      "label": "getAuthToken()",
+      "degree": 25
+    },
+    {
+      "id": "src_ai_controller_handlechat",
+      "label": "handleChat()",
+      "degree": 24
+    },
+    {
+      "id": "src_ai_controller_handlechatstream",
+      "label": "handleChatStream()",
+      "degree": 24
+    },
+    {
+      "id": "services_dynamic_norm_service_dynamicnormengine",
+      "label": "DynamicNormEngine",
+      "degree": 23
+    },
+    {
+      "id": "services_file_parser_labreportextraction",
+      "label": "LabReportExtraction",
+      "degree": 22
+    }
+  ],
+  "surprises": [
+    {
+      "source": "loadWearables()",
+      "target": "createClient()",
+      "source_files": [
+        "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
+        "apps\\web\\src\\lib\\supabase\\server.ts"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities; peripheral node `loadWearables()` unexpectedly reaches hub `createClient()`"
+    },
+    {
+      "source": "handleDeleteAccount()",
+      "target": "createClient()",
+      "source_files": [
+        "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
+        "apps\\web\\src\\lib\\supabase\\server.ts"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities; peripheral node `handleDeleteAccount()` unexpectedly reaches hub `createClient()`"
+    },
+    {
+      "source": "async()",
+      "target": "createClient()",
+      "source_files": [
+        "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
+        "apps\\web\\src\\lib\\supabase\\server.ts"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities; peripheral node `async()` unexpectedly reaches hub `createClient()`"
+    },
+    {
+      "source": "REST API endpoints for user feedback.  Handles submission of feedback/bug repo",
+      "target": "DatabaseError",
+      "source_files": [
+        "apps\\api\\api\\v1\\endpoints\\users.py",
+        "apps\\api\\core\\exceptions.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "uses",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "Inserts a feedback row into the db.     Includes a 60-second rate-limit via che",
+      "target": "DatabaseError",
+      "source_files": [
+        "apps\\api\\api\\v1\\endpoints\\users.py",
+        "apps\\api\\core\\exceptions.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "uses",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `createClient()` connect `Community 1` to `Community 3`, `Community 4`, `Community 5`, `Community 19`, `Community 20`, `Community 21`?",
+      "why": "High betweenness centrality (0.057) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `DatabaseError` connect `Community 0` to `Community 9`, `Community 12`, `Community 23`?",
+      "why": "High betweenness centrality (0.027) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `String()` connect `Community 4` to `Community 1`?",
+      "why": "High betweenness centrality (0.022) - this node is a cross-community bridge."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 52 inferred relationships involving `DatabaseError` (e.g. with `REST API endpoint for session analysis.  Compares actual blood test results fr` and `Provide an ``AnalysisService`` instance via DI.`) actually correct?",
+      "why": "`DatabaseError` has 52 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 44 inferred relationships involving `RecordNotFoundError` (e.g. with `REST API endpoint for session analysis.  Compares actual blood test results fr` and `Provide an ``AnalysisService`` instance via DI.`) actually correct?",
+      "why": "`RecordNotFoundError` has 44 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 46 inferred relationships involving `createClient()` (e.g. with `run()` and `fetchUserContext()`) actually correct?",
+      "why": "`createClient()` has 46 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `Application configuration loaded from environment variables.  Uses ``pydantic-`, `Central configuration for the VITOGRAPH API.      Attributes:         supabas`, `Custom exception hierarchy for database / repository operations.  All exceptio` to the rest of the system?",
+      "why": "51 weakly-connected nodes found - possible documentation gaps or missing edges."
+    }
+  ]
+}

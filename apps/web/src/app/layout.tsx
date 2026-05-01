@@ -7,6 +7,7 @@ import Logo from "@/components/ui/Logo";
 import { FontScaleProvider } from "@/components/providers/FontScaleProvider";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getLocale } from 'next-intl/server';
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 import { getTranslations } from 'next-intl/server';
 import { Toaster } from "sonner";
@@ -55,11 +56,12 @@ export default async function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="h-[100dvh] flex flex-col bg-surface-muted sm:h-auto sm:min-h-screen sm:block">
+      <body className="h-[100dvh] flex flex-col bg-surface-muted sm:h-auto sm:min-h-screen sm:block transition-colors duration-200">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <NextIntlClientProvider messages={messages}>
         <FontScaleProvider>
           {user && (
-            <header className="shrink-0 bg-white border-b border-border px-4 py-2 sm:px-6 sm:py-3 flex items-center justify-between">
+            <header className="shrink-0 bg-surface border-b border-border px-4 py-2 sm:px-6 sm:py-3 flex items-center justify-between">
               <Logo size="sm" showSubtitle={false} />
               <div className="flex items-center gap-4">
                 <UserProfileSheet userId={user.id} userEmail={user.email || "User"} />
@@ -70,6 +72,7 @@ export default async function RootLayout({
           <main className="flex-1 flex flex-col min-h-0">{children}</main>
         </FontScaleProvider>
         </NextIntlClientProvider>
+        </ThemeProvider>
         <Toaster />
       </body>
     </html>

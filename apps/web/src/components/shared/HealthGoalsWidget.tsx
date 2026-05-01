@@ -87,15 +87,15 @@ export default function HealthGoalsWidget() {
   if (goals.length === 0) {
     return (
       <div className="px-5 sm:px-12 py-2 animate-in fade-in slide-in-from-top-1 duration-500">
-        <div className="flex items-center gap-3 p-2 bg-slate-50/50 border border-slate-100 rounded-2xl w-full shadow-sm">
-          <div className="flex shrink-0 items-center justify-center bg-white border border-slate-200 text-primary-600 rounded-xl w-9 h-9">
+        <div className="flex items-center gap-3 p-2 bg-surface-muted/50 border border-border rounded-2xl w-full shadow-sm">
+          <div className="flex shrink-0 items-center justify-center bg-surface border border-border text-primary-600 rounded-xl w-9 h-9">
             <Target className="w-4 h-4" />
           </div>
           <div className="flex flex-col">
-            <p className="text-[0.75rem] font-semibold text-slate-700 leading-tight">
+            <p className="text-[0.75rem] font-semibold text-ink leading-tight">
               {t("noGoalsTitle")}
             </p>
-            <p className="text-[0.6875rem] text-slate-500 italic mt-0.5 leading-snug">
+            <p className="text-[0.6875rem] text-ink-muted italic mt-0.5 leading-snug">
               {t("noGoalsPrompt")}
             </p>
           </div>

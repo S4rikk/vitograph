@@ -327,7 +327,13 @@
       "strengthStrong": "강함"
     },
     "hoursShort": "시간",
-    "minsShort": "분"
+    "minsShort": "분",
+    "theme": "Theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
   },
   "lifestyle": {
     "activityLevel": "활동 수준",

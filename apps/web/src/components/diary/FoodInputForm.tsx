@@ -177,7 +177,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
       {/* ── Photo Analysis Notification ─────────────────────────── */}
       {photoResult && (
         <div
-          className={`relative rounded-xl border p-3 pr-8 text-sm ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-gray-50"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-gray-200"} ${REACTION_STYLES[photoResult.reaction_type]?.text || "text-gray-800"}`}
+          className={`relative rounded-xl border p-3 pr-8 text-sm ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-surface-muted"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-border"} ${REACTION_STYLES[photoResult.reaction_type]?.text || "text-ink"}`}
         >
           <button
             type="button"
@@ -186,7 +186,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
               setName("");
               setWeight("");
             }}
-            className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-black/5 text-gray-500 hover:text-gray-700 transition-colors"
+            className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-black/5 text-ink-muted hover:text-ink transition-colors"
             title={t('cancelAndClear')}
           >
             <X className="w-4 h-4" />
@@ -319,7 +319,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
       {/* ── Form ────────────────────────────────────────────────── */}
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-1.5 rounded-2xl border border-border bg-white px-3 py-2 shadow-sm"
+        className="flex flex-col gap-1.5 rounded-2xl border border-border bg-surface px-3 py-2 shadow-sm"
       >
         {/* Row 1: Dish name — full width */}
         <div className="w-full">
@@ -381,7 +381,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
             }}
             rows={1}
             style={{ fieldSizing: "content" } as any}
-            className="w-full rounded-lg border border-border bg-surface-muted px-3 py-1 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100 max-h-[150px] min-h-[30px] overflow-y-auto resize-none"
+            className="w-full rounded-lg border border-border bg-surface-muted px-3 py-1 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-100 max-h-[150px] min-h-[30px] overflow-y-auto resize-none"
           />
         </div>
 
@@ -432,7 +432,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
               placeholder="200"
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
-              className="w-full rounded-xl border border-border bg-surface-muted px-3 py-1 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100 h-[30px]"
+              className="w-full rounded-xl border border-border bg-surface-muted px-3 py-1 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-100 h-[30px]"
             />
           </div>
 
@@ -458,7 +458,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
             onClick={() => setShowPhotoMenu(false)}
           />
           {/* Menu */}
-          <div className="photo-action-sheet relative z-10 w-full max-w-md rounded-t-2xl bg-white p-4 pb-8 shadow-2xl animate-slide-up">
+          <div className="photo-action-sheet relative z-10 w-full max-w-md rounded-t-2xl bg-surface p-4 pb-8 shadow-2xl animate-slide-up">
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-gray-300" />
             <h3 className="text-center text-sm font-semibold text-ink mb-4">
               {t('photoMenuTitle')}
@@ -503,7 +503,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
             onClick={() => setShowLabelMenu(false)}
           />
           {/* Menu */}
-          <div className="photo-action-sheet relative z-10 w-full max-w-md rounded-t-2xl bg-white p-4 pb-8 shadow-2xl animate-slide-up">
+          <div className="photo-action-sheet relative z-10 w-full max-w-md rounded-t-2xl bg-surface p-4 pb-8 shadow-2xl animate-slide-up">
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-gray-300" />
             <h3 className="text-center text-sm font-semibold text-ink mb-4">
               {t('labelMenuTitle')}

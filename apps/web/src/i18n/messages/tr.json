@@ -327,7 +327,13 @@
       "strengthStrong": "Güçlü"
     },
     "hoursShort": "sa",
-    "minsShort": "dk"
+    "minsShort": "dk",
+    "theme": "Theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
   },
   "lifestyle": {
     "activityLevel": "Aktivite Düzeyi",

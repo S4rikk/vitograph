@@ -327,7 +327,13 @@
       "strengthStrong": "强"
     },
     "hoursShort": "小时",
-    "minsShort": "分钟"
+    "minsShort": "分钟",
+    "theme": "Theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
   },
   "lifestyle": {
     "activityLevel": "活动水平",

@@ -130,8 +130,9 @@ LangGraph граф → создаёт checkpoint (~4 blobs):
 | Механизм | Частота | Что делает |
 |:---|:---|:---|
 | Cron `checkpoint-pruning-weekly` | Воскресенье 04:00 UTC | Оставляет 30 latest checkpoints/thread, чистит orphaned blobs |
-| `DELETE /api/v1/ai/chat/history` | По действию пользователя | `deleteThread()` — полная очистка thread'а |
-| `DELETE /api/v1/ai/account` | По действию пользователя | `deleteThread()` для обоих thread'ов (`-diary`, `-assistant`) |
+| `DELETE /api/v1/ai/chat/history` | По действию пользователя | `deleteThread()` — полная очистка thread'а (Очистка L1 памяти) |
+| `DELETE /api/v1/ai/memory/long-term` | По действию пользователя | Полная очистка векторов, эмоций и логов (Очистка L2 и L3 памяти). *Не затрагивает LangGraph checkpoints.* |
+| `DELETE /api/v1/ai/account` | По действию пользователя | `deleteThread()` для обоих thread'ов (`-diary`, `-assistant`) + Каскадное удаление всех остальных данных из БД |
 
 ---
 

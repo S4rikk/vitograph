@@ -35,6 +35,7 @@ graph TB
             LS[label-scanner.ts]
             VA[vision-analyzer.ts]
             NA[nutrition-analyzer.ts]
+            WVA[wearable-vision-analyzer.ts]
         end
 
         subgraph "Services"
@@ -51,7 +52,7 @@ graph TB
     FAMC & FAS & FMSD & FKB & WS --> CPB
     CPB --> B
     B --> T & S & CP
-    AC --> FVA & LRA & LS & VA & NA
+    AC --> FVA & LRA & LS & VA & NA & WVA
 ```
 
 ---
@@ -62,7 +63,7 @@ graph TB
 | :--- | :----- | :--------- |
 | **Chat (primary)** | `gpt-5.4-mini` | Режимы `assistant` и `diary` — основной ReAct Agent |
 | **Chat (fallback)** | `gpt-4o-mini` | Fallback для обоих режимов при сбое primary |
-| **Vision / Lab / Label** | `gpt-5.4-mini` | Standalone analyzers (food-vision, lab-report, label-scanner) |
+| **Vision / Lab / Label / Wearables** | `gpt-5.4-mini` | Standalone analyzers (food-vision, lab-report, label-scanner, wearable-vision) |
 | **Embeddings (Memory/Skills)** | `text-embedding-3-small` (384d) | Семантический поиск в episodic memory (PostgresSaver/MemVector) |
 | **Embeddings (Knowledge Base)**| `gte-small` (Supabase.ai) | Вложенный поиск в Knowledge Base (проксируется через EF `kb-embed-query`) |
 
@@ -263,6 +264,12 @@ Fluent builder, собирающий system prompt из секций с прио
 
 Текстовое описание еды (без фото) → нутриенты.
 
+### 7.6 Wearable Vision Analyzer
+Файл: `graph/wearable-vision-analyzer.ts` *(новый)*
+
+Фото скриншотов с Apple Health, Garmin, Oura и других трекеров → `WearableOCRSchema` (detectedCategory, metrics). Распознает показатели сна, кардио, состава тела и метаболизма.
+Модель: `gpt-5.4-mini` (vision).
+
 ---
 
 ## 8. Детерминированные нормы микронутриентов
@@ -342,3 +349,18 @@ graph LR
 - **Сброс:** При увеличении `water_logs` за сегодня → `retry_level = 0`
 - **Триггер:** Внешний cron (Vercel/GitHub Actions) вызывает `GET /api/v1/ai/cron/water-push` каждую 1 минуту
 - **Библиотека:** `web-push` (npm) с VAPID ключами
+
+---
+
+## 11. TTL Media Garbage Collection (Cron)
+
+В целях оптимизации хранилища внедрена система автоматической очистки медиафайлов по времени жизни (TTL).
+
+### Архитектура:
+1. **Таблица `media_cleanup`**: Хранит связи между файлами (фото еды, анализов, ногтей) и их TTL.
+2. **CRON-джоба `handleMediaCleanupCron`** (`/api/v1/ai/cron/media-cleanup`): Вызывается внешним планировщиком каждую ночь.
+3. **Механика**:
+   - Находит записи в `media_cleanup`, где `expires_at < NOW()`.
+   - Удаляет соответствующие файлы из Supabase Storage (`user-media`, `lab-reports` и др.).
+   - Удаляет записи из таблицы логов (каскадно или напрямую), если это необходимо, или оставляет текстовые метаданные (например, для food logs), удаляя только само фото.
+   - Освобождает занимаемое пространство.

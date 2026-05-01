@@ -1,62 +1,173 @@
 @import "tailwindcss";
 
+/* ── Theme Variables (Dynamic) ────────────────────────────── */
+:root {
+  /* Primary — teal: trust, health, calm */
+  --theme-primary-50: #f0fdfa;
+  --theme-primary-100: #ccfbf1;
+  --theme-primary-200: #99f6e4;
+  --theme-primary-400: #2dd4bf;
+  --theme-primary-500: #14b8a6;
+  --theme-primary-600: #0d9488;
+  --theme-primary-700: #0f766e;
+
+  /* Accent — blue: action, interactive */
+  --theme-accent-500: #3b82f6;
+  --theme-accent-600: #2563eb;
+
+  /* Surfaces */
+  --theme-surface: #ffffff;
+  --theme-surface-muted: #f8fafc;
+  --theme-surface-hover: #f1f5f9;
+
+  /* Text */
+  --theme-ink: #0f172a;
+  --theme-ink-muted: #475569;
+  --theme-ink-faint: #94a3b8;
+
+  /* Semantic */
+  --theme-success: #16a34a;
+  --theme-warning: #d97706;
+  --theme-error: #dc2626;
+
+  /* Border */
+  --theme-border: #e2e8f0;
+  --theme-border-strong: #cbd5e1;
+
+  /* Macro Colors Stage 1 */
+  --theme-cal-ring-track: #FFEDD5;
+  --theme-cal-ring-fill: #F97316;
+  --theme-protein-bg: #EFF6FF;
+  --theme-protein-text: #2563EB;
+  --theme-fat-bg: #FFFBEB;
+  --theme-fat-text: #D97706;
+  --theme-carb-bg: #ECFDF5;
+  --theme-carb-text: #059669;
+
+  /* Micronutrients Stage 2 */
+  --theme-bar-critical: #EF4444;
+  --theme-bar-low: #F59E0B;
+  --theme-bar-medium: #3B82F6;
+  --theme-bar-good: #10B981;
+  --theme-bar-over: #8B5CF6;
+  --theme-cat-vitamin: #F59E0B;
+  --theme-cat-vitamin-bg: #FFFBEB;
+  --theme-cat-mineral: #6366F1;
+  --theme-cat-mineral-bg: #EEF2FF;
+}
+
+/* ── Dark Mode ───────────────────────────────────────────── */
+.dark {
+  /* Surfaces */
+  --theme-surface: #0f172a;
+  --theme-surface-muted: #1e293b;
+  --theme-surface-hover: #334155;
+
+  /* Text */
+  --theme-ink: #f8fafc;
+  --theme-ink-muted: #94a3b8;
+  --theme-ink-faint: #64748b;
+
+  /* Border */
+  --theme-border: #334155;
+  --theme-border-strong: #475569;
+
+  /* Primary (Скорректировано для читаемости белого текста на кнопках) */
+  --theme-primary-50: #042f2e;
+  --theme-primary-100: #134e4a;
+  --theme-primary-200: #115e59;
+  --theme-primary-400: #2dd4bf;
+  --theme-primary-500: #14b8a6;
+  --theme-primary-600: #0d9488;
+  --theme-primary-700: #0f766e;
+
+  /* Accent */
+  --theme-accent-500: #3b82f6;
+  --theme-accent-600: #2563eb;
+
+  /* Semantic */
+  --theme-success: #22c55e;
+  --theme-warning: #f59e0b;
+  --theme-error: #ef4444;
+
+  /* Macro Colors Stage 1 */
+  --theme-cal-ring-track: #431407;
+  --theme-cal-ring-fill: #ea580c;
+  --theme-protein-bg: #1e3a8a;
+  --theme-protein-text: #60a5fa;
+  --theme-fat-bg: #451a03;
+  --theme-fat-text: #fbbf24;
+  --theme-carb-bg: #064e3b;
+  --theme-carb-text: #34d399;
+
+  /* Micronutrients Stage 2 */
+  --theme-bar-critical: #f87171;
+  --theme-bar-low: #fbbf24;
+  --theme-bar-medium: #60a5fa;
+  --theme-bar-good: #34d399;
+  --theme-bar-over: #a78bfa;
+  --theme-cat-vitamin: #fbbf24;
+  --theme-cat-vitamin-bg: #451a03;
+  --theme-cat-mineral: #818cf8;
+  --theme-cat-mineral-bg: #312e81;
+}
 
 /* ── Design Tokens ────────────────────────────────────────── */
 @theme inline {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 
   /* Primary — teal: trust, health, calm */
-  --color-primary-50: #f0fdfa;
-  --color-primary-100: #ccfbf1;
-  --color-primary-200: #99f6e4;
-  --color-primary-400: #2dd4bf;
-  --color-primary-500: #14b8a6;
-  --color-primary-600: #0d9488;
-  --color-primary-700: #0f766e;
+  --color-primary-50: var(--theme-primary-50);
+  --color-primary-100: var(--theme-primary-100);
+  --color-primary-200: var(--theme-primary-200);
+  --color-primary-400: var(--theme-primary-400);
+  --color-primary-500: var(--theme-primary-500);
+  --color-primary-600: var(--theme-primary-600);
+  --color-primary-700: var(--theme-primary-700);
 
   /* Accent — blue: action, interactive */
-  --color-accent-500: #3b82f6;
-  --color-accent-600: #2563eb;
+  --color-accent-500: var(--theme-accent-500);
+  --color-accent-600: var(--theme-accent-600);
 
   /* Surfaces */
-  --color-surface: #ffffff;
-  --color-surface-muted: #f8fafc;
-  --color-surface-hover: #f1f5f9;
+  --color-surface: var(--theme-surface);
+  --color-surface-muted: var(--theme-surface-muted);
+  --color-surface-hover: var(--theme-surface-hover);
 
   /* Text */
-  --color-ink: #0f172a;
-  --color-ink-muted: #475569;
-  --color-ink-faint: #94a3b8;
+  --color-ink: var(--theme-ink);
+  --color-ink-muted: var(--theme-ink-muted);
+  --color-ink-faint: var(--theme-ink-faint);
 
   /* Semantic */
-  --color-success: #16a34a;
-  --color-warning: #d97706;
-  --color-error: #dc2626;
+  --color-success: var(--theme-success);
+  --color-warning: var(--theme-warning);
+  --color-error: var(--theme-error);
 
   /* Border */
-  --color-border: #e2e8f0;
-  --color-border-strong: #cbd5e1;
+  --color-border: var(--theme-border);
+  --color-border-strong: var(--theme-border-strong);
 
   /* Macro Colors Stage 1 */
-  --color-cal-ring-track: #FFEDD5;
-  --color-cal-ring-fill: #F97316;
-  --color-protein-bg: #EFF6FF;
-  --color-protein-text: #2563EB;
-  --color-fat-bg: #FFFBEB;
-  --color-fat-text: #D97706;
-  --color-carb-bg: #ECFDF5;
-  --color-carb-text: #059669;
+  --color-cal-ring-track: var(--theme-cal-ring-track);
+  --color-cal-ring-fill: var(--theme-cal-ring-fill);
+  --color-protein-bg: var(--theme-protein-bg);
+  --color-protein-text: var(--theme-protein-text);
+  --color-fat-bg: var(--theme-fat-bg);
+  --color-fat-text: var(--theme-fat-text);
+  --color-carb-bg: var(--theme-carb-bg);
+  --color-carb-text: var(--theme-carb-text);
 
   /* Micronutrients Stage 2 */
-  --color-bar-critical: #EF4444;
-  --color-bar-low: #F59E0B;
-  --color-bar-medium: #3B82F6;
-  --color-bar-good: #10B981;
-  --color-bar-over: #8B5CF6;
-  --color-cat-vitamin: #F59E0B;
-  --color-cat-vitamin-bg: #FFFBEB;
-  --color-cat-mineral: #6366F1;
-  --color-cat-mineral-bg: #EEF2FF;
+  --color-bar-critical: var(--theme-bar-critical);
+  --color-bar-low: var(--theme-bar-low);
+  --color-bar-medium: var(--theme-bar-medium);
+  --color-bar-good: var(--theme-bar-good);
+  --color-bar-over: var(--theme-bar-over);
+  --color-cat-vitamin: var(--theme-cat-vitamin);
+  --color-cat-vitamin-bg: var(--theme-cat-vitamin-bg);
+  --color-cat-mineral: var(--theme-cat-mineral);
+  --color-cat-mineral-bg: var(--theme-cat-mineral-bg);
 }
 
 /* ── Base styles ──────────────────────────────────────────── */

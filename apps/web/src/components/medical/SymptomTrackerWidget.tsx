@@ -122,14 +122,14 @@ export default function SymptomTrackerWidget() {
   return (
     <div className="w-full space-y-8 mt-10">
       {/* Tracker Section */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-xl font-bold text-slate-900">{t("symptomsRegistration")}</h2>
-        <p className="mb-6 text-sm text-slate-500">
+      <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+        <h2 className="mb-4 text-xl font-bold text-ink">{t("symptomsRegistration")}</h2>
+        <p className="mb-6 text-sm text-ink-muted">
           {t("symptomsDescription")}
         </p>
 
         <div className="mb-6">
-          <label className="mb-2 block text-sm font-medium text-slate-700">{t("frequentSymptoms")}</label>
+          <label className="mb-2 block text-sm font-medium text-ink">{t("frequentSymptoms")}</label>
           <div className="flex flex-wrap gap-2">
             {COMMON_SYMPTOMS_KEYS.map((key) => {
               const sym = t(`symptomsList.${key}`);
@@ -138,7 +138,7 @@ export default function SymptomTrackerWidget() {
                 key={sym}
                 onClick={() => addSymptom(sym)}
                 disabled={symptoms.some((s) => s.name === sym)}
-                className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-full border border-border bg-surface-muted px-3 py-1.5 text-sm font-medium text-ink-muted transition hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 + {sym}
               </button>
@@ -153,7 +153,7 @@ export default function SymptomTrackerWidget() {
             onChange={(e) => setCustomSymptom(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addSymptom(customSymptom)}
             placeholder={t("customSymptomPlaceholder")}
-            className="flex-1 rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className="flex-1 rounded-xl border border-border px-4 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
           <button
             onClick={() => addSymptom(customSymptom)}
@@ -165,15 +165,15 @@ export default function SymptomTrackerWidget() {
 
         {symptoms.length > 0 && (
           <div className="space-y-4 mb-8">
-            <h3 className="text-sm font-semibold text-slate-800">{t("selected")}</h3>
+            <h3 className="text-sm font-semibold text-ink">{t("selected")}</h3>
             {symptoms.map((s) => (
-              <div key={s.name} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-slate-100 bg-slate-50 p-4">
+              <div key={s.name} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-surface-muted p-4">
                 <div className="flex items-center gap-3">
-                  <span className="font-medium text-slate-800">{s.name}</span>
+                  <span className="font-medium text-ink">{s.name}</span>
                   <button onClick={() => removeSymptom(s.name)} className="text-xs text-red-500 hover:text-red-700 underline">{t("delete")}</button>
                 </div>
                 <div className="flex items-center gap-4 flex-1 max-w-xs">
-                  <span className="text-xs text-slate-500 w-12 sm:text-right">{t("strengthLabel")} {s.severity}</span>
+                  <span className="text-xs text-ink-muted w-12 sm:text-right">{t("strengthLabel")} {s.severity}</span>
                   <input
                     type="range"
                     min="1"
@@ -192,7 +192,7 @@ export default function SymptomTrackerWidget() {
           <button
             onClick={saveDay}
             disabled={isSaving || symptoms.length === 0}
-            className="rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white transition hover:bg-cyan-700 disabled:bg-slate-300 disabled:cursor-not-allowed"
+            className="rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white transition hover:bg-cyan-700 disabled:bg-surface-muted disabled:text-ink-muted disabled:border disabled:border-border disabled:cursor-not-allowed"
           >
             {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : t("saveDay")}
           </button>
@@ -201,14 +201,14 @@ export default function SymptomTrackerWidget() {
       </div>
 
       {/* AI Correlation Section */}
-      <div className="rounded-2xl border border-purple-200 bg-gradient-to-b from-purple-50 to-white p-6 shadow-sm">
+      <div className="rounded-2xl border border-border bg-gradient-to-b from-purple-500/10 to-surface p-6 shadow-sm">
         <div className="mb-6 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-ink flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-purple-600" />
               {t("aiCorrelationAnalysis")}
             </h2>
-            <p className="mt-2 text-sm text-slate-600 max-w-2xl">
+            <p className="mt-2 text-sm text-ink-muted max-w-2xl">
               {t("aiCorrelationDescription")}
             </p>
           </div>
@@ -228,7 +228,7 @@ export default function SymptomTrackerWidget() {
         </div>
 
         {analysisError && (
-          <div className="mb-6 rounded-xl bg-red-50 p-4 flex items-start gap-3 border border-red-100">
+          <div className="mb-6 rounded-xl bg-red-500/10 p-4 flex items-start gap-3 border border-red-500/20">
             <AlertCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
             <p className="text-sm text-red-700">{analysisError}</p>
           </div>
@@ -237,7 +237,7 @@ export default function SymptomTrackerWidget() {
         {isAnalyzing && (
           <div className="grid gap-4 sm:grid-cols-2">
             {[1, 2].map((i) => (
-              <div key={i} className="animate-pulse rounded-xl border border-purple-100 bg-purple-50/50 p-5">
+              <div key={i} className="animate-pulse rounded-xl border border-purple-500/20 bg-purple-500/10/50 p-5">
                 <div className="h-4 w-32 rounded bg-purple-200 mb-4" />
                 <div className="h-3 w-full rounded bg-purple-100 mb-2" />
                 <div className="h-3 w-4/5 rounded bg-purple-100" />
@@ -249,9 +249,9 @@ export default function SymptomTrackerWidget() {
         {!isAnalyzing && correlations && correlations.length > 0 && (
           <div className="grid gap-5 sm:grid-cols-2">
             {correlations.map((corr, idx) => (
-              <div key={idx} className="rounded-xl border border-purple-100 bg-white p-5 shadow-sm hover:shadow-md transition">
+              <div key={idx} className="rounded-xl border border-purple-500/20 bg-surface p-5 shadow-sm hover:shadow-md transition">
                 <div className="flex items-start justify-between mb-3">
-                  <h3 className="font-bold text-slate-800 text-lg">{corr.symptom}</h3>
+                  <h3 className="font-bold text-ink text-lg">{corr.symptom}</h3>
                   <span className="flex items-center gap-1 rounded-full bg-purple-100 px-2.5 py-1 text-xs font-semibold text-purple-700">
                     {t("confidenceLabel")} {Math.round(corr.confidence * 100)}%
                   </span>
@@ -259,13 +259,13 @@ export default function SymptomTrackerWidget() {
                 
                 <div className="mb-4 flex flex-wrap gap-2">
                   {corr.triggers.map((trigger, i) => (
-                    <span key={i} className="rounded-md bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700 border border-rose-100">
+                    <span key={i} className="rounded-md bg-rose-500/10 px-2 py-1 text-xs font-medium text-rose-700 border border-rose-500/20">
                       {trigger}
                     </span>
                   ))}
                 </div>
                 
-                <div className="rounded-lg bg-slate-50 p-3 text-sm text-slate-700 leading-relaxed">
+                <div className="rounded-lg bg-surface-muted p-3 text-sm text-ink leading-relaxed">
                   {corr.explanation}
                 </div>
               </div>
@@ -274,8 +274,8 @@ export default function SymptomTrackerWidget() {
         )}
 
         {!isAnalyzing && correlations && correlations.length === 0 && (
-          <div className="rounded-xl border border-slate-100 bg-slate-50 p-8 text-center">
-            <p className="text-slate-500 text-sm">{t("noCorrelationsFound")}</p>
+          <div className="rounded-xl border border-border bg-surface-muted p-8 text-center">
+            <p className="text-ink-muted text-sm">{t("noCorrelationsFound")}</p>
           </div>
         )}
       </div>

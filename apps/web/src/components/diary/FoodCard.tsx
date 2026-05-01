@@ -192,7 +192,7 @@ export default function FoodCard({
   const giStyle = getGIColor(gi, tGlycemic);
 
   return (
-    <div className="bg-white border border-border shadow-sm rounded-2xl overflow-hidden w-full flex flex-col max-w-[320px] sm:max-w-[400px]">
+    <div className="bg-surface border border-border shadow-sm rounded-2xl overflow-hidden w-full flex flex-col max-w-[320px] sm:max-w-[400px]">
       {/* Photo Thumbnail */}
       {imageUrl && (
         <div className="w-full overflow-hidden" style={{ maxHeight: "140px" }}>

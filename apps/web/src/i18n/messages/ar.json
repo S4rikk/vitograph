@@ -327,7 +327,13 @@
       "strengthStrong": "قوية"
     },
     "hoursShort": "س",
-    "minsShort": "د"
+    "minsShort": "د",
+    "theme": "Theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
   },
   "lifestyle": {
     "activityLevel": "مستوى النشاط",

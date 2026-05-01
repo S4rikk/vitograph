@@ -29,7 +29,7 @@ export default function TabSwitcher({
     <nav
       role="tablist"
       aria-label="Main navigation"
-      className="flex w-full overflow-x-auto hide-scrollbar sm:inline-flex sm:w-auto items-center gap-1 sm:gap-2 rounded-xl bg-white p-1 shadow-sm border border-border"
+      className="flex w-full overflow-x-auto hide-scrollbar sm:inline-flex sm:w-auto items-center gap-1 sm:gap-2 rounded-xl bg-surface p-1 shadow-sm border border-border"
     >
       {tabs.map((tab) => {
         const isActive = tab.id === activeTab;

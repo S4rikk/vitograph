@@ -8,9 +8,9 @@ import { useTranslations } from "next-intl";
 const STATUS_COLORS: Record<string, string> = {
     critical_low: "bg-red-100 text-red-800 border-red-300",
     critical_high: "bg-red-100 text-red-800 border-red-300",
-    low: "bg-amber-50 text-amber-800 border-amber-300",
-    high: "bg-amber-50 text-amber-800 border-amber-300",
-    normal: "bg-green-50 text-green-700 border-green-300",
+    low: "bg-amber-500/10 text-amber-800 border-amber-300",
+    high: "bg-amber-500/10 text-amber-800 border-amber-300",
+    normal: "bg-green-500/10 text-green-700 border-green-300",
 };
 
 const SEVERITY_BORDER: Record<string, string> = {
@@ -41,7 +41,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
     const t = useTranslations("medical");
 
     return (
-        <div className="space-y-6 rounded-2xl border border-border bg-white p-6 shadow-sm">
+        <div className="space-y-6 rounded-2xl border border-border bg-surface p-6 shadow-sm">
             {/* ── Header ──────────────────────────────────────────── */}
             <div className="flex items-center gap-3">
                 <div className="rounded-xl bg-purple-100 p-3">
@@ -56,7 +56,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
             </div>
 
             {/* ── Summary ─────────────────────────────────────────── */}
-            <div className="rounded-xl bg-primary-50 p-4">
+            <div className="rounded-xl bg-primary-500/10 p-4">
                 <p className="text-sm leading-relaxed text-ink">{report.summary}</p>
             </div>
 
@@ -100,7 +100,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
                         {report.diagnostic_patterns.map((p, i) => (
                             <div
                                 key={i}
-                                className={`rounded-lg border border-l-4 bg-white p-4 shadow-xs ${SEVERITY_BORDER[p.severity] ?? ""}`}
+                                className={`rounded-lg border border-l-4 bg-surface p-4 shadow-xs ${SEVERITY_BORDER[p.severity] ?? ""}`}
                             >
                                 <div className="flex items-center justify-between">
                                     <h5 className="text-sm font-semibold text-ink">
@@ -143,7 +143,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
                             return (
                                 <div
                                     key={i}
-                                    className="flex items-start gap-3 rounded-lg border border-border bg-white p-3"
+                                    className="flex items-start gap-3 rounded-lg border border-border bg-surface p-3"
                                 >
                                     <span
                                         className={`mt-0.5 rounded-full px-2 py-0.5 text-xs font-medium ${badge.color}`}
@@ -191,7 +191,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
                         {report.dietary_recommendations.map((d, i) => (
                             <li
                                 key={i}
-                                className="rounded-lg border border-border bg-white p-3"
+                                className="rounded-lg border border-border bg-surface p-3"
                             >
                                 <p className="text-sm text-ink">{d.recommendation}</p>
                                 <p className="mt-1 text-xs text-ink-muted">
@@ -204,7 +204,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
             )}
 
             {/* ── Disclaimer ─────────────────────────────────────── */}
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+            <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-3">
                 <p className="text-xs leading-relaxed text-amber-800">
                     {report.disclaimer}
                 </p>

@@ -327,7 +327,13 @@
       "strengthStrong": "強い"
     },
     "hoursShort": "時間",
-    "minsShort": "分"
+    "minsShort": "分",
+    "theme": "Theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
   },
   "lifestyle": {
     "activityLevel": "活動レベル",

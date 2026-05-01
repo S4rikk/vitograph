@@ -103,7 +103,7 @@ export default function ChangePasswordForm() {
             <div className="flex flex-col">
                 <label
                     htmlFor="current_password"
-                    className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
+                    className="block text-[0.8125rem] font-semibold text-ink mb-1.5"
                 >
                     {t("changePassword.currentPassword")}
                 </label>
@@ -113,13 +113,13 @@ export default function ChangePasswordForm() {
                         type={showCurrentPassword ? "text" : "password"}
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
-                        className="w-full px-3 py-2 pr-10 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                        className="w-full px-3 py-2 pr-10 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm"
                         autoComplete="current-password"
                     />
                     <button
                         type="button"
                         onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink-main transition-colors cursor-pointer"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink transition-colors cursor-pointer"
                         tabIndex={-1}
                     >
                         {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -131,7 +131,7 @@ export default function ChangePasswordForm() {
             <div className="flex flex-col">
                 <label
                     htmlFor="new_password"
-                    className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
+                    className="block text-[0.8125rem] font-semibold text-ink mb-1.5"
                 >
                     {t("changePassword.newPassword")}
                 </label>
@@ -141,13 +141,13 @@ export default function ChangePasswordForm() {
                         type={showNewPassword ? "text" : "password"}
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full px-3 py-2 pr-10 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                        className="w-full px-3 py-2 pr-10 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm"
                         autoComplete="new-password"
                     />
                     <button
                         type="button"
                         onClick={() => setShowNewPassword(!showNewPassword)}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink-main transition-colors cursor-pointer"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink transition-colors cursor-pointer"
                         tabIndex={-1}
                     >
                         {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -176,7 +176,7 @@ export default function ChangePasswordForm() {
             <div className="flex flex-col">
                 <label
                     htmlFor="confirm_password"
-                    className="block text-[0.8125rem] font-semibold text-ink-main mb-1.5"
+                    className="block text-[0.8125rem] font-semibold text-ink mb-1.5"
                 >
                     {t("changePassword.confirmPassword")}
                 </label>
@@ -185,7 +185,7 @@ export default function ChangePasswordForm() {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-3 py-2 border border-divider rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-base text-sm"
+                    className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm"
                     autoComplete="new-password"
                 />
             </div>

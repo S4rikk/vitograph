@@ -36,6 +36,7 @@
 - **Прямое подключение:** `PostgresSaver` (LangGraph checkpoints) через `SUPABASE_DB_URL` (postgres:// URL напрямую, без PostgREST).
 - Напрямую читает/пишет в таблицы: `ai_chat_messages`, `meal_logs`, `meal_items`, `profiles`, `supplement_logs`, `push_subscriptions`, `water_logs`, `user_memory_vectors`, `user_emotional_profile`, `user_active_skills`, `biomarker_note_cache`.
 - Использует `web-push` для VAPID push notifications.
+- Управляет таблицей `media_cleanup` для автоматического удаления устаревших файлов из Storage (Garbage Collection). Скрипт вызывается внешним Cron (`GET /api/v1/ai/cron/media-cleanup`).
 
 ---
 

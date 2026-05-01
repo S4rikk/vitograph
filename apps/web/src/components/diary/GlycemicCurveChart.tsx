@@ -182,7 +182,7 @@ export default function GlycemicCurveChart({ timeline, meals, baseline, zoneThre
   const gradientId = "glycemic-curve-gradient";
 
   return (
-    <div className="w-full rounded-2xl bg-white mt-1">
+    <div className="w-full rounded-2xl bg-surface mt-1">
       <svg
         viewBox={`0 -40 ${SVG_W} ${SVG_H + 80}`}
         width="100%"

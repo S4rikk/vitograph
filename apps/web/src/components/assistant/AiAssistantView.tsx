@@ -37,7 +37,7 @@ const ScoreBadge = ({ score, reason }: { score: number; reason: string }) => {
   return (
     <div className={`my-6 p-5 rounded-2xl border ${colorClass} shadow-sm overflow-hidden relative`}>
       <div className="flex items-center space-x-4">
-        <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white font-bold text-xl shadow-sm border border-inherit`}>
+        <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-surface font-bold text-xl shadow-sm border border-inherit`}>
           {score}
         </div>
         <div>
@@ -63,7 +63,7 @@ const NutrPill = ({ type, children }: { type: string; children: React.ReactNode 
   const colorSpace = getMicronutrientColor(content);
   
   return (
-    <span className={`inline-flex items-center rounded-lg px-2 py-0.5 text-[0.8125rem] font-semibold border bg-slate-50 border-slate-200 mx-0.5 my-0 transition-all hover:scale-105 cursor-default shadow-sm ${colorSpace.text}`}>
+    <span className={`inline-flex items-center rounded-lg px-2 py-0.5 text-[0.8125rem] font-semibold border bg-surface-muted border-border mx-0.5 my-0 transition-all hover:scale-105 cursor-default shadow-sm ${colorSpace.text}`}>
        {children}
     </span>
   );
@@ -473,9 +473,9 @@ export default function AiAssistantView({ userId }: { userId: string }) {
   };
 
   return (
-    <div className="flex flex-1 sm:flex-none flex-col overflow-hidden rounded-xl border border-cloud-dark bg-white shadow-sm sm:h-[750px] mb-[env(safe-area-inset-bottom)]">
+    <div className="flex flex-1 sm:flex-none flex-col overflow-hidden rounded-xl border border-cloud-dark bg-surface shadow-sm sm:h-[750px] mb-[env(safe-area-inset-bottom)]">
       {/* Header with Clear Button */}
-      <div className="flex items-center justify-between border-b border-cloud px-4 py-1 sm:py-1.5 bg-white">
+      <div className="flex items-center justify-between border-b border-cloud px-4 py-1 sm:py-1.5 bg-surface">
         <h3 className="text-[0.6875rem] sm:text-xs font-semibold text-ink-muted uppercase tracking-widest">
           {profile?.ai_name || t("defaultAssistantName")}
         </h3>
@@ -580,7 +580,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="inline-flex items-center justify-center rounded-xl bg-white border border-cloud-dark px-3 py-3 text-ink-muted hover:text-primary-600 hover:border-primary-300 transition-colors focus:outline-none min-h-[44px]"
+            className="inline-flex items-center justify-center rounded-xl bg-surface border border-cloud-dark px-3 py-3 text-ink-muted hover:text-primary-600 hover:border-primary-300 transition-colors focus:outline-none min-h-[44px]"
             title={t("attachPhotoTitle")}
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -601,7 +601,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
                 handleSubmit(e);
               }
             }}
-            className="flex-1 rounded-xl border-cloud-dark bg-white px-4 py-3 text-[0.9375rem] text-ink shadow-sm transition-all focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 max-h-[150px] min-h-[44px] overflow-y-auto resize-none"
+            className="flex-1 rounded-xl border-cloud-dark bg-surface px-4 py-3 text-[0.9375rem] text-ink shadow-sm transition-all focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 max-h-[150px] min-h-[44px] overflow-y-auto resize-none"
           />
           <button
             type="submit"

@@ -124,7 +124,7 @@ export default function SupplementChecklistWidget({
                 className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[0.625rem] sm:text-[0.6875rem] font-semibold tracking-tight transition-all cursor-pointer border select-none w-max ${
                   isChecked 
                     ? "bg-primary-50 text-primary-800 border-primary-200 shadow-sm ring-1 ring-primary-100" 
-                    : "bg-surface-subtle text-ink-muted border-divider hover:bg-surface-base hover:border-border"
+                    : "bg-surface-subtle text-ink-muted border-border hover:bg-surface hover:border-border"
                 }`}
               >
                 <input
@@ -134,7 +134,7 @@ export default function SupplementChecklistWidget({
                   onChange={() => handleToggle(med, isChecked, matchedLog)}
                 />
                 <div className={`w-3 h-3 rounded-full flex items-center justify-center transition-colors shrink-0 ${
-                  isChecked ? "bg-primary-500" : "bg-white border border-ink-faint"
+                  isChecked ? "bg-primary-500" : "bg-surface border border-ink-faint"
                 }`}>
                   {isChecked && (
                     <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
@@ -178,7 +178,7 @@ export default function SupplementChecklistWidget({
                  className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[0.625rem] sm:text-[0.6875rem] font-semibold tracking-tight transition-all cursor-pointer border select-none w-full ${
                    isChecked 
                      ? "bg-primary-50 text-primary-800 border-primary-200 shadow-sm ring-1 ring-primary-100" 
-                     : "bg-surface-subtle text-ink-muted border-divider hover:bg-surface-base hover:border-border"
+                     : "bg-surface-subtle text-ink-muted border-border hover:bg-surface hover:border-border"
                  }`}
                >
                  <input
@@ -188,7 +188,7 @@ export default function SupplementChecklistWidget({
                    onChange={() => handleToggle(med, isChecked, matchedLog)}
                  />
                  <div className={`w-3 h-3 rounded-full flex items-center justify-center transition-colors shrink-0 ${
-                   isChecked ? "bg-primary-500" : "bg-white border border-ink-faint"
+                   isChecked ? "bg-primary-500" : "bg-surface border border-ink-faint"
                  }`}>
                    {isChecked && (
                      <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
@@ -207,8 +207,8 @@ export default function SupplementChecklistWidget({
 
   // Default variant for Profile Sheet
   return (
-    <div className="mt-5 pt-4 border-t border-divider">
-      <label className="block text-[0.8125rem] font-semibold text-ink-main mb-3">
+    <div className="mt-5 pt-4 border-t border-border">
+      <label className="block text-[0.8125rem] font-semibold text-ink mb-3">
         {t("checklistToday")}
       </label>
       {isLoading && todaySuppLogs.length === 0 ? (
@@ -228,7 +228,7 @@ export default function SupplementChecklistWidget({
                 className={`flex items-center gap-3 w-full p-3 rounded-xl border transition-all cursor-pointer group ${
                   isChecked
                     ? "bg-primary-50 border-primary-200 shadow-sm"
-                    : "bg-surface-base border-divider hover:border-primary-300"
+                    : "bg-surface border-border hover:border-primary-300"
                 }`}
               >
                 <div className="relative flex items-center justify-center">
@@ -241,7 +241,7 @@ export default function SupplementChecklistWidget({
                   <div className={`w-[22px] h-[22px] rounded-md border-2 transition-all flex items-center justify-center ${
                     isChecked
                       ? "bg-primary-600 border-primary-600 shadow-inner"
-                      : "bg-white border-divider peer-hover:border-primary-400 group-hover:border-primary-400"
+                      : "bg-surface border-border peer-hover:border-primary-400 group-hover:border-primary-400"
                   }`}>
                     {isChecked && (
                       <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -250,7 +250,7 @@ export default function SupplementChecklistWidget({
                     )}
                   </div>
                 </div>
-                <span className={`text-sm font-semibold transition-colors flex-1 ${isChecked ? "text-primary-800" : "text-ink-main"}`}>
+                <span className={`text-sm font-semibold transition-colors flex-1 ${isChecked ? "text-primary-800" : "text-ink"}`}>
                   {med}
                 </span>
               </label>
