@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { LabReportExtraction } from "@/lib/api-client";
+import { useLocale } from "next-intl";
 
 type JobStatus = "IDLE" | "UPLOADING" | "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
 
@@ -22,6 +23,7 @@ async function getAuthToken(): Promise<string> {
 }
 
 export function useLabScanJob(): UseLabScanJobReturn {
+  const locale = useLocale();
   const [status, setStatus] = useState<JobStatus>("IDLE");
   const [result, setResult] = useState<LabReportExtraction | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +75,10 @@ export function useLabScanJob(): UseLabScanJobReturn {
       // Step 2: POST to create job
       const response = await fetch("/api/v1/integration/parse-image-batch-async", {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          "Accept-Language": locale
+        },
         body: formData,
         signal: AbortSignal.timeout(30_000), // 30s for job creation only
       });

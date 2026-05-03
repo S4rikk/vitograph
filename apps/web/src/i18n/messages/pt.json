@@ -600,7 +600,10 @@
     "tongueTitle": "Diagnóstico da língua",
     "tongueDescription": "Mostre sua língua com boa iluminação. A IA avaliará a saburra, cor e textura em correlação com a saúde digestiva.",
     "skinTitle": "Diagnóstico da pele",
-    "skinDescription": "Tire uma foto da área de pele problemática. A IA identificará padrões visíveis: ressecamento, erupções, pigmentação."
+    "skinDescription": "Tire uma foto da área de pele problemática. A IA identificará padrões visíveis: ressecamento, erupções, pigmentação.",
+    "flagNormal": "Normal",
+    "flagLow": "Baixo",
+    "flagHigh": "Alto"
   },
   "onboarding": {
     "welcome": "Bem-vindo ao VITOGRAPH",

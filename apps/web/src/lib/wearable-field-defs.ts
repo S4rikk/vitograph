@@ -2,7 +2,7 @@ import type { MetricFieldDefinition } from "@/types/wearable-types";
 
 // t is expected to be useTranslations('wearables')
 
-export const getSleepFields = (t: any): MetricFieldDefinition[] => [
+export const getSleepFields = (t: (key: string) => string): MetricFieldDefinition[] => [
     { key: "sleepDurationHours", label: t("sleepDuration"), unit: "ч", type: "number", step: "0.1", placeholder: "7.5" },
     { key: "deepSleepPercent", label: t("deepSleep"), unit: "%", type: "number", step: "1", placeholder: "20" },
     { key: "remSleepPercent", label: t("remSleep"), unit: "%", type: "number", step: "1", placeholder: "22" },
@@ -11,7 +11,7 @@ export const getSleepFields = (t: any): MetricFieldDefinition[] => [
     { key: "respiratoryRateBrpm", label: t("respiratoryRate"), unit: "вд/мин", type: "number", step: "0.1", placeholder: "15" },
 ];
 
-export const getCardioFields = (t: any): MetricFieldDefinition[] => [
+export const getCardioFields = (t: (key: string) => string): MetricFieldDefinition[] => [
     { key: "restingHeartRateBpm", label: t("restingHR"), unit: "уд/мин", type: "number", step: "1", placeholder: "62" },
     { key: "vo2MaxMlKgMin", label: t("vo2max"), unit: "мл/кг/мин", type: "number", step: "0.1", placeholder: "42.5" },
     { key: "steps", label: t("steps"), unit: "шагов", type: "number", step: "1", placeholder: "8500" },
@@ -20,7 +20,7 @@ export const getCardioFields = (t: any): MetricFieldDefinition[] => [
     { key: "bloodPressureDiastolic", label: t("bloodPressureDiastolic"), unit: "мм рт.ст.", type: "number", step: "1", placeholder: "80" },
 ];
 
-export const getBodyFields = (t: any): MetricFieldDefinition[] => [
+export const getBodyFields = (t: (key: string) => string): MetricFieldDefinition[] => [
     { key: "weightKg", label: t("weightLabel"), unit: "кг", type: "number", step: "0.1", placeholder: "72.5" },
     { key: "bodyFatPercent", label: t("bodyFat"), unit: "%", type: "number", step: "0.1", placeholder: "18.5" },
     { key: "muscleMassPercent", label: t("muscleMass"), unit: "%", type: "number", step: "0.1", placeholder: "42" },
@@ -28,13 +28,13 @@ export const getBodyFields = (t: any): MetricFieldDefinition[] => [
     { key: "visceralFatIndex", label: t("visceralFat"), unit: "индекс", type: "number", step: "1", placeholder: "8" },
 ];
 
-export const getMetabolicFields = (t: any): MetricFieldDefinition[] => [
+export const getMetabolicFields = (t: (key: string) => string): MetricFieldDefinition[] => [
     { key: "glucoseMmol", label: t("glucose"), unit: "ммоль/л", type: "number", step: "0.1", placeholder: "5.2" },
     { key: "timeInRangePercent", label: t("timeInRange"), unit: "%", type: "number", step: "1", placeholder: "85" },
     { key: "glucoseVariabilityPercent", label: t("glucoseVariability"), unit: "%", type: "number", step: "0.1", placeholder: "18" },
 ];
 
-export const getStressFields = (t: any): MetricFieldDefinition[] => [
+export const getStressFields = (t: (key: string) => string): MetricFieldDefinition[] => [
     { key: "stressScore", label: t("stressScore"), unit: "0-100", type: "number", step: "1", placeholder: "35" },
     { key: "bodyTemperatureVariationC", label: t("tempVariation"), unit: "°C", type: "number", step: "0.01", placeholder: "0.15" },
     { key: "spo2Percent", label: t("spo2"), unit: "%", type: "number", step: "0.1", placeholder: "97.5" },

@@ -20,7 +20,7 @@ export function useTypewriter(rawText: string, speedMs: number = 10) {
     const interval = setInterval(() => {
       setDisplayedText((current) => {
         const currentRaw = rawTextRef.current;
-        let i = current.length;
+        const i = current.length;
         
         if (i >= currentRaw.length) {
           return current; // Do nothing, wait for more text

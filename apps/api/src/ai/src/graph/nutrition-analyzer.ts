@@ -2,6 +2,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { getLLMConfig } from "../services/config.service.js";
 
 const TargetSchema = z.object({
     macros: z.object({
@@ -124,8 +125,9 @@ ${somaticSummary || "None"}
 Generate the JSON with macros, micros, and rationale based on adjusting the Standard Base Targets.`;
 
     // 3. Call LLM
+    const llmConfig = await getLLMConfig();
     const model = new ChatOpenAI({
-        modelName: "gpt-4o-mini",
+        modelName: llmConfig.analysis_llm,
         temperature: 0.1,
     }).withStructuredOutput(TargetSchema);
 

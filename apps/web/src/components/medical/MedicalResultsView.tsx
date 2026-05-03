@@ -32,6 +32,7 @@ export default function MedicalResultsView() {
   const { startJob, status: jobStatus, result: jobResult, error: jobError, reset: resetJob } = useLabScanJob();
 
   const controlsRef = useRef<HTMLDivElement>(null);
+  const diagnosingRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("medical");
 
   useEffect(() => {
@@ -42,6 +43,8 @@ export default function MedicalResultsView() {
       return () => clearTimeout(timer);
     }
   }, [uploadState, editableBiomarkers]);
+
+
 
   // ── Somatic Analysis State ───────────────────────────────────
   const [somaticHistory, setSomaticHistory] = useState<SomaticHistoryResponse>({});
@@ -72,6 +75,15 @@ export default function MedicalResultsView() {
   const [isDiagnosing, setIsDiagnosing] = useState(false);
   const [reportAlreadyGenerated, setReportAlreadyGenerated] = useState(false); // ← НОВОЕ
   const [diagnosisError, setDiagnosisError] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (isDiagnosing) {
+      const timer = setTimeout(() => {
+        diagnosingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isDiagnosing]);
 
   useEffect(() => {
     async function fetchHistory() {
@@ -369,7 +381,7 @@ export default function MedicalResultsView() {
         <>
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-ink">
-              {t("analysisResults")} {results?.report_date ? `(От ${results.report_date})` : ""}
+              {t("analysisResults")} {results?.report_date ? `(${results.report_date})` : ""}
             </h2>
             <span className="text-sm text-ink-muted">
               {editableBiomarkers.length} {t("markersCount")}
@@ -403,7 +415,7 @@ export default function MedicalResultsView() {
                         ) : (
                           <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path></svg>
                         )}
-                        {marker.flag}
+                        {marker.flag === 'Normal' ? t('flagNormal') : marker.flag === 'Low' ? t('flagLow') : marker.flag === 'High' ? t('flagHigh') : marker.flag}
                       </span>
                     )}
                   </div>
@@ -548,7 +560,7 @@ export default function MedicalResultsView() {
 
       {/* ── GPT-5.4 Diagnostic Report ─────────────────────── */}
       {isDiagnosing && (
-        <div className="flex flex-col items-center gap-3 rounded-2xl border border-purple-500/20 bg-purple-500/10 p-8">
+        <div ref={diagnosingRef} className="flex flex-col items-center gap-3 rounded-2xl border border-purple-500/20 bg-purple-500/10 p-8">
           <div className="relative h-10 w-10">
             <div className="absolute inset-0 animate-spin rounded-full border-2 border-purple-500/20 border-t-purple-600" />
           </div>

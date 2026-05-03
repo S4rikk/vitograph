@@ -600,7 +600,10 @@
     "tongueTitle": "舌头诊断",
     "tongueDescription": "在良好光线下展示您的舌头。AI将评估舌苔、颜色和纹理，与消化系统健康进行关联分析。",
     "skinTitle": "皮肤诊断",
-    "skinDescription": "拍摄问题皮肤区域的照片。AI将识别可见模式：干燥、皮疹、色素沉着。"
+    "skinDescription": "拍摄问题皮肤区域的照片。AI将识别可见模式：干燥、皮疹、色素沉着。",
+    "flagNormal": "正常",
+    "flagLow": "偏低",
+    "flagHigh": "偏高"
   },
   "onboarding": {
     "welcome": "欢迎来到 VITOGRAPH",

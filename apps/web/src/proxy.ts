@@ -9,7 +9,7 @@ import { locales, defaultLocale } from "./i18n/config";
  * 1. Detect locale from Accept-Language → set NEXT_LOCALE cookie
  * 2. Run Supabase auth session refresh + route protection
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // ── Step 1: Locale detection (lightweight, no async) ──
   const existingLocale = request.cookies.get('NEXT_LOCALE')?.value;
   const needsLocaleCookie = !existingLocale || !(locales as readonly string[]).includes(existingLocale);

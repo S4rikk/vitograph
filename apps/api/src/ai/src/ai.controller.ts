@@ -1268,12 +1268,12 @@ export async function handleChat(
             weatherAlert += `\n\n[ENVIRONMENT_ALERT: Внимание! Сегодня магнитная буря (Kp-индекс: ${weatherData.max_kp_index}) и/или резкий перепад давления (Падение: ${weatherData.pressure_drop_max_hpa} гПа). Учитывай это в анализе симптомов пользователя (может болеть голова, слабость, мигрень, скачки давления).]`;
           }
 
-          const userTimeStr = body.localTimeStr || now.toLocaleTimeString('ru-RU', {
+          const userTimeStr = body.localTimeStr || now.toLocaleTimeString(dbContext.profile?.locale || 'ru-RU', {
             hour: '2-digit',
             minute: '2-digit',
             timeZone: timezone
           });
-          const userDateStr = body.localDateStr || now.toLocaleDateString('ru-RU', {
+          const userDateStr = body.localDateStr || now.toLocaleDateString(dbContext.profile?.locale || 'ru-RU', {
             day: '2-digit', month: '2-digit', year: 'numeric',
             timeZone: timezone
           });
@@ -1586,12 +1586,12 @@ export async function handleChatStream(
             weatherAlert += `\n\n[ENVIRONMENT_ALERT: Внимание! Сегодня магнитная буря (Kp-индекс: ${weatherData.max_kp_index}) и/или резкий перепад давления (Падение: ${weatherData.pressure_drop_max_hpa} гПа). Учитывай это в анализе симптомов пользователя (может болеть голова, слабость, мигрень, скачки давления).]`;
           }
 
-          const userTimeStr = body.localTimeStr || now.toLocaleTimeString('ru-RU', {
+          const userTimeStr = body.localTimeStr || now.toLocaleTimeString(dbContext.profile?.locale || 'ru-RU', {
             hour: '2-digit',
             minute: '2-digit',
             timeZone: timezone
           });
-          const userDateStr = body.localDateStr || now.toLocaleDateString('ru-RU', {
+          const userDateStr = body.localDateStr || now.toLocaleDateString(dbContext.profile?.locale || 'ru-RU', {
             day: '2-digit', month: '2-digit', year: 'numeric',
             timeZone: timezone
           });

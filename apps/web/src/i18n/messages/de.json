@@ -600,7 +600,10 @@
     "tongueTitle": "Zungendiagnostik",
     "tongueDescription": "Zeigen Sie Ihre Zunge bei guter Beleuchtung. Die KI bewertet Belag, Farbe und Textur in Bezug auf die Verdauungsgesundheit.",
     "skinTitle": "Hautdiagnostik",
-    "skinDescription": "Fotografieren Sie den problematischen Hautbereich. Die KI erkennt sichtbare Muster: Trockenheit, Ausschläge, Pigmentierung."
+    "skinDescription": "Fotografieren Sie den problematischen Hautbereich. Die KI erkennt sichtbare Muster: Trockenheit, Ausschläge, Pigmentierung.",
+    "flagNormal": "Normal",
+    "flagLow": "Niedrig",
+    "flagHigh": "Hoch"
   },
   "onboarding": {
     "welcome": "Willkommen bei VITOGRAPH",

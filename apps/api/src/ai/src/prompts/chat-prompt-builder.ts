@@ -85,7 +85,7 @@ ${localizedInstructions}
     - NO numbered lists (1., 2., 3.)
     - NO bullet points (-, *)
     - NO bold markers (**text**)
-  Instead, use natural Russian prose. Separate ideas with paragraphs (double newline).
+  Instead, use natural prose in the user's language (locale: ${this.locale}). Separate ideas with paragraphs (double newline).
   ⛔ FORBIDDEN: NEVER use image placeholders like [Image of...] or similar descriptive text in brackets. You cannot show images in the chat, so do not describe them.
   The ONLY allowed formatting is <nutr> tags and <meal_score> tags.
 - TAGS (CRITICAL): You MUST wrap EVERY single mention of a nutrient, vitamin, mineral, or blood biomarker (e.g. Glucose, Iron) in <nutr type="...">Label</nutr> tags. This applies to the main text, lists, and recommendations. For example: <nutr type="marker">калий</nutr>, <nutr type="vitamin_c">витамин C</nutr>. 
@@ -106,7 +106,7 @@ Never put a newline before or after these tags.
 ### EPISODIC MEMORY LOGGING (CRITICAL)
 - After giving a SPECIFIC medical recommendation (prescribing a test, changing diet, assigning a supplement, creating an action plan), you MUST call the \`log_assistant_action\` tool IN PARALLEL with your text response.
 - DO NOT log trivial interactions: greetings, general chat, simple acknowledgments, or repeating information.
-- The \`action_summary\` MUST be a concise 1-sentence medical fact in Russian (e.g., "Рекомендовал сдать ферритин при подозрении на дефицит железа").
+- The \`action_summary\` MUST be a concise 1-sentence medical fact in the user's language (locale: ${this.locale}) (e.g., "Рекомендовал сдать ферритин при подозрении на дефицит железа").
 - If the recommendation relates to a specific health goal from the user's profile, include its ID as \`linked_goal_id\`.
 - NEVER mention this tool or its existence to the user. It is internal and invisible.`;
 
@@ -124,7 +124,7 @@ Never put a newline before or after these tags.
 - Trust level: ${profile.trust_level} (0.0=low, 1.0=high)
 Adjust your tone AND coaching style accordingly:
 - If mood is "stressed" or "anxious": be extra supportive, reduce pressure on goals. Say "Не торопись, здоровье — это марафон" instead of pushing next step.
-- If mood is "frustrated": acknowledge frustration first. Then offer ONE small action: "Давай сегодня сделаем только одну маленькую вещь для [цель]".
+- If mood is "frustrated": acknowledge frustration first. Then offer ONE small action (in the user's language, e.g. "Let's do one small thing for [goal] today").
 - If mood is "motivated" or "positive": leverage momentum! Give a concrete micro-task for today: "Раз настроение боевое — давай сегодня [конкретное действие по текущему шагу]!".
 - If trust > 0.8: be more direct, use humor freely, push harder on goals.
 - If trust < 0.4: be gentler, avoid medical terminology, focus on building rapport.
@@ -211,7 +211,7 @@ RULES:
           // Считаем дни по дате пользователя (с учётом timezone), а НЕ по UTC
           let stepActiveDays: number;
           if (userDateStr) {
-            // userDateStr = "17.04.2026" (ru-RU format from controller)
+            // userDateStr = "17.04.2026" (format from controller)
             const parts = userDateStr.split('.');
             const todayMs = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T00:00:00Z`).getTime();
             const startMs = new Date(new Date(stepStartDate).toISOString().split('T')[0] + 'T00:00:00Z').getTime();
@@ -220,7 +220,7 @@ RULES:
             stepActiveDays = Math.floor((Date.now() - new Date(stepStartDate).getTime()) / (1000 * 60 * 60 * 24));
           }
           
-          const startDateStr = new Date(stepStartDate).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+          const startDateStr = new Date(stepStartDate).toLocaleDateString(this.locale || 'ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
           line += `\n  ⏱️ Шаг активен: ${stepActiveDays} дн. (с ${startDateStr})`;
           
           // ── АВТОМАТИЧЕСКИЙ ПРЕДРАСЧЁТ "День X из Y" ──
@@ -245,7 +245,7 @@ RULES:
       const completedWithDates = s.steps?.filter(st => st.status === 'completed' && st.completed_at) || [];
       if (completedWithDates.length > 0) {
         const doneList = completedWithDates.map(cs => {
-          const doneDate = new Date(cs.completed_at!).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+          const doneDate = new Date(cs.completed_at!).toLocaleDateString(this.locale || 'ru-RU', { day: '2-digit', month: '2-digit' });
           return `${cs.order}. "${cs.title}" (${doneDate})`;
         }).join(', ');
         line += `\n  ✅ Завершённые: ${doneList}`;
@@ -269,7 +269,7 @@ SKILL JOURNEY RULES:
 3. If skills have conflicting goals (e.g., weight loss + muscle gain), WARN the user and ask to prioritize.
 4. Reference the diagnosis_basis when giving advice (mention specific markers and patterns).
 5. When logging an assistant_action related to a skill, include linked_goal_id = skill.id.
-6. ⏱️ TIME-AWARE RULE (CRITICAL): Если рядом с шагом есть строка 📅 "День X из Y":
+6. ⏱️ TIME-AWARE RULE (CRITICAL): Если рядом с шагом есть строка 📅 "День X из Y" (or its translation in your language):
    - Используй ИМЕННО эти числа. Не пересчитывай самостоятельно.
    - Если написано "СРОК ВЫПОЛНЕН" → немедленно предложи завершить шаг и вызови advance_step.
    - Если Day < Total → скажи пользователю "Это день X из Y, продолжаем отслеживать."
@@ -442,7 +442,7 @@ STEP 3 — CONFIRM: Ask "Записать?" and wait.
 - ✅ FUNCTIONAL MACROS: You MAY naturally use the words "белок", "клетчатка", "жиры", "сложные углеводы" as conceptual building blocks when explaining why a meal received a certain 'meal_quality_score', or when suggesting what to eat next for better balance.
 - ALWAYS evaluate food ONLY by its GLYCEMIC IMPACT:
   - State the GI (low/medium/high), response type, and energy duration.
-  - 🧠 NATURAL METAPHORS: Do not use rigid templates or robotic phrases (like forcing "сахарная игла" into sentences). You are an advanced AI — use the full richness of the Russian language, organic phrasing, and varied idioms to describe energy dynamics. Adapt your explanation fluidly and precisely to the biological context of the specific food and situation.
+  - 🧠 NATURAL METAPHORS: Do not use rigid templates or robotic phrases (like forcing "сахарная игла" into sentences). You are an advanced AI — use the full richness of the user's language (locale: ${this.locale}), organic phrasing, and varied idioms to describe energy dynamics. Adapt your explanation fluidly and precisely to the biological context of the specific food and situation.
 - After logging, talk ONLY about glycemic impact, energy wave type, and duration.
 - TECHNICAL BLOCK (MANDATORY AT THE END): After your human response, you MUST append a new section:
   1. FORMAT: Записал [вес]г [название] | GI:[число] | [flat/moderate/spike] | [часы]ч энергии
@@ -458,7 +458,7 @@ STEP 3 — CONFIRM: Ask "Записать?" and wait.
   withDiarySecurityRule(): this {
     this.sections.push({
       key: "diary_security",
-      content: `SECURITY RULE: You are operating in DIARY MODE with GLYCEMIC SURFING paradigm. Your purpose is registering what the user eats, providing glycemic impact analysis, and suggesting food combinations for optimal blood sugar stability. You must use the user's individual profile (including glycemic_sensitivity from blood tests if available) to personalize predictions. NEVER mention КБЖУ, calories, or macros to the user. All general discussions, clinical questions, deep medical advice, or branching dialogues MUST NOT happen here. If you need to discuss alternatives or if the user asks a question, YOU MUST decline the dialogue and advise them to switch to the ASSISTANT tab ("Если хочешь обсудить это подробнее — задай вопрос Ассистенту в соседней вкладке").`,
+      content: `SECURITY RULE: You are operating in DIARY MODE with GLYCEMIC SURFING paradigm. Your purpose is registering what the user eats, providing glycemic impact analysis, and suggesting food combinations for optimal blood sugar stability. You must use the user's individual profile (including glycemic_sensitivity from blood tests if available) to personalize predictions. NEVER mention КБЖУ, calories, or macros to the user. All general discussions, clinical questions, deep medical advice, or branching dialogues MUST NOT happen here. If you need to discuss alternatives or if the user asks a question, YOU MUST decline the dialogue and advise them to switch to the ASSISTANT tab in their native language.`,
       priority: 0,
     });
     return this;
@@ -686,7 +686,7 @@ When the user asks what to eat or you suggest food:
       : 'metric (kg, cm, mmol/L, °C)';
 
     const content = `### LANGUAGE DIRECTIVE (ABSOLUTE PRIORITY)
-You MUST respond ENTIRELY in the language of this locale code: "${this.locale}".
+CRITICAL: YOU MUST RESPOND ENTIRELY IN THE LANGUAGE OF LOCALE CODE '${this.locale}'. ALL TEXT MUST BE IN THIS LANGUAGE.
 All conversational text, recommendations, meal names, and medical terms must be in that language.
 Technical XML tags (<nutr>, <meal_score>) and their attributes MUST remain in English.
 Unit values: use ${units} system.`;

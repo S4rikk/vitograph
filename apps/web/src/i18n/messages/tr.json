@@ -47,28 +47,28 @@
     "spo2": "SpO2",
     "slogan": "Feed your cells, find balance",
     "notSpecifiedPlaceholder": "Belirtilmedi",
-    "skipOnboarding": "TODO"
+    "skipOnboarding": "Daha sonra doldur"
   },
   "auth": {
     "title": "VITOGRAPH",
-    "subtitle": "TODO",
-    "subtitleRegister": "TODO",
+    "subtitle": "Hesabınıza giriş yapın",
+    "subtitleRegister": "Hesap oluşturun",
     "signIn": "Sign in",
     "signingIn": "Signing in...",
     "email": "Email address",
     "password": "Password",
     "signOut": "Sign out",
-    "signUp": "TODO",
-    "signingUp": "TODO",
-    "noAccount": "TODO",
-    "hasAccount": "TODO",
-    "registerSuccessTitle": "TODO",
-    "registerSuccessDesc": "TODO",
-    "copyPassword": "TODO",
-    "passwordCopied": "TODO",
-    "registerWarning": "TODO",
-    "confirmEmailWarning": "TODO",
-    "backToLogin": "TODO"
+    "signUp": "Kayıt Ol",
+    "signingUp": "Kayıt Olunuyor...",
+    "noAccount": "Hesabınız yok mu? Kayıt Olun",
+    "hasAccount": "Hesabınız var mı? Giriş Yapın",
+    "registerSuccessTitle": "Kayıt Başarılı!",
+    "registerSuccessDesc": "Hesabınız için güvenli bir parola oluşturduk. Lütfen güvenli bir yerde saklayın.",
+    "copyPassword": "Parolayı Kopyala",
+    "passwordCopied": "Kopyalandı",
+    "registerWarning": "Bu parolayı şimdi unuttuğunuzda kurtaramazsınız. Daha sonra ayarlardan değiştirebilirsiniz.",
+    "confirmEmailWarning": "Giriş yapmadan önce mutlaka e-postayı gelen mail üzerinden doğrulayın.",
+    "backToLogin": "Girişe geri dön"
   },
   "water": {
     "title": "Su",
@@ -314,8 +314,8 @@
       "a6": "Hayır. Vitograph, güçlü bir analitik araç ve sağlık yolculuğunuzda kişisel bir navigatördür, ancak tıbbi teşhis koymaz ve tedavi önermez. Tüm içgörüler ve AI önerileri, bunları doktorunuzla somut bir şekilde tartışabilmeniz için tasarlanmıştır.",
       "q7": "Verilerim gizli mi?",
       "a7": "Evet. Tıbbi verileriniz, analizleriniz ve anketleriniz güvenli bir veritabanında saklanmaktadır. AI, bunları yalnızca korunan oturumlarınız kapsamında kişiselleştirilmiş önerilerde bulunmak için kullanır.",
-      "q8": "TODO",
-      "a8": "TODO"
+      "q8": "Hedefler nasıl çalışır ve nasıl oluşturulurlar?",
+      "a8": "Hedefler basit bir sohbet talebiyle oluşturulur (örneğin, '5 kg vermek istiyorum'). Anlamanız önemlidir: Vitograph size statik bir program sunmaz. Belirli hedefinize göre benzersiz bir sanal AI uzmanı oluşturulur. Bu uzman, ilerlemenizin sorumluluğunu alır: günlük olarak izler, verilerinizi analiz eder ve planı proaktif olarak düzeltir, böylece hedefinize garanti altında ulaşırsınız."
     },
     "about": {
       "title": "Hakkında (About)",
@@ -472,7 +472,7 @@
     "tempVariation": "Sıcaklık Değişimi",
     "spo2": "Kandaki Oksijen (SpO2)",
     "bloodPressureLabel": "Basınç",
-    "screenshotComingSoon": "TODO",
+    "screenshotComingSoon": "OCR for screenshots yakında!",
     "units": {
       "h": "sa",
       "ms": "ms",
@@ -600,7 +600,10 @@
     "tongueTitle": "Dil Teşhisi",
     "tongueDescription": "Dilinizi iyi aydınlatma altında gösterin. Yapay zeka, kaplama, renk ve dokuyu sindirim sağlığıyla ilişkilendirerek değerlendirecektir.",
     "skinTitle": "Cilt Teşhisi",
-    "skinDescription": "Sorunlu cilt bölgesinin fotoğrafını çekin. Yapay zeka görünür desenleri belirleyecektir: kuruluk, döküntüler, pigmentasyon."
+    "skinDescription": "Sorunlu cilt bölgesinin fotoğrafını çekin. Yapay zeka görünür desenleri belirleyecektir: kuruluk, döküntüler, pigmentasyon.",
+    "flagNormal": "Normal",
+    "flagLow": "Düşük",
+    "flagHigh": "Yüksek"
   },
   "onboarding": {
     "welcome": "VITOGRAPH'a Hoş Geldiniz",
@@ -711,11 +714,11 @@
     "g": "g",
     "iu": "IU",
     "kcal": "kcal",
-    "cm": "TODO",
-    "kg": "TODO",
-    "ft": "TODO",
-    "in": "TODO",
-    "lbs": "TODO"
+    "cm": "cm",
+    "kg": "kg",
+    "ft": "ayak",
+    "in": "inç",
+    "lbs": "pound"
   },
   "assistant": {
     "chat": {

@@ -67,9 +67,12 @@ router.post(
         throw new AppError("Supported formats: PDF, DOCX, TXT", 400);
       }
 
+      const locale = req.headers["accept-language"]?.split(",")[0].trim() || "ru";
+
       const extraction = await pythonCore.parsePdf(
         file.buffer,
-        file.originalname
+        file.originalname,
+        locale
       );
 
       // --- Database Persistence ---
@@ -200,7 +203,8 @@ router.post(
       }
 
       console.log("[parse-image] ③  Calling Python parseImage...");
-      const extraction = await pythonCore.parseImage(file.buffer, mimeType);
+      const locale = req.headers["accept-language"]?.split(",")[0].trim() || "ru";
+      const extraction = await pythonCore.parseImage(file.buffer, mimeType, locale);
       console.log(`[parse-image] ④  Python returned: biomarkers=${extraction?.biomarkers?.length ?? 0}`);
 
       // --- Database Persistence (best-effort — never block the response) ---
@@ -333,7 +337,8 @@ router.post(
       }
 
       console.log("[parse-image-batch] ③  Calling Python parseImageBatch...");
-      const extraction = await pythonCore.parseImageBatch(files);
+      const locale = req.headers["accept-language"]?.split(",")[0].trim() || "ru";
+      const extraction = await pythonCore.parseImageBatch(files, locale);
       console.log(`[parse-image-batch] ④  Python returned: biomarkers=${extraction?.biomarkers?.length ?? 0}`);
 
       // --- Database Persistence (best-effort) ---
@@ -444,7 +449,8 @@ router.post(
   "/refresh-notes",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await pythonCore.refreshBiomarkerNotesAction(req.body.biomarkers);
+      const locale = req.headers["accept-language"]?.split(",")[0].trim() || "ru";
+      const result = await pythonCore.refreshBiomarkerNotesAction(req.body.biomarkers, locale);
       res.json({ success: true, data: result });
     } catch (error) {
       next(error);
@@ -484,7 +490,8 @@ router.post(
       }
 
       console.log(`[parse-image-batch-async] ②  Files: ${files.length}, forwarding to Python...`);
-      const result = await pythonCore.parseImageBatchAsync(files, authToken);
+      const locale = req.headers["accept-language"]?.split(",")[0].trim() || "ru";
+      const result = await pythonCore.parseImageBatchAsync(files, authToken, locale);
       console.log(`[parse-image-batch-async] ③  Job created: ${result.job_id}`);
 
       res.json({ success: true, data: result });

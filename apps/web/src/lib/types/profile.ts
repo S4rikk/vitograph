@@ -9,5 +9,5 @@ export interface HealthGoal {
 export interface Profile {
   id: string;
   health_goals?: HealthGoal[];
-  [key: string]: any; // Allow other fields to exist without strict typing here
+  [key: string]: unknown; // Allow other fields to exist without strict typing here
 }

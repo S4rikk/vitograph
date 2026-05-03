@@ -13,8 +13,10 @@ export async function POST(req: NextRequest) {
         const backendUrl = `${baseUrl}/chat/stream`;
 
         const authorization = req.headers.get("Authorization");
+        const acceptLanguage = req.headers.get("Accept-Language");
         const headers: Record<string, string> = { "Content-Type": "application/json" };
         if (authorization) headers["Authorization"] = authorization;
+        if (acceptLanguage) headers["Accept-Language"] = acceptLanguage;
 
         const backendResponse = await fetch(backendUrl, {
             method: "POST",
@@ -58,11 +60,15 @@ export async function DELETE(req: NextRequest) {
         const backendUrl = `${baseUrl}/chat/history?mode=${mode}`;
 
         const authorization = req.headers.get("Authorization");
+        const acceptLanguage = req.headers.get("Accept-Language");
         const headers: Record<string, string> = {
             "Content-Type": "application/json",
         };
         if (authorization) {
             headers["Authorization"] = authorization;
+        }
+        if (acceptLanguage) {
+            headers["Accept-Language"] = acceptLanguage;
         }
 
         const response = await axios.delete(backendUrl, {

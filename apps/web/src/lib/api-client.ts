@@ -233,6 +233,9 @@ class AiApiClient {
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
+      if (typeof document !== "undefined" && document.documentElement.lang) {
+        headers["Accept-Language"] = document.documentElement.lang;
+      }
 
       const response = await fetch(url, {
         method: "POST",
@@ -274,6 +277,9 @@ class AiApiClient {
 
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
+      }
+      if (typeof document !== "undefined" && document.documentElement.lang) {
+        headers["Accept-Language"] = document.documentElement.lang;
       }
 
       const response = await fetch(url, {
@@ -401,17 +407,18 @@ class AiApiClient {
    */
   async getChatHistory(mode: "diary" | "assistant" = "assistant", startIso?: string, endIso?: string): Promise<{ history: any[] }> {
     try {
+      const token = await getAuthToken();
+      if (!token) return { history: [] }; // Short-circuit if no token to avoid 401 overlay
+
       let url = `${this.baseUrl}/chat/history?mode=${mode}`;
       if (startIso && endIso) {
         url += `&startDate=${encodeURIComponent(startIso)}&endDate=${encodeURIComponent(endIso)}`;
       }
 
-      const token = await getAuthToken();
-
       const headers: HeadersInit = {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
       };
-      if (token) headers["Authorization"] = `Bearer ${token}`;
 
       const response = await fetch(url, { method: "GET", headers });
       if (!response.ok) throw new Error(`API Error: ${response.status}`);
@@ -457,15 +464,19 @@ class AiApiClient {
    * Fetches the user's active supplement protocol and today's logs.
    */
   async getTodaySupplements(startIso?: string, endIso?: string): Promise<{ activeProtocol: any, medications: string[], todayLogs: any[] }> {
+    const token = await getAuthToken();
+    if (!token) return { activeProtocol: null, medications: [], todayLogs: [] };
+
     const queryParams = new URLSearchParams();
     if (startIso) queryParams.append("startDate", startIso);
     if (endIso) queryParams.append("endDate", endIso);
     const queryString = queryParams.toString() ? `?${queryParams.toString()}` : "";
     
-    const token = await getAuthToken();
     const url = `${this.baseUrl.replace('/ai', '/supplements')}/today${queryString}`;
-    const headers: HeadersInit = { "Content-Type": "application/json" };
-    if (token) headers["Authorization"] = `Bearer ${token}`;
+    const headers: HeadersInit = { 
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    };
 
     const res = await fetch(url, { method: "GET", headers });
     if (!res.ok) {
@@ -631,6 +642,9 @@ class AiApiClient {
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
+    if (typeof document !== "undefined" && document.documentElement.lang) {
+      headers["Accept-Language"] = document.documentElement.lang;
+    }
 
     // Route through Node.js integration endpoint
     const integrationUrl = "/api/v1/integration/parse";
@@ -666,6 +680,9 @@ class AiApiClient {
 
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
+    }
+    if (typeof document !== "undefined" && document.documentElement.lang) {
+      headers["Accept-Language"] = document.documentElement.lang;
     }
 
     // Route through our custom Next.js API route that has a higher maxDuration (120s)
@@ -704,6 +721,9 @@ class AiApiClient {
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
+    if (typeof document !== "undefined" && document.documentElement.lang) {
+      headers["Accept-Language"] = document.documentElement.lang;
+    }
 
     // Route through our custom Next.js API route that has a higher maxDuration (300s)
     const integrationUrl = "/api/parse-image-batch";
@@ -738,6 +758,9 @@ class AiApiClient {
     const token = await getAuthToken();
     const headers: HeadersInit = {};
     if (token) headers["Authorization"] = `Bearer ${token}`;
+    if (typeof document !== "undefined" && document.documentElement.lang) {
+      headers["Accept-Language"] = document.documentElement.lang;
+    }
 
     const response = await fetch("/api/v1/integration/parse-image-batch-async", {
       method: "POST",
@@ -786,6 +809,9 @@ class AiApiClient {
     const token = await getAuthToken();
     const headers: HeadersInit = { "Content-Type": "application/json" };
     if (token) headers["Authorization"] = `Bearer ${token}`;
+    if (typeof document !== "undefined" && document.documentElement.lang) {
+      headers["Accept-Language"] = document.documentElement.lang;
+    }
 
     const response = await fetch(directUrl, {
       method: "POST",
@@ -980,6 +1006,9 @@ class AiApiClient {
     const token = await getAuthToken();
     const headers: HeadersInit = { "Content-Type": "application/json" };
     if (token) headers["Authorization"] = `Bearer ${token}`;
+    if (typeof document !== "undefined" && document.documentElement.lang) {
+      headers["Accept-Language"] = document.documentElement.lang;
+    }
 
     const response = await fetch(proxyUrl, {
       method: "POST",

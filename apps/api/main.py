@@ -7,24 +7,43 @@ and a top-level health-check endpoint.
 
 from __future__ import annotations
 
+import asyncio
+import logging
+import traceback
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, List, Optional
 
-from fastapi import FastAPI, File, HTTPException, UploadFile, status, Request, BackgroundTasks
-from fastapi.responses import JSONResponse
+from fastapi import (
+    BackgroundTasks,
+    FastAPI,
+    File,
+    HTTPException,
+    Request,
+    UploadFile,
+    status,
+)
 from fastapi.middleware.cors import CORSMiddleware
-import logging
-import traceback
-import asyncio
+from fastapi.responses import JSONResponse
 from fastembed import TextEmbedding
 
 logger = logging.getLogger(__name__)
 
 embedding_model = TextEmbedding("BAAI/bge-small-en-v1.5")
 
-from api.v1.endpoints import analysis, analytics, norms, profiles, test_results, users
-from core.database import supabase_manager
-from services.file_parser import (
+from openai import AsyncOpenAI  # noqa: E402
+from pydantic import BaseModel  # noqa: E402
+
+from api.v1.endpoints import (  # noqa: E402
+    analysis,
+    analytics,
+    norms,
+    profiles,
+    test_results,
+    users,
+)
+from core.config import settings  # noqa: E402
+from core.database import supabase_manager  # noqa: E402
+from services.file_parser import (  # noqa: E402
     BiomarkerResult,
     LabReportExtraction,
     ReferenceRange,
@@ -32,10 +51,11 @@ from services.file_parser import (
     extract_biomarkers_from_image,
     extract_biomarkers_from_image_batch,
 )
-from services.norm_engine import NormResult, UserProfile, calculate_dynamic_norm
-from pydantic import BaseModel
-from openai import AsyncOpenAI
-from core.config import settings
+from services.norm_engine import (  # noqa: E402
+    NormResult,
+    UserProfile,
+    calculate_dynamic_norm,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -80,6 +100,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     """Pass through HTTPExceptions so they aren't caught by the global handler."""
@@ -94,17 +115,14 @@ async def global_exception_handler(request: Request, exc: Exception):
     """Catch all unhandled exceptions and log full traceback."""
     error_traceback = traceback.format_exc()
     logger.error(f"Global Exception Handler caught: {exc}\n{error_traceback}")
-    
+
     # In a real app, we might check an env var like DEBUG or ENV
     # For now, following the TZ to return detailed info if possible
-    content = {
-        "detail": "Internal Server Error",
-        "error": str(exc)
-    }
-    
+    content = {"detail": "Internal Server Error", "error": str(exc)}
+
     # Add traceback ONLY if we are NOT in production (or keep it for now as per TZ)
     content["traceback"] = error_traceback
-    
+
     return JSONResponse(
         status_code=500,
         content=content,
@@ -147,22 +165,28 @@ app.include_router(
 
 # ── Integration Endpoints (Phase 70) ───────────────────────────────
 
+
 class RefreshNotesRequest(BaseModel):
     biomarkers: List[BiomarkerResult]
+
 
 class RefreshedMarker(BaseModel):
     index: int
     ai_clinical_note: str
     flag: Optional[str]
 
+
 class RefreshNotesResponse(BaseModel):
     markers: List[RefreshedMarker]
 
-def recalculate_flag(value: Optional[float], ref: Optional[ReferenceRange]) -> Optional[str]:
+
+def recalculate_flag(
+    value: Optional[float], ref: Optional[ReferenceRange]
+) -> Optional[str]:
     """Deterministically recalculate flag based on numeric value and reference range."""
     if value is None or ref is None:
         return None
-        
+
     # 1. Use explicit low/high if present
     if ref.low is not None and ref.high is not None:
         if value < ref.low:
@@ -170,46 +194,51 @@ def recalculate_flag(value: Optional[float], ref: Optional[ReferenceRange]) -> O
         if value > ref.high:
             return "High"
         return "Normal"
-        
+
     # 2. Parse text property if low/high missing (e.g. "< 15", "> 1.5", "10-20")
     if ref.text:
         import re
+
         text = ref.text.strip().lower()
-        
+
         # Match "< 15" or "<15" or "less than 15"
-        less_match = re.search(r'(?:<|less than|до)\s*([\d\.,]+)', text)
+        less_match = re.search(r"(?:<|less than|до)\s*([\d\.,]+)", text)
         if less_match:
             try:
-                threshold = float(less_match.group(1).replace(',', '.'))
+                threshold = float(less_match.group(1).replace(",", "."))
                 return "Normal" if value < threshold else "High"
             except ValueError:
                 pass
-                
+
         # Match "> 15" or ">15" or "more than 15"
-        greater_match = re.search(r'(?:>|more than|higher than|от)\s*([\d\.,]+)', text)
+        greater_match = re.search(r"(?:>|more than|higher than|от)\s*([\d\.,]+)", text)
         if greater_match:
             try:
-                threshold = float(greater_match.group(1).replace(',', '.'))
+                threshold = float(greater_match.group(1).replace(",", "."))
                 return "Normal" if value > threshold else "Low"
             except ValueError:
                 pass
-                
+
         # Match "10 - 20" or "10-20"
-        range_match = re.search(r'([\d\.,]+)\s*[-–]\s*([\d\.,]+)', text)
+        range_match = re.search(r"([\d\.,]+)\s*[-–]\s*([\d\.,]+)", text)
         if range_match:
             try:
-                low = float(range_match.group(1).replace(',', '.'))
-                high = float(range_match.group(2).replace(',', '.'))
-                if value < low: return "Low"
-                if value > high: return "High"
+                low = float(range_match.group(1).replace(",", "."))
+                high = float(range_match.group(2).replace(",", "."))
+                if value < low:
+                    return "Low"
+                if value > high:
+                    return "High"
                 return "Normal"
             except ValueError:
                 pass
 
     return None
 
+
 async def enrich_biomarkers_with_insights(
     biomarkers: list[BiomarkerResult],
+    locale: str = "ru",
 ) -> list[BiomarkerResult]:
     """Enrich biomarkers with AI clinical notes via semantic cache + LLM fallback.
 
@@ -235,7 +264,35 @@ async def enrich_biomarkers_with_insights(
         new_flag = recalculate_flag(marker.value_numeric, marker.reference_range)
         marker.flag = new_flag
 
-        signature = f"{marker.original_name} - {new_flag}"
+        signature = f"[{locale}] {marker.original_name} - {new_flag}"
+
+        # Tier 1: Fast Exact Match
+        exact_match_found = False
+        try:
+            exact_res = (
+                await supabase_client.table("insights_cache")
+                .select("*")
+                .eq("marker_signature", signature)
+                .limit(1)
+                .execute()
+            )
+            if exact_res and hasattr(exact_res, "data") and len(exact_res.data) > 0:
+                cached_insight = exact_res.data[0]
+                marker.ai_clinical_note = cached_insight.get("ai_clinical_note", "")
+                asyncio.create_task(
+                    supabase_client.table("insights_cache")
+                    .update({"hit_count": (cached_insight.get("hit_count") or 0) + 1})
+                    .eq("id", cached_insight["id"])
+                    .execute()
+                )
+                exact_match_found = True
+        except Exception as cache_err:
+            logger.error("Exact cache lookup failed for '%s': %s", signature, cache_err)
+
+        if exact_match_found:
+            continue
+
+        # Tier 2: Fuzzy Semantic Match with Post-Filtering
         emb_generator = embedding_model.embed([signature])
         query_emb = list(emb_generator)[0].tolist()
 
@@ -243,21 +300,39 @@ async def enrich_biomarkers_with_insights(
         try:
             rpc_response = await supabase_client.rpc(
                 "match_insights",
-                {"query_embedding": query_emb, "match_threshold": 0.95, "match_count": 1},
+                {
+                    "query_embedding": query_emb,
+                    "match_threshold": 0.95,
+                    "match_count": 20,
+                },
             ).execute()
         except Exception as cache_err:
-            logger.error("Semantic cache lookup failed for '%s': %s", signature, cache_err)
-
-        if rpc_response and hasattr(rpc_response, "data") and len(rpc_response.data) > 0:
-            cached_insight = rpc_response.data[0]
-            marker.ai_clinical_note = cached_insight.get("ai_clinical_note", "")
-            asyncio.create_task(
-                supabase_client.table("insights_cache")
-                .update({"hit_count": (cached_insight.get("hit_count") or 0) + 1})
-                .eq("id", cached_insight["id"])
-                .execute()
+            logger.error(
+                "Semantic cache lookup failed for '%s': %s", signature, cache_err
             )
-        else:
+
+        fuzzy_match_found = False
+        if (
+            rpc_response
+            and hasattr(rpc_response, "data")
+            and len(rpc_response.data) > 0
+        ):
+            for item in rpc_response.data:
+                if item.get("marker_signature", "").startswith(f"[{locale}]"):
+                    cached_insight = item
+                    marker.ai_clinical_note = cached_insight.get("ai_clinical_note", "")
+                    asyncio.create_task(
+                        supabase_client.table("insights_cache")
+                        .update(
+                            {"hit_count": (cached_insight.get("hit_count") or 0) + 1}
+                        )
+                        .eq("id", cached_insight["id"])
+                        .execute()
+                    )
+                    fuzzy_match_found = True
+                    break
+
+        if not fuzzy_match_found:
             llm_input.append(
                 {
                     "index": idx,
@@ -289,10 +364,25 @@ async def enrich_biomarkers_with_insights(
 
     client = AsyncOpenAI(api_key=api_key, timeout=60.0)
 
+    target_language = {
+        "ru": "Russian",
+        "en": "English",
+        "es": "Spanish",
+        "pt": "Portuguese",
+        "de": "German",
+        "fr": "French",
+        "it": "Italian",
+        "ja": "Japanese",
+        "ko": "Korean",
+        "zh": "Chinese",
+        "tr": "Turkish",
+    }.get(locale[:2].lower(), "English")
+
     system_prompt = (
         "You are a medical lab expert for VITOGRAPH.\n"
-        "For each biomarker provided, generate exactly 1 concise sentence in Russian "
-        "(`ai_clinical_note`) explaining what this marker's current value means clinically.\n"
+        f"For each biomarker provided, generate exactly 1 concise sentence strictly in {target_language} language "  # noqa: E501
+        "(`ai_clinical_note`) explaining what this marker's current value means clinically.\n"  # noqa: E501
+        f"IMPORTANT: The entire ai_clinical_note MUST be written in {target_language}. Do not use English unless it is an international medical acronym.\n"  # noqa: E501
         "Focus on the recalculated flag."
     )
 
@@ -334,7 +424,10 @@ async def enrich_biomarkers_with_insights(
             model=model_name,
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Biomarkers to process:\n{clean_llm_input}"},
+                {
+                    "role": "user",
+                    "content": f"Biomarkers to process:\n{clean_llm_input}",
+                },
             ],
             response_format=schema,
             temperature=0.0,
@@ -369,7 +462,7 @@ async def enrich_biomarkers_with_insights(
 
     except Exception as llm_err:
         logger.error("LLM enrichment error: %s", llm_err)
-        # Graceful degradation: mark cache-miss markers as failed but keep others intact.
+        # Graceful degradation: mark cache-miss markers as failed but keep others intact.  # noqa: E501
         for item in llm_input:
             if not biomarkers[item["index"]].ai_clinical_note:
                 biomarkers[item["index"]].ai_clinical_note = "[Ошибка AI]"
@@ -378,12 +471,15 @@ async def enrich_biomarkers_with_insights(
 
 
 @app.post("/refresh-notes", response_model=RefreshNotesResponse, tags=["integration"])
-async def refresh_biomarker_notes(request: RefreshNotesRequest):
-    """Recalculate flags and generate concise AI clinical notes for updated biomarkers."""
+async def refresh_biomarker_notes(request: RefreshNotesRequest, req: Request):
+    """Recalculate flags and generate concise AI clinical notes for updated biomarkers."""  # noqa: E501
     if not request.biomarkers:
         return RefreshNotesResponse(markers=[])
 
-    enriched_markers = await enrich_biomarkers_with_insights(request.biomarkers)
+    locale = req.headers.get("Accept-Language", "ru").split(",")[0].strip().lower()[:2]
+    enriched_markers = await enrich_biomarkers_with_insights(
+        request.biomarkers, locale=locale
+    )
 
     result = [
         RefreshedMarker(
@@ -398,8 +494,9 @@ async def refresh_biomarker_notes(request: RefreshNotesRequest):
 
 # ── Core Engine Endpoints (Phase 18) ─────────────────────────────────
 
+
 @app.post("/parse", response_model=LabReportExtraction, tags=["file-parser"])
-async def parse_lab_report(file: UploadFile = File(...)):
+async def parse_lab_report(request: Request, file: UploadFile = File(...)):
     """Upload PDF/DOCX/TXT -> Extract Biomarkers dynamically via AI."""
     filename = file.filename or "unknown.pdf"
     if not filename.endswith((".pdf", ".docx", ".txt")):
@@ -410,14 +507,14 @@ async def parse_lab_report(file: UploadFile = File(...)):
 
     try:
         content = await file.read()
-        parsed_data = await extract_biomarkers(content, filename)
+        locale = request.headers.get("Accept-Language", "ru").split(",")[0].strip().lower()[:2]
+        parsed_data = await extract_biomarkers(content, filename, locale=locale)
 
         if not parsed_data.biomarkers:
             raise HTTPException(
                 status_code=400,
-                detail="Не удалось распознать медицинские показатели. Пожалуйста, загрузите четкое фото бланка анализов.",
+                detail="Не удалось распознать медицинские показатели. Пожалуйста, загрузите четкое фото бланка анализов.",  # noqa: E501
             )
-
 
         return parsed_data
     except ValueError as e:
@@ -429,7 +526,7 @@ async def parse_lab_report(file: UploadFile = File(...)):
 
 
 @app.post("/parse-image", response_model=LabReportExtraction, tags=["file-parser"])
-async def parse_lab_report_image(file: UploadFile = File(...)):
+async def parse_lab_report_image(request: Request, file: UploadFile = File(...)):
     """Upload a PHOTO of a lab report -> OCR via GPT-4o Vision -> Extract Biomarkers."""
     content_type = file.content_type or ""
     if not content_type.startswith("image/"):
@@ -444,7 +541,8 @@ async def parse_lab_report_image(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Image too large. Max 10MB.")
 
     try:
-        parsed_data = await extract_biomarkers_from_image(content, content_type)
+        locale = request.headers.get("Accept-Language", "ru").split(",")[0].strip().lower()[:2]
+        parsed_data = await extract_biomarkers_from_image(content, content_type, locale=locale)
 
         if not parsed_data.biomarkers:
             raise HTTPException(
@@ -455,7 +553,6 @@ async def parse_lab_report_image(file: UploadFile = File(...)):
                 ),
             )
 
-
         return parsed_data
     except HTTPException:
         raise
@@ -463,9 +560,11 @@ async def parse_lab_report_image(file: UploadFile = File(...)):
         raise HTTPException(status_code=422, detail=f"Image parsing error: {str(e)}")
 
 
-@app.post("/parse-image-batch", response_model=LabReportExtraction, tags=["file-parser"])
-async def parse_lab_report_image_batch(files: List[UploadFile] = File(...)):
-    """Upload a batch of PHOTOS (up to 10) of a lab report -> OCR via GPT-4o Vision -> Extract Biomarkers."""
+@app.post(
+    "/parse-image-batch", response_model=LabReportExtraction, tags=["file-parser"]
+)
+async def parse_lab_report_image_batch(request: Request, files: List[UploadFile] = File(...)):
+    """Upload a batch of PHOTOS (up to 10) of a lab report -> OCR via GPT-4o Vision -> Extract Biomarkers."""  # noqa: E501
     if len(files) > 10:
         raise HTTPException(
             status_code=400,
@@ -481,13 +580,15 @@ async def parse_lab_report_image_batch(files: List[UploadFile] = File(...)):
         if not content_type.startswith("image/"):
             raise HTTPException(
                 status_code=400,
-                detail=f"Expected an image file, got '{content_type}' for {file.filename}.",
+                detail=f"Expected an image file, got '{content_type}' for {file.filename}.",  # noqa: E501
             )
 
         content = await file.read()
         total_size += len(content)
         if total_size > max_total_size:
-            raise HTTPException(status_code=400, detail="Total size of images too large. Max 50MB.")
+            raise HTTPException(
+                status_code=400, detail="Total size of images too large. Max 50MB."
+            )
 
         images_data.append((content, content_type))
 
@@ -495,7 +596,8 @@ async def parse_lab_report_image_batch(files: List[UploadFile] = File(...)):
         raise HTTPException(status_code=400, detail="No valid images provided.")
 
     try:
-        parsed_data = await extract_biomarkers_from_image_batch(images_data)
+        locale = request.headers.get("Accept-Language", "ru").split(",")[0].strip().lower()[:2]
+        parsed_data = await extract_biomarkers_from_image_batch(images_data, locale=locale)
 
         if not parsed_data.biomarkers:
             raise HTTPException(
@@ -506,21 +608,24 @@ async def parse_lab_report_image_batch(files: List[UploadFile] = File(...)):
                 ),
             )
 
-
         return parsed_data
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=422, detail=f"Batch image parsing error: {str(e)}")
+        raise HTTPException(
+            status_code=422, detail=f"Batch image parsing error: {str(e)}"
+        )
 
 
 # ── Async OCR Pipeline (Phase 3 Refactor) ────────────────────────────
+
 
 async def _process_ocr_job(
     job_id: str,
     user_id: str,
     images_data: list[tuple[bytes, str]],
     auth_token: str,
+    locale: str = "ru",
 ) -> None:
     """Background: run OCR on images, save result to lab_scans table.
 
@@ -530,7 +635,7 @@ async def _process_ocr_job(
         images_data: List of (raw_bytes, mime_type) tuples.
         auth_token: Bearer JWT for scoped Supabase client (RLS-compatible).
     """
-    from supabase import create_async_client, ClientOptions
+    from supabase import ClientOptions, create_async_client
 
     # Create scoped client with user's JWT for RLS compatibility
     options = ClientOptions(headers={"Authorization": f"Bearer {auth_token}"})
@@ -542,37 +647,65 @@ async def _process_ocr_job(
 
     try:
         # Mark as PROCESSING
-        await client.table("lab_scans").update(
-            {"status": "PROCESSING"}
-        ).eq("id", job_id).execute()
+        await (
+            client.table("lab_scans")
+            .update({"status": "PROCESSING"})
+            .eq("id", job_id)
+            .execute()
+        )
 
         # Run OCR (reuse existing function)
-        extraction = await extract_biomarkers_from_image_batch(images_data)
+        extraction = await extract_biomarkers_from_image_batch(
+            images_data, locale=locale
+        )
 
         if not extraction.biomarkers:
-            await client.table("lab_scans").update({
-                "status": "FAILED",
-                "error": "Не удалось распознать показатели на фото.",
-            }).eq("id", job_id).execute()
+            await (
+                client.table("lab_scans")
+                .update(
+                    {
+                        "status": "FAILED",
+                        "error": "Не удалось распознать показатели на фото.",
+                    }
+                )
+                .eq("id", job_id)
+                .execute()
+            )
             return
 
         # Enrich with AI clinical notes (reuse existing function)
-        enriched = await enrich_biomarkers_with_insights(extraction.biomarkers)
+        enriched = await enrich_biomarkers_with_insights(
+            extraction.biomarkers, locale=locale
+        )
         extraction.biomarkers = enriched
 
         # Save COMPLETED result
-        await client.table("lab_scans").update({
-            "status": "COMPLETED",
-            "result": extraction.model_dump(mode="json"),
-        }).eq("id", job_id).execute()
+        await (
+            client.table("lab_scans")
+            .update(
+                {
+                    "status": "COMPLETED",
+                    "result": extraction.model_dump(mode="json"),
+                }
+            )
+            .eq("id", job_id)
+            .execute()
+        )
 
     except Exception as e:
         logger.error("OCR job %s failed: %s", job_id, traceback.format_exc())
         try:
-            await client.table("lab_scans").update({
-                "status": "FAILED",
-                "error": str(e)[:500],
-            }).eq("id", job_id).execute()
+            await (
+                client.table("lab_scans")
+                .update(
+                    {
+                        "status": "FAILED",
+                        "error": str(e)[:500],
+                    }
+                )
+                .eq("id", job_id)
+                .execute()
+            )
         except Exception:
             logger.error("Failed to update job %s status after error", job_id)
 
@@ -597,6 +730,10 @@ async def parse_lab_report_image_batch_async(
 
     auth_token = auth_header.split(" ", 1)[1]
 
+    locale = (
+        request.headers.get("Accept-Language", "ru").split(",")[0].strip().lower()[:2]
+    )
+
     # Read all files into memory
     images_data: list[tuple[bytes, str]] = []
     total_size = 0
@@ -614,7 +751,8 @@ async def parse_lab_report_image_batch_async(
         images_data.append((content, content_type))
 
     # Create scoped Supabase client with user JWT
-    from supabase import create_async_client, ClientOptions
+    from supabase import ClientOptions, create_async_client
+
     options = ClientOptions(headers={"Authorization": f"Bearer {auth_token}"})
     client = await create_async_client(
         settings.supabase_url,
@@ -624,6 +762,7 @@ async def parse_lab_report_image_batch_async(
 
     # Decode user_id from JWT directly (avoids network timeout locally)
     import jwt
+
     try:
         decoded = jwt.decode(auth_token, options={"verify_signature": False})
         user_id = str(decoded.get("sub"))
@@ -633,11 +772,17 @@ async def parse_lab_report_image_batch_async(
         raise HTTPException(status_code=401, detail="Invalid token")
 
     # Create job record
-    job_resp = await client.table("lab_scans").insert({
-        "user_id": user_id,
-        "status": "PENDING",
-        "file_count": len(images_data),
-    }).execute()
+    job_resp = (
+        await client.table("lab_scans")
+        .insert(
+            {
+                "user_id": user_id,
+                "status": "PENDING",
+                "file_count": len(images_data),
+            }
+        )
+        .execute()
+    )
 
     if not job_resp.data or len(job_resp.data) == 0:
         raise HTTPException(status_code=500, detail="Failed to create job")
@@ -646,7 +791,7 @@ async def parse_lab_report_image_batch_async(
 
     # Schedule background processing
     background_tasks.add_task(
-        _process_ocr_job, job_id, user_id, images_data, auth_token
+        _process_ocr_job, job_id, user_id, images_data, auth_token, locale
     )
 
     return {"job_id": job_id, "status": "PENDING"}
@@ -661,7 +806,8 @@ async def get_lab_scan_status(job_id: str, request: Request) -> dict:
 
     auth_token = auth_header.split(" ", 1)[1]
 
-    from supabase import create_async_client, ClientOptions
+    from supabase import ClientOptions, create_async_client
+
     options = ClientOptions(headers={"Authorization": f"Bearer {auth_token}"})
     client = await create_async_client(
         settings.supabase_url,
@@ -669,7 +815,9 @@ async def get_lab_scan_status(job_id: str, request: Request) -> dict:
         options=options,
     )
 
-    resp = await client.table("lab_scans").select("*").eq("id", job_id).single().execute()
+    resp = (
+        await client.table("lab_scans").select("*").eq("id", job_id).single().execute()
+    )
     if not resp.data:
         raise HTTPException(status_code=404, detail="Job not found")
     return resp.data

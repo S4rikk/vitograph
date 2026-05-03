@@ -600,7 +600,10 @@
     "tongueTitle": "Diagnóstico de la lengua",
     "tongueDescription": "Muestre su lengua con buena iluminación. La IA evaluará el revestimiento, el color y la textura en correlación con la salud digestiva.",
     "skinTitle": "Diagnóstico de la piel",
-    "skinDescription": "Tome una foto del área de piel problemática. La IA identificará patrones visibles: sequedad, erupciones, pigmentación."
+    "skinDescription": "Tome una foto del área de piel problemática. La IA identificará patrones visibles: sequedad, erupciones, pigmentación.",
+    "flagNormal": "Normal",
+    "flagLow": "Bajo",
+    "flagHigh": "Alto"
   },
   "onboarding": {
     "welcome": "Bienvenido a VITOGRAPH",

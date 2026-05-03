@@ -600,7 +600,10 @@
     "tongueTitle": "舌の診断",
     "tongueDescription": "良い照明の下で舌を見せてください。AIが舌苔、色、質感を評価し、消化器の健康との相関を分析します。",
     "skinTitle": "肌の診断",
-    "skinDescription": "問題のある肌の部分を撮影してください。AIが乾燥、発疹、色素沈着などの目に見えるパターンを特定します。"
+    "skinDescription": "問題のある肌の部分を撮影してください。AIが乾燥、発疹、色素沈着などの目に見えるパターンを特定します。",
+    "flagNormal": "正常",
+    "flagLow": "低い",
+    "flagHigh": "高い"
   },
   "onboarding": {
     "welcome": "VITOGRAPHへようこそ",

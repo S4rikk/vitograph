@@ -185,11 +185,9 @@ export default function UserProfileSheet({
     const tProfile = useTranslations("profile");
     const tLifestyle = useTranslations("lifestyle");
     const tWearables = useTranslations("wearables");
-    const tMedical = useTranslations("medical");
     const [activeTab, setActiveTab] = useState("overview");
     const [mounted, setMounted] = useState(false);
     const { scale, setScale } = useFontScale();
-    const router = useRouter();
     const currentLocale = useLocale();
     const [locale, setLocale] = useState(currentLocale);
     const [isChangingLocale, setIsChangingLocale] = useState(false);
@@ -285,11 +283,11 @@ export default function UserProfileSheet({
                 };
                 
                 setWearableMetrics(prev => {
-                    const merged: any = { ...prev };
+                    const merged: WearableMetrics = { ...prev };
                     for (const [cat, metrics] of Object.entries(latestByCategory)) {
                         const field = categoryMap[cat];
                         if (field && metrics) {
-                            merged[field] = { ...prev[field], ...(metrics as Record<string, unknown>) };
+                            merged[field] = { ...prev[field], ...(metrics as Record<string, unknown>) } as never;
                         }
                     }
                     return merged;
@@ -339,7 +337,7 @@ export default function UserProfileSheet({
                 toast.success(tProfile("clearMemorySuccess"));
             } catch (err: unknown) {
                 const message = err instanceof Error ? err.message : "Clear memory failed";
-                console.error("[ClearMemory] Error:", err);
+                console.error("[ClearMemory] Error:", message);
                 toast.error(tProfile("clearMemoryError"));
             }
         }

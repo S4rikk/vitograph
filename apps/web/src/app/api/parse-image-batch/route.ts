@@ -36,6 +36,11 @@ export async function POST(req: NextRequest) {
             headers.set("Authorization", `Bearer ${token}`);
         }
 
+        const acceptLanguage = req.headers.get("Accept-Language");
+        if (acceptLanguage) {
+            headers.set("Accept-Language", acceptLanguage);
+        }
+
         const fetchOptions: RequestInit = {
             method: "POST",
             body: req.body, // Proxy raw stream to avoid FormData array keys loss

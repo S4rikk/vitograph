@@ -600,7 +600,10 @@
     "tongueTitle": "혀 진단",
     "tongueDescription": "좋은 조명에서 혀를 보여주세요. AI가 설태, 색상, 질감을 평가하여 소화기 건강과의 상관관계를 분석합니다.",
     "skinTitle": "피부 진단",
-    "skinDescription": "문제가 있는 피부 부위를 촬영해 주세요. AI가 건조함, 발진, 색소침착 등의 패턴을 파악합니다."
+    "skinDescription": "문제가 있는 피부 부위를 촬영해 주세요. AI가 건조함, 발진, 색소침착 등의 패턴을 파악합니다.",
+    "flagNormal": "정상",
+    "flagLow": "낮음",
+    "flagHigh": "높음"
   },
   "onboarding": {
     "welcome": "VITOGRAPH에 오신 것을 환영합니다",

@@ -123,7 +123,7 @@ class ProfileRepository:
 
         # Safety check: if maybe_single returned data but it's empty
         if not response.data:
-             raise RecordNotFoundError(
+            raise RecordNotFoundError(
                 table=_TABLE,
                 identifier=str(profile_id),
             )
@@ -161,7 +161,7 @@ class ProfileRepository:
             exclude_unset=True,
         )
         upsert_payload["id"] = str(profile_id)
-        
+
         if extra_fields:
             upsert_payload.update(extra_fields)
 

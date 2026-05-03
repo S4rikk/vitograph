@@ -125,7 +125,7 @@ class PythonCoreClient {
   /**
    * Parse lab report file (PDF, DOCX, or TXT) via Python Engine
    */
-  async parsePdf(fileBuffer: Buffer, filename: string): Promise<LabReportExtraction> {
+  async parsePdf(fileBuffer: Buffer, filename: string, locale: string = "ru"): Promise<LabReportExtraction> {
     const formData = new FormData();
     // In Node.js environment, FormData from 'undici' (global in Node 18+) 
     // requires a Blob. We can use `new Blob([buffer])`.
@@ -145,13 +145,14 @@ class PythonCoreClient {
     return this.request<LabReportExtraction>("/parse", {
       method: "POST",
       body: formData,
+      headers: { "Accept-Language": locale },
     });
   }
 
   /**
    * Parse lab report IMAGE (JPEG/PNG/HEIC) via Python Vision endpoint
    */
-  async parseImage(imageBuffer: Buffer, mimeType: string): Promise<LabReportExtraction> {
+  async parseImage(imageBuffer: Buffer, mimeType: string, locale: string = "ru"): Promise<LabReportExtraction> {
     const formData = new FormData();
     const blob = new Blob([imageBuffer], { type: mimeType });
     formData.append("file", blob, "lab_report_photo.jpg");
@@ -159,13 +160,14 @@ class PythonCoreClient {
     return this.request<LabReportExtraction>("/parse-image", {
       method: "POST",
       body: formData,
+      headers: { "Accept-Language": locale },
     });
   }
 
   /**
    * Parse a BATCH of lab report PHOTOS (JPEG/PNG/HEIC) via Python Vision endpoint
    */
-  async parseImageBatch(files: Express.Multer.File[]): Promise<LabReportExtraction> {
+  async parseImageBatch(files: Express.Multer.File[], locale: string = "ru"): Promise<LabReportExtraction> {
     const formData = new FormData();
 
     for (const file of files) {
@@ -179,6 +181,7 @@ class PythonCoreClient {
       {
         method: "POST",
         body: formData,
+        headers: { "Accept-Language": locale },
       },
       1_000_000 // ~16.6 minute timeout for 10-page batch processing
     );
@@ -187,10 +190,10 @@ class PythonCoreClient {
   /**
    * Recalculate biomarker notes and flags via Python Engine
    */
-  async refreshBiomarkerNotesAction(biomarkers: BiomarkerResult[]): Promise<{ index: number; ai_clinical_note: string; flag: string }[]> {
+  async refreshBiomarkerNotesAction(biomarkers: BiomarkerResult[], locale: string = "ru"): Promise<{ index: number; ai_clinical_note: string; flag: string }[]> {
     return this.request<{ markers: { index: number; ai_clinical_note: string; flag: string }[] }>("/refresh-notes", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "Accept-Language": locale },
       body: JSON.stringify({ biomarkers })
     }).then(res => res.markers);
   }
@@ -200,7 +203,8 @@ class PythonCoreClient {
    */
   async parseImageBatchAsync(
     files: Express.Multer.File[],
-    authToken: string
+    authToken: string,
+    locale: string = "ru"
   ): Promise<{ job_id: string; status: string }> {
     const formData = new FormData();
     for (const file of files) {
@@ -214,7 +218,7 @@ class PythonCoreClient {
       {
         method: "POST",
         body: formData,
-        headers: { "Authorization": `Bearer ${authToken}` },
+        headers: { "Authorization": `Bearer ${authToken}`, "Accept-Language": locale },
       },
       15_000 // 15 sec — just creating a job, should be fast
     );

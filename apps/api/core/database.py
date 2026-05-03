@@ -99,18 +99,17 @@ supabase_manager = SupabaseClientManager()
 async def get_supabase_client(request: Request) -> AsyncClient:
     """FastAPI dependency that yields an async client.
 
-    If an Authorization header is present, returns a securely scoped 
-    client for that user to satisfy RLS policies. Otherwise returns 
+    If an Authorization header is present, returns a securely scoped
+    client for that user to satisfy RLS policies. Otherwise returns
     the shared anonymous client.
     """
     token = request.headers.get("Authorization")
     if token:
         from supabase import ClientOptions
+
         options = ClientOptions(headers={"Authorization": token})
         return await create_async_client(
-            settings.supabase_url, 
-            settings.supabase_key, 
-            options=options
+            settings.supabase_url, settings.supabase_key, options=options
         )
 
     # Fallback to shared global client (anon)

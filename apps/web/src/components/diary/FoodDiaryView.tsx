@@ -217,7 +217,7 @@ export default function FoodDiaryView() {
     }
   }, []);
 
-  const handleSubmit = useCallback((name: string, weight: number, nutritionalContext?: any) => {
+  const handleSubmit = useCallback(async (name: string, weight: number, nutritionalContext?: any) => {
     const now = new Date();
     const time = `${now.getHours().toString().padStart(2, "0")}:${now
       .getMinutes()
@@ -233,52 +233,74 @@ export default function FoodDiaryView() {
       time,
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    const placeholderId = nextId.current++;
+    const placeholderMsg: Message = {
+      id: placeholderId,
+      variant: "system",
+      text: "",
+      time,
+      imageUrl: nutritionalContext?.imageUrl || undefined,
+    };
+
+    setMessages((prev) => [...prev, userMsg, placeholderMsg]);
     setIsThinking(true);
 
-    // Call AI API via LangGraph integration
-    apiClient
-      .chat(textPayload, threadId, undefined, "diary", undefined, nutritionalContext)
-      .then(async (payload) => {
-        const aiMsg: Message = {
-          id: nextId.current++,
-          variant: "system",
-          text: payload.response,
-          time,
-          // If this was a photo submission, attach the imageUrl so FoodCard can show it
-          imageUrl: nutritionalContext?.imageUrl || undefined,
-        };
-        
-        const match = payload.response.match(/<meal_id id="([^"]+)"\s*\/>/);
-        if (match && match[1]) {
-          const mId = match[1];
-          try {
-            const { data } = await supabase.from("meal_logs").select("micronutrients").eq("id", mId).single();
-            if (data && data.micronutrients) {
-              aiMsg.mealMicros = data.micronutrients as Record<string, number>;
-            }
-          } catch (e) {
-            console.error("[Diary] Failed to fetch instant micros:", e);
-          }
+    try {
+      const payload = await apiClient.chat(
+        textPayload, 
+        threadId, 
+        undefined, 
+        "diary", 
+        undefined, 
+        nutritionalContext,
+        undefined,
+        (token) => {
+          setMessages((prev) => 
+            prev.map((m) => 
+              m.id === placeholderId ? { ...m, text: m.text + token } : m
+            )
+          );
         }
+      );
 
-        setMessages((prev) => [...prev, aiMsg]);
-        fetchDailyMicros(selectedDate);
-        triggerRefresh();
-        window.dispatchEvent(new Event("refresh-health-goals"));
-      })
-      .catch((err) => {
-        const errorMsg: Message = {
-          id: nextId.current++,
-          variant: "system",
-          text: `⚠️ ${t('aiError')}${(err as Error).message}`,
-          time,
-        };
-        setMessages((prev) => [...prev, errorMsg]);
-      })
-      .finally(() => {
-        setIsThinking(false);
-      });
+      const finalMsg: Message = {
+        ...placeholderMsg,
+        text: payload.response,
+      };
+
+      const match = payload.response.match(/<meal_id id="([^"]+)"\s*\/>/);
+      if (match && match[1]) {
+        const mId = match[1];
+        try {
+          const { data } = await supabase.from("meal_logs").select("micronutrients").eq("id", mId).single();
+          if (data && data.micronutrients) {
+            finalMsg.mealMicros = data.micronutrients as Record<string, number>;
+          }
+        } catch (e) {
+          console.error("[Diary] Failed to fetch instant micros:", e);
+        }
+      }
+
+      setMessages((prev) => 
+        prev.map((m) => (m.id === placeholderId ? finalMsg : m))
+      );
+
+      fetchDailyMicros(selectedDate);
+      triggerRefresh();
+      window.dispatchEvent(new Event("refresh-health-goals"));
+    } catch (err) {
+      const errorMsg: Message = {
+        id: nextId.current++,
+        variant: "system",
+        text: `⚠️ ${t('aiError')}${(err as Error).message}`,
+        time,
+      };
+      setMessages((prev) => 
+        prev.map((m) => (m.id === placeholderId ? errorMsg : m))
+      );
+    } finally {
+      setIsThinking(false);
+    }
   }, [threadId, fetchDailyMicros, selectedDate]);
 
   // ── RED ZONE Handlers ─────────────────────────────────────────────

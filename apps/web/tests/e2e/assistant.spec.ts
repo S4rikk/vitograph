@@ -6,21 +6,22 @@ test.describe('AI Assistant', () => {
     await page.goto('/?tab=assistant'); 
     
     // Check if the AI view is present
-    await expect(page.getByPlaceholder('Задайте вопрос о здоровье...')).toBeVisible({ timeout: 10000 });
+    // The placeholder is from assistant.chat.inputPlaceholder
+    await expect(page.getByPlaceholder('Введите сообщение')).toBeVisible({ timeout: 10000 });
 
     // 2. Type the message
-    await page.getByPlaceholder('Задайте вопрос о здоровье...').fill('Привет, сколько калорий я сегодня съел?');
+    await page.getByPlaceholder('Введите сообщение').fill('Привет, сколько шагов я сегодня прошел?');
     
     // 3. Submit
     await page.getByRole('button', { name: 'Отправить' }).click();
 
     // 4. Verify message added to UI
-    await expect(page.getByText('Привет, сколько калорий я сегодня съел?').first()).toBeVisible();
+    await expect(page.getByText('Привет, сколько шагов я сегодня прошел?').first()).toBeVisible();
 
     // 5. Wait for the Assistant response. We check that at least one assistant message exists and differs from the welcome message or contains some typical response characters. 
     // The "bg-cloud-light" class indicates an assistant message. We expect the latest one to appear.
     // Instead of waiting for specific text, we can wait for the loading indicator to disappear.
-    await expect(page.locator('.animate-bounce').first()).toBeHidden({ timeout: 300000 });
+    await expect(page.locator('.animate-bounce').first()).toBeHidden({ timeout: 15000 });
 
     // Ensure the message list contains a response to our query
     // We get the last assistant message and ensure it has text

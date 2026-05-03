@@ -6,31 +6,37 @@ export const maxDuration = 120; // 2 minutes
 
 export async function POST(req: NextRequest) {
     try {
-        const formData = await req.formData();
-
         // Read the target backend URL.
-        // We try to use the direct URL if provided, otherwise fallback to local Node.js API
         const baseUrl = process.env.NEXT_PUBLIC_AI_DIRECT_URL || "http://localhost:3001/api/v1";
-        // For integrations like parsing, it's not under /ai, it's under /integration
-        // So if NEXT_PUBLIC_AI_DIRECT_URL is "http://vg.sanderok.uk/api/v1/ai", we replace "/ai" with "/integration"
         const integrationBaseUrl = baseUrl.endsWith("/ai")
             ? baseUrl.slice(0, -3) + "/integration"
             : "http://localhost:3001/api/v1/integration";
-
         const backendUrl = `${integrationBaseUrl}/parse-image`;
 
+        // Forward the exact content-type (including the multipart boundary!)
+        const headers = new Headers();
+        const contentType = req.headers.get("Content-Type");
+        if (contentType) {
+            headers.set("Content-Type", contentType);
+        }
+
         const authorization = req.headers.get("Authorization");
-        const headers: HeadersInit = {};
         if (authorization) {
-            headers["Authorization"] = authorization;
+            headers.set("Authorization", authorization);
+        }
+
+        const acceptLanguage = req.headers.get("Accept-Language");
+        if (acceptLanguage) {
+            headers.set("Accept-Language", acceptLanguage);
         }
 
         const response = await fetch(backendUrl, {
             method: "POST",
             headers,
-            body: formData,
-            // Pass the timeout to the underlying node-fetch
+            body: req.body,
             signal: AbortSignal.timeout(120_000),
+            // @ts-ignore
+            duplex: "half", // Required for sending streams in Node 18+ fetch
         });
 
         if (!response.ok) {

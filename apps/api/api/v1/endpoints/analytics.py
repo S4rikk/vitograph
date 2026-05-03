@@ -7,19 +7,20 @@ from __future__ import annotations
 
 import datetime
 import uuid
-from typing import Annotated, Dict, Any
+from typing import Annotated, Any, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from core.database import get_supabase_client
+from schemas.analytics_schema import LabScheduleItem, MicronutrientTrendDay
 from supabase import AsyncClient
-from schemas.analytics_schema import MicronutrientTrendDay, LabScheduleItem
 
 router = APIRouter()
 
 DbClient = Annotated[AsyncClient, Depends(get_supabase_client)]
 
 # ── GET /{user_id}/micronutrient-trends ──────────────────────────────
+
 
 @router.get(
     "/{user_id}/micronutrient-trends",
@@ -33,7 +34,9 @@ async def get_micronutrient_trends(
     days: int = Query(30, ge=1, le=90, description="Number of days to analyze"),
 ) -> list[Dict[str, Any]]:
     """Fetch and aggregate daily micronutrient intake."""
-    cutoff_date = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=days)).isoformat()
+    cutoff_date = (
+        datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=days)
+    ).isoformat()
 
     try:
         # Fetch meal logs for the user within the date range
@@ -48,40 +51,41 @@ async def get_micronutrient_trends(
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Database error: {exc}"
+            detail=f"Database error: {exc}",
         )
 
     meals = response.data or []
-    
+
     # Aggregate by date (YYYY-MM-DD)
     daily_aggregates: Dict[str, Dict[str, Any]] = {}
-    
+
     for meal in meals:
         date_str = meal.get("logged_at")[:10]  # "2026-02-24"
         micros: Dict[str, float] = meal.get("micronutrients") or {}
-        
+
         if date_str not in daily_aggregates:
             daily_aggregates[date_str] = {"date": date_str}
-            
+
         for nutrient, value in micros.items():
             if nutrient not in daily_aggregates[date_str]:
                 daily_aggregates[date_str][nutrient] = 0.0
             daily_aggregates[date_str][nutrient] += float(value)
-            
+
     # Convert dict to sorted list
     sorted_dates = sorted(daily_aggregates.keys())
     result = [daily_aggregates[d] for d in sorted_dates]
-    
+
     return result
 
 
 # ── GET /{user_id}/lab-schedule ──────────────────────────────────────
 
+
 @router.get(
     "/{user_id}/lab-schedule",
     response_model=list[LabScheduleItem],
     summary="Get recommended lab testing schedule",
-    description="Generates test recommendations based on recent test dates and intake history.",
+    description="Generates test recommendations based on recent test dates and intake history.",  # noqa: E501
 )
 async def get_lab_schedule(
     user_id: uuid.UUID,
@@ -89,9 +93,9 @@ async def get_lab_schedule(
 ) -> list[LabScheduleItem]:
     """Generate predictive lab schedule."""
     # MVP Heuristic approach: Check the most recent test results for core biomarkers
-    
+
     try:
-        # Fetch the most recent tests per marker (simplified - taking last 20 tests total)
+        # Fetch the most recent tests per marker (simplified - taking last 20 tests total)  # noqa: E501
         tests_response = (
             await db.table("test_results")
             .select("test_date, biomarkers(name_en, name_ru)")
@@ -103,11 +107,11 @@ async def get_lab_schedule(
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Database error: {exc}"
+            detail=f"Database error: {exc}",
         )
 
     tests = tests_response.data or []
-    
+
     # Store most recent test date per biomarker name (ru)
     latest_tests = {}
     for t in tests:
@@ -116,46 +120,46 @@ async def get_lab_schedule(
         if marker and date_str:
             if marker not in latest_tests:
                 latest_tests[marker] = date_str
-                
+
     now = datetime.datetime.now(datetime.timezone.utc).date()
     recommendations = []
-    
+
     # Core markers to track for MVP
     core_markers = ["Ферритин", "Витамин D", "Витамин B12", "ТТГ"]
-    
+
     for marker in core_markers:
         last_test_str = latest_tests.get(marker)
-        
+
         if not last_test_str:
             recommendations.append(
                 LabScheduleItem(
                     biomarker_name=marker,
                     status="due",
                     recommended_date=now,
-                    rationale="Нет истории анализов по этому маркеру. Рекомендуется сдать для проверки базового уровня."
+                    rationale="Нет истории анализов по этому маркеру. Рекомендуется сдать для проверки базового уровня.",  # noqa: E501
                 )
             )
             continue
-            
+
         last_test_date = datetime.date.fromisoformat(last_test_str[:10])
         days_since = (now - last_test_date).days
-        
-        if days_since > 180: # 6 months
+
+        if days_since > 180:  # 6 months
             recommendations.append(
                 LabScheduleItem(
                     biomarker_name=marker,
                     status="due",
                     recommended_date=now,
-                    rationale=f"С момента последней сдачи прошло более 6 месяцев (сдавали {last_test_str[:10]}). Пора проверить динамику."
+                    rationale=f"С момента последней сдачи прошло более 6 месяцев (сдавали {last_test_str[:10]}). Пора проверить динамику.",  # noqa: E501
                 )
             )
-        elif days_since > 150: # 5 months
+        elif days_since > 150:  # 5 months
             recommendations.append(
                 LabScheduleItem(
                     biomarker_name=marker,
                     status="upcoming",
                     recommended_date=last_test_date + datetime.timedelta(days=180),
-                    rationale=f"Приближается плановая проверка (каждые 6 месяцев)."
+                    rationale="Приближается плановая проверка (каждые 6 месяцев).",
                 )
             )
         else:
@@ -164,8 +168,8 @@ async def get_lab_schedule(
                     biomarker_name=marker,
                     status="optimal",
                     recommended_date=last_test_date + datetime.timedelta(days=180),
-                    rationale=f"Уровень проверен недавно ({last_test_str[:10]}). Следующая плановая проверка через полгода."
+                    rationale=f"Уровень проверен недавно ({last_test_str[:10]}). Следующая плановая проверка через полгода.",  # noqa: E501
                 )
             )
-            
+
     return recommendations

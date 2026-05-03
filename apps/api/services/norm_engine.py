@@ -3,21 +3,22 @@
 Calculates personalized reference ranges based on user profile factors.
 """
 
-from typing import Optional
 from pydantic import BaseModel
 
 # ── Schemas ──────────────────────────────────────────────────────────
+
 
 class UserProfile(BaseModel):
     age: int
     gender: str = "male"
     stress_level: str = "low"  # low, moderate, high, very_high
-    activity_level: str = "sedentary" # sedentary, light, moderate, active, very_active
-    diet_type: str = "omnivore" # omnivore, vegetarian, vegan, pescatarian, keto, other
-    environment_aqi: int = 50 
+    activity_level: str = "sedentary"  # sedentary, light, moderate, active, very_active
+    diet_type: str = "omnivore"  # omnivore, vegetarian, vegan, pescatarian, keto, other
+    environment_aqi: int = 50
     lab_deficiencies: list[str] = []
     is_smoker: bool = False
     is_pregnant: bool = False
+
 
 class NormResult(BaseModel):
     biomarker: str
@@ -25,6 +26,7 @@ class NormResult(BaseModel):
     high: float
     unit: str
     reason: str
+
 
 # ── Constants ────────────────────────────────────────────────────────
 
@@ -43,14 +45,15 @@ BASE_RANGES = {
     "Selenium": {"low": 40.0, "high": 120.0, "unit": "mcg/L"},
     "Cortisol": {"low": 6.0, "high": 23.0, "unit": "mcg/dL"},
     "Omega-3": {"low": 8.0, "high": 12.0, "unit": "%"},
-    "Testosterone": {"low": 300.0, "high": 1000.0, "unit": "ng/dL"}
+    "Testosterone": {"low": 300.0, "high": 1000.0, "unit": "ng/dL"},
 }
 
 # ── Service ──────────────────────────────────────────────────────────
 
+
 def calculate_dynamic_norm(biomarker_name: str, profile: UserProfile) -> NormResult:
     """Calculate personalized norms based on profile factors (Mock Logic)."""
-    
+
     base = BASE_RANGES.get(biomarker_name)
     if not base:
         raise ValueError(f"Unknown biomarker: {biomarker_name}")
@@ -100,7 +103,7 @@ def calculate_dynamic_norm(biomarker_name: str, profile: UserProfile) -> NormRes
             low *= 1.20
             reasons.append("Vitamin D deficiency cofactor (+20% min)")
 
-    # Keep legacy mock logic for backward compatibility if needed, though they weren't in the new list:
+    # Keep legacy mock logic for backward compatibility if needed, though they weren't in the new list:  # noqa: E501
     if biomarker_name == "Vitamin C" and profile.is_smoker:
         low *= 1.2
         high *= 1.2
@@ -115,5 +118,5 @@ def calculate_dynamic_norm(biomarker_name: str, profile: UserProfile) -> NormRes
         low=round(low, 2),
         high=round(high, 2),
         unit=unit,
-        reason="; ".join(reasons)
+        reason="; ".join(reasons),
     )

@@ -600,7 +600,10 @@
     "tongueTitle": "Tongue Diagnostics",
     "tongueDescription": "Show your tongue in good lighting. AI will evaluate coating, color, and texture for correlation with digestive health.",
     "skinTitle": "Skin Diagnostics",
-    "skinDescription": "Take a photo of the problem skin area. AI will identify visible patterns: dryness, rashes, pigmentation."
+    "skinDescription": "Take a photo of the problem skin area. AI will identify visible patterns: dryness, rashes, pigmentation.",
+    "flagNormal": "Normal",
+    "flagLow": "Low",
+    "flagHigh": "High"
   },
   "onboarding": {
     "welcome": "Welcome to VITOGRAPH",

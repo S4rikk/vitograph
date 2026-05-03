@@ -21,11 +21,15 @@ export async function POST(req: NextRequest) {
         const backendUrl = `${integrationBaseUrl}/refresh-notes`;
 
         const authorization = req.headers.get("Authorization");
+        const acceptLanguage = req.headers.get("Accept-Language");
         const headers: HeadersInit = {
             "Content-Type": "application/json",
         };
         if (authorization) {
             headers["Authorization"] = authorization;
+        }
+        if (acceptLanguage) {
+            headers["Accept-Language"] = acceptLanguage;
         }
 
         const response = await fetch(backendUrl, {
