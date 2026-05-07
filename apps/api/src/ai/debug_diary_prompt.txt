@@ -1,4 +1,4 @@
-[FULL PROMPT LOG (diary) - 2026-05-03T07:51:56.902Z]
+[FULL PROMPT LOG (diary) - 2026-05-03T14:53:17.080Z]
 --- system ---
 ### LANGUAGE DIRECTIVE (ABSOLUTE PRIORITY)
 CRITICAL: YOU MUST RESPOND ENTIRELY IN THE LANGUAGE OF LOCALE CODE 'ru'. ALL TEXT MUST BE IN THIS LANGUAGE.
@@ -8,7 +8,7 @@ Unit values: use metric (kg, cm, mmol/L, °C) system.
 
 You are Айболит, a senior medical expert and supportive health companion. 
 Current User Local Date: 03.05.2026
-Current User Local Time: 15:51
+Current User Local Time: 22:52
 
 ### CORE PERSONA & TONE
 <persona>
@@ -146,10 +146,10 @@ Adjust your tone AND coaching style accordingly:
 ### LONG-TERM MEMORY (CRITICAL CONTEXT)
 Here are relevant facts previously extracted from conversations with this user:
 <user_memories>
-- [Омлет без масла на молоке весит 250 г.] (type: fact)
-- [Гобачжоу весит 400 г.] (type: fact)
-- [Пользователь употребляет конфеты 'Птичье молоко' в количестве 400г.] (type: preference)
-- [Омлет без масла на молоке имеет низкий гликемический индекс (GI: 32).] (type: fact)
+- [Пользователь добавляет творог в свой рацион для увеличения белка.] (type: experience)
+- [Пользователь записал 300г печеночного торта.] (type: fact)
+- [Бутерброд с печенью трески весит 180 г.] (type: fact)
+- [Жареные крылышки во фритюре весит 300 г.] (type: fact)
 - [Пользователь записал 300г мандаринов.] (type: fact)
 </user_memories>
 USE THESE FACTS naturally to show you remember the user. 
@@ -158,8 +158,7 @@ Just naturally incorporate these facts into your advice and responses.
 
 ### YOUR PAST ACTIONS & RECOMMENDATIONS (ANTI-REPETITION)
 <your_past_actions>
-- Рекомендовал заменить безалкогольное пиво на низкогликемический напиток без алкоголя и лишних углеводов.
-- Рекомендовал начать курс витамина D3 1000–2000 МЕ утром с едой и контроль 25(OH)D через 8 недель
+- Создал маршрут снижения жировой массы с умеренным дефицитом калорий и сохранением белка
 </your_past_actions>
 These are YOUR OWN previous medical recommendations and actions for this user.
 RULES:
@@ -198,8 +197,8 @@ RULES:
 
 #### 🍽️ СЪЕДЕНО СЕГОДНЯ (ДНЕВНИК)
 Агрегированный итог:
-Приёмов пищи сегодня: 5
-Микронутриенты (сумма): Цинк (мг): 33.8, Калий (мг): 3293.0, Железо (мг): 33.6, Магний (мг): 258.7, Натрий (мг): 2628.0, Селен (мкг): 412.0, Кальций (мг): 812.3, Витамин E (мг): 17.5, Витамин A (мкг): 1885.0, Витамин D (мкг): 24.6, Витамин B12 (мкг): 24.7, Фолиевая кислота (мкг): 566.5, Витамин C (мг): 2.8
+Приёмов пищи сегодня: 6
+Микронутриенты (сумма): Цинк (мг): 37.1, Калий (мг): 3614.3, Железо (мг): 38.5, Магний (мг): 285.7, Натрий (мг): 3054.0, Селен (мкг): 498.9, Кальций (мг): 955.1, Витамин E (мг): 21.5, Витамин A (мкг): 2341.0, Витамин D (мкг): 30.6, Витамин B12 (мкг): 27.8, Фолиевая кислота (мкг): 707.5, Витамин C (мг): 2.8
 
 
 ### ⚠️ GLYCEMIC-AWARE FOOD ADVICE RULE
@@ -223,6 +222,8 @@ When the user asks what to eat or you suggest food:
   Микро: Цинк: 3.9, Калий: 378.0, Железо: 5.4, Магний: 36.0, Натрий: 426.0, Селен: 91.5, Кальций: 168.0, Витамин E: 4.2, Витамин A: 480.0, Витамин D: 6.3, Витамин B12: 3.3, Фолиевая кислота: 141.0
 - [Сегодня, 15:26] Carne ensopada (550г)
   Микро: Цинк: 19.3, Калий: 1760.0, Железо: 14.3, Магний: 121.0, Натрий: 990.0, Селен: 71.5, Кальций: 66.0, Витамин C: 2.8, Витамин E: 1.7, Витамин A: 55.0, Витамин D: 0.6, Витамин B12: 12.1, Фолиевая кислота: 38.5
+- [Сегодня, 15:51] Омлет (300г)
+  Микро: Цинк: 3.3, Калий: 321.3, Железо: 4.9, Магний: 27.0, Натрий: 426.0, Селен: 86.9, Кальций: 142.8, Витамин E: 4.0, Витамин A: 456.0, Витамин D: 6.0, Витамин B12: 3.1, Фолиевая кислота: 141.0
 
 
 --- АКТИВНЫЙ ПРОТОКОЛ ДОБАВОК И ВИТАМИНОВ (Phase 50) ---
@@ -253,50 +254,60 @@ When the user asks what to eat or you suggest food:
 2. Если пользователь подтверждает прием любой добавки — **ОБЯЗАТЕЛЬНО** вызови инструмент 'log_supplement_intake'.
 3. Только если добавка пропущена И пользователь не упоминал о ней в текущем диалоге — мягко напомни ОДИН раз.
 
+--- ai ---
+200 г блинов сейчас — это еда с выраженным <nutr type="red">пиком</nutr>: быстро поднимает <nutr type="marker">глюкозу</nutr>, а потом так же быстро роняет энергию. Жарка добавляет лишнюю нагрузку, а сытость у такого варианта, как правило, с дырявым дном — через недолгое время снова тянет что-нибудь перехватить.
+
+На фоне сегодняшнего дня это не лучший ход: у тебя уже многовато <nutr type="marker">натрия</nutr>, а вот с <nutr type="vitamin_c">витамином C</nutr> день откровенно проседает. После такой еды нередко получается качели по самочувствию: сначала бодро, потом вяло, и рука сама тянется за добавкой — организм тут не ленится, он просто отвечает на быстрый <nutr type="red">отклик</nutr>.
+
+Если потом захочешь выровнять день, следующим приёмом пищи лучше взять рыбу или морепродукты с овощами, особенно с источником <nutr type="vitamin_c">витамина C</nutr>, чтобы фон был ровнее. И воду тоже не забывай: иногда после жареного жажда маскируется под голод.
+
+Уверен? Если хочешь обсудить варианты замены — задай вопрос Ассистенту в соседней вкладке.
+<red_zone_confirm food="Блины" weight="200"/>
+
 --- human ---
-Carne ensopada — 400г
+Нет, не надо. Подберёшь здоровую альтернативу?
+
+--- ai ---
+Да, но это лучше делать во вкладке Ассистент — там можно нормально подобрать замену под твою цель без лишнего <nutr type="red">пика</nutr> <nutr type="marker">глюкозы</nutr>.
+
+Для твоего курса логика простая: вместо блинов нужен вариант с более <nutr type="green">ровным откликом</nutr>, нормальной сытостью и без жареной углеводной волны. Хорошо зайдут, например, йогурт без сахара с ягодами, яйца с овощами, сардины с салатом или хумус с овощными палочками — такие варианты обычно дают более спокойный <nutr type="green">фон</nutr> энергии.
+
+И да, сегодня с водой пока не разгулялись, так что стакан воды рядом с перекусом будет вполне кстати.
+
+--- human ---
+жаренные сосиски — 400г
 
 --- ai ---
 
 
 --- tool ---
-Successfully logged 400g of Carne ensopada (GI: 8, Response: ▬ Flat, 5.5h energy) for lunch. AI INSTRUCTION: Do NOT mention calories, КБЖУ, or macros (protein/fat/carbs) to the user. Focus ONLY on glycemic impact, response type, and energy duration. CRITICAL: You MUST include this EXACT technical line at the END of your response (after your human text): Записал 400г Carne ensopada | GI:8 | flat | 5.5ч энергии Micronutrients found: Витамин A (мкг) (40.0мкг), Витамин C (мг) (2.0мг), Витамин D (мкг) (0.4мкг), Витамин E (мг) (1.2мг), Витамин B12 (мкг) (8.8мкг), Фолиевая кислота (мкг) (28.0мкг), Железо (мг) (10.4мг), Кальций (мг) (48.0мг), Магний (мг) (88.0мг), Цинк (мг) (14.0мг), Селен (мкг) (52.0мкг), Калий (мг) (1280.0мг), Натрий (мг) (720.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="84" reason="Carne ensopada tem impacto glicêmico baixo e fornece energia estável por várias horas. Ganha pontos pelo perfil saciante e pelo apoio a ferro e B12, mas perde um pouco se vier sem legumes ou verduras." /> AI INSTRUCTION (POST-LOG IMPACT): In your response, include a brief glycemic impact note in 1-2 natural sentences: predicted peak in ~85 minutes. Do NOT use lists or markdown. Keep it conversational. <meal_id id="5101750c-0ff7-47f0-b596-755209416466" />
+⚠️ RED ZONE BLOCKED (score: 22/100). This meal was NOT logged yet. Detected risks: fried food (trans fats, LDL cholesterol risk); Сильно переработанный и жареный продукт с избытком соли и насыщенных жиров, даёт тяжёлую метаболическую нагрузку.. You MUST now explain to the user IN RUSSIAN why this food is harmful using vivid, accessible language. Describe the specific health risks (e.g., trans fats from frying damage blood vessels, high GI causes energy crash). Then conclude by saying: "Уверен? Если хочешь обсудить варианты замены — задай вопрос Ассистенту в соседней вкладке." Do NOT ask open-ended questions like "What do you want instead?" because this Diary mode does not support branching dialogues. At the END of your message, you MUST append this exact tag (replacing values): <red_zone_confirm food="Жареные сосиски" weight="400"/> If the user confirms, the system will handle the override explicitly. Do NOT suggest smoothing tips — that becomes an excuse for junk food. After logging, recommend what to eat NEXT to balance today's intake.
 
 --- ai ---
-Registado. A carne ensopada tem um impacto <nutr type="green">glicémico</nutr> baixo, com pico previsto por volta de 85 minutos e energia estável durante cerca de 5.5 horas. Do ponto de vista nutricional, ela ajuda bastante com <nutr type="iron">ferro</nutr>, <nutr type="vitamin_b">vitamina B12</nutr>, <nutr type="magnesium">magnésio</nutr>, <nutr type="marker">zinco</nutr> e <nutr type="marker">potássio</nutr> — aqui o prato trabalha a teu favor sem fazer ondas desnecessárias.
+400 г жареных сосисок — тяжёлая история: по <nutr type="marker">глюкозе</nutr> это может выглядеть относительно <nutr type="green">ровно</nutr>, но метаболически блюдо бьёт с другой стороны. Жарка и сильная переработка — это сочетание, которое даёт избыток <nutr type="marker">натрия</nutr>, насыщенных жиров и лишнюю нагрузку на сосуды: вроде не шторм по сахару, а мотору всё равно достаётся.
 
-Se vier sem legumes, perde um pouco de finesse metabólica; com verduras ou pimento, especialmente pela <nutr type="vitamin_c">vitamina C</nutr>, a refeição fica ainda mais redonda. E como já vai a meio da tarde, um copo de água junto não faz mal nenhum — o organismo também gosta de manutenção básica.
+На сегодня это особенно неудачно, потому что <nutr type="marker">натрий</nutr> у тебя уже и так выше разумного, а такие продукты ещё сильнее тянут воду, усиливают жажду и оставляют после себя ощущение тяжести. Плюс это еда с бедной отдачей по защитным факторам: <nutr type="vitamin_c">витамина C</nutr> почти нет, а он тебе сегодня как раз нужен, день по нему пустоват.
 
-Записал 400г Carne ensopada | GI:8 | flat | 5.5ч энергии
-<meal_score score="84" reason="Carne ensopada tem impacto glicêmico baixo e fornece energia estável por várias horas. Ganha pontos pelo perfil saciante e pelo apoio a ferro e B12, mas perde um pouco se vier sem legumes ou verduras." />
-<nutr type="micro">Витамин A (40.0мкг)</nutr><nutr type="micro">Витамин C (2.0мг)</nutr><nutr type="micro">Витамин D (0.4мкг)</nutr><nutr type="micro">Витамин E (1.2мг)</nutr><nutr type="micro">Витамин B12 (8.8мкг)</nutr><nutr type="micro">Фолиевая кислота (28.0мкг)</nutr><nutr type="micro">Железо (10.4мг)</nutr><nutr type="micro">Кальций (48.0мг)</nutr><nutr type="micro">Магний (88.0мг)</nutr><nutr type="micro">Цинк (14.0мг)</nutr><nutr type="micro">Селен (52.0мкг)</nutr><nutr type="micro">Калий (1280.0мг)</nutr><nutr type="micro">Натрий (720.0мг)</nutr><meal_id id="5101750c-0ff7-47f0-b596-755209416466" />
+Следующим приёмом пищи лучше взять что-то легче и чище: рыбу или морепродукты с овощами, особенно с источником <nutr type="vitamin_c">витамина C</nutr>, чтобы немного выровнять общий фон дня. И вода тут тоже не роскошь, а здравый смысл.
+
+Уверен? Если хочешь обсудить варианты замены — задай вопрос Ассистенту в соседней вкладке.
+<red_zone_confirm food="Жареные сосиски" weight="400"/>
 
 --- human ---
-Carne ensopada — 550г
+Нет, не надо. Подберёшь здоровую альтернативу?
+
+--- ai ---
+Да, но подбор лучше делать во вкладке Ассистент — там можно спокойно выбрать замену под твою цель с более <nutr type="green">ровным откликом</nutr> и без лишней солевой нагрузки.
+
+Если коротко по направлению: вместо жареных сосисок тебе лучше подойдут сардины, мидии, яйца или рыба с овощами. Такой вариант обычно даёт более спокойный <nutr type="green">фон</nutr> энергии, меньше перегружает <nutr type="marker">натрий</nutr> и лучше вписывается в курс на стабильную <nutr type="marker">глюкозу</nutr>.
+
+И да, после солёного или когда тянуло на солёное, стакан воды — вполне рабочая идея, без фанатизма, просто по-человечески.
+
+--- human ---
+творог — 200г
 
 --- ai ---
 
 
 --- tool ---
-Successfully logged 550g of Carne ensopada (GI: 8, Response: ▬ Flat, 6h energy) for lunch. AI INSTRUCTION: Do NOT mention calories, КБЖУ, or macros (protein/fat/carbs) to the user. Focus ONLY on glycemic impact, response type, and energy duration. CRITICAL: You MUST include this EXACT technical line at the END of your response (after your human text): Записал 550г Carne ensopada | GI:8 | flat | 6ч энергии Micronutrients found: Витамин A (мкг) (55.0мкг), Витамин C (мг) (2.8мг), Витамин D (мкг) (0.6мкг), Витамин E (мг) (1.7мг), Витамин B12 (мкг) (12.1мкг), Фолиевая кислота (мкг) (38.5мкг), Железо (мг) (14.3мг), Кальций (мг) (66.0мг), Магний (мг) (121.0мг), Цинк (мг) (19.3мг), Селен (мкг) (71.5мкг), Калий (мг) (1760.0мг), Натрий (мг) (990.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="83" reason="Carne ensopada mantém resposta glicêmica baixa e energia prolongada, com bom suporte para ferro e B12. Perde um pouco pela porção grande e pela possível falta de vegetais, o que pode deixar a refeição pesada." /> AI INSTRUCTION (POST-LOG IMPACT): In your response, include a brief glycemic impact note in 1-2 natural sentences: predicted peak in ~90 minutes. Do NOT use lists or markdown. Keep it conversational. <meal_id id="824e0de0-ded3-4ff0-ae03-5618015ba3a0" />
-
---- ai ---
-Registado. A carne ensopada nessa porção continua com resposta <nutr type="green">glicémica</nutr> bem estável: o pico deve vir por volta de 90 minutos e a energia tende a durar cerca de 6 horas. Em compensação, a refeição fica mais pesada; metabolicamente é serena, mas no estômago pode sentar-se como quem decidiu ficar para jantar e dormir no sofá.
-
-Do lado útil, ela reforça bastante <nutr type="iron">ferro</nutr>, <nutr type="vitamin_b">vitamina B12</nutr>, <nutr type="magnesium">magnésio</nutr>, <nutr type="marker">zinco</nutr> e <nutr type="marker">potássio</nutr>. Se na próxima juntares algo com <nutr type="vitamin_c">vitamina C</nutr>, como pimento, o conjunto fica mais inteligente para o teu contexto.
-
-Записал 550г Carne ensopada | GI:8 | flat | 6ч энергии
-<meal_score score="83" reason="Carne ensopada mantém resposta glicêmica baixa e energia prolongada, com bom suporte para ferro e B12. Perde um pouco pela porção grande e pela possível falta de vegetais, o que pode deixar a refeição pesada." />
-<nutr type="micro">Витамин A (55.0мкг)</nutr><nutr type="micro">Витамин C (2.8мг)</nutr><nutr type="micro">Витамин D (0.6мкг)</nutr><nutr type="micro">Витамин E (1.7мг)</nutr><nutr type="micro">Витамин B12 (12.1мкг)</nutr><nutr type="micro">Фолиевая кислота (38.5мкг)</nutr><nutr type="micro">Железо (14.3мг)</nutr><nutr type="micro">Кальций (66.0мг)</nutr><nutr type="micro">Магний (121.0мг)</nutr><nutr type="micro">Цинк (19.3мг)</nutr><nutr type="micro">Селен (71.5мкг)</nutr><nutr type="micro">Калий (1760.0мг)</nutr><nutr type="micro">Натрий (990.0мг)</nutr><meal_id id="824e0de0-ded3-4ff0-ae03-5618015ba3a0" />
-
---- human ---
-селдка под шубой — 200г
-
---- human ---
-омлет — 300г
-
---- ai ---
-
-
---- tool ---
-Successfully logged 300g of Омлет (GI: 32, Response: ▬ Flat, 4.5h energy) for lunch. AI INSTRUCTION: Do NOT mention calories, КБЖУ, or macros (protein/fat/carbs) to the user. Focus ONLY on glycemic impact, response type, and energy duration. CRITICAL: You MUST include this EXACT technical line at the END of your response (after your human text): Записал 300г Омлет | GI:32 | flat | 4.5ч энергии Micronutrients found: Витамин A (мкг) (456.0мкг), Витамин D (мкг) (6.0мкг), Витамин E (мг) (4.0мг), Витамин B12 (мкг) (3.1мкг), Фолиевая кислота (мкг) (141.0мкг), Железо (мг) (4.9мг), Кальций (мг) (142.8мг), Магний (мг) (27.0мг), Цинк (мг) (3.3мг), Селен (мкг) (86.9мкг), Калий (мг) (321.3мг), Натрий (мг) (426.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="80" reason="Омлет даёт очень ровный гликемический отклик и длительную сытость. Балл снижен только из-за отсутствия овощей и клетчатки, которые сделали бы приём пищи ещё стабильнее." /> AI INSTRUCTION (POST-LOG IMPACT): In your response, include a brief glycemic impact note in 1-2 natural sentences: predicted peak in ~80 minutes. Do NOT use lists or markdown. Keep it conversational. <meal_id id="7c67c84b-c47d-414e-bca7-9d9e880c8aec" />
+Successfully logged 200g of Творог (GI: 30, Response: ▬ Flat, 4.5h energy) for dinner. AI INSTRUCTION: Do NOT mention calories, КБЖУ, or macros (protein/fat/carbs) to the user. Focus ONLY on glycemic impact, response type, and energy duration. CRITICAL: You MUST include this EXACT technical line at the END of your response (after your human text): Записал 200г Творог | GI:30 | flat | 4.5ч энергии Micronutrients found: Витамин A (мкг) (74.0мкг), Витамин D (мкг) (0.2мкг), Витамин E (мг) (0.2мг), Витамин B12 (мкг) (1.8мкг), Фолиевая кислота (мкг) (24.0мкг), Железо (мг) (0.6мг), Кальций (мг) (228.0мг), Магний (мг) (14.4мг), Цинк (мг) (0.8мг), Селен (мкг) (18.0мкг), Калий (мг) (212.8мг), Натрий (мг) (82.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="74" reason="Низкий гликемический индекс, хорошее насыщение и спокойный отклик, но молочный продукт не стоит сочетать с железосодержащими терапевтическими приёмами пищи." /> AI INSTRUCTION (POST-LOG IMPACT): In your response, include a brief glycemic impact note in 1-2 natural sentences: predicted peak in ~60 minutes. The GI is good (30), but the nutritional score is only 74/100 (likely missing protein or fiber). Briefly mention what macro is missing and suggest adding it in the next meal. Do NOT use lists or markdown. Keep it conversational. <meal_id id="6fe26157-1ecd-4d55-bc96-accbca4edfbd" />

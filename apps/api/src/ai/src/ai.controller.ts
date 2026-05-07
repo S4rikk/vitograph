@@ -3090,7 +3090,11 @@ export async function handleGetGlycemicTimeline(
         }
         
         // Final fallback chain
-        const finalGl = (meal as any).glycemic_load_total || glSum || 10;
+        const rawGl = (meal as any).glycemic_load_total || glSum || 0;
+        // Visual floor: GL values < 5 (e.g. 1g of food) are imperceptible on the curve.
+        // Clamp to 8 so any real logged meal produces a visible glycemic bump.
+        // Zero (e.g. water with no items) stays zero.
+        const finalGl = rawGl === 0 ? 10 : rawGl < 5 ? 8 : rawGl;
         const avgScore = headcount > 0 ? Math.round(rScoreSum / headcount) : 2;
         const finalRespType = (meal as any).response_type || valueType[avgScore] || 'moderate';
 
