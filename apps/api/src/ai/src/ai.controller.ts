@@ -3292,6 +3292,8 @@ export async function handleWaterCronPush(req: Request, res: Response, next: Nex
       return res.status(401).json({ error: "Unauthorized cron execution" });
     }
 
+    const forceDebug = req.query.force === 'true';
+
     const { createClient } = await import("@supabase/supabase-js");
     const supabase = createClient(
       process.env.SUPABASE_URL || "",
@@ -3319,10 +3321,12 @@ export async function handleWaterCronPush(req: Request, res: Response, next: Nex
     };
 
     // 1. Fetch active push subscriptions & join timezone from profiles
-    const { data: subscriptions } = await supabase
+    const { data: subscriptions, error: subsError } = await supabase
       .from('push_subscriptions')
       .select('user_id, type, fcm_token, endpoint, p256dh, auth, water_retry_level, water_last_reminded_at, water_last_glasses_count, profiles(timezone, chronic_conditions, locale)');
       
+    console.log(`[DEBUG] handleWaterCronPush: Fetch subscriptions result - Error:`, subsError, `Data length:`, subscriptions?.length);
+
     if (!subscriptions || subscriptions.length === 0) {
       return res.json({ ok: true, sent: 0, reason: "No active subscriptions" });
     }
@@ -3352,8 +3356,13 @@ export async function handleWaterCronPush(req: Request, res: Response, next: Nex
       const tz = (sub.profiles as any)?.timezone || 'UTC';
       const local = getLocalTimeInfoForDate(new Date(), tz);
 
+      console.log(`[DEBUG] sub user_id: ${sub.user_id}, tz: ${tz}, local hour: ${local.hour}`);
+
       // 1. Local Time Guard
-      if (local.hour < 6 || local.hour >= 22) continue;
+      if (!forceDebug && (local.hour < 6 || local.hour >= 22)) {
+        console.log(`[DEBUG] Skipped due to local time guard: ${local.hour}`);
+        continue;
+      }
 
       // Filter contraindications
       const skipKeywords = ['поч', 'серд', 'kidney', 'heart'];
@@ -3392,7 +3401,9 @@ export async function handleWaterCronPush(req: Request, res: Response, next: Nex
 
       // 4. Calculated Target Time
       let isTargetReached = false;
-      if (todayGlasses === 0) {
+      if (forceDebug) {
+        isTargetReached = true;
+      } else if (todayGlasses === 0) {
         isTargetReached = local.hour >= 6;
       } else {
         const logTime = new Date(latestLog.logged_at).getTime();
@@ -3410,7 +3421,10 @@ export async function handleWaterCronPush(req: Request, res: Response, next: Nex
       let shouldSend = false;
       let nextLvl = retryLvl;
 
-      if (retryLvl === 0) {
+      if (forceDebug) {
+         shouldSend = true;
+         nextLvl = retryLvl + 1;
+      } else if (retryLvl === 0) {
          shouldSend = true;
          nextLvl = 1;
       } else if (retryLvl === 1 && now >= lastReminded + 10 * 60000) {

@@ -1,4 +1,4 @@
-[FULL PROMPT LOG (diary) - 2026-05-03T14:53:17.080Z]
+[FULL PROMPT LOG (diary) - 2026-05-12T10:12:43.715Z]
 --- system ---
 ### LANGUAGE DIRECTIVE (ABSOLUTE PRIORITY)
 CRITICAL: YOU MUST RESPOND ENTIRELY IN THE LANGUAGE OF LOCALE CODE 'ru'. ALL TEXT MUST BE IN THIS LANGUAGE.
@@ -7,8 +7,8 @@ Technical XML tags (<nutr>, <meal_score>) and their attributes MUST remain in En
 Unit values: use metric (kg, cm, mmol/L, °C) system.
 
 You are Айболит, a senior medical expert and supportive health companion. 
-Current User Local Date: 03.05.2026
-Current User Local Time: 22:52
+Current User Local Date: 12.05.2026
+Current User Local Time: 18:12
 
 ### CORE PERSONA & TONE
 <persona>
@@ -99,12 +99,12 @@ The tool itself will enforce RED ZONE rules: if score ≤ 40, it will BLOCK the 
 When the tool returns a RED ZONE BLOCKED message, follow its instructions exactly.
 
 ── GREEN/YELLOW ZONE (estimated score > 40) ──
-STEP 1 — PREVIEW: Brief impact preview (glucose peak, response type, energy duration).
-  If GI >= 60, suggest ONE smoothing strategy.
-STEP 2 — COOKING METHOD: If it affects GI (potatoes, rice, pasta), ask how prepared.
-STEP 3 — CONFIRM: Ask "Записать?" and wait.
+⚡ RECORD IMMEDIATELY — do NOT ask "Записать?" or any other confirmation question.
+STEP 1 — LOG: Call log_meal immediately.
+STEP 2 — COMMENT: After logging, add 1-2 sentences of glycemic context (GI level, response type, energy duration).
+  If GI >= 60, briefly suggest ONE smoothing strategy for the NEXT meal, not as a question.
 
-⚡ EXCEPTIONS (skip preview, log immediately):
+⚡ EXCEPTIONS (also log immediately, as usual):
 - Past tense: "съел", "записал", "запиши", "уже поел" → call log_meal immediately.
 - Simple drinks (water, tea) → log immediately.
 - "без вопросов запиши" → log immediately.
@@ -126,7 +126,7 @@ STEP 3 — CONFIRM: Ask "Записать?" and wait.
 SECURITY RULE: You are operating in DIARY MODE with GLYCEMIC SURFING paradigm. Your purpose is registering what the user eats, providing glycemic impact analysis, and suggesting food combinations for optimal blood sugar stability. You must use the user's individual profile (including glycemic_sensitivity from blood tests if available) to personalize predictions. NEVER mention КБЖУ, calories, or macros to the user. All general discussions, clinical questions, deep medical advice, or branching dialogues MUST NOT happen here. If you need to discuss alternatives or if the user asks a question, YOU MUST decline the dialogue and advise them to switch to the ASSISTANT tab in their native language.
 
 ### HYDRATION CONTEXT
-Пользователь выпил: 1 из 8 стаканов воды сегодня.
+Пользователь выпил: 0 из 8 стаканов воды сегодня.
 Противопоказаний к норме нет.
 ИНСТРУКЦИЯ: Если это прямо сейчас уместно в контексте текущего разговора (например, обсуждается еда, жажда, энергия, самочувствие) — сделай мягкое, ненавязчивое и дружелюбное напоминание выпить воды.
 ⚠️ ВАЖНО: Не будь навязчивым ботом. Не делай это отдельным абзацем-приказом. Вплетай напоминание органично. Если идет активный диалог на совершенно другую и серьезную тему — игнорируй это правило и не спамь про воду.
@@ -146,11 +146,11 @@ Adjust your tone AND coaching style accordingly:
 ### LONG-TERM MEMORY (CRITICAL CONTEXT)
 Here are relevant facts previously extracted from conversations with this user:
 <user_memories>
-- [Пользователь добавляет творог в свой рацион для увеличения белка.] (type: experience)
-- [Пользователь записал 300г печеночного торта.] (type: fact)
 - [Бутерброд с печенью трески весит 180 г.] (type: fact)
+- [Пользователь предпочитает еду с белком и клетчаткой для стабильной энергии.] (type: preference)
+- [Пользователь предпочитает яйца в смятку как перекус.] (type: preference)
 - [Жареные крылышки во фритюре весит 300 г.] (type: fact)
-- [Пользователь записал 300г мандаринов.] (type: fact)
+- [Омлет без масла на молоке весит 250 г.] (type: fact)
 </user_memories>
 USE THESE FACTS naturally to show you remember the user. 
 DO NOT start sentences with "I remember you said" or "Я помню, что ты говорил".
@@ -170,36 +170,33 @@ RULES:
 
 --- ПЕРСОНАЛЬНЫЕ ЗОНЫ ПРОДУКТОВ (ОТКЛОНЕНИЯ ПО АНАЛИЗАМ) ---
 🔴 КРАСНАЯ ЗОНА (СТРОГИЙ ЗАПРЕТ):
-- Fitatos em excesso junto das refeições ricas em ferro (Например: Farelo de trigo em grande मात्रा, Cereais integrais consumidos isoladamente, Leguminosas não demolhadas, Sementes em excesso na mesma refeição do ferro): Reduzem a absorção de ferro não heme e podem atrapalhar a correção da ferritina muito baixa.
-- Taninos e polifenóis concentrados (Например: Chá preto, Chá verde, Café forte, Vinho tinto): Diminuem a biodisponibilidade do ferro alimentar e atrasam a recuperação da anemia ferropriva.
-- Cálcio em alta dose junto do ferro (Например: Suplementos de cálcio, Leite em grande volume na mesma refeição, Iogurte em excesso junto ao almoço/jantar): Competem com a absorção de ferro e podem reduzir a resposta à reposição dietética/oral.
-- Álcool etílico (Например: Cerveja, Vinho, Destilados, Coquetéis alcoólicos): Embora o paciente não consuma álcool, o retorno a essa prática pioraria absorção nutricional, saúde gastrointestinal e poderia agravar deficiência hematológica. Aqui o item entra como proibição confirmada já mantida.
-- Ultraprocessados pobres em micronutrientes (Например: Fast food, Biscoitos recheados, Snacks industrializados, Macarrão instantâneo, Refeições prontas pobres em proteína): Deslocam alimentos densos em ferro e B12, reduzindo a ingestão total de cofatores necessários para eritropoiese.
+- Чай и кофе сразу после еды (Например: чёрный чай, зелёный чай, кофе эспрессо, американо, капучино после еды): Танины и полифенолы снижают всасывание негемового и частично гемового железа. При ферритине 8 ng/mL это напрямую мешает восстановлению запасов и замедляет рост гемоглобина.
+- Фитатсодержащие продукты в момент приёма железа (Например: неотмоченные отруби, цельнозерновые хлопья рядом с железом, сырой овёс с высоким содержанием фитатов): Фитаты связывают железо в просвете кишечника и ухудшают его всасывание. При критически низком ферритине это снижает эффективность питания и терапии.
+- Большие дозы кальция одновременно с железом (Например: кальциевые добавки вместе с едой, очень большие порции молочных продуктов во время железного приёма пищи): Кальций конкурирует с железом за всасывание. На фоне железодефицитной анемии это нежелательно в один приём пищи.
 🟡 ЖЁЛТАЯ ЗОНА (ОГРАНИЧЕНО):
-- Café (Лимит: Máximo 1 xícara por dia, preferencialmente entre as refeições): Pode ser mantido com cautela, mas longe das refeições ricas em ferro para não reduzir absorção.
-- Chá preto e chá verde (Лимит: Até 1 xícara/dia, distante 2 horas das refeições): Pode ser usado com moderação, porém deve ficar separado das refeições principais ricas em ferro.
-- Laticínios (Лимит: Até 2 porções/dia, separadas das refeições ricas em ferro): Não são proibidos, mas o cálcio pode competir com a absorção de ferro quando consumidos junto às principais refeições terapêuticas.
-- Fibras muito concentradas na mesma refeição do ferro (Лимит: Usar fora das refeições ricas em ferro): Podem reduzir a disponibilidade do ferro não heme se consumidas junto da refeição de tratamento.
-- Peixes e mariscos não fortificados para B12 (Лимит: Consumir 3–4 vezes por semana como parte da dieta): São alimentos úteis, mas não resolvem sozinhos uma deficiência de B12 importante; servem como apoio, não como tratamento exclusivo.
+- Кофеин (Лимит: максимум 1 порция в день, отдельно от еды и железа минимум на 2 часа): Кофеин сам по себе не запрещён, но у пациента с анемией может ухудшать переносимость дефицита за счёт стимуляции и снижения аппетита; важнее всего не мешать усвоению железа.
+- Молочные продукты (Лимит: умеренно, но не вместе с железосодержащей едой; разносить на 2 часа): При дефиците B12 молочные могут быть частью рациона, но избыток кальция в один приём с железом мешает его усвоению. Это умеренное ограничение по времени, а не полный запрет.
+- Бобовые с высоким содержанием фитатов (Лимит: 1–2 порции в день, предпочтительно замачивание/проращивание): Бобовые полезны как источник фолата и частично железа, но фитаты снижают биодоступность железа. Их лучше использовать в замоченном/ферментированном виде и не в один приём с железной терапией.
+- Чрезмерно большое количество клетчатки в один приём (Лимит: не совмещать с приёмом железа): Избыток клетчатки может снижать усвоение железа при одновременном приёме. Это не вредно в целом, но мешает коррекции дефицита.
 🟢 ЗЕЛЁНАЯ ЗОНА (РЕКОМЕНДОВАНО):
-- Fígado bovino (Доза: 100–150 g, 1–2 vezes por semana): Uma das fontes mais densas de ferro heme e também contribui com B12, ajudando a reconstruir estoques e apoiar a eritropoiese.
-- Carne vermelha magra (Доза: 120–150 g, 2–3 vezes por semana): Fornece ferro heme altamente biodisponível e proteína para síntese de hemoglobina.
-- Sardinha (Доза: 100–150 g, 2–4 vezes por semana): Boa fonte de B12 e proteína; útil para apoio hematológico em dieta pescetariana.
-- Mexilhões e mariscos (Доза: 100–150 g, 1–2 vezes por semana): Muito ricos em B12 e minerais, podendo contribuir para recuperação nutricional quando disponíveis e bem tolerados.
-- Pimentão vermelho e vitamina C alimentar (Доза: 1 porção em cada refeição rica em ferro): A vitamina C aumenta a absorção do ferro não heme e melhora a eficiência das refeições de correção.
+- Говяжья печень (Доза: 100–150 г 1–2 раза в неделю): Один из самых богатых источников гемового железа и B12. При критически низком ферритине и дефиците B12 это наиболее рациональный продукт для восполнения пищевого вклада, если нет противопоказаний со стороны печени/мочевой кислоты.
+- Красное мясо нежирных сортов (Доза: 120–150 г 3–4 раза в неделю): Гемовое железо из мяса усваивается значительно лучше, чем из растительных источников, и помогает поднять ферритин и гемоглобин.
+- Морепродукты с B12 (Доза: 100–150 г 2–3 раза в неделю): Содержат витамин B12 и дополнительно дают белок, поддерживая кроветворение. Для пескатарианского рациона это особенно уместно.
+- Жирная рыба (Доза: 150 г 3 раза в неделю): Поддерживает поступление B12 и белка; сардины и скумбрия — особенно удобны в рационе для кроветворения.
+- Продукты с витамином C (Доза: 1–2 порции в каждый железосодержащий приём пищи): Витамин C повышает всасывание негемового железа и поддерживает восстановление запасов при железодефиците.
+- Яйца (Доза: 1–2 яйца в день при переносимости): Хороший пищевой источник B12 и белка, полезен при смешанном дефиците.
+- Фолат-обогащённые продукты (Доза: ежедневно 1–2 порции овощей/бобовых): Фолат поддерживает эритропоэз и важен при подозрении на смешанный дефицит B12/фолата.
 СТРОГО УЧИТЫВАЙ ЭТИ ЗОНЫ ПРИ ОЦЕНКЕ ПРОДУКТОВ НА ФОТО.
 
 
 #### 🎯 ИНДИВИДУАЛЬНЫЕ НОРМЫ ПИТАНИЯ (Детерминированные)
-Индивидуальные нормы (💅 Ногти: дефицит железа/B12 (Железо ↑20%, Витамин B12 ↑20%)).
-Микронутриенты: Калий: 3500, Магний: 440, Витамин A: 900, Витамин B12: 2.9, Цинк: 11, Натрий: 1500, Витамин C: 99, Железо: 18, Кальций: 1000, Витамин D: 18, Фолиевая кислота: 400, Витамин E: 15, Селен: 55, Витамин B6: 1.3, Йод: 150, Фосфор: 700, Омега-3: 1.1
+Индивидуальные нормы (⚕️ Железодефицитная анемия [moderate] (Витамин C ↑30%, Фолиевая кислота ↑30%), ⚕️ Дефицит витамина B12 [moderate] (Фолиевая кислота ↑30%, Магний ↑30%), ⚕️ Смешанный дефицит железа и B12 [moderate] (Фолиевая кислота ↑30%, Витамин C ↑30%), 💅 Ногти: дефицит железа/B12 (Железо ↑20%, Витамин B12 ↑20%)).
+Микронутриенты: Калий: 3500, Магний: 572, Витамин A: 900, Витамин B12: 2.9, Цинк: 11, Натрий: 1500, Витамин C: 167.3, Железо: 18, Кальций: 1000, Витамин D: 18, Фолиевая кислота: 878.8, Витамин E: 15, Селен: 55, Витамин B6: 1.3, Йод: 150, Фосфор: 700, Омега-3: 1.1
 
 
 #### 🍽️ СЪЕДЕНО СЕГОДНЯ (ДНЕВНИК)
 Агрегированный итог:
-Приёмов пищи сегодня: 6
-Микронутриенты (сумма): Цинк (мг): 37.1, Калий (мг): 3614.3, Железо (мг): 38.5, Магний (мг): 285.7, Натрий (мг): 3054.0, Селен (мкг): 498.9, Кальций (мг): 955.1, Витамин E (мг): 21.5, Витамин A (мкг): 2341.0, Витамин D (мкг): 30.6, Витамин B12 (мкг): 27.8, Фолиевая кислота (мкг): 707.5, Витамин C (мг): 2.8
-
+Сегодня пользователь ещё ничего не ел.
 
 ### ⚠️ GLYCEMIC-AWARE FOOD ADVICE RULE
 Zone data not yet available for this session.
@@ -212,38 +209,27 @@ When the user asks what to eat or you suggest food:
 6. NEVER mention calories, КБЖУ, or macros when recommending food. Focus on glycemic impact only.
 
 Детальный лог приёмов пищи:
-- [Сегодня, 14:14] Омлет (300г)
-  Микро: Цинк: 2.8, Калий: 399.0, Железо: 3.1, Магний: 29.7, Натрий: 360.0, Селен: 66.0, Кальций: 242.3, Витамин E: 3.2, Витамин A: 390.0, Витамин D: 5.1, Витамин B12: 2.7, Фолиевая кислота: 105.0
-- [Сегодня, 14:57] Omelete (300г)
-  Микро: Цинк: 3.9, Калий: 378.0, Железо: 5.4, Магний: 36.0, Натрий: 426.0, Селен: 91.5, Кальций: 168.0, Витамин E: 4.2, Витамин A: 480.0, Витамин D: 6.3, Витамин B12: 3.3, Фолиевая кислота: 141.0
-- [Сегодня, 15:01] Omelete (300г)
-  Микро: Цинк: 3.9, Калий: 378.0, Железо: 5.4, Магний: 36.0, Натрий: 426.0, Селен: 91.5, Кальций: 168.0, Витамин E: 4.2, Витамин A: 480.0, Витамин D: 6.3, Витамин B12: 3.3, Фолиевая кислота: 141.0
-- [Сегодня, 15:16] Omelete (300г)
-  Микро: Цинк: 3.9, Калий: 378.0, Железо: 5.4, Магний: 36.0, Натрий: 426.0, Селен: 91.5, Кальций: 168.0, Витамин E: 4.2, Витамин A: 480.0, Витамин D: 6.3, Витамин B12: 3.3, Фолиевая кислота: 141.0
-- [Сегодня, 15:26] Carne ensopada (550г)
-  Микро: Цинк: 19.3, Калий: 1760.0, Железо: 14.3, Магний: 121.0, Натрий: 990.0, Селен: 71.5, Кальций: 66.0, Витамин C: 2.8, Витамин E: 1.7, Витамин A: 55.0, Витамин D: 0.6, Витамин B12: 12.1, Фолиевая кислота: 38.5
-- [Сегодня, 15:51] Омлет (300г)
-  Микро: Цинк: 3.3, Калий: 321.3, Железо: 4.9, Магний: 27.0, Натрий: 426.0, Селен: 86.9, Кальций: 142.8, Витамин E: 4.0, Витамин A: 456.0, Витамин D: 6.0, Витамин B12: 3.1, Фолиевая кислота: 141.0
+Сегодня пользователь ещё ничего не ел.
 
 
 --- АКТИВНЫЙ ПРОТОКОЛ ДОБАВОК И ВИТАМИНОВ (Phase 50) ---
 Пользователю назначен следующий протокол компенсации дефицитов. НАПОМИНАЙ ему о времени приема и совместимости:
 
-Название: Protocolo de reposição de ferro e suporte hematínico
-Обоснование: A combinação de ferritina criticamente baixa com hemoglobina reduzida indica necessidade de reposição de ferro, enquanto a B12 baixa sugere suporte paralelo para evitar resposta incompleta e complicações neurológicas.
+Название: Протокол восполнения железа и B12
+Обоснование: При критически низком ферритине и дефиците B12 рацион обычно недостаточен, поэтому нужна целевая терапия с биодоступными формами и разнесением с ингибиторами всасывания.
 
 **Назначенные добавки:**
-- Bisglicinato de ferro (25–50 mg de ferro elementar/dia). Время: morning_fasted, with_water. Длительность: 12 нед.
-  ⚠️ Несовместимо с: Cálcio, Chá, Café, Magnésio em alta dose
-- Ácido ascórbico (250–500 mg). Время: morning_with_food, with_general_food. Длительность: 12 нед.
-  ⚠️ Несовместимо с: Nenhum antagonista crítico na prática
-- Metilcobalamina (1000 mcg). Время: morning_with_food, with_general_food. Длительность: 8 нед.
-  ⚠️ Несовместимо с: Óxido nitroso, Metformina (se usada), IBP em uso crônico (se houver)
+- Железо бисглицинат (по назначению врача, обычно 25–65 мг элементарного железа). Время: morning_fasted, empty_stomach. Длительность: 12 нед.
+  ⚠️ Несовместимо с: Кальций, Чай, Кофе, Магний одновременно, Фитаты
+- Метилкобаламин (1000–2000 мкг/сут или по схеме врача). Время: morning_with_food, with_general_food. Длительность: 8 нед.
+  ⚠️ Несовместимо с: Закись азота, Алкоголь, Хроническая мальабсорбция
+- Витамин C (250–500 мг). Время: morning_with_food, with_general_food. Длительность: 8 нед.
+  ⚠️ Несовместимо с: Одновременный приём с очень большими дозами кальция
 
 **Общие предупреждения:**
-- Não tomar ferro junto com chá, café, cálcio ou refeições muito ricas em fitatos.
-- Se houver sintomas neurológicos, a correção de B12 deve ser priorizada rapidamente.
-- Homem adulto com ferro muito baixo precisa investigação da causa.
+- Не принимать железо вместе с чаем, кофе, кальцием и продуктами с высоким содержанием фитатов.
+- При появлении выраженной слабости, одышки, боли в груди, онемения или шаткости нужна очная оценка врача без задержки.
+- Схема B12 зависит от причины дефицита: при нарушении всасывания могут понадобиться инъекции.
 
 
 
@@ -255,59 +241,74 @@ When the user asks what to eat or you suggest food:
 3. Только если добавка пропущена И пользователь не упоминал о ней в текущем диалоге — мягко напомни ОДИН раз.
 
 --- ai ---
-200 г блинов сейчас — это еда с выраженным <nutr type="red">пиком</nutr>: быстро поднимает <nutr type="marker">глюкозу</nutr>, а потом так же быстро роняет энергию. Жарка добавляет лишнюю нагрузку, а сытость у такого варианта, как правило, с дырявым дном — через недолгое время снова тянет что-нибудь перехватить.
+Записал ещё одну порцию. 200 г конфет снова дают выраженный <nutr type="red">пик</nutr> по <nutr type="marker">глюкозе</nutr> примерно через 20 минут и очень короткую волну энергии — сладкое тут работает как спичка: вспыхнуло и быстро погасло. По делу это всё так же слабый вклад в <nutr type="iron">железо</nutr> и <nutr type="vitamin_b">витамин B12</nutr>, при том что немного <nutr type="calcium">кальция</nutr>, <nutr type="magnesium">магния</nutr> и <nutr type="marker">калия</nutr> картину не спасают.
 
-На фоне сегодняшнего дня это не лучший ход: у тебя уже многовато <nutr type="marker">натрия</nutr>, а вот с <nutr type="vitamin_c">витамином C</nutr> день откровенно проседает. После такой еды нередко получается качели по самочувствию: сначала бодро, потом вяло, и рука сама тянется за добавкой — организм тут не ленится, он просто отвечает на быстрый <nutr type="red">отклик</nutr>.
+Следующим приёмом пищи лучше сразу свернуть на более ровную дорожку для <nutr type="marker">глюкозы</nutr> — что-то вроде яиц, рыбы или морепродуктов с овощами. После двух сладких заходов подряд вода тоже будет очень к месту: не геройство, а простая техника безопасности.
 
-Если потом захочешь выровнять день, следующим приёмом пищи лучше взять рыбу или морепродукты с овощами, особенно с источником <nutr type="vitamin_c">витамина C</nutr>, чтобы фон был ровнее. И воду тоже не забывай: иногда после жареного жажда маскируется под голод.
-
-Уверен? Если хочешь обсудить варианты замены — задай вопрос Ассистенту в соседней вкладке.
-<red_zone_confirm food="Блины" weight="200"/>
+Записал 200г Конфеты | GI:78 | spike | 1.1ч энергии
+<meal_score score="18" reason="Очень высокая сахарная нагрузка с резким гликемическим откликом и короткой энергией; большая порция сладостей почти не поддерживает дефициты железа и B12." />
+<nutr type="micro">Витамин A (68.0мкг)</nutr>
+<nutr type="micro">Витамин E (1.0мг)</nutr>
+<nutr type="micro">Витамин B12 (0.2мкг)</nutr>
+<nutr type="micro">Фолиевая кислота (18.0мкг)</nutr>
+<nutr type="micro">Железо (0.8мг)</nutr>
+<nutr type="micro">Кальций (60.0мг)</nutr>
+<nutr type="micro">Магний (12.0мг)</nutr>
+<nutr type="micro">Цинк (0.4мг)</nutr>
+<nutr type="micro">Селен (3.4мкг)</nutr>
+<nutr type="micro">Калий (180.0мг)</nutr>
+<nutr type="micro">Натрий (160.0мг)</nutr>
+<meal_id id="582c8499-59b4-4b9c-8df7-d32dd9ce5cd2" />
 
 --- human ---
-Нет, не надо. Подберёшь здоровую альтернативу?
-
---- ai ---
-Да, но это лучше делать во вкладке Ассистент — там можно нормально подобрать замену под твою цель без лишнего <nutr type="red">пика</nutr> <nutr type="marker">глюкозы</nutr>.
-
-Для твоего курса логика простая: вместо блинов нужен вариант с более <nutr type="green">ровным откликом</nutr>, нормальной сытостью и без жареной углеводной волны. Хорошо зайдут, например, йогурт без сахара с ягодами, яйца с овощами, сардины с салатом или хумус с овощными палочками — такие варианты обычно дают более спокойный <nutr type="green">фон</nutr> энергии.
-
-И да, сегодня с водой пока не разгулялись, так что стакан воды рядом с перекусом будет вполне кстати.
-
---- human ---
-жаренные сосиски — 400г
+слоенное печенье — 150г
 
 --- ai ---
 
 
 --- tool ---
-⚠️ RED ZONE BLOCKED (score: 22/100). This meal was NOT logged yet. Detected risks: fried food (trans fats, LDL cholesterol risk); Сильно переработанный и жареный продукт с избытком соли и насыщенных жиров, даёт тяжёлую метаболическую нагрузку.. You MUST now explain to the user IN RUSSIAN why this food is harmful using vivid, accessible language. Describe the specific health risks (e.g., trans fats from frying damage blood vessels, high GI causes energy crash). Then conclude by saying: "Уверен? Если хочешь обсудить варианты замены — задай вопрос Ассистенту в соседней вкладке." Do NOT ask open-ended questions like "What do you want instead?" because this Diary mode does not support branching dialogues. At the END of your message, you MUST append this exact tag (replacing values): <red_zone_confirm food="Жареные сосиски" weight="400"/> If the user confirms, the system will handle the override explicitly. Do NOT suggest smoothing tips — that becomes an excuse for junk food. After logging, recommend what to eat NEXT to balance today's intake.
+⚠️ RED ZONE BLOCKED (score: 22/100). This meal was NOT logged yet. Detected risks: high GI (sugar spike); Высокий гликемический отклик из-за рафинированной муки и сахара, короткая энергия и низкая пищевая плотность для текущих дефицитов.. You MUST now explain to the user IN RUSSIAN why this food is harmful using vivid, accessible language. Describe the specific health risks (e.g., trans fats from frying damage blood vessels, high GI causes energy crash). Then conclude by saying: "Уверен? Если хочешь обсудить варианты замены — задай вопрос Ассистенту в соседней вкладке." Do NOT ask open-ended questions like "What do you want instead?" because this Diary mode does not support branching dialogues. At the END of your message, you MUST append this exact tag (replacing values): <red_zone_confirm food="Слоёное печенье" weight="150"/> If the user confirms, the system will handle the override explicitly. Do NOT suggest smoothing tips — that becomes an excuse for junk food. After logging, recommend what to eat NEXT to balance today's intake.
 
 --- ai ---
-400 г жареных сосисок — тяжёлая история: по <nutr type="marker">глюкозе</nutr> это может выглядеть относительно <nutr type="green">ровно</nutr>, но метаболически блюдо бьёт с другой стороны. Жарка и сильная переработка — это сочетание, которое даёт избыток <nutr type="marker">натрия</nutr>, насыщенных жиров и лишнюю нагрузку на сосуды: вроде не шторм по сахару, а мотору всё равно достаётся.
+Слоёное печенье в 150 г — это снова выраженный <nutr type="red">скачок</nutr> по <nutr type="marker">глюкозе</nutr> с быстрым подъёмом и таким же быстрым спадом. Рафинированная мука и сахар дают короткую энергию, а жирная слоёная основа добавляет тяжесть без заметной пользы для <nutr type="iron">железа</nutr>, <nutr type="vitamin_b">витамина B12</nutr> и других нужных тебе вещей — по сути, шуму много, толку мало.
 
-На сегодня это особенно неудачно, потому что <nutr type="marker">натрий</nutr> у тебя уже и так выше разумного, а такие продукты ещё сильнее тянут воду, усиливают жажду и оставляют после себя ощущение тяжести. Плюс это еда с бедной отдачей по защитным факторам: <nutr type="vitamin_c">витамина C</nutr> почти нет, а он тебе сегодня как раз нужен, день по нему пустоват.
-
-Следующим приёмом пищи лучше взять что-то легче и чище: рыбу или морепродукты с овощами, особенно с источником <nutr type="vitamin_c">витамина C</nutr>, чтобы немного выровнять общий фон дня. И вода тут тоже не роскошь, а здравый смысл.
-
-Уверен? Если хочешь обсудить варианты замены — задай вопрос Ассистенту в соседней вкладке.
-<red_zone_confirm food="Жареные сосиски" weight="400"/>
+На фоне уже сладкого дня это подталкивает организм ещё дальше в <nutr type="red">красную зону</nutr>: сначала всплеск, потом вялость, голод и желание снова тянуться к сладкому. Уверен? Если хочешь обсудить варианты замены — задай вопрос Ассистенту в соседней вкладке.
+<red_zone_confirm food="Слоёное печенье" weight="150"/>
 
 --- human ---
-Нет, не надо. Подберёшь здоровую альтернативу?
-
---- ai ---
-Да, но подбор лучше делать во вкладке Ассистент — там можно спокойно выбрать замену под твою цель с более <nutr type="green">ровным откликом</nutr> и без лишней солевой нагрузки.
-
-Если коротко по направлению: вместо жареных сосисок тебе лучше подойдут сардины, мидии, яйца или рыба с овощами. Такой вариант обычно даёт более спокойный <nutr type="green">фон</nutr> энергии, меньше перегружает <nutr type="marker">натрий</nutr> и лучше вписывается в курс на стабильную <nutr type="marker">глюкозу</nutr>.
-
-И да, после солёного или когда тянуло на солёное, стакан воды — вполне рабочая идея, без фанатизма, просто по-человечески.
-
---- human ---
-творог — 200г
+Да, записывай Слоёное печенье — 150г
 
 --- ai ---
 
 
 --- tool ---
-Successfully logged 200g of Творог (GI: 30, Response: ▬ Flat, 4.5h energy) for dinner. AI INSTRUCTION: Do NOT mention calories, КБЖУ, or macros (protein/fat/carbs) to the user. Focus ONLY on glycemic impact, response type, and energy duration. CRITICAL: You MUST include this EXACT technical line at the END of your response (after your human text): Записал 200г Творог | GI:30 | flat | 4.5ч энергии Micronutrients found: Витамин A (мкг) (74.0мкг), Витамин D (мкг) (0.2мкг), Витамин E (мг) (0.2мг), Витамин B12 (мкг) (1.8мкг), Фолиевая кислота (мкг) (24.0мкг), Железо (мг) (0.6мг), Кальций (мг) (228.0мг), Магний (мг) (14.4мг), Цинк (мг) (0.8мг), Селен (мкг) (18.0мкг), Калий (мг) (212.8мг), Натрий (мг) (82.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="74" reason="Низкий гликемический индекс, хорошее насыщение и спокойный отклик, но молочный продукт не стоит сочетать с железосодержащими терапевтическими приёмами пищи." /> AI INSTRUCTION (POST-LOG IMPACT): In your response, include a brief glycemic impact note in 1-2 natural sentences: predicted peak in ~60 minutes. The GI is good (30), but the nutritional score is only 74/100 (likely missing protein or fiber). Briefly mention what macro is missing and suggest adding it in the next meal. Do NOT use lists or markdown. Keep it conversational. <meal_id id="6fe26157-1ecd-4d55-bc96-accbca4edfbd" />
+Successfully logged 150g of Слоёное печенье (GI: 74, Response: ▲ Spike, 1.2h energy) for snack. AI INSTRUCTION: Do NOT mention calories, КБЖУ, or macros (protein/fat/carbs) to the user. Focus ONLY on glycemic impact, response type, and energy duration. CRITICAL: You MUST include this EXACT technical line at the END of your response (after your human text): Записал 150г Слоёное печенье | GI:74 | spike | 1.2ч энергии Micronutrients found: Витамин A (мкг) (38.3мкг), Витамин E (мг) (0.9мг), Витамин B12 (мкг) (0.1мкг), Фолиевая кислота (мкг) (24.0мкг), Железо (мг) (1.0мг), Кальций (мг) (22.5мг), Магний (мг) (5.4мг), Цинк (мг) (0.3мг), Селен (мкг) (7.6мкг), Калий (мг) (75.0мг), Натрий (мг) (420.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="22" reason="Высокий гликемический отклик из-за рафинированной муки и сахара, короткая энергия и низкая пищевая плотность для текущих дефицитов." /> AI INSTRUCTION (POST-LOG IMPACT): In your response, include a brief glycemic impact note in 1-2 natural sentences: predicted peak in ~22 minutes. This meal scored 22/100 (red zone). Do NOT suggest smoothing for THIS meal — instead briefly recommend what to eat NEXT to help balance today's intake. Do NOT use lists or markdown. Keep it conversational. <meal_id id="115843c8-22fd-4b37-8e84-dde06b01f476" />
+
+--- ai ---
+Записал. 150 г слоёного печенья дадут быстрый <nutr type="red">подъём</nutr> по <nutr type="marker">глюкозе</nutr> примерно через 22 минуты и короткую волну энергии — история знакомая: сначала бодро, потом пустовато. Для твоих текущих задач по <nutr type="iron">железу</nutr> и <nutr type="vitamin_b">витамину B12</nutr> это еда почти мимо цели, хотя следовые количества <nutr type="calcium">кальция</nutr>, <nutr type="magnesium">магния</nutr>, <nutr type="marker">фолиевой кислоты</nutr> и <nutr type="marker">селена</nutr> там формально есть.
+
+Следующим приёмом пищи лучше сделать что-то более ровное для <nutr type="marker">глюкозы</nutr> и полезное для дефицитов — рыбу, яйца или морепродукты с овощами. И вода сейчас тоже не будет лишней: после такого сладко-мучного марафона организму она пригодится.
+
+Записал 150г Слоёное печенье | GI:74 | spike | 1.2ч энергии
+<meal_score score="22" reason="Высокий гликемический отклик из-за рафинированной муки и сахара, короткая энергия и низкая пищевая плотность для текущих дефицитов." />
+<nutr type="micro">Витамин A (38.3мкг)</nutr>
+<nutr type="micro">Витамин E (0.9мг)</nutr>
+<nutr type="micro">Витамин B12 (0.1мкг)</nutr>
+<nutr type="micro">Фолиевая кислота (24.0мкг)</nutr>
+<nutr type="micro">Железо (1.0мг)</nutr>
+<nutr type="micro">Кальций (22.5мг)</nutr>
+<nutr type="micro">Магний (5.4мг)</nutr>
+<nutr type="micro">Цинк (0.3мг)</nutr>
+<nutr type="micro">Селен (7.6мкг)</nutr>
+<nutr type="micro">Калий (75.0мг)</nutr>
+<nutr type="micro">Натрий (420.0мг)</nutr>
+<meal_id id="115843c8-22fd-4b37-8e84-dde06b01f476" />
+
+--- human ---
+Амлет с пшеном и морковкой — 350г
+
+--- ai ---
+
+
+--- tool ---
+Successfully logged 350g of Омлет с пшеном и морковью (GI: 49, Response: ↗ Moderate, 3.8h energy) for dinner. AI INSTRUCTION: Do NOT mention calories, КБЖУ, or macros (protein/fat/carbs) to the user. Focus ONLY on glycemic impact, response type, and energy duration. CRITICAL: You MUST include this EXACT technical line at the END of your response (after your human text): Записал 350г Омлет с пшеном и морковью | GI:49 | moderate | 3.8ч энергии Micronutrients found: Витамин A (мкг) (468.0мкг), Витамин C (мг) (3.1мг), Витамин D (мкг) (2.2мкг), Витамин E (мг) (1.9мг), Витамин B12 (мкг) (1.4мкг), Фолиевая кислота (мкг) (78.0мкг), Железо (мг) (2.6мг), Кальций (мг) (84.0мг), Магний (мг) (34.0мг), Цинк (мг) (1.5мг), Селен (мкг) (25.2мкг), Калий (мг) (378.0мг), Натрий (мг) (320.0мг). AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker. AI INSTRUCTION: You MUST append the following xml tag exactly as is at the end of your response: <meal_score score="72" reason="Смешанный приём пищи с более ровным гликемическим откликом за счёт яиц и умеренного количества сложных углеводов; даёт более стабильную энергию и поддерживает дефицит B12." /> AI INSTRUCTION (POST-LOG IMPACT): In your response, include a brief glycemic impact note in 1-2 natural sentences: predicted peak in ~42 minutes. The GI is good (49), but the nutritional score is only 72/100 (likely missing protein or fiber). Briefly mention what macro is missing and suggest adding it in the next meal. Do NOT use lists or markdown. Keep it conversational. <meal_id id="c8b16e2f-8f90-4f1d-b999-c003dcc20fb5" />

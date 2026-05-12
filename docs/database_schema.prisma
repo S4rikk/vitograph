@@ -357,7 +357,6 @@ model Profile {
   sleepSessions                 SleepSession[]
   hrvReadings                   HrvReading[]
   readinessScores               ReadinessScore[]
-  wearableManualMetrics         WearableManualMetric[]
   healthspanScores              HealthspanScore[]
   aiInsights                    AiInsight[]
   environmentReadings           EnvironmentReading[]
@@ -1031,6 +1030,23 @@ model AiInsight {
   @@map("ai_insights")
 }
 
+/// Phase 52: Web Push VAPID subscriptions for hydration reminders
+model PushSubscription {
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                String   @map("user_id") @db.Uuid
+  endpoint              String   @unique
+  p256dh                String
+  auth                  String
+  waterRetryLevel       Int      @default(0) @map("water_retry_level")
+  waterLastGlassesCount Int      @default(0) @map("water_last_glasses_count")
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
+}
+
 model InsightCache {
   id              String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   markerSignature String                      @map("marker_signature") // e.g. "Витамин D - High"
@@ -1173,13 +1189,12 @@ model KbSearchLog {
 
 /// Table for tracking TTL of media files (Garbage Collection)
 model MediaCleanup {
-  id               Int      @id @default(autoincrement())
-  userId           String   @map("user_id") @db.Uuid
-  bucket           String
-  filePath         String   @map("file_path")
-  mediaType        String   @map("media_type") // 'food', 'lab_report', 'somatic'
-  expiresAt        DateTime @map("expires_at") @db.Timestamptz
-  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  filePath  String   @map("file_path")
+  bucketName String   @map("bucket_name")
+  expiresAt DateTime @map("expires_at") @db.Timestamptz
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   @@index([expiresAt])
   @@index([userId])

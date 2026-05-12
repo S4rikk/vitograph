@@ -167,7 +167,14 @@
       "infoModalBenefitTitle": "What's the benefit?",
       "infoModalBenefitDesc": "Understanding your glycemic profile helps you choose food that provides stable energy throughout the day.",
       "infoModalDesc1": "Vitograph zählt keine Kalorien. Stattdessen verfolgen wir die <strong>glykämische Reaktion</strong> — wie Nahrung Ihren Blutzuckerspiegel und Ihre Energie beeinflusst.",
-      "overdoseDefault": "Exceeding the norm may be toxic to the body"
+      "overdoseDefault": "Exceeding the norm may be toxic to the body",
+      "whereAreCalories": "Wo sind die Kalorien?",
+      "caloriesModalTitle": "Warum VitoGraph keine Kalorien zählt?",
+      "caloriesModalP1": "Wir haben das klassische Kalorienzählen aufgegeben, da es mathematisch ungenau ist. Stattdessen analysieren wir den glykämischen Index und die tatsächliche metabolische Reaktion Ihres Körpers.",
+      "caloriesModalP2": "Forschungen aus Harvard (R. Wrangham) haben bewiesen: Ungenauigkeiten bei Etiketten und die verborgenen Verdauungskosten des Körpers führen zu einem Fehler von bis zu 20 % pro Produkt. Im Laufe eines Tages summiert sich dieser Fehler schnell (bei 5 Produkten am Tag kann die Gesamtverzerrung 100 % Ihres angestrebten Defizits überschreiten). Gleichzeitig wissen Sie nicht, ob diese Kalorien in Energie umgewandelt werden oder als unnötiges Gewicht in Ihrem Körper verbleiben. Unter diesen Bedingungen ist das Verlassen auf Kalorienzählen sinnlos und gefährlich.",
+      "caloriesModalP3Title": "Für diejenigen, die Kalorien dennoch verfolgen möchten:",
+      "caloriesModalP3": "Sie können den Assistenten im Chat bitten, ein Ziel für die Verfolgung zu erstellen. In diesem Moment bildet das System einen personalisierten KI-Spezialisten, der speziell auf Ihre Situation zugeschnitten ist. In diesem Modus hilft Ihnen der Assistent sorgfältiger, detaillierter und qualitativer bei der Kontrolle des Gleichgewichts von Ressourcenverbrauch und -ausgabe.",
+      "caloriesModalDisclaimer": "VitoGraph konzentriert sich auf die Lebensmittelqualität und die metabolische Reaktion — dies liefert ein genaueres und praktischeres Bild als einfaches Kalorienzählen."
     },
     "mealScore": {
       "healthScoreLabel": "Health Score"

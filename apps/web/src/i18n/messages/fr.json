@@ -167,7 +167,14 @@
       "infoModalBenefitTitle": "What's the benefit?",
       "infoModalBenefitDesc": "Understanding your glycemic profile helps you choose food that provides stable energy throughout the day.",
       "infoModalDesc1": "Vitograph ne compte pas les calories. Nous suivons plutôt la <strong>réponse glycémique</strong> — comment les aliments affectent votre glycémie et votre énergie.",
-      "overdoseDefault": "Exceeding the norm may be toxic to the body"
+      "overdoseDefault": "Exceeding the norm may be toxic to the body",
+      "whereAreCalories": "Où sont les calories ?",
+      "caloriesModalTitle": "Pourquoi VitoGraph ne compte pas les calories ?",
+      "caloriesModalP1": "Nous avons abandonné le comptage classique des calories car il est mathématiquement inexact. Au lieu de cela, nous analysons l'index glycémique et la réponse métabolique réelle de votre corps.",
+      "caloriesModalP2": "Les recherches de Harvard (R. Wrangham) l'ont prouvé : les inexactitudes des étiquettes et les coûts cachés de la digestion pour le corps entraînent une erreur allant jusqu'à 20 % par produit. Au cours d'une journée, cette erreur s'accumule rapidement (pour 5 produits par jour, la distorsion totale peut dépasser 100 % de votre déficit cible). De plus, vous ne saurez pas si ces calories se transformeront en énergie ou resteront stockées dans votre corps. Dans ces conditions, se fier au comptage des calories est dénué de sens et dangereux.",
+      "caloriesModalP3Title": "Pour ceux qui souhaitent tout de même suivre les calories :",
+      "caloriesModalP3": "Vous pouvez demander à l'assistant dans le chat de créer un objectif pour les suivre. À ce moment-là, le système forme un spécialiste en IA personnalisé, adapté spécifiquement à votre situation. Dans ce mode, l'assistant vous aidera plus attentivement, en détail et qualitativement à contrôler l'équilibre de la consommation et de la dépense des ressources.",
+      "caloriesModalDisclaimer": "VitoGraph se concentre sur la qualité des aliments et la réponse métabolique — cela offre une image plus précise et pratique que le simple comptage des calories."
     },
     "mealScore": {
       "healthScoreLabel": "Health Score"

@@ -1,6 +1,6 @@
 # VITOGRAPH — AI Pipeline
 
-> **Дата актуальности:** 20 апреля 2026
+> **Дата актуальности:** 12 Мая 2026 (обновлено: Wearable Vision, Deterministic Targets)
 >
 > Документация AI/LLM пайплайна: LangGraph, модели, сервисы, инструменты.
 

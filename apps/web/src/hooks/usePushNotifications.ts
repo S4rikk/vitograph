@@ -146,7 +146,7 @@ export function usePushNotifications(token?: string) {
         try {
           // Создаем канал перед регистрацией, это может предотвратить зависание Firebase на некоторых Android
           await cap.createChannel({
-            id: 'vitograph_default',
+            id: 'water_reminders',
             name: 'Напоминания',
             description: 'Уведомления о приеме воды',
             importance: 4, // High

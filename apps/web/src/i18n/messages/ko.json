@@ -167,7 +167,14 @@
       "infoModalBenefitTitle": "What's the benefit?",
       "infoModalBenefitDesc": "Understanding your glycemic profile helps you choose food that provides stable energy throughout the day.",
       "infoModalDesc1": "Vitograph는 칼로리를 계산하지 않습니다. 대신 <strong>혈당 반응</strong>을 추적합니다 — 음식이 혈당 수준과 에너지에 어떤 영향을 미치는지 분석합니다.",
-      "overdoseDefault": "Exceeding the norm may be toxic to the body"
+      "overdoseDefault": "Exceeding the norm may be toxic to the body",
+      "whereAreCalories": "칼로리는 어디 있나요?",
+      "caloriesModalTitle": "왜 VitoGraph는 칼로리를 계산하지 않나요?",
+      "caloriesModalP1": "우리는 고전적인 칼로리 계산이 수학적으로 부정확하기 때문에 이를 포기했습니다. 대신 혈당 지수와 신체의 실제 대사 반응을 분석합니다.",
+      "caloriesModalP2": "하버드 대학의 연구(R. Wrangham)에 따르면 제품 라벨의 부정확성과 신체의 숨겨진 소화 비용으로 인해 제품당 최대 20%의 오차가 발생합니다. 하루 동안 이 오차는 빠르게 누적됩니다(하루에 5개 제품의 경우 총 왜곡이 목표 부족량의 100%를 초과할 수 있습니다). 동시에 이 칼로리가 에너지가 될지 아니면 체내에 불필요한 무게로 남을지 알 수 없습니다. 이러한 조건에서 칼로리 계산에 의존하는 것은 무의미하며 위험합니다.",
+      "caloriesModalP3Title": "여전히 칼로리를 추적하고 싶은 분들을 위해:",
+      "caloriesModalP3": "채팅에서 어시스턴트에게 추적 목표를 생성해달라고 요청할 수 있습니다. 이 순간 시스템은 귀하의 상황에 특별히 맞춤화된 개인 AI 전문가를 형성합니다. 이 모드에서 어시스턴트는 리소스 소비와 지출의 균형을 제어하는 데 더 신중하고 세부적이며 양질의 도움을 줄 것입니다.",
+      "caloriesModalDisclaimer": "VitoGraph는 식품의 품질과 대사 반응에 중점을 둡니다. 이는 단순한 칼로리 계산보다 더 정확하고 실용적인 그림을 제공합니다."
     },
     "mealScore": {
       "healthScoreLabel": "Health Score"

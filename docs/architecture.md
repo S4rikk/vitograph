@@ -1,8 +1,9 @@
-# VITOGRAPH — Architecture: Database Schema & API Structure
+# VITOGRAPH — System Architecture
 
-> **Последнее обновление:** 29 апреля 2026
+> **Дата актуальности:** 12 Мая 2026 (обновлено: Deterministic Nutrition Targets, Wearable Vision, TTL GC)
 >
-> Смотрите также: [API Reference](./api_reference.md) | [Frontend Components](./frontend_components.md) | [AI Pipeline](./ai_pipeline.md)
+> Данный документ описывает высокоуровневую архитектуру, потоки данных и ключевые компоненты платформы Vitograph.
+[API Reference](./api_reference.md) | [Frontend Components](./frontend_components.md) | [AI Pipeline](./ai_pipeline.md)
 
 > **Slogan:** "Feed your cells, find balance."
 >

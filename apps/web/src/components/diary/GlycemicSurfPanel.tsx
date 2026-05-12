@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { TrendingUp, Timer, Target, Activity, Info } from "lucide-react";
+import { TrendingUp, Timer, Target, Activity, Info, Lightbulb, ChevronRight } from "lucide-react";
 import SupplementChecklistWidget from "@/components/shared/SupplementChecklistWidget";
 import GlycemicCurveChart from "./GlycemicCurveChart";
 import { apiClient } from "@/lib/api-client";
@@ -79,6 +79,7 @@ export default function GlycemicSurfPanel({
   const [isMicrosExpanded, setIsMicrosExpanded] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [showThresholds, setShowThresholds] = useState(false);
+  const [showCaloriesInfo, setShowCaloriesInfo] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -302,19 +303,9 @@ export default function GlycemicSurfPanel({
         )}
       </div>
 
-      {/* ── Mobile Supplements Block ────────────────────────────────── */}
-      <div className="sm:hidden w-full px-1 mb-3.5">
-        <div className="bg-surface rounded-[20px] shadow-sm border border-border p-3.5">
-          <SupplementChecklistWidget variant="mobileStrip" startIso={startIso} endIso={endIso} />
-        </div>
-      </div>
-
-      {/* ── Desktop Supplements (floating in header region) ────────── */}
-      <div className="hidden sm:block px-1 mb-3.5">
-        <div className="bg-surface rounded-[20px] shadow-sm border border-border p-3.5">
-          <SupplementChecklistWidget variant="compact" startIso={startIso} endIso={endIso} />
-        </div>
-      </div>
+      {/* ── Supplements Blocks ────────────────────────────────── */}
+      <SupplementChecklistWidget variant="mobileStrip" startIso={startIso} endIso={endIso} />
+      <SupplementChecklistWidget variant="compact" startIso={startIso} endIso={endIso} />
 
       {/* ── Micronutrients Expansion Panel (reused from DailyAllowancesPanel) ──── */}
       <div className="bg-surface rounded-[20px] shadow-sm border border-border mt-3.5 mx-1 overflow-hidden">
@@ -438,6 +429,22 @@ export default function GlycemicSurfPanel({
           </div>
         )}
       </div>
+
+      {/* ── "Where are calories?" hint badge ─── */}
+      <button
+        onClick={() => setShowCaloriesInfo(true)}
+        className="flex items-center gap-2 w-[calc(100%-8px)] mx-1 px-3 py-2 mt-2 mb-1 rounded-xl
+          bg-surface-muted/50 dark:bg-surface-muted/30
+          border border-border/30
+          text-xs text-ink-muted font-medium
+          hover:bg-surface-muted/80 dark:hover:bg-surface-muted/50
+          transition-colors cursor-pointer group"
+      >
+        <Lightbulb className="w-3.5 h-3.5 text-amber-500/70 group-hover:text-amber-500 transition-colors shrink-0" />
+        <span className="flex-1 text-left">{t("whereAreCalories")}</span>
+        <ChevronRight className="w-3.5 h-3.5 opacity-40 group-hover:opacity-70 transition-opacity" />
+      </button>
+
       {/* ── Glycemic Surfing Info Modal ──────────────────────────── */}
       <Dialog open={showInfo} onOpenChange={setShowInfo}>
         <DialogContent onClose={() => setShowInfo(false)} className="sm:max-w-[600px]">
@@ -483,6 +490,33 @@ export default function GlycemicSurfPanel({
               <h5 className="font-bold mb-1 text-[#2563EB] relative z-10">{t("infoModalBenefitTitle")}</h5>
               <p className="text-[0.8125rem] text-[#1D4ED8] relative z-10">
                 {t("infoModalBenefitDesc")}
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Calories Info Modal ── */}
+      <Dialog open={showCaloriesInfo} onOpenChange={setShowCaloriesInfo}>
+        <DialogContent onClose={() => setShowCaloriesInfo(false)} className="sm:max-w-[540px]">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="flex items-center gap-2 text-ink">
+              <Lightbulb className="w-5 h-5 text-amber-500" />
+              {t("caloriesModalTitle")}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-sm text-ink leading-relaxed max-h-[70vh] overflow-y-auto pr-2">
+            <p>{t("caloriesModalP1")}</p>
+            <p>{t("caloriesModalP2")}</p>
+
+            <div className="border-t border-border pt-4 mt-4">
+              <h5 className="font-bold text-ink mb-2">{t("caloriesModalP3Title")}</h5>
+              <p>{t("caloriesModalP3")}</p>
+            </div>
+
+            <div className="bg-blue-50 dark:bg-blue-500/10 p-3.5 rounded-xl border border-blue-100 dark:border-blue-500/20 mt-2">
+              <p className="text-[0.8125rem] text-blue-800 dark:text-blue-300 font-medium">
+                {t("caloriesModalDisclaimer")}
               </p>
             </div>
           </div>

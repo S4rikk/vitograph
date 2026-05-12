@@ -167,7 +167,14 @@
       "infoModalBenefitTitle": "What's the benefit?",
       "infoModalBenefitDesc": "Understanding your glycemic profile helps you choose food that provides stable energy throughout the day.",
       "infoModalDesc1": "Vitographはカロリーを数えません。代わりに<strong>血糖応答</strong>を追跡します — 食べ物が血糖値とエネルギーにどのように影響するかを分析します。",
-      "overdoseDefault": "Exceeding the norm may be toxic to the body"
+      "overdoseDefault": "Exceeding the norm may be toxic to the body",
+      "whereAreCalories": "カロリーはどこ？",
+      "caloriesModalTitle": "なぜVitoGraphはカロリーを計算しないのですか？",
+      "caloriesModalP1": "古典的なカロリー計算は数学的に不正確であるため、採用していません。代わりに、グリセミック指数とあなたの体の実際の代謝反応を分析します。",
+      "caloriesModalP2": "ハーバード大学の研究（R.ランガム）により、ラベルの不正確さと消化による体の隠れたコストが、製品ごとに最大20％の誤差を生むことが証明されています。1日を通してこの誤差は急速に蓄積します（1日に5つの製品を摂取した場合、総歪みは目標とするカロリー不足分の100％を超える可能性があります）。同時に、これらのカロリーがエネルギーになるのか、それとも体内に蓄積されるのかを知ることはできません。このような状況下でカロリー計算に頼ることは無意味であり、危険です。",
+      "caloriesModalP3Title": "それでもカロリーを追跡したい方へ：",
+      "caloriesModalP3": "チャットでアシスタントに目標の作成を依頼することができます。この時、システムはあなたの状況に特化したパーソナライズされたAIスペシャリストを形成します。このモードでは、アシスタントはリソースの消費と支出のバランスを制御するために、より慎重かつ詳細で質的に役立ちます。",
+      "caloriesModalDisclaimer": "VitoGraphは食品の品質と代謝反応に焦点を当てています。これは単純なカロリー計算よりも正確で実用的な図を提供します。"
     },
     "mealScore": {
       "healthScoreLabel": "Health Score"

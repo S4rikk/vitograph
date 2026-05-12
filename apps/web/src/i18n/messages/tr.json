@@ -167,7 +167,14 @@
       "infoModalBenefitTitle": "What's the benefit?",
       "infoModalBenefitDesc": "Understanding your glycemic profile helps you choose food that provides stable energy throughout the day.",
       "infoModalDesc1": "Vitograph kalori saymaz. Bunun yerine <strong>glisemik yanıtı</strong> takip ederiz — yiyeceklerin kan şekeri seviyenizi ve enerjinizi nasıl etkilediğini analiz ederiz.",
-      "overdoseDefault": "Exceeding the norm may be toxic to the body"
+      "overdoseDefault": "Exceeding the norm may be toxic to the body",
+      "whereAreCalories": "Kaloriler nerede?",
+      "caloriesModalTitle": "VitoGraph neden kalori saymaz?",
+      "caloriesModalP1": "Matematiksel olarak yanlış olduğu için klasik kalori sayımını terk ettik. Bunun yerine, glisemik indeksi ve vücudunuzun gerçek metabolik tepkisini analiz ediyoruz.",
+      "caloriesModalP2": "Harvard araştırmaları (R. Wrangham) şunu kanıtlamıştır: etiketlerdeki yanlışlıklar ve vücudun gizli sindirim maliyetleri, ürün başına %20'ye varan bir hataya neden olur. Gün boyunca bu hata hızla birikir (günde 5 ürün için toplam sapma hedef açığınızın %100'ünü aşabilir). Aynı zamanda, bu kalorilerin enerjiye dönüşüp dönüşmeyeceğini veya vücudunuzda ölü ağırlık olarak kalıp kalmayacağını bilemezsiniz. Bu koşullar altında kalori sayımına güvenmek anlamsız ve tehlikelidir.",
+      "caloriesModalP3Title": "Yine de kalori takibi yapmak isteyenler için:",
+      "caloriesModalP3": "Sohbette asistandan bunları takip etmek için bir hedef oluşturmasını isteyebilirsiniz. Bu noktada sistem, durumunuza özel olarak tasarlanmış kişiselleştirilmiş bir yapay zeka uzmanı oluşturur. Bu modda asistan, kaynak tüketimi ve harcama dengesini kontrol etmenize daha dikkatli, ayrıntılı ve nitelikli bir şekilde yardımcı olacaktır.",
+      "caloriesModalDisclaimer": "VitoGraph, gıda kalitesine ve metabolik tepkiye odaklanır — bu, basit kalori sayımından daha doğru ve pratik bir tablo sunar."
     },
     "mealScore": {
       "healthScoreLabel": "Health Score"

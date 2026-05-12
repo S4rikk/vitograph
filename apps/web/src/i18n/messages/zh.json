@@ -167,7 +167,14 @@
       "infoModalBenefitTitle": "What's the benefit?",
       "infoModalBenefitDesc": "Understanding your glycemic profile helps you choose food that provides stable energy throughout the day.",
       "infoModalDesc1": "Vitograph不计算卡路里。相反，我们跟踪<strong>血糖反应</strong> — 分析食物如何影响您的血糖水平和能量。",
-      "overdoseDefault": "Exceeding the norm may be toxic to the body"
+      "overdoseDefault": "Exceeding the norm may be toxic to the body",
+      "whereAreCalories": "卡路里在哪里？",
+      "caloriesModalTitle": "为什么VitoGraph不计算卡路里？",
+      "caloriesModalP1": "我们放弃了经典的卡路里计算，因为它在数学上是不准确的。相反，我们分析血糖生成指数和您身体的真实代谢反应。",
+      "caloriesModalP2": "哈佛大学的研究（R. Wrangham）已经证明：标签的不准确性和身体消化的隐藏成本会导致每个产品高达20%的误差。在一天中，这种误差会迅速累积（如果一天吃5种产品，总偏差可能超过目标缺口的100%）。同时，您也不知道这些卡路里是会转化为能量还是作为负担留在体内。在这些条件下，依赖卡路里计算是毫无意义且危险的。",
+      "caloriesModalP3Title": "对于那些仍然想要追踪卡路里的人：",
+      "caloriesModalP3": "您可以在聊天中让助手创建一个追踪卡路里的目标。此时，系统会专门针对您的情况生成一个个性化的AI专家。在这种模式下，助手将更细致、更全面、更高质量地帮助您控制资源的消耗和支出平衡。",
+      "caloriesModalDisclaimer": "VitoGraph关注食物质量和代谢反应——这比简单的卡路里计算提供了更准确、更实用的图像。"
     },
     "mealScore": {
       "healthScoreLabel": "Health Score"

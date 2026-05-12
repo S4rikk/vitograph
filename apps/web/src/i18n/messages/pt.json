@@ -167,7 +167,14 @@
       "infoModalBenefitTitle": "What's the benefit?",
       "infoModalBenefitDesc": "Understanding your glycemic profile helps you choose food that provides stable energy throughout the day.",
       "infoModalDesc1": "O Vitograph não conta calorias. Em vez disso, rastreamos a <strong>resposta glicêmica</strong> — como os alimentos afetam seu nível de glicose no sangue e sua energia.",
-      "overdoseDefault": "Exceeding the norm may be toxic to the body"
+      "overdoseDefault": "Exceeding the norm may be toxic to the body",
+      "whereAreCalories": "Onde estão as calorias?",
+      "caloriesModalTitle": "Por que o VitoGraph não conta calorias?",
+      "caloriesModalP1": "Abandonamos a contagem clássica de calorias porque é matematicamente imprecisa. Em vez disso, analisamos o índice glicêmico e a resposta metabólica real do seu corpo.",
+      "caloriesModalP2": "Pesquisas de Harvard (R. Wrangham) comprovaram: imprecisões nos rótulos e os custos ocultos da digestão pelo corpo resultam em até 20% de erro por produto. Ao longo do dia, esse erro se acumula rapidamente (para 5 produtos por dia, a distorção total pode exceder 100% do seu déficit alvo). Ao mesmo tempo, você não saberá se essas calorias se transformarão em energia ou permanecerão como peso morto em seu corpo. Nessas condições, confiar na contagem de calorias é inútil e perigoso.",
+      "caloriesModalP3Title": "Para aqueles que ainda desejam monitorar as calorias:",
+      "caloriesModalP3": "Você pode pedir ao assistente no chat para criar um objetivo para acompanhá-las. Nesse momento, o sistema forma um especialista em IA personalizado, adaptado especificamente à sua situação. Neste modo, o assistente o ajudará de forma mais atenta, detalhada e qualitativa a controlar o equilíbrio de consumo e gasto de recursos.",
+      "caloriesModalDisclaimer": "O VitoGraph foca na qualidade dos alimentos e na resposta metabólica — isso fornece uma imagem mais precisa e prática do que a simples contagem de calorias."
     },
     "mealScore": {
       "healthScoreLabel": "Health Score"

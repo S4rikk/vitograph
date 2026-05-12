@@ -167,7 +167,14 @@
       "infoModalBenefitTitle": "What's the benefit?",
       "infoModalBenefitDesc": "Understanding your glycemic profile helps you choose food that provides stable energy throughout the day.",
       "infoModalDesc1": "Vitograph doesn't count calories. Instead, we track <strong>glycemic response</strong> — how food affects your blood glucose level and energy.",
-      "overdoseDefault": "Exceeding the norm may be toxic to the body"
+      "overdoseDefault": "Exceeding the norm may be toxic to the body",
+      "whereAreCalories": "Where are the calories?",
+      "caloriesModalTitle": "Why VitoGraph doesn't count calories?",
+      "caloriesModalP1": "We have abandoned classical calorie counting as it is mathematically inaccurate. Instead, we analyze the glycemic index and your body's real metabolic response.",
+      "caloriesModalP2": "Harvard research (R. Wrangham) has proven: label inaccuracies and the body's hidden costs of digestion result in up to a 20% error per product. Over the course of a day, this error accumulates rapidly (for 5 products a day, the total distortion can exceed 100% of your target deficit). At the same time, you won't know if these calories will go into energy or remain as dead weight in your body. Under these conditions, relying on calorie counting is meaningless and dangerous.",
+      "caloriesModalP3Title": "For those who still want to track calories:",
+      "caloriesModalP3": "You can ask the assistant in the chat to create a goal for tracking them. At this moment, the system forms a personalized AI specialist tailored specifically to your situation. In this mode, the assistant will more carefully, thoroughly, and qualitatively help you control the balance of resource consumption and expenditure.",
+      "caloriesModalDisclaimer": "VitoGraph focuses on food quality and metabolic response — this provides a more accurate and practical picture than simple calorie counting."
     },
     "mealScore": {
       "healthScoreLabel": "Health Score"

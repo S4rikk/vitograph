@@ -120,7 +120,7 @@ export default function SymptomTrackerWidget() {
   };
 
   return (
-    <div className="w-full space-y-8 mt-10">
+    <div className="w-full space-y-8">
       {/* Tracker Section */}
       <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
         <h2 className="mb-4 text-xl font-bold text-ink">{t("symptomsRegistration")}</h2>

@@ -167,7 +167,14 @@
       "infoModalBenefitTitle": "What's the benefit?",
       "infoModalBenefitDesc": "Understanding your glycemic profile helps you choose food that provides stable energy throughout the day.",
       "infoModalDesc1": "Vitograph no cuenta calorías. En su lugar, rastreamos la <strong>respuesta glucémica</strong> — cómo los alimentos afectan tu nivel de glucosa en sangre y tu energía.",
-      "overdoseDefault": "Exceeding the norm may be toxic to the body"
+      "overdoseDefault": "Exceeding the norm may be toxic to the body",
+      "whereAreCalories": "¿Dónde están las calorías?",
+      "caloriesModalTitle": "¿Por qué VitoGraph no cuenta calorías?",
+      "caloriesModalP1": "Hemos abandonado el conteo clásico de calorías porque es matemáticamente inexacto. En su lugar, analizamos el índice glucémico y la respuesta metabólica real de su cuerpo.",
+      "caloriesModalP2": "Investigaciones de Harvard (R. Wrangham) han demostrado: las inexactitudes en las etiquetas y los costos ocultos de digestión del cuerpo resultan en hasta un 20% de error por producto. A lo largo del día, este error se acumula rápidamente (para 5 productos al día, la distorsión total puede superar el 100% de su déficit objetivo). Al mismo tiempo, no sabrá si estas calorías se convertirán en energía o se quedarán como peso muerto en su cuerpo. Bajo estas condiciones, depender del conteo de calorías no tiene sentido y es peligroso.",
+      "caloriesModalP3Title": "Para aquellos que aún desean registrar calorías:",
+      "caloriesModalP3": "Puede pedirle al asistente en el chat que cree un objetivo para registrarlas. En este momento, el sistema forma un especialista en IA personalizado adaptado específicamente a su situación. En este modo, el asistente le ayudará de manera más cuidadosa, detallada y cualitativa a controlar el equilibrio de consumo y gasto de recursos.",
+      "caloriesModalDisclaimer": "VitoGraph se enfoca en la calidad de los alimentos y la respuesta metabólica; esto proporciona una imagen más precisa y práctica que el simple conteo de calorías."
     },
     "mealScore": {
       "healthScoreLabel": "Health Score"

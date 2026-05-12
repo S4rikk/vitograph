@@ -340,6 +340,7 @@ model Profile {
   activeNutritionTargets Json @default("{}") @map("active_nutrition_targets") @db.JsonB
 
   aiName    String?  @map("ai_name")
+  locale    String   @default("ru")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
@@ -369,6 +370,7 @@ model Profile {
 
   aiChatMessages    AiChatMessage[]
   pushSubscriptions PushSubscription[]
+  mediaCleanup      MediaCleanup[]
 
   @@map("profiles")
 }
@@ -1039,4 +1041,19 @@ model PushSubscription {
 
   @@index([userId])
   @@map("push_subscriptions")
+}
+
+model MediaCleanup {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  filePath   String   @map("file_path")
+  bucketName String   @map("bucket_name")
+  expiresAt  DateTime @map("expires_at") @db.Timestamptz
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+  @@index([userId])
+  @@map("media_cleanup")
 }

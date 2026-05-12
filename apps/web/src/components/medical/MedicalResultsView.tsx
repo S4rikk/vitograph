@@ -305,15 +305,15 @@ export default function MedicalResultsView() {
 
   return (
     <div className="space-y-6">
-      {/* ── Symptom Tracker ─────────────────────────────────── */}
-      <SymptomTrackerWidget />
-
       {/* ── Upload Zone ─────────────────────────────────── */}
       <UploadZone
         onFilesAccepted={handleFilesAccepted}
         state={uploadState}
         errorMessage={errorMessage}
       />
+
+      {/* ── Symptom Tracker ─────────────────────────────────── */}
+      <SymptomTrackerWidget />
 
       {/* ── Photo Uploaders (Somatic Diagnostics) ───────────── */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
