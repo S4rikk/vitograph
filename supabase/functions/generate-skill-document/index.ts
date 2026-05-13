@@ -72,11 +72,19 @@ Deno.serve(async (req) => {
     // Fetch user profile for personalization
     const { data: profile } = await supabase
       .from("profiles")
-      .select("sex, birthdate, chronic_conditions")
+      .select("biological_sex, date_of_birth, chronic_conditions")
       .eq("id", user_id)
       .single();
 
-    const age = profile?.birthdate ? calculateAge(profile.birthdate) : null;
+    console.log(`[generate-skill-document] Profile fetched for ${user_id}:`,
+      JSON.stringify({
+        sex: profile?.biological_sex,
+        dob: profile?.date_of_birth,
+        conditions_count: Array.isArray(profile?.chronic_conditions) ? profile.chronic_conditions.length : 0
+      })
+    );
+
+    const age = profile?.date_of_birth ? calculateAge(profile.date_of_birth) : null;
 
     // Build context for OpenAI
     const userContext = JSON.stringify({
@@ -85,7 +93,7 @@ Deno.serve(async (req) => {
       steps: steps || [],
       diagnosis: diagnosis_basis || {},
       patient: {
-        sex: profile?.sex || "unknown",
+        sex: profile?.biological_sex || "unknown",
         age: age,
         conditions: profile?.chronic_conditions || []
       }

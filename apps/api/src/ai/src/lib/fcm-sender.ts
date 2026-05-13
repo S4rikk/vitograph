@@ -14,7 +14,15 @@ function getAuth(): GoogleAuth {
     throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON env var is missing');
   }
 
-  const credentials = JSON.parse(serviceAccountJson);
+  let credentials: any;
+  try {
+    credentials = JSON.parse(serviceAccountJson);
+  } catch (e) {
+    console.error('[FCM] Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON:', (e as Error).message);
+    console.error('[FCM] First 50 chars:', serviceAccountJson.substring(0, 50));
+    throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON contains invalid JSON');
+  }
+
   authClient = new GoogleAuth({
     credentials,
     scopes: ['https://www.googleapis.com/auth/firebase.messaging'],

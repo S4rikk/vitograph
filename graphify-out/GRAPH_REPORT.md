@@ -1,7 +1,7 @@
-# Graph Report - VITOGRAPH  (2026-05-12)
+# Graph Report - VITOGRAPH  (2026-05-13)
 
 ## Corpus Check
-- 205 files · ~206,819 words
+- 205 files · ~206,867 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -71,8 +71,8 @@
 10. `ChatPromptBuilder` - 33 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Inserts a feedback row into the db.     Includes a 60-second rate-limit via che` --uses--> `DatabaseError`  [INFERRED]
-  apps\api\api\v1\endpoints\users.py → apps\api\core\exceptions.py
+- `DatabaseError` --uses--> `Inserts a feedback row into the db.     Includes a 60-second rate-limit via che`  [INFERRED]
+  apps\api\core\exceptions.py → apps\api\api\v1\endpoints\users.py
 - `loadWearables()` --calls--> `createClient()`  [INFERRED]
   apps\web\src\components\profile\UserProfileSheet.tsx → apps\web\src\lib\supabase\server.ts
 - `handleDeleteAccount()` --calls--> `createClient()`  [INFERRED]
