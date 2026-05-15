@@ -134,7 +134,7 @@ export function FeedbackButton({ className }: { className?: string }) {
                                 placeholder={t("placeholder")}
                                 maxLength={2000}
                                 required
-                                className="min-h-[120px] w-full resize-y rounded-xl border border-border bg-surface-muted p-3 text-sm text-ink placeholder:text-ink-faint focus:border-primary-400 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-100"
+                                className="min-h-[140px] w-full resize-none rounded-2xl border border-border bg-surface-muted p-4 text-base sm:text-sm text-ink placeholder:text-ink-faint focus:border-primary-400 focus:bg-surface focus:outline-none focus:ring-4 focus:ring-primary-500/10 transition-all overscroll-contain touch-pan-y"
                             />
 
                             {/* File Upload & Preview Section */}

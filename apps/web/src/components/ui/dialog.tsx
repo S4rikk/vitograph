@@ -1,23 +1,42 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
-// Minimal Shadcn API-compatible Dialog wrapper
+/**
+ * Enhanced Dialog component with Portal and Body Scroll Locking.
+ * Fixes iOS Safari "jumping/bouncing" behavior when modals are opened inside scrollable containers.
+ */
 export function Dialog({ open, onOpenChange, children }: { open?: boolean; onOpenChange?: (open: boolean) => void; children: React.ReactNode }) {
-    if (!open) return null;
+    const [mounted, setMounted] = useState(false);
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-            {/* Backdrop */}
-            <div
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-                onPointerDown={(e) => {
-                    // If the custom property does not prevent it, close on click outside
-                    // We will handle this in DialogContent
-                }}
-            />
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        if (open) {
+            const originalStyle = window.getComputedStyle(document.body).overflow;
+            // Prevent body scroll while modal is open
+            document.body.style.overflow = "hidden";
+            // iOS Safari fix for fixed elements inside scrollable containers
+            document.body.style.touchAction = "none";
+            
+            return () => {
+                document.body.style.overflow = originalStyle;
+                document.body.style.touchAction = "";
+            };
+        }
+    }, [open]);
+
+    if (!mounted || !open) return null;
+
+    // Use Portal to render at the end of body, isolating from parent scroll/transform contexts
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 outline-none touch-none overscroll-none">
             {children}
-        </div>
+        </div>,
+        document.body
     );
 }
 
@@ -46,9 +65,9 @@ export function DialogContent({
 
     return (
         <>
-            {/* A distinct backdrop layer for capturing outside clicks */}
+            {/* Backdrop layer - sibling to content to avoid click propagation issues */}
             <div
-                className="fixed inset-0 z-[51]"
+                className="fixed inset-0 z-[-1] bg-black/60 backdrop-blur-md animate-in fade-in duration-300 pointer-events-auto"
                 onPointerDown={(e) => {
                     if (onPointerDownOutside) {
                         onPointerDownOutside(e);
@@ -57,12 +76,16 @@ export function DialogContent({
                     onClose?.();
                 }}
             />
-            <div className={`relative z-[52] w-full max-w-lg rounded-2xl bg-surface p-6 shadow-2xl animate-in fade-in zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95 ${className || ""}`}>
+            
+            <div className={`relative z-[10000] w-full max-w-lg rounded-3xl bg-surface p-6 shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-white/10 animate-in fade-in zoom-in-95 duration-200 ${className || ""}`}>
                 <button
                     onClick={() => onClose?.()}
-                    className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
+                    className="absolute right-5 top-5 rounded-full p-2 opacity-50 transition-all hover:opacity-100 hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:pointer-events-none"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                        <path d="M18 6 6 18" />
+                        <path d="m6 6 12 12" />
+                    </svg>
                     <span className="sr-only">Close</span>
                 </button>
                 {children}
@@ -76,13 +99,14 @@ export function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLD
 }
 
 export function DialogTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
-    return <h2 className={`text-lg font-semibold leading-none tracking-tight ${className || ""}`} {...props} />;
+    return <h2 className={`text-xl font-bold leading-none tracking-tight text-ink ${className || ""}`} {...props} />;
 }
 
 export function DialogDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
-    return <p className={`text-sm text-ink-muted ${className || ""}`} {...props} />;
+    return <p className={`text-sm text-ink-muted leading-relaxed mt-2 ${className || ""}`} {...props} />;
 }
 
 export function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-    return <div className={`flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 ${className || ""}`} {...props} />;
+    return <div className={`flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-3 gap-2 sm:gap-0 ${className || ""}`} {...props} />;
 }
+

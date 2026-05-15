@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { X } from "lucide-react";
 import type { MetricFieldDefinition } from "@/types/wearable-types";
 import { useTranslations } from "next-intl";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 interface ManualEntryDialogProps {
     /** Whether the dialog is visible. */
@@ -54,85 +54,59 @@ export default function ManualEntryDialog({
         onClose();
     };
 
-    if (!isOpen) return null;
-
     return (
-        <>
-            {/* Backdrop */}
-            <div
-                className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm transition-opacity"
-                onClick={onClose}
-                aria-hidden="true"
-            />
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent onClose={onClose} className="max-w-md">
+                <DialogHeader>
+                    <DialogTitle>{title}</DialogTitle>
+                </DialogHeader>
 
-            {/* Dialog */}
-            <div className="fixed inset-0 z-[61] flex items-center justify-center p-4">
-                <div
-                    className="relative w-full max-w-md rounded-2xl bg-surface shadow-2xl animate-slide-up"
-                    onClick={(e) => e.stopPropagation()}
-                    role="dialog"
-                    aria-modal="true"
-                    aria-label={title}
-                >
-                    {/* Header */}
-                    <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-border">
-                        <h3 className="text-lg font-bold text-ink">{title}</h3>
-                        <button
-                            onClick={onClose}
-                            className="p-1.5 text-ink-muted hover:text-ink hover:bg-surface-muted rounded-full transition-colors cursor-pointer"
-                            aria-label={t("close")}
-                        >
-                            <X size={18} />
-                        </button>
-                    </div>
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="py-4 space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                    {fields.map((field) => (
+                        <div key={field.key}>
+                            <label
+                                htmlFor={`manual-${field.key}`}
+                                className="block text-[0.8125rem] font-semibold text-ink mb-1.5"
+                            >
+                                {field.label}
+                                {field.unit && (
+                                    <span className="ml-1 text-ink-muted font-normal">
+                                        ({field.unit})
+                                    </span>
+                                )}
+                            </label>
+                            <input
+                                id={`manual-${field.key}`}
+                                type={field.type}
+                                step={field.step ?? (field.type === "number" ? "0.1" : undefined)}
+                                value={values[field.key] ?? ""}
+                                onChange={(e) => handleChange(field.key, e.target.value)}
+                                placeholder={field.placeholder ?? `${t("enterValue")} ${field.label.toLowerCase()}`}
+                                className="w-full px-3 py-2.5 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface-muted text-sm text-ink transition-all focus:bg-surface"
+                            />
+                        </div>
+                    ))}
+                </form>
 
-                    {/* Form */}
-                    <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 max-h-[60vh] overflow-y-auto">
-                        {fields.map((field) => (
-                            <div key={field.key}>
-                                <label
-                                    htmlFor={`manual-${field.key}`}
-                                    className="block text-[0.8125rem] font-semibold text-ink mb-1.5"
-                                >
-                                    {field.label}
-                                    {field.unit && (
-                                        <span className="ml-1 text-ink-muted font-normal">
-                                            ({field.unit})
-                                        </span>
-                                    )}
-                                </label>
-                                <input
-                                    id={`manual-${field.key}`}
-                                    type={field.type}
-                                    step={field.step ?? (field.type === "number" ? "0.1" : undefined)}
-                                    value={values[field.key] ?? ""}
-                                    onChange={(e) => handleChange(field.key, e.target.value)}
-                                    placeholder={field.placeholder ?? `${t("enterValue")} ${field.label.toLowerCase()}`}
-                                    className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm text-ink"
-                                />
-                            </div>
-                        ))}
-                    </form>
-
-                    {/* Footer */}
-                    <div className="px-6 py-4 border-t border-border flex justify-end gap-3">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-4 py-2 text-sm font-semibold text-ink-muted hover:text-ink rounded-lg hover:bg-surface-muted transition-colors cursor-pointer"
-                        >
-                            {t("cancel")}
-                        </button>
-                        <button
-                            type="submit"
-                            onClick={handleSubmit}
-                            className="px-5 py-2 text-sm font-semibold text-white bg-primary-600 rounded-xl hover:bg-primary-700 transition-colors shadow-sm active:scale-95 cursor-pointer"
-                        >
-                            {t("save")}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </>
+                {/* Footer */}
+                <DialogFooter className="mt-6">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="px-4 py-2.5 text-sm font-semibold text-ink-muted hover:text-ink rounded-xl hover:bg-surface-muted transition-colors cursor-pointer"
+                    >
+                        {t("cancel")}
+                    </button>
+                    <button
+                        type="submit"
+                        onClick={handleSubmit}
+                        className="px-6 py-2.5 text-sm font-semibold text-white bg-primary-600 rounded-xl hover:bg-primary-700 transition-all shadow-md active:scale-95 cursor-pointer"
+                    >
+                        {t("save")}
+                    </button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 }
