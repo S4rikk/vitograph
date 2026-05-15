@@ -24,6 +24,7 @@ import { requireAuth } from "./middleware/auth.js";
 import { aiRouter } from "./routes/v1/ai.routes.js";
 import { supplementRouter } from "./routes/v1/supplement.routes.js";
 import { profilesRouter } from "./routes/v1/profiles.routes.js";
+import { usersRouter } from "./routes/v1/users.routes.js";
 import { integrationRouter } from "./routes/integration.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import { initCheckpointer } from "./graph/checkpointer.js";
@@ -70,6 +71,7 @@ app.get("/api/v1/ai/cron/media-cleanup", handleMediaCleanupCron);
 app.use("/api/v1/ai", requireAuth, aiRouter);
 app.use("/api/v1/supplements", requireAuth, supplementRouter);
 app.use("/api/v1/profiles", requireAuth, profilesRouter);
+app.use("/api/v1/users", requireAuth, usersRouter);
 app.use("/api/v1/integration", requireAuth, integrationRouter);
 
 // ── 404 fallback ────────────────────────────────────────────────────

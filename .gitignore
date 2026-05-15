@@ -5,25 +5,36 @@ build/
 .env*
 !.env.example
 trash/
+
+# Tooling & Editor
 .ruff_cache/
 .vscode/
-coverage/
-*.log
 .eslintcache
 *.tsbuildinfo
 _server_backup/
 
-# Temporary and scratch files
+# Temporary, scratch and log files
 tmp/
-tmp_*.ts
-tmp_*.js
-tmp_*.py
-tmp_*.txt
-temp_*.py
-verify_*.py
-plan_correction*.md
+tmp_*
+temp_*
+verify_*
+scratch/
+scratch_*
+*.log
+*_errors.txt
+recent_ai_log.txt
+temp.txt
+food_card_history.txt
+logo_demo*.html
+debug_*.txt
 *.session.sql
 
-# AI workflow files (Maya's workspace — not for repo)
+# AI workflow & metadata
 next_prompt.md
 vitograph_skills.json
+plan_correction*.md
+graphify-out/
+
+# Supabase & Tooling
+.temp/
+supabase/.temp/
