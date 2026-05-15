@@ -70,7 +70,7 @@ export default function LoginPage() {
         password: generatedPassword,
         options: {
           data: {
-            temp_password: generatedPassword,
+            vito_pass: generatedPassword,
           }
         }
       });
