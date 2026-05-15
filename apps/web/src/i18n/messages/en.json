@@ -67,7 +67,8 @@
     "copyPassword": "Copy password",
     "passwordCopied": "Copied",
     "registerWarning": "You will not be able to recover this password if you forget it now. You can change it later in settings.",
-    "confirmEmailWarning": "Make sure to confirm your email via the received letter before logging in.",
+    "confirmEmailWarning": "Check your email and click the link to log in.",
+    "emailNotConfirmed": "Email not confirmed. Please check your inbox and follow the link.",
     "backToLogin": "Back to login"
   },
   "water": {

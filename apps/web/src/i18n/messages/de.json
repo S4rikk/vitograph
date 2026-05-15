@@ -67,7 +67,8 @@
     "copyPassword": "Passwort kopieren",
     "passwordCopied": "Kopiert",
     "registerWarning": "Sie können dieses Passwort nicht wiederherstellen, wenn Sie es jetzt vergessen. Sie können es später in den Einstellungen ändern.",
-    "confirmEmailWarning": "Bestätigen Sie die E-Mail über die gesendete Nachricht, bevor Sie sich anmelden.",
+    "confirmEmailWarning": "Prüfen Sie Ihre E-Mail und klicken Sie auf den Link, um sich anzumelden.",
+    "emailNotConfirmed": "E-Mail nicht bestätigt. Bitte prüfen Sie Ihren Posteingang und folgen Sie dem Link.",
     "backToLogin": "Zurück zum Login"
   },
   "water": {

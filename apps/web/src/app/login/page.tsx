@@ -68,6 +68,11 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signUp({
         email,
         password: generatedPassword,
+        options: {
+          data: {
+            temp_password: generatedPassword,
+          }
+        }
       });
 
       if (error) {
@@ -84,7 +89,11 @@ export default function LoginPage() {
       });
 
       if (error) {
-        setError(error.message);
+        if (error.message === 'Email not confirmed') {
+          setError(t('emailNotConfirmed'));
+        } else {
+          setError(error.message);
+        }
         setLoading(false);
       } else {
         router.push("/");

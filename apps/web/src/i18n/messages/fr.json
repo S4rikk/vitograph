@@ -67,7 +67,8 @@
     "copyPassword": "Copier le mot de passe",
     "passwordCopied": "Copié",
     "registerWarning": "Vous ne pourrez pas récupérer ce mot de passe si vous l'oubliez maintenant. Vous pourrez le changer plus tard dans les paramètres.",
-    "confirmEmailWarning": "N'oubliez pas de confirmer votre email via le message reçu avant de vous connecter.",
+    "confirmEmailWarning": "Vérifiez vos e-mails et cliquez sur le lien pour vous connecter.",
+    "emailNotConfirmed": "E-mail non confirmé. Veuillez vérifier votre boîte de réception et suivre le lien.",
     "backToLogin": "Retour à la connexion"
   },
   "water": {

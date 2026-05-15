@@ -67,7 +67,8 @@
     "copyPassword": "パスワードをコピー",
     "passwordCopied": "コピー済み",
     "registerWarning": "今忘れると、このパスワードを回復できません。後で設定で変更できます。",
-    "confirmEmailWarning": "ログインする前に、受信メールでメールを確認してください。",
+    "confirmEmailWarning": "ログインするにはメールを確認し、リンクをクリックしてください。",
+    "emailNotConfirmed": "メールが確認されていません。受信トレイを確認し、リンクをクリックしてください。",
     "backToLogin": "ログイン画面に戻る"
   },
   "water": {

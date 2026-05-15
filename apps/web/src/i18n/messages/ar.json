@@ -67,7 +67,8 @@
     "copyPassword": "TODO",
     "passwordCopied": "TODO",
     "registerWarning": "TODO",
-    "confirmEmailWarning": "TODO",
+    "confirmEmailWarning": "افحص بريدك الإلكتروني وانقر على الرابط لتسجيل الدخول.",
+    "emailNotConfirmed": "لم يتم تأكيد البريد الإلكتروني. يرجى فحص صندوق الوارد واتباع الرابط.",
     "backToLogin": "TODO"
   },
   "water": {

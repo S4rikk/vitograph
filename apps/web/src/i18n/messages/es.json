@@ -67,7 +67,8 @@
     "copyPassword": "Copiar contraseña",
     "passwordCopied": "Copiado",
     "registerWarning": "No podrá recuperar esta contraseña si la olvida ahora. Podrá cambiarla más tarde en la configuración.",
-    "confirmEmailWarning": "Asegúrese de confirmar su correo a través del enlace recibido antes de iniciar sesión.",
+    "confirmEmailWarning": "Revise su correo y haga clic en el enlace para iniciar sesión.",
+    "emailNotConfirmed": "Correo no confirmado. Por favor, revise su bandeja de entrada y siga el enlace.",
     "backToLogin": "Volver a iniciar sesión"
   },
   "water": {

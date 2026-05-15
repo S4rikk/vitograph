@@ -67,7 +67,8 @@
     "copyPassword": "Parolayı Kopyala",
     "passwordCopied": "Kopyalandı",
     "registerWarning": "Bu parolayı şimdi unuttuğunuzda kurtaramazsınız. Daha sonra ayarlardan değiştirebilirsiniz.",
-    "confirmEmailWarning": "Giriş yapmadan önce mutlaka e-postayı gelen mail üzerinden doğrulayın.",
+    "confirmEmailWarning": "Giriş yapmak için e-postanızı kontrol edin ve bağlantıya tıklayın.",
+    "emailNotConfirmed": "E-posta onaylanmadı. Lütfen gelen kutunuzu kontrol edin ve bağlantıyı takip edin.",
     "backToLogin": "Girişe geri dön"
   },
   "water": {

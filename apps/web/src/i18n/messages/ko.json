@@ -67,7 +67,8 @@
     "copyPassword": "비밀번호 복사",
     "passwordCopied": "복사됨",
     "registerWarning": "지금 비밀번호를 잊으면 복구할 수 없습니다. 설정에서 나중에 변경할 수 있습니다.",
-    "confirmEmailWarning": "로그인 전에 받으신 이메일로 반드시 메일 확인을 해주세요.",
+    "confirmEmailWarning": "로그인하려면 이메일을 확인하고 링크를 클릭하세요.",
+    "emailNotConfirmed": "이메일이 확인되지 않았습니다. 받은 편지함을 확인하고 링크를 클릭해 주세요.",
     "backToLogin": "로그인으로 돌아가기"
   },
   "water": {

@@ -67,7 +67,8 @@
     "copyPassword": "复制密码",
     "passwordCopied": "已复制",
     "registerWarning": "如果您现在忘记，无法恢复此密码。您可以稍后在设置中更改。",
-    "confirmEmailWarning": "在登录前，请通过收到的邮件确认您的电子邮件。",
+    "confirmEmailWarning": "请检查您的邮件并点击链接以登录。",
+    "emailNotConfirmed": "电子邮件未确认。请检查您的收件箱并点击链接。",
     "backToLogin": "返回登录"
   },
   "water": {
