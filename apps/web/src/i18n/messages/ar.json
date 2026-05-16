@@ -826,8 +826,9 @@
       "activeGoal_one": "Active goal",
       "activeGoal_few": "Active goals",
       "activeGoal_many": "Active goals",
-      "goalsLabel": "Goals",
-      "completeGoal": "Complete goal"
+      "goalsLabel": "الأهداف",
+      "completeGoal": "إكمال الهدف",
+      "howToAddGoal": "تتم إضافة الأهداف عبر المساعد. اطلب في الدردشة، على سبيل المثال: 'ضع لي هدفًا لـ...'"
     },
     "supplements": {
       "supplementsToday": "Supplements today",

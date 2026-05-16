@@ -827,7 +827,8 @@
       "activeGoal_few": "Aktif Hedefler",
       "activeGoal_many": "Aktif Hedefler",
       "goalsLabel": "Hedefler",
-      "completeGoal": "Hedefi Tamamla"
+      "completeGoal": "Hedefi tamamla",
+      "howToAddGoal": "Hedefler asistan aracılığıyla eklenir. Sohbet kısmından isteyebilirsiniz, örneğin: 'Benim için bir hedef belirle...'"
     },
     "supplements": {
       "supplementsToday": "Bugün Takviyeler",

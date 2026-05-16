@@ -827,8 +827,10 @@
       "activeGoal_few": "활성 목표",
       "activeGoal_many": "활성 목표",
       "goalsLabel": "목표",
-      "completeGoal": "목표 완료"
+      "completeGoal": "목표 완료",
+      "howToAddGoal": "목표는 어시스턴트를 통해 추가됩니다. 채팅창에 '목표 설정해줘...'와 같이 요청해 보세요."
     },
+
     "supplements": {
       "supplementsToday": "오늘의 보충제",
       "checklistToday": "오늘의 체크리스트"

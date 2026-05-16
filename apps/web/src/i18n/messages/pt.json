@@ -826,8 +826,9 @@
       "activeGoal_one": "Meta ativa",
       "activeGoal_few": "Metas ativas",
       "activeGoal_many": "Metas ativas",
-      "goalsLabel": "Metas",
-      "completeGoal": "Concluir meta"
+      "goalsLabel": "Objetivos",
+      "completeGoal": "Concluir objetivo",
+      "howToAddGoal": "Os objetivos são adicionados através do assistente. Basta perguntar no chat, por exemplo: 'Defina um objetivo para...'"
     },
     "supplements": {
       "supplementsToday": "Suplementos hoje",

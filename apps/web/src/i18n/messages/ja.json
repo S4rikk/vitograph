@@ -827,7 +827,8 @@
       "activeGoal_few": "アクティブな目標",
       "activeGoal_many": "アクティブな目標",
       "goalsLabel": "目標",
-      "completeGoal": "目標を完了"
+      "completeGoal": "目標完了",
+      "howToAddGoal": "目標はアシスタント経由で追加されます。チャットで『目標を設定して...』のように依頼してください。"
     },
     "supplements": {
       "supplementsToday": "今日のサプリメント",

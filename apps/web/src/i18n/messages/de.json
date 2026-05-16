@@ -827,8 +827,10 @@
       "activeGoal_few": "Aktive Ziele",
       "activeGoal_many": "Aktive Ziele",
       "goalsLabel": "Ziele",
-      "completeGoal": "Ziel abschließen"
+      "completeGoal": "Ziel abschließen",
+      "howToAddGoal": "Ziele werden über den Assistenten hinzugefügt. Frage einfach im Chat, z. B.: 'Setze mir ein Ziel für...'"
     },
+
     "supplements": {
       "supplementsToday": "Ergänzungen heute",
       "checklistToday": "Checkliste für heute"
