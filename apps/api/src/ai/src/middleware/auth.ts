@@ -57,3 +57,27 @@ export async function requireAuth(
     next(error);
   }
 }
+
+/**
+ * Ensures the authenticated user has administrator privileges.
+ * Must be used AFTER requireAuth.
+ */
+export async function requireAdmin(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+) {
+  try {
+    if (!req.user) {
+      throw new AppError("Authentication required", 401);
+    }
+
+    if (req.user.app_metadata?.role !== "admin") {
+      throw new AppError("Administrator privileges required", 403);
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+}

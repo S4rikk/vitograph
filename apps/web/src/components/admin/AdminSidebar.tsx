@@ -11,7 +11,8 @@ import {
   Menu,
   X,
   MessageSquareWarning,
-  Users
+  Users,
+  Network
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -20,6 +21,7 @@ const navItems = [
   { name: "Users", href: "/admin/users", icon: Users },
   { name: "Knowledge Base", href: "/admin/knowledge", icon: Database },
   { name: "Feedback", href: "/admin/feedback", icon: MessageSquareWarning },
+  { name: "System Architecture", href: "/admin/system-graph", icon: Network },
   { name: "AI Settings", href: "/admin/ai-settings", icon: Settings },
 ];
 

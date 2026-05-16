@@ -32,7 +32,7 @@ const UnifiedWearableSchema = z.object({
     stressScore: z.number().nullable(),
     bodyTemperatureVariationC: z.number().nullable(),
     spo2Percent: z.number().nullable(),
-  })
+  }).partial()
 });
 
 export async function runWearableVisionAnalyzer(imageBase64: string) {

@@ -1092,6 +1092,23 @@ class AiApiClient {
       throw new Error(message);
     }
   }
+
+  /**
+   * Fetches the architectural graph HTML content for admins.
+   */
+  async getSystemGraphHtml(): Promise<string> {
+    const token = await getAuthToken();
+    const url = `${this.baseUrl}/admin/system-graph`;
+    const headers: HeadersInit = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(url, { method: "GET", headers });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.message || `API Error: ${res.status}`);
+    }
+    return res.text();
+  }
 }
 
 export type FoodRecognitionResult = {

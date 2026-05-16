@@ -10,6 +10,7 @@
 
 import { Router } from "express";
 import { validate } from "../../middleware/validate.js";
+import { requireAdmin } from "../../middleware/auth.js";
 import {
   ChatRequestSchema,
   AnalyzeRequestSchema,
@@ -47,6 +48,7 @@ import {
   handleWaterCronPush,
   handlePushUnsubscribe,
   handleAnalyzeWearable,
+  handleGetSystemGraph,
 } from "../../ai.controller.js";
 
 /** AI engine router — mount at /api/v1/ai */
@@ -79,3 +81,6 @@ aiRouter.post("/analytics/correlate-symptoms", handleCorrelateSymptoms);
 
 aiRouter.patch("/meal-log/:id", validate(UpdateMealLogSchema), handleUpdateMealLog);
 aiRouter.delete("/meal-log/:id", handleDeleteMealLog);
+
+// ── Admin Routes ────────────────────────────────────────────────────
+aiRouter.get("/admin/system-graph", requireAdmin, handleGetSystemGraph);

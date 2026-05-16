@@ -25,6 +25,7 @@ import { runLabReportAnalyzer } from "./graph/lab-report-analyzer.js";
 import { runLabelScanner } from "./graph/label-scanner.js";
 import { runWearableVisionAnalyzer } from "./graph/wearable-vision-analyzer.js";
 import * as fs from "fs";
+import * as path from "path";
 import type {
   FoodContext,
   UserProfileContext,
@@ -3640,3 +3641,25 @@ export const handleAnalyzeWearable = async (req: Request, res: Response, next: N
     next(error);
   }
 };
+
+/**
+ * GET /api/v1/ai/admin/system-graph
+ * Serves the interactive architectural graph for admins.
+ */
+export async function handleGetSystemGraph(req: Request, res: Response, next: NextFunction) {
+  try {
+    // The graph.html is located at the root of the project
+    // Apps/api/src/ai is the base for process.cwd() usually in PM2
+    const graphPath = path.resolve(process.cwd(), "../../graphify-out/graph.html");
+    
+    if (!fs.existsSync(graphPath)) {
+      return res.status(404).json({ error: "Architecture graph not found. Run graphify first." });
+    }
+
+    res.setHeader("Content-Type", "text/html");
+    return res.sendFile(graphPath);
+  } catch (error) {
+    console.error("[GET_SYSTEM_GRAPH_ERROR]", error);
+    next(error);
+  }
+}
