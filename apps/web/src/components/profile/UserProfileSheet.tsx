@@ -189,7 +189,6 @@ export default function UserProfileSheet({
     const [mounted, setMounted] = useState(false);
     const { scale, setScale } = useFontScale();
     const currentLocale = useLocale();
-    const [locale, setLocale] = useState(currentLocale);
     const [isChangingLocale, setIsChangingLocale] = useState(false);
     const { theme, setTheme } = useTheme();
 
@@ -366,6 +365,7 @@ export default function UserProfileSheet({
         medications: [] as string[],
         city: "",
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+        locale: "",
     });
 
     const isDirty = initialFormData ? JSON.stringify(formData) !== JSON.stringify(initialFormData) : false;
@@ -430,6 +430,7 @@ export default function UserProfileSheet({
                 timezone:
                     data.timezone ??
                     Intl.DateTimeFormat().resolvedOptions().timeZone,
+                locale: data.locale ?? currentLocale,
             };
             setFormData(newFormData);
             setInitialFormData(newFormData);
@@ -489,6 +490,12 @@ export default function UserProfileSheet({
             };
             setFormData(updatedState);
             setInitialFormData(updatedState);
+
+            // 3. Если язык изменился — перезагружаем страницу
+            if (formData.locale !== initialFormData?.locale) {
+                document.cookie = `NEXT_LOCALE=${formData.locale}; path=/; max-age=31536000; SameSite=Lax`;
+                window.location.reload();
+            }
 
             // 3. Показываем успех
             setSaveSuccess(true);
@@ -1158,23 +1165,11 @@ export default function UserProfileSheet({
                                                 <div className="flex flex-col h-full">
                                                     <label className="block text-[0.8125rem] font-semibold text-ink mb-1.5">{tProfile("language")}</label>
                                                     <select
-                                                        value={locale}
+                                                        value={String(formData.locale ?? currentLocale)}
                                                         disabled={isChangingLocale}
-                                                        onChange={async (e) => {
+                                                        onChange={(e) => {
                                                             const newLocale = e.target.value;
-                                                            setLocale(newLocale);
-                                                            setIsChangingLocale(true);
-                                                            try {
-                                                                const supabase = createClient();
-                                                                await supabase.from('profiles').update({ locale: newLocale }).eq('id', userId);
-                                                                document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
-                                                                window.location.reload();
-                                                            } catch (error) {
-                                                                console.error("Failed to update locale:", error);
-                                                            } finally {
-                                                                // Always re-enable to prevent freezing if refresh throws or takes too long
-                                                                setTimeout(() => setIsChangingLocale(false), 500);
-                                                            }
+                                                            setFormData({ ...formData, locale: newLocale });
                                                         }}
                                                         className="mt-auto w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-surface text-sm text-ink disabled:opacity-50"
                                                     >

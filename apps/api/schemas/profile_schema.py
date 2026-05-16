@@ -56,6 +56,7 @@ class ProfileBase(BaseModel):
     city: str | None = None
     timezone: str | None = None
     ai_name: str | None = Field(default=None)
+    locale: str | None = None
 
 
 # ── Create schema ────────────────────────────────────────────────────
@@ -105,6 +106,7 @@ class ProfileUpdate(BaseModel):
     city: str | None = None
     timezone: str | None = None
     ai_name: str | None = Field(default=None)
+    locale: str | None = None
 
 
 # ── Read (response) schema ───────────────────────────────────────────
