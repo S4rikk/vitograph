@@ -827,7 +827,8 @@
       "activeGoal_few": "Активные цели",
       "activeGoal_many": "Активных целей",
       "goalsLabel": "Цели",
-      "completeGoal": "Завершить цель"
+      "completeGoal": "Завершить цель",
+      "howToAddGoal": "Цели добавляются через ассистента. Просто попросите его в чате, например: «Поставь мне цель...»"
     },
     "supplements": {
       "supplementsToday": "Добавки сегодня",

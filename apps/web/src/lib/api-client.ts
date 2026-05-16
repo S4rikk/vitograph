@@ -923,6 +923,31 @@ class AiApiClient {
   }
 
   /**
+   * Creates a new user profile.
+   */
+  async createProfile(data: any): Promise<any> {
+    try {
+      // Route is /api/v1/profiles
+      const url = this.baseUrl.replace("/ai", "/profiles");
+      const token = await getAuthToken();
+      const headers: HeadersInit = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error(`API Error: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error("[ApiClient] createProfile error:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Gets micronutrient trends over N days.
    */
   async getMicronutrientTrends(userId: string, days: number = 30): Promise<any[]> {

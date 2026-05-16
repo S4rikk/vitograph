@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Target, X, Loader2, Sparkles, ChevronDown } from "lucide-react";
+import { Target, X, Loader2, Sparkles, ChevronDown, Info } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { createClient } from "@/lib/supabase/client";
 import { useTranslations } from "next-intl";
@@ -92,9 +92,18 @@ export default function HealthGoalsWidget() {
             <Target className="w-4 h-4" />
           </div>
           <div className="flex flex-col">
-            <p className="text-[0.75rem] font-semibold text-ink leading-tight">
-              {t("noGoalsTitle")}
-            </p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-[0.75rem] font-semibold text-ink leading-tight">
+                {t("noGoalsTitle")}
+              </p>
+              <div className="group relative inline-flex items-center">
+                <Info size={12} className="text-ink-muted/60 hover:text-primary-500 transition-colors cursor-help" />
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block w-56 p-2.5 bg-white dark:bg-surface border border-border rounded-xl shadow-xl text-[0.7rem] font-medium text-ink-muted z-50 animate-in fade-in zoom-in-95 duration-200 leading-relaxed">
+                  {t("howToAddGoal")}
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 -mb-1 border-4 border-transparent border-b-white dark:border-b-surface"></div>
+                </div>
+              </div>
+            </div>
             <p className="text-[0.6875rem] text-ink-muted italic mt-0.5 leading-snug">
               {t("noGoalsPrompt")}
             </p>

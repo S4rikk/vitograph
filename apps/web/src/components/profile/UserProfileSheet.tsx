@@ -439,6 +439,7 @@ export default function UserProfileSheet({
                 err instanceof Error ? err.message : "Unknown error";
             if (message.includes("404")) {
                 setProfile(null);
+                setInitialFormData({...formData}); // Инициализируем базовое состояние для нового пользователя
             } else {
                 setError(message);
             }
@@ -455,8 +456,9 @@ export default function UserProfileSheet({
         setError(null);
         setSaveSuccess(false);
         try {
-            const payload = {
+            const payload: any = {
                 ...formData,
+                ...(profile ? {} : { id: userId }), // Добавляем ID для новых пользователей (POST)
                 ai_name: formData.ai_name || null,
                 weight_kg: formData.weight_kg
                     ? parseFloat(String(formData.weight_kg))
@@ -476,7 +478,9 @@ export default function UserProfileSheet({
             };
 
             // 1. Сохраняем и получаем актуальные данные от сервера
-            const updatedData = await apiClient.updateProfile(userId, payload);
+            const updatedData = profile 
+                ? await apiClient.updateProfile(userId, payload)
+                : await apiClient.createProfile(payload);
 
             // 2. Обновляем локальный стейт НАПРЯМУЮ, без вызова loadProfile()
             setProfile(updatedData);

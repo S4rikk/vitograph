@@ -827,7 +827,8 @@
       "activeGoal_few": "Active goals",
       "activeGoal_many": "Active goals",
       "goalsLabel": "Goals",
-      "completeGoal": "Complete goal"
+      "completeGoal": "Complete goal",
+      "howToAddGoal": "Goals are added via the assistant. Just ask in the chat, e.g., 'Set a goal for me to...'"
     },
     "supplements": {
       "supplementsToday": "Supplements today",
