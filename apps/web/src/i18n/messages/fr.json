@@ -830,7 +830,6 @@
       "completeGoal": "Terminer l'objectif",
       "howToAddGoal": "Les objectifs sont ajoutés via l'assistant. Demandez simplement dans le chat, par exemple : 'Fixe-moi un objectif pour...'"
     },
-
     "supplements": {
       "supplementsToday": "Suppléments aujourd'hui",
       "checklistToday": "Liste pour aujourd'hui"

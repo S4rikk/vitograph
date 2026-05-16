@@ -1,6 +1,6 @@
 # VITOGRAPH — Frontend Component Map
 
-> **Дата актуальности:** 29 апреля 2026 (обновлено: i18n Localization, Dual-Path Push, Temporal AI Logic)
+> **Дата актуальности:** 16 мая 2026 (обновлено: Locale Persistence, Memory Pruning, Biomarker Localization)
 >
 > Карта UI-компонентов Next.js 14+ (App Router) с описанием ответственности и зависимостей, а также интеграцией Android Capacitor и next-intl.
 
@@ -54,7 +54,7 @@ layout.tsx (RootLayout)
 
 | Компонент                | Назначение                                                                            | API-зависимости                                                                                                                                                |
 | :----------------------- | :------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **MedicalResultsView**   | Оркестратор: загрузка PDF/фото, редактируемые карточки биомаркеров (Pause & Review), красная подсветка пустых полей, диагностический отчёт, соматика. **[NEW]** Батч-загрузка использует `useLabScanJob` хук с async pipeline + Realtime progress bar (UPLOADING→PENDING→PROCESSING→COMPLETED). | `apiClient.uploadFile()`, `apiClient.uploadImageFile()`, **`useLabScanJob()`** → `/parse-image-batch-async`, `apiClient.analyzeLabReport()`, `apiClient.getLabReportsHistory()`, `apiClient.getSomaticHistory()` |
+| **MedicalResultsView**   | Оркестратор: загрузка PDF/фото, редактируемые карточки биомаркеров (Pause & Review), красная подсветка пустых полей, диагностический отчёт, соматика. **[NEW]** Локализация: отображает `display_name` (перевод от ИИ) с оригинальным названием в тултипе. Батч-загрузка использует `useLabScanJob` хук с async pipeline + Realtime progress bar. | `apiClient.uploadFile()`, `apiClient.uploadImageFile()`, **`useLabScanJob()`** → `/parse-image-batch-async`, `apiClient.analyzeLabReport()`, `apiClient.getLabReportsHistory()`, `apiClient.getSomaticHistory()` |
 | **UploadZone**           | Drag-n-drop зона для PDF/DOCX                                                         | `onFileSelect(file)`                                                                                                                                           |
 | **PhotoUploader**        | Кнопка камеры для фото анализов                                                       | `onCapture(base64)`                                                                                                                                            |
 | **ResultCard**           | Одиночная карточка биомаркера                                                         | `name`, `value`, `unit`, `flag`, `referenceRange`                                                                                                              |
@@ -96,7 +96,7 @@ layout.tsx (RootLayout)
 
 | Компонент             | Назначение                                     | API-зависимости         |
 | :-------------------- | :--------------------------------------------- | :---------------------- |
-| **UserProfileSheet**  | Боковая панель профиля (редактирование данных). Кастомная 3D-верстка вкладок. Все данные (ИМТ, носимые устройства, вкладки) локализованы (`tProfile`, `tWearables`). Содержит Danger Zone для сброса долгосрочной памяти ИИ (`/api/v1/ai/memory/long-term`). | Supabase `profiles`     |
+| **UserProfileSheet**  | Боковая панель профиля (редактирование данных). Кастомная 3D-верстка вкладок. Все данные локализованы. **[NEW]** Буферизация: выбор языка сохраняется локально до нажатия «Сохранить», что предотвращает лишние перезагрузки. После сохранения `locale` синхронизируется с БД и куками. Содержит Danger Zone для сброса памяти ИИ. | Supabase `profiles`     |
 | **DeviceWidgetCard**  | Виджет подключённого устройства (wearable)     | — (будущая фича)        |
 | **ManualEntryDialog** | Диалог ручного ввода биомаркера для Health Hub (Вес, Давление, Сахар). Полностью локализован. | Supabase `test_results` |
 
@@ -115,7 +115,7 @@ layout.tsx (RootLayout)
 | Компонент | Назначение |
 | :--- | :--- |
 | **FontScaleProvider** | React Context для глобального масштабирования шрифтов (`small` / `medium` / `large`). Персистит в `localStorage`. Применяет масштаб через `rem` на `<html>` root. Инжектируется в `RootLayout`, anti-FOUC через синхронный `<script>` в `<head>`. UI-контроль в `UserProfileSheet` («Настройки приложения»). |
-
+| **LocaleSync** | Клиентский компонент для синхронизации локали БД с куками `NEXT_LOCALE`. Срабатывает при авторизации и смене языка, обеспечивая персистентность настроек между сессиями. Защищен от бесконечных циклов через `sessionStorage`. |
 ### 2.9 `ui/` — Общие UI-компоненты
 
 | Компонент       | Назначение                                         |

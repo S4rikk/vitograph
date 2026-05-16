@@ -2163,11 +2163,15 @@ export async function handleAnalyzeLabReport(
         val: t.value
       })) || [];
 
-      const userContext = JSON.stringify({
-        profile: leanContext!.profile,
+      const profile = leanContext!.profile;
+      const isDynamicReady = !!(profile.biological_sex && profile.age && profile.weight_kg);
+      const modeInstruction = isDynamicReady ? "[MODE: DYNAMIC_OPTIMUM]" : "[MODE: STANDARD_LAB_REFERENCE]";
+
+      const userContext = `${modeInstruction}\n${JSON.stringify({
+        profile: profile,
         recentTests: mappedRecentTests,
         historySynopsis: formatHistorySynopsis(dbContext.profile),
-      });
+      })}`;
 
       const locale = dbContext.profile?.locale || "ru";
 

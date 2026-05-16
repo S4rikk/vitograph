@@ -1,6 +1,6 @@
 # VITOGRAPH — System Architecture
 
-> **Дата актуальности:** 12 Мая 2026 (обновлено: Deterministic Nutrition Targets, Wearable Vision, TTL GC)
+> **Дата актуальности:** 16 Мая 2026 (обновлено: Locale Persistence, Memory Optimization, Biomarker Localization)
 >
 > Данный документ описывает высокоуровневую архитектуру, потоки данных и ключевые компоненты платформы Vitograph.
 [API Reference](./api_reference.md) | [Frontend Components](./frontend_components.md) | [AI Pipeline](./ai_pipeline.md)
@@ -17,8 +17,8 @@
 | Layer      | Technology                                     |
 | ---------- | ---------------------------------------------- |
 | Frontend   | Next.js (App Router, Server Components)        |
-| Localization | `next-intl` (Поддержка ru, en, ar и др.)       |
 | Mobile App | Capacitor 7 (Android Shell), Remote Server Mode|
+| Locale Sync | Server Layout + LocaleSync Client Component    |
 | AI/App API | Node.js / Express (Port 3001) - *Hybrid Layer* |
 | Core API   | Python 3.12+, FastAPI (async-first)            |
 | Database   | Supabase (PostgreSQL 15+, pgvector, RLS)       |
@@ -59,6 +59,7 @@
 | `lifestyle_markers` | `jsonb`        | **CRITICAL:** Stores the remaining 40+ onboarding markers defined in [`docs/core_markers_50.md`](./core_markers_50.md). This object is updated dynamically by the LangGraph AI. |
 | `city`              | `text`         | Nullable, for geo-environmental factors                                                                                                                                         |
 | `timezone`          | `text`         | IANA timezone, e.g. `Asia/Singapore`                                                                                                                                            |
+| `locale`            | `text`         | User preference (ru, en, ko, etc.). Defaults to 'ru'.                                                                                                                           |
 | `created_at`        | `timestamptz`  | Default `now()`                                                                                                                                                                 |
 | `updated_at`        | `timestamptz`  | Default `now()`, updated by trigger                                                                                                                                             |
 
