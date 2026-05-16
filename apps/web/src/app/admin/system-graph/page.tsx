@@ -51,7 +51,7 @@ export default function SystemGraphPage() {
       </div>
 
       {/* Main Visualization Container */}
-      <div className="flex-1 min-h-[70vh] rounded-2xl border border-white/10 bg-slate-900/40 backdrop-blur-xl overflow-hidden relative group ring-1 ring-white/5 shadow-2xl">
+      <div className="flex-1 min-h-[85vh] md:min-h-[calc(100vh-14rem)] rounded-2xl border border-white/10 bg-slate-900/40 backdrop-blur-xl overflow-hidden relative group ring-1 ring-white/5 shadow-2xl">
         {/* Decorative elements */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/30 to-transparent z-10" />
         
@@ -83,19 +83,11 @@ export default function SystemGraphPage() {
         ) : html ? (
           <iframe 
             srcDoc={html} 
-            className="w-full h-full border-0 transition-opacity duration-1000 ease-in" 
+            className="absolute inset-0 w-full h-full border-0 transition-opacity duration-1000 ease-in" 
             style={{ opacity: loading ? 0 : 1 }}
             title="System Graph"
           />
         ) : null}
-
-        {/* Floating Info Badge */}
-        {!loading && !error && (
-          <div className="absolute bottom-6 right-6 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-slate-950/80 border border-white/10 backdrop-blur-md shadow-xl text-slate-300 pointer-events-none group-hover:opacity-100 opacity-40 transition-opacity duration-500">
-            <Info className="w-4 h-4 text-blue-400" />
-            <span className="text-xs font-medium">Use mouse to zoom & drag nodes</span>
-          </div>
-        )}
       </div>
 
       {/* Investor Talking Points */}

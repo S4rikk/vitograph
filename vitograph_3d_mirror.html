@@ -55,16 +55,17 @@
 
         #hud-sidebar {
             position: absolute;
-            right: 40px;
-            top: 40px;
-            bottom: 40px;
-            width: 400px;
-            padding: 30px;
+            right: 30px;
+            top: 30px;
+            width: 280px;
+            padding: 15px;
             /* Original clip path */
             clip-path: polygon(0 0, 100% 0, 100% 95%, 90% 100%, 0 100%);
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 10px;
+            z-index: 1000;
+            max-height: calc(100% - 60px);
         }
 
         /* 
@@ -117,10 +118,10 @@
 
         .brand {
             font-family: 'Orbitron', sans-serif;
-            font-size: 24px;
-            letter-spacing: 4px;
+            font-size: 18px;
+            letter-spacing: 3px;
             color: var(--neon-cyan);
-            text-shadow: 0 0 10px var(--neon-cyan);
+            text-shadow: 0 0 8px var(--neon-cyan);
         }
 
         .subtitle {
@@ -138,14 +139,14 @@
 
         .stat-card {
             border: 1px solid var(--fui-border);
-            padding: 15px;
+            padding: 10px;
             text-align: center;
             background: rgba(0, 242, 255, 0.03);
         }
 
         .stat-value {
             font-family: 'Orbitron', sans-serif;
-            font-size: 20px;
+            font-size: 16px;
             color: var(--neon-cyan);
         }
 
@@ -175,28 +176,49 @@
         }
 
         .module-name {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 18px;
-            color: white;
-            line-height: 1.4;
+            font-family: monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--neon-cyan);
+            opacity: 0.9;
+            line-height: 1.2;
+            margin-bottom: 5px;
         }
 
         .path-box {
             font-family: monospace;
-            font-size: 11px;
+            font-size: 10px;
             color: var(--neon-cyan);
             background: rgba(0, 0, 0, 0.3);
-            padding: 10px;
+            padding: 8px;
             border-left: 3px solid var(--neon-cyan);
             word-break: break-all;
         }
 
         .description-box {
-            font-size: 14px;
-            line-height: 1.6;
+            font-size: 12px;
+            line-height: 1.5;
             color: rgba(255, 255, 255, 0.8);
             border: 1px dashed var(--fui-border);
-            padding: 15px;
+            padding: 12px;
+            overflow-y: auto;
+            max-height: 45vh;
+            scrollbar-width: thin;
+            scrollbar-color: var(--neon-cyan) transparent;
+        }
+
+        .description-box::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .description-box::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .description-box::-webkit-scrollbar-thumb {
+            background: var(--neon-cyan);
+            box-shadow: 0 0 10px var(--neon-cyan);
         }
 
         #search-container {
@@ -333,6 +355,8 @@
                     id: node.id,
                     name: node.label,
                     val: calculatedVal,
+                    size: node.size || 10,
+                    community: node.community,
                     color: (node.color && node.color.background) ? node.color.background : '#00f2ff',
                     file: node.source_file || 'unknown'
                 };
@@ -490,12 +514,22 @@
 
             .graphData(RAW_DATA)
             .nodeLabel('name')
-            .nodeColor('color')
-            .nodeRelSize(3) // Clean default size without glow logic
-            .nodeResolution(24) // Makes geometry perfectly spherical instead of low-poly
-            .linkDirectionalParticles(2)
-            .linkDirectionalParticleWidth(1.5)
-            .linkDirectionalParticleSpeed(d => Math.random() * 0.005 + 0.002)
+            .nodeColor(node => node === selectedNode ? '#00f2ff' : (node.color.background || node.color))
+            .nodeVal(node => {
+                const s = node.size || 10;
+                let v = 20; // Small (Minor)
+                if (s > 17) v = 800; // Big (Core) - Massive dominance
+                else if (s > 12) v = 180; // Medium (Major) - Clear distinction
+                
+                return node === selectedNode ? v * 3 : v;
+            })
+            .nodeRelSize(1)
+            .nodeResolution(24)
+            .linkColor(link => (link.source === selectedNode || link.target === selectedNode) ? '#00f2ff' : '#555555')
+            .linkWidth(link => (link.source === selectedNode || link.target === selectedNode) ? 2 : 0.8)
+            .linkDirectionalParticles(link => (link.source === selectedNode || link.target === selectedNode) ? 12 : 2)
+            .linkDirectionalParticleWidth(2)
+            .linkDirectionalParticleSpeed(link => (link.source === selectedNode || link.target === selectedNode) ? 0.012 : 0.003)
             .onNodeClick(node => {
                 focusNode(node);
             });
@@ -518,8 +552,19 @@
 
         Graph.onEngineStop(() => { 
             console.log('Engine simulation complete.');
-            // Graph.zoomToFit(400); // Disabled: prevented sudden camera zoom-outs during interaction
         });
+
+        // Ensure canvas resizes dynamically when the iframe/window changes
+        window.addEventListener('resize', () => {
+            Graph.width(window.innerWidth);
+            Graph.height(window.innerHeight);
+        });
+
+        // Trigger resize manually after a short delay to fix iframe initialization race conditions
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 500);
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 1000);
+            // Graph.zoomToFit(400); // Disabled: prevented sudden camera zoom-outs during interaction
 
         // Controls
         Graph.controls().autoRotate = true;
@@ -542,7 +587,14 @@
             document.getElementById('detail-path').innerText = node.file;
             document.getElementById('detail-desc').innerText = semantic.desc;
 
-            const distance = 160; // Increased distance so the node appears half the size
+            // Trigger visual refresh for highlighting
+            Graph.nodeColor(Graph.nodeColor());
+            Graph.nodeVal(Graph.nodeVal());
+            Graph.linkColor(Graph.linkColor());
+            Graph.linkWidth(Graph.linkWidth());
+            Graph.linkDirectionalParticles(Graph.linkDirectionalParticles());
+
+            const distance = 350; // Increased distance so the node appears smaller and provides more context after zoom
             const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
 
             Graph.cameraPosition(

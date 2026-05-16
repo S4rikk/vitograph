@@ -3648,12 +3648,21 @@ export const handleAnalyzeWearable = async (req: Request, res: Response, next: N
  */
 export async function handleGetSystemGraph(req: Request, res: Response, next: NextFunction) {
   try {
-    // The graph.html is located at the root of the project
-    // Apps/api/src/ai is the base for process.cwd() usually in PM2
-    const graphPath = path.resolve(process.cwd(), "../../graphify-out/graph.html");
+    // Bulletproof search: walk up the directory tree to find the file
+    let currentDir = process.cwd();
+    let graphPath = path.join(currentDir, "vitograph_3d_mirror.html");
+    
+    while (currentDir !== path.dirname(currentDir)) {
+      const testPath = path.join(currentDir, "vitograph_3d_mirror.html");
+      if (fs.existsSync(testPath)) {
+        graphPath = testPath;
+        break;
+      }
+      currentDir = path.dirname(currentDir);
+    }
     
     if (!fs.existsSync(graphPath)) {
-      return res.status(404).json({ error: "Architecture graph not found. Run graphify first." });
+      return res.status(404).json({ error: "System mirror HTML not found." });
     }
 
     res.setHeader("Content-Type", "text/html");
