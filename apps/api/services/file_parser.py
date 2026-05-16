@@ -37,6 +37,9 @@ class BiomarkerResult(BaseModel):
     original_name: str = Field(
         description="Exact name from the report (e.g., 'Hemoglobin (Hb)')"
     )
+    display_name: Optional[str] = Field(
+        None, description="Localized name for the user interface (e.g., 'Sodium (Na)')"
+    )
     standardized_slug: str = Field(
         description="Standardized unified ID, e.g., 'hemoglobin', 'tsh', 'glucose'"
     )
@@ -174,10 +177,15 @@ async def extract_biomarkers(
 
     system_prompt = (
         "You are an expert medical lab report parser for VITOGRAPH.\n\n"
-        f"Your goal is to extract clinical data and return it using the strict JSON schema provided. ALL TEXT OUTPUTS (notes, recommendations, context) MUST BE STRICTLY WRITTEN IN {target_language.upper()}.\n\n"  # noqa: E501
+        f"Your goal is to extract clinical data and return it using the strict JSON schema provided. ALL TEXT OUTPUTS (display_name, unit, notes, recommendations, context) MUST BE STRICTLY WRITTEN IN {target_language.upper()}.\n\n"  # noqa: E501
         "STEPS:\n"
-        "1. MENTAL OCR: First, carefully read the entire provided text and count EVERY unique biomarker row.\n"  # noqa: E501
-        "2. POPULATE `total_found_count`: This number MUST exactly match the total number of items in the `biomarkers` array.\n\n"  # noqa: E501
+        "1. MENTAL OCR: First, carefully read the entire provided text and count EVERY unique biomarker row.\n"
+        f"2. LANGUAGE TRANSLATION: If the report is NOT in {target_language.upper()}, translate names and units to {target_language.upper()}.\n"
+        "   - `original_name`: Extract EXACTLY as written in the report (e.g., 'Натрий (Na)').\n"
+        "   - `display_name`: Translate the name while preserving chemical symbols or abbreviations in parentheses (e.g., 'Sodium (Na)').\n"
+        "   - `unit`: Translate units to their standard medical equivalents (e.g., 'ммоль/л' -> 'mmol/L', 'МЕ/л' -> 'IU/L'). Use Latin characters for units if appropriate for medical applications.\n"
+        f"   - `notes` & `recommendations`: Must be strictly in {target_language.upper()}.\n"
+        "3. POPULATE `total_found_count`: This number MUST exactly match the total number of items in the `biomarkers` array.\n\n"  # noqa: E501
         "ZERO-TOLERANCE RULES:\n"
         "1. NO HALLUCINATIONS: If the reference range is NOT explicitly written in the provided text, "  # noqa: E501
         "set `reference_range` to null. DO NOT hallucinate standard medical ranges from your training data. "  # noqa: E501
@@ -257,16 +265,20 @@ async def extract_biomarkers_from_image(
     }.get(locale[:2].lower(), "English")
 
     system_prompt = (
-        f"You are an expert medical lab report parser for VITOGRAPH. ALL TEXT EXPLANATIONS (notes, recommendations, context) MUST BE STRICTLY WRITTEN IN {target_language.upper()}.\n\n"  # noqa: E501
+        f"You are an expert medical lab report parser for VITOGRAPH. ALL TEXT OUTPUTS (display_name, unit, notes, recommendations, context) MUST BE STRICTLY WRITTEN IN {target_language.upper()}.\n\n"  # noqa: E501
         "You are receiving a PHOTO of a printed lab report form.\n"
         "STEPS:\n"
         "1. VISUAL ANCHORS: Treat the page as a structured grid. Identify columns for 'Name', 'Result', 'Unit', and 'Reference Range'.\n"  # noqa: E501
-        "2. ROW ANCHORING: Every row in these reports typically starts with a numeric index (1, 2, 3...). Treat this index as a **rigid anchor**. If you skip an index, you are likely missing a biomarker.\n"  # noqa: E501
-        "3. SUBTYPE AWARENESS: Explicitly distinguish between markers with similar stems but different suffixes, such as `PDW-CV` (which might be in row 24) and `PDW-SD` (which might be in row 25). Do not merge them into one entry.\n"  # noqa: E501
-        "4. HORIZONTAL SCANNING: Reference ranges are often far to the right. Ensure you maintain row alignment even across wide whitespace gaps.\n"  # noqa: E501
-        "5. SECOND LOOK: If you find a biomarker name but the value is missing in its usual column, perform a second look nearby (above, below, or slightly offset) before returning null.\n"  # noqa: E501
-        "6. MENTAL OCR: Carefully scan the entire image and count EVERY unique biomarker row (numeric indices).\n"  # noqa: E501
-        "7. POPULATE `total_found_count`: This number MUST exactly match the total number of items in the `biomarkers` array and the count of numeric indices found.\n\n"  # noqa: E501
+        f"2. LANGUAGE TRANSLATION: If the report is NOT in {target_language.upper()}, translate names and units to {target_language.upper()}.\n"
+        "   - `original_name`: Extract EXACTLY as written in the report (e.g., 'Натрий (Na)').\n"
+        "   - `display_name`: Translate the name while preserving chemical symbols or abbreviations in parentheses (e.g., 'Sodium (Na)').\n"
+        "   - `unit`: Translate units to their standard medical equivalents (e.g., 'ммоль/л' -> 'mmol/L', 'МЕ/л' -> 'IU/L'). Use Latin characters for units if appropriate for medical applications.\n"
+        "3. ROW ANCHORING: Every row in these reports typically starts with a numeric index (1, 2, 3...). Treat this index as a **rigid anchor**. If you skip an index, you are likely missing a biomarker.\n"  # noqa: E501
+        "4. SUBTYPE AWARENESS: Explicitly distinguish between markers with similar stems but different suffixes, such as `PDW-CV` (which might be in row 24) and `PDW-SD` (which might be in row 25). Do not merge them into one entry.\n"  # noqa: E501
+        "5. HORIZONTAL SCANNING: Reference ranges are often far to the right. Ensure you maintain row alignment even across wide whitespace gaps.\n"  # noqa: E501
+        "6. SECOND LOOK: If you find a biomarker name but the value is missing in its usual column, perform a second look nearby (above, below, or slightly offset) before returning null.\n"  # noqa: E501
+        "7. MENTAL OCR: Carefully scan the entire image and count EVERY unique biomarker row (numeric indices).\n"  # noqa: E501
+        "8. POPULATE `total_found_count`: This number MUST exactly match the total number of items in the `biomarkers` array and the count of numeric indices found.\n\n"  # noqa: E501
         "ZERO-TOLERANCE RULES:\n"
         "1. NO HALLUCINATIONS: If the reference range is NOT explicitly visible "
         "in the photo, set `reference_range` to null. DO NOT hallucinate "

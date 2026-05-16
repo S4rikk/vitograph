@@ -132,6 +132,7 @@ export interface ReferenceRange {
 
 export interface BiomarkerResult {
   original_name: string;
+  display_name: string;
   standardized_slug: string;
   value_numeric?: number | null;
   value_string?: string | null;

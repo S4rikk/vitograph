@@ -611,7 +611,8 @@
     "skinDescription": "Take a photo of the problem skin area. AI will identify visible patterns: dryness, rashes, pigmentation.",
     "flagNormal": "Normal",
     "flagLow": "Low",
-    "flagHigh": "High"
+    "flagHigh": "High",
+    "originalLabel": "Original"
   },
   "onboarding": {
     "welcome": "Welcome to VITOGRAPH",

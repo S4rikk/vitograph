@@ -403,7 +403,12 @@ export default function MedicalResultsView() {
                 <div>
                   {/* Название */}
                   <div className="flex justify-between items-start gap-3 mt-1">
-                    <h3 className="font-semibold text-ink leading-tight" title={marker.original_name}>{marker.original_name}</h3>
+                    <h3 
+                      className="font-semibold text-ink leading-tight cursor-help" 
+                      title={`${t("originalLabel")}: ${marker.original_name}`}
+                    >
+                      {marker.display_name || marker.original_name}
+                    </h3>
                     {/* Бейдж статуса (Flag) */}
                     {marker.flag && (
                       <span className={`flex-shrink-0 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium tracking-wide ${marker.flag === 'Normal'
