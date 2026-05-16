@@ -1,7 +1,7 @@
 import { StateGraph, END } from "@langchain/langgraph";
 import { ChatOpenAI } from "@langchain/openai";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
-import { BaseMessage, AIMessage } from "@langchain/core/messages";
+import { BaseMessage, AIMessage, RemoveMessage } from "@langchain/core/messages";
 import { GraphAnnotation } from "./state.js";
 import { agentTools, assistantTools, diaryTools } from "./tools.js";
 import { checkpointer } from "./checkpointer.js";
@@ -120,7 +120,19 @@ async function callModel(state: typeof GraphAnnotation.State, config?: any) {
   const latestSystemMessage = systemMessages.length > 0 ? systemMessages[systemMessages.length - 1] : null;
   
   let convoMessages = state.messages.filter(m => !m._getType || m._getType() !== "system");
-  if (convoMessages.length > 12) {
+  
+  // Identify messages to prune from the persistent state (keep last 20)
+  const PRUNE_THRESHOLD = 20;
+  const messagesToPrune: RemoveMessage[] = [];
+  
+  if (convoMessages.length > PRUNE_THRESHOLD) {
+    const toRemove = convoMessages.slice(0, convoMessages.length - PRUNE_THRESHOLD);
+    toRemove.forEach(m => {
+      if (m.id) {
+        messagesToPrune.push(new RemoveMessage({ id: m.id }));
+      }
+    });
+    // For the LLM prompt, we keep a smaller window (12 messages)
     convoMessages = convoMessages.slice(convoMessages.length - 12);
   }
 
@@ -183,7 +195,7 @@ async function callModel(state: typeof GraphAnnotation.State, config?: any) {
   const usageInfo = usage ? ` | tokens: P=${usage.input_tokens}, C=${usage.output_tokens}, T=${usage.total_tokens}` : "";
 
   console.log(`[AGENT] ✅ Response received | model=${response.response_metadata?.model_name || 'unknown'}${usageInfo}`);
-  return { messages: [response] };
+  return { messages: [...messagesToPrune, response] };
 }
 const toolNode = new ToolNode(agentTools);
 function shouldContinue(state: typeof GraphAnnotation.State) {
