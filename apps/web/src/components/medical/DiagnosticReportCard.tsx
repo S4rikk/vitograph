@@ -6,11 +6,11 @@ import { useTranslations } from "next-intl";
 /* ── Color Maps ──────────────────────────────────────────────── */
 
 const STATUS_COLORS: Record<string, string> = {
-    critical_low: "bg-red-100 text-red-800 border-red-300",
-    critical_high: "bg-red-100 text-red-800 border-red-300",
-    low: "bg-amber-500/10 text-amber-800 border-amber-300",
-    high: "bg-amber-500/10 text-amber-800 border-amber-300",
-    normal: "bg-green-500/10 text-green-700 border-green-300",
+    critical_low: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/50",
+    critical_high: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/50",
+    low: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900/50",
+    high: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900/50",
+    normal: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50",
 };
 
 const SEVERITY_BORDER: Record<string, string> = {
@@ -78,7 +78,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
                                         {b.value} {b.unit}
                                     </span>
                                 </div>
-                                <p className="mt-1 text-xs opacity-80">
+                                <p className="mt-1 text-xs opacity-70">
                                     {t("refLabel")} {b.reference_range}
                                 </p>
                                 <p className="mt-1 text-xs leading-snug">

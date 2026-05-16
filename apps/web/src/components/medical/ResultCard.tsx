@@ -17,31 +17,31 @@ const STATUS_CONFIG: Record<
 > = {
   optimal: {
     labelKey: "optimal",
-    color: "text-success",
-    bg: "bg-green-500/10",
+    color: "text-emerald-700 dark:text-emerald-400",
+    bg: "bg-emerald-500/10",
     icon: "✓",
   },
   low: {
     labelKey: "low",
-    color: "text-warning",
+    color: "text-amber-700 dark:text-amber-400",
     bg: "bg-amber-500/10",
     icon: "↓",
   },
   high: {
     labelKey: "high",
-    color: "text-warning",
+    color: "text-amber-700 dark:text-amber-400",
     bg: "bg-amber-500/10",
     icon: "↑",
   },
   critical_low: {
     labelKey: "critical",
-    color: "text-error",
+    color: "text-red-700 dark:text-red-400",
     bg: "bg-red-500/10",
     icon: "↓↓",
   },
   critical_high: {
     labelKey: "critical",
-    color: "text-error",
+    color: "text-red-700 dark:text-red-400",
     bg: "bg-red-500/10",
     icon: "↑↑",
   },
