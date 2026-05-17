@@ -230,6 +230,7 @@
         }
 
         #search {
+            box-sizing: border-box;
             width: 100%;
             background: rgba(0,0,0,0.5);
             border: 1px solid var(--fui-border);
@@ -278,6 +279,184 @@
             0% { bottom: 100%; }
             100% { bottom: -100px; }
         }
+
+        /* Responsive Mobile Styles */
+        .hud-toggle-btn {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            #search-container {
+                left: 15px !important;
+                top: 15px !important;
+                width: calc(100% - 30px) !important;
+            }
+            
+            #hud-sidebar {
+                right: 10px !important;
+                left: 10px !important;
+                top: auto !important;
+                bottom: 10px !important;
+                width: auto !important;
+                height: auto !important;
+                max-height: 75vh !important;
+                padding: 10px !important;
+                transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+                clip-path: polygon(0 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%) !important;
+            }
+
+            #hud-sidebar::before {
+                background-image: 
+                    /* Top border */
+                    linear-gradient(to right, rgba(0, 242, 255, 0), var(--neon-cyan) 15%, var(--neon-cyan) 85%, rgba(0, 242, 255, 0)),
+                    /* Left border */
+                    linear-gradient(to bottom, rgba(0, 242, 255, 0), var(--neon-cyan) 15%, var(--neon-cyan) 85%, rgba(0, 242, 255, 0)),
+                    /* Right border */
+                    linear-gradient(to bottom, rgba(0, 242, 255, 0), var(--neon-cyan) 15%, var(--neon-cyan) 85%, rgba(0, 242, 255, 0)),
+                    /* Bottom border */
+                    linear-gradient(to right, rgba(0, 242, 255, 0), var(--neon-cyan) 15%, var(--neon-cyan) 85%, rgba(0, 242, 255, 0)),
+                    /* Diagonal border */
+                    linear-gradient(135deg, rgba(0, 242, 255, 0) 40%, var(--neon-cyan) 50%, rgba(0, 242, 255, 0) 60%) !important;
+                
+                background-size: 
+                    100% 1.8px, 
+                    1.8px 100%, 
+                    1.8px calc(100% - 18px), 
+                    calc(100% - 18px) 1.8px, 
+                    18px 18px !important;
+                
+                background-position: 
+                    0 0, 
+                    0 0, 
+                    100% 0, 
+                    0 100%, 
+                    100% 100% !important;
+            }
+            
+            /* Collapsed Drawer state on mobile - extremely compact thin bar */
+            #hud-sidebar.collapsed {
+                bottom: 10px !important;
+                max-height: 52px !important;
+                height: 52px !important;
+                overflow: hidden !important;
+            }
+
+            #hud-sidebar.collapsed .stats-grid,
+            #hud-sidebar.collapsed #detail-view {
+                opacity: 0 !important;
+                pointer-events: none !important;
+                display: none !important;
+            }
+            
+            /* Hide general stats and subtitle when a node is selected on mobile to avoid blocking the graph */
+            #hud-sidebar.has-selected .stats-grid {
+                display: none !important;
+            }
+            
+            #hud-sidebar.has-selected .hud-header .subtitle {
+                display: none !important;
+            }
+            
+            #hud-sidebar.has-selected .hud-header {
+                padding-bottom: 3px !important;
+                margin-bottom: 1.3px !important;
+            }
+
+            .brand {
+                font-size: 15px !important; /* 15% reduction from 18px */
+                letter-spacing: 2px !important;
+            }
+            
+            #detail-view {
+                height: auto !important;
+                max-height: none !important;
+                overflow-y: visible !important;
+                gap: 8px !important;
+            }
+
+            /* Extra-tight sizing for mobile selection details */
+            #hud-sidebar.has-selected {
+                padding: 8px 8px 4px 8px !important; /* tight body padding */
+            }
+
+            #hud-sidebar.has-selected #detail-view {
+                gap: 4px !important; /* tight element spacing */
+            }
+
+            #hud-sidebar.has-selected #detail-view > div:first-child {
+                margin-top: 1px !important;
+            }
+
+            .category-tag {
+                font-size: 8px !important;
+                padding: 2.5px 10px 2.5px 16px !important;
+                clip-path: polygon(0 0, 97% 0, 100% 100%, 3% 100%) !important;
+            }
+
+            .module-name {
+                font-size: 9.5px !important;
+                margin-top: 1px !important;
+                margin-bottom: 1px !important;
+                line-height: 1.15 !important;
+            }
+
+            .detail-status {
+                margin-top: 2px !important;
+                margin-bottom: 0px !important;
+                font-size: 7.5px !important;
+                opacity: 0.3 !important;
+                letter-spacing: 0.5px !important;
+                text-align: center !important;
+            }
+
+            .path-box {
+                padding: 4px 6px !important;
+                font-size: 8px !important;
+                margin-bottom: 1px !important;
+            }
+
+            .description-box {
+                font-size: 10.5px !important;
+                line-height: 1.3 !important;
+                padding: 5px 8px !important;
+            }
+            
+            .hud-toggle-btn {
+                display: inline-block !important;
+                position: absolute !important;
+                right: 10px !important;
+                top: 7px !important;
+                background: transparent !important;
+                border: 1px solid var(--neon-cyan) !important;
+                color: var(--neon-cyan) !important;
+                font-family: 'Orbitron', sans-serif !important;
+                font-size: 9px !important;
+                padding: 3px 6px !important;
+                cursor: pointer !important;
+                letter-spacing: 1px !important;
+                box-shadow: 0 0 5px rgba(0, 242, 255, 0.3) !important;
+                transition: all 0.2s ease !important;
+                z-index: 1001 !important;
+                pointer-events: auto !important;
+            }
+            
+            .hud-toggle-btn:hover {
+                background: rgba(0, 242, 255, 0.2) !important;
+                box-shadow: 0 0 10px var(--neon-cyan) !important;
+            }
+            
+            #hud-sidebar.collapsed .subtitle {
+                display: none !important;
+            }
+
+            /* Полная видимость подсказки навигации в 10px зазоре под панелью */
+            .scene-nav-info {
+                bottom: 1px !important;
+                font-size: 8px !important;
+                line-height: 1 !important;
+                opacity: 0.5 !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -294,6 +473,7 @@
         </div>
 
         <div id="hud-sidebar" class="glass-panel">
+            <button class="hud-toggle-btn" id="hud-toggle">[MINIMIZE]</button>
             <div class="hud-header">
                 <div class="brand">VITOGRAPH</div>
                 <div class="subtitle">STRATEGIC SYSTEM ARCHITECTURE MIRROR V3.0 (3D)</div>
@@ -319,7 +499,7 @@
                 <div class="description-box" id="detail-desc">
                     Выберите узел в трехмерном пространстве для активации орбитального режима и получения семантической справки.
                 </div>
-                <div style="margin-top: auto; font-size: 10px; opacity: 0.4;">
+                <div class="detail-status" style="margin-top: auto; font-size: 10px; opacity: 0.4;">
                     STATUS: ONLINE | INTEGRITY: 100% | MODE: ORBIT_LOCK
                 </div>
             </div>
@@ -532,6 +712,9 @@
             .linkDirectionalParticleSpeed(link => (link.source === selectedNode || link.target === selectedNode) ? 0.012 : 0.003)
             .onNodeClick(node => {
                 focusNode(node);
+            })
+            .onBackgroundClick(() => {
+                deselectNode();
             });
 
         // Forces
@@ -577,6 +760,34 @@
 
         let selectedNode = null;
 
+        function deselectNode() {
+            selectedNode = null;
+            
+            // Remove has-selected and collapse on mobile
+            const sidebar = document.getElementById('hud-sidebar');
+            const toggleBtn = document.getElementById('hud-toggle');
+            if (sidebar) {
+                sidebar.classList.remove('has-selected');
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.add('collapsed');
+                    if (toggleBtn) toggleBtn.innerText = '[EXPAND]';
+                }
+            }
+
+            // Reset detail view opacity
+            document.getElementById('detail-view').style.opacity = '0';
+            
+            // Clear laser path
+            document.getElementById('laser').setAttribute('d', '');
+
+            // Trigger visual refresh for highlighting
+            Graph.nodeColor(Graph.nodeColor());
+            Graph.nodeVal(Graph.nodeVal());
+            Graph.linkColor(Graph.linkColor());
+            Graph.linkWidth(Graph.linkWidth());
+            Graph.linkDirectionalParticles(Graph.linkDirectionalParticles());
+        }
+
         function focusNode(node) {
             selectedNode = node;
             document.getElementById('detail-view').style.opacity = '1';
@@ -586,6 +797,17 @@
             document.getElementById('detail-title').innerText = semantic.title;
             document.getElementById('detail-path').innerText = node.file;
             document.getElementById('detail-desc').innerText = semantic.desc;
+
+            // Automatically expand sidebar and add has-selected marker to minimize size
+            const sidebar = document.getElementById('hud-sidebar');
+            const toggleBtn = document.getElementById('hud-toggle');
+            if (sidebar) {
+                sidebar.classList.add('has-selected');
+                if (toggleBtn && window.innerWidth <= 768) {
+                    sidebar.classList.remove('collapsed');
+                    toggleBtn.innerText = '[MINIMIZE]';
+                }
+            }
 
             // Trigger visual refresh for highlighting
             Graph.nodeColor(Graph.nodeColor());
@@ -597,9 +819,12 @@
             const distance = 350; // Increased distance so the node appears smaller and provides more context after zoom
             const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
 
+            // Shift camera lookAt down on mobile so the node is centered in the free top area above the panel
+            const offsetY = window.innerWidth <= 768 ? 75 : 0;
+
             Graph.cameraPosition(
-                { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }, // new pos
-                node, // lookAt
+                { x: node.x * distRatio, y: node.y * distRatio - offsetY, z: node.z * distRatio }, // new pos
+                { x: node.x, y: node.y - offsetY, z: node.z }, // lookAt
                 1500  // ms
             );
         }
@@ -617,15 +842,65 @@
                 const x = (nodePos.x + 1) * window.innerWidth / 2;
                 const y = -(nodePos.y - 1) * window.innerHeight / 2;
                 
-                const hudX = window.innerWidth - 440;
-                const hudY = 300; 
+                const sidebar = document.getElementById('hud-sidebar');
+                const rect = sidebar.getBoundingClientRect();
+                
+                // Dynamically target the panel based on screen layout
+                const isMobile = window.innerWidth <= 768;
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                
+                // If collapsed on mobile, hide the laser line
+                if (isMobile && isCollapsed) {
+                    document.getElementById('laser').setAttribute('d', '');
+                    return;
+                }
+                
+                const hudX = isMobile ? rect.left + rect.width / 2 : rect.left;
+                const hudY = isMobile ? rect.top : rect.top + rect.height / 3;
 
-                // Backticks inside f-string must be properly escaped if we were using it in Python, 
-                // but since we are writing raw javascript we just use backticks:
                 document.getElementById('laser').setAttribute('d', `M ${x} ${y} L ${hudX} ${hudY}`);
             } catch (e) {
                 // ignore
             }
+        }
+
+        // Initialize mobile collapsible sidebar controls
+        const sidebar = document.getElementById('hud-sidebar');
+        const toggleBtn = document.getElementById('hud-toggle');
+        if (sidebar && toggleBtn) {
+            // Default collapsed on mobile view initially
+            if (window.innerWidth <= 768 && !selectedNode) {
+                sidebar.classList.add('collapsed');
+                toggleBtn.innerText = '[EXPAND]';
+            }
+            
+            toggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                sidebar.classList.toggle('collapsed');
+                if (sidebar.classList.contains('collapsed')) {
+                    toggleBtn.innerText = '[EXPAND]';
+                } else {
+                    toggleBtn.innerText = '[MINIMIZE]';
+                }
+            });
+        }
+
+        // Live real-time search auto-focus
+        const searchInput = document.getElementById('search');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                if (!query) return;
+                
+                const matchedNode = RAW_DATA.nodes.find(node => 
+                    (node.label && node.label.toLowerCase().includes(query)) ||
+                    (node.id && node.id.toLowerCase().includes(query))
+                );
+                
+                if (matchedNode) {
+                    focusNode(matchedNode);
+                }
+            });
         }
 
         (function animate() {
