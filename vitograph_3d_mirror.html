@@ -820,7 +820,7 @@
             const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
 
             // Shift camera lookAt down on mobile so the node is centered in the free top area above the panel
-            const offsetY = window.innerWidth <= 768 ? 75 : 0;
+            const offsetY = window.innerWidth <= 768 ? 105 : 0;
 
             Graph.cameraPosition(
                 { x: node.x * distRatio, y: node.y * distRatio - offsetY, z: node.z * distRatio }, // new pos
