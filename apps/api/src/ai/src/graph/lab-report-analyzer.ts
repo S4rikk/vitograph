@@ -347,10 +347,12 @@ SUPPLEMENTS: ${JSON.stringify(supps ? supps : [])}
         saveCachedNotes(supabase, newEntries).catch(() => {});
     }
 
+    const reportTimestamp = new Date().toISOString();
+
     // ── Persist report in profiles.lab_diagnostic_reports ────────────
     if (supabase) {
         existingReports.push({
-            timestamp: new Date().toISOString(),
+            timestamp: reportTimestamp,
             biomarkers_count: biomarkerResults.length,
             data_hash: currentHash,
             report: result.data,
@@ -369,6 +371,72 @@ SUPPLEMENTS: ${JSON.stringify(supps ? supps : [])}
                 // @ts-ignore
                 .update({ food_contraindication_zones: result.data.food_zones })
                 .eq("id", userId);
+        }
+
+        // --- Database Persistence for Test Sessions & Results ---
+        try {
+            const { data: dbBiomarkers, error: bioError } = await supabase
+                .from("biomarkers")
+                .select("id, name_en, name_ru, code, aliases");
+
+            if (!bioError && dbBiomarkers) {
+                const insertPayloads: any[] = [];
+
+                for (const item of biomarkerResults) {
+                    const cleanItemName = (item.original_name || "").toLowerCase().trim();
+                    const match = (dbBiomarkers as any[]).find(b => {
+                        const nameEn = (b.name_en || "").toLowerCase();
+                        const nameRu = (b.name_ru || "").toLowerCase();
+                        const aliases = Array.isArray(b.aliases) ? b.aliases.map((a: string) => a.toLowerCase()) : [];
+                        return nameEn === cleanItemName || nameRu === cleanItemName || aliases.includes(cleanItemName);
+                    });
+
+                    if (match) {
+                        insertPayloads.push({
+                            user_id: userId,
+                            biomarker_id: match.id,
+                            value: item.value_numeric !== null && item.value_numeric !== undefined ? item.value_numeric : item.value_string,
+                            unit: item.unit,
+                            test_date: reportTimestamp.split('T')[0],
+                            source: "manual",
+                        });
+                    }
+                }
+
+                if (insertPayloads.length > 0) {
+                    const { data: sessionData, error: sessionError } = await (supabase
+                        .from("test_sessions") as any)
+                        .insert({
+                            user_id: userId,
+                            test_date: reportTimestamp.split('T')[0],
+                            status: "completed",
+                            notes: reportTimestamp
+                        })
+                        .select("id")
+                        .single();
+
+                    if (sessionError) {
+                        console.error("[LabAnalyzer] DB Session Insert Error:", sessionError);
+                    } else if (sessionData) {
+                        const finalPayloads = insertPayloads.map(p => ({
+                            ...p,
+                            session_id: (sessionData as any).id
+                        }));
+
+                        const { error: insertError } = await (supabase
+                            .from("test_results") as any)
+                            .insert(finalPayloads);
+
+                        if (insertError) {
+                            console.error("[LabAnalyzer] DB Insert Error:", insertError);
+                        }
+                    }
+                }
+            } else {
+                console.error("[LabAnalyzer] Failed to fetch biomarkers dict:", bioError);
+            }
+        } catch (dbError) {
+            console.error("[LabAnalyzer] DB persistence failed (non-fatal):", dbError);
         }
 
         // ── Phase 49: Persist Temporary Knowledge Bases ────────────

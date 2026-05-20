@@ -85,10 +85,40 @@ export default function MedicalResultsView() {
     }
   }, [isDiagnosing]);
 
+  // Synchronize draft state to sessionStorage
+  useEffect(() => {
+    if (uploadState === "done" && editableBiomarkers && !reportAlreadyGenerated) {
+      sessionStorage.setItem("vitograph_draft_biomarkers", JSON.stringify(editableBiomarkers));
+      if (results) sessionStorage.setItem("vitograph_draft_results", JSON.stringify(results));
+      sessionStorage.setItem("vitograph_draft_isDirty", JSON.stringify(isDirty));
+    }
+  }, [editableBiomarkers, results, uploadState, isDirty, reportAlreadyGenerated]);
+
   useEffect(() => {
     async function fetchHistory() {
       try {
         setIsLoadingHistory(true);
+
+        // 1. Restore draft if exists
+        const draftBiomarkersStr = sessionStorage.getItem("vitograph_draft_biomarkers");
+        const draftResultsStr = sessionStorage.getItem("vitograph_draft_results");
+        const draftIsDirtyStr = sessionStorage.getItem("vitograph_draft_isDirty");
+        
+        let hasDraft = false;
+        if (draftBiomarkersStr && draftResultsStr) {
+          try {
+            setEditableBiomarkers(JSON.parse(draftBiomarkersStr));
+            setResults(JSON.parse(draftResultsStr));
+            if (draftIsDirtyStr) setIsDirty(JSON.parse(draftIsDirtyStr));
+            setUploadState("done");
+            setReportAlreadyGenerated(false);
+            hasDraft = true;
+          } catch (e) {
+            console.error("Failed to parse draft", e);
+          }
+        }
+
+        // 2. Fetch History
         const [history, somatic] = await Promise.all([
           apiClient.getLabReportsHistory(),
           apiClient.getSomaticHistory()
@@ -97,17 +127,20 @@ export default function MedicalResultsView() {
         setReportHistory(history || []);
         if (history && history.length > 0) {
           setSelectedTimestamp(history[0].timestamp);
-          setReportAlreadyGenerated(true); // ← НОВОЕ: отчёт уже существует в БД
           
-          // Restore biomarker cards from the latest report (if saved)
-          const latest = history[0];
-          if (latest.biomarkers && latest.biomarkers.length > 0) {
-            setEditableBiomarkers(latest.biomarkers);
-            setResults({ biomarkers: latest.biomarkers, general_recommendations: [] });
-            setUploadState("done");
+          if (!hasDraft) {
+            setReportAlreadyGenerated(true);
+            const latest = history[0];
+            if (latest.biomarkers && latest.biomarkers.length > 0) {
+              setEditableBiomarkers(latest.biomarkers);
+              setResults({ biomarkers: latest.biomarkers, general_recommendations: [] });
+              setUploadState("done");
+            }
           }
         } else {
-          setSelectedTimestamp(null);
+          if (!hasDraft) {
+            setSelectedTimestamp(null);
+          }
         }
 
         setSomaticHistory(somatic || {});
@@ -133,6 +166,11 @@ export default function MedicalResultsView() {
     try {
       await apiClient.analyzeLabReport(biomarkers);
 
+      // Clear draft on success
+      sessionStorage.removeItem("vitograph_draft_biomarkers");
+      sessionStorage.removeItem("vitograph_draft_results");
+      sessionStorage.removeItem("vitograph_draft_isDirty");
+
       // Re-fetch history to get the true state from DB (prevents fake duplicates)
       const history = await apiClient.getLabReportsHistory();
       setReportHistory(history || []);
@@ -157,6 +195,11 @@ export default function MedicalResultsView() {
   }, []);
 
   const handleFilesAccepted = useCallback(async (files: File[], type: "document" | "image") => {
+    // Clear draft when starting new upload
+    sessionStorage.removeItem("vitograph_draft_biomarkers");
+    sessionStorage.removeItem("vitograph_draft_results");
+    sessionStorage.removeItem("vitograph_draft_isDirty");
+
     setUploadState("loading");
     setErrorMessage(undefined);
     setResults(null);

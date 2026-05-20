@@ -2343,6 +2343,19 @@ export async function handleDeleteLabReport(
       throw updateError;
     }
 
+    // Delete associated test session and results
+    const { data: session } = await (supabase
+      .from("test_sessions") as any)
+      .select("id")
+      .eq("user_id", userId)
+      .eq("notes", timestamp)
+      .single();
+
+    if (session) {
+      await (supabase.from("test_results") as any).delete().eq("session_id", (session as any).id);
+      await (supabase.from("test_sessions") as any).delete().eq("id", (session as any).id);
+    }
+
     // Phase 55: Targeted Cleanup if last report deleted
     if (reports.length === 0) {
       console.log(`[DeleteLabReport] Last report deleted for user ${userId}. Performing targeted cleanup.`);
