@@ -19,12 +19,11 @@ type FoodInputFormProps = {
   previewContainer?: HTMLDivElement | null;
 };
 
-/** Color map for reaction type notifications (Premium Dark Glassmorphism). */
 const REACTION_STYLES: Record<string, { bg: string; border: string; glow: string }> = {
-  positive: { bg: "bg-[#111113]/30 backdrop-blur-2xl backdrop-saturate-200", border: "border-green-500/30", glow: "shadow-[inset_0_0_80px_rgba(34,197,94,0.1)]" },
-  neutral: { bg: "bg-[#111113]/30 backdrop-blur-2xl backdrop-saturate-200", border: "border-blue-500/30", glow: "shadow-[inset_0_0_80px_rgba(59,130,246,0.1)]" },
-  warning: { bg: "bg-[#111113]/30 backdrop-blur-2xl backdrop-saturate-200", border: "border-yellow-500/30", glow: "shadow-[inset_0_0_80px_rgba(234,179,8,0.1)]" },
-  restriction_violation: { bg: "bg-[#111113]/30 backdrop-blur-2xl backdrop-saturate-200", border: "border-red-500/30", glow: "shadow-[inset_0_0_80px_rgba(239,68,68,0.1)]" },
+  positive: { bg: "bg-[#111113]/50 backdrop-blur-lg backdrop-saturate-150", border: "border-green-500/30", glow: "shadow-[0_0_100px_rgba(34,197,94,0.3)]" },
+  neutral: { bg: "bg-[#111113]/50 backdrop-blur-lg backdrop-saturate-150", border: "border-blue-500/30", glow: "shadow-[0_0_100px_rgba(59,130,246,0.3)]" },
+  warning: { bg: "bg-[#111113]/50 backdrop-blur-lg backdrop-saturate-150", border: "border-yellow-500/30", glow: "shadow-[0_0_100px_rgba(234,179,8,0.3)]" },
+  restriction_violation: { bg: "bg-[#111113]/50 backdrop-blur-lg backdrop-saturate-150", border: "border-red-500/30", glow: "shadow-[0_0_100px_rgba(239,68,68,0.3)]" },
 };
 
 /**
@@ -221,8 +220,14 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
   const isValid = name.trim().length > 0 && !isNaN(parseInt(weight, 10)) && parseInt(weight, 10) > 0;
 
   const previewContent = photoResult && (
+    <div className="absolute inset-0 z-[100] flex flex-col pointer-events-auto">
+      {/* Background Overlay: mild blur, slight brightness bump to illuminate dark elements, low opacity dark tint */}
+      <div className="absolute inset-0 bg-[#000000]/20 backdrop-blur-md backdrop-brightness-125 backdrop-saturate-150 pointer-events-none"></div>
+
+      {/* Floating Card Container */}
+      <div className="relative flex-1 flex flex-col items-center justify-center p-4 sm:p-5 overflow-y-auto">
         <div
-          className={`absolute inset-0 flex flex-col p-4 sm:p-5 overflow-y-auto pointer-events-auto z-[60] border-b ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-[#1a1a1e]/80 backdrop-blur-2xl"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-white/10"} ${REACTION_STYLES[photoResult.reaction_type]?.glow || "shadow-2xl"} text-ink`}
+          className={`relative w-full max-w-md flex flex-col p-4 sm:p-5 rounded-[24px] border ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-[#1a1a1e]/80 backdrop-blur-lg"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-white/10"} ${REACTION_STYLES[photoResult.reaction_type]?.glow || "shadow-2xl"} text-ink`}
         >
 
           <div className="flex gap-4">
@@ -281,28 +286,39 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
               );
             })}
             
-            <button
-              type="button"
-              onClick={() => {
-                setPhotoResult(null);
-                setName("");
-                setWeight("");
-                // Clear draft
-                sessionStorage.removeItem("vitograph_diary_photoResult");
-                sessionStorage.removeItem("vitograph_diary_name");
-                sessionStorage.removeItem("vitograph_diary_weight");
-              }}
-              className="ml-auto p-2 rounded-full hover:bg-white/10 text-ink/40 hover:text-red-500 transition-colors shrink-0"
-              title={t('cancelAndClear')}
-            >
-              <Trash2 className="w-5 h-5" />
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setPhotoResult(null);
+                  setName("");
+                  setWeight("");
+                  sessionStorage.removeItem("vitograph_diary_photoResult");
+                  sessionStorage.removeItem("vitograph_diary_name");
+                  sessionStorage.removeItem("vitograph_diary_weight");
+                }}
+                className="p-3 rounded-[14px] bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors shrink-0 flex items-center justify-center"
+                title={t('cancelAndClear')}
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => handleSubmit(e)}
+                disabled={isUpdating || !isValid}
+                className="flex-1 rounded-[14px] bg-green-500/20 text-green-400 py-3 font-semibold hover:bg-green-500/30 transition-colors disabled:opacity-50"
+              >
+                {isUpdating ? t('saving') : t('saveFood')}
+              </button>
+            </div>
           </div>
           
           {photoResult.llmError && (
             <p className="mt-2 text-xs opacity-60 text-red-500">Ошибка: {photoResult.llmError}</p>
           )}
         </div>
+      </div>
+    </div>
   );
 
   return (
