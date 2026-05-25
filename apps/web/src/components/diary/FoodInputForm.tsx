@@ -16,12 +16,12 @@ type FoodInputFormProps = {
   onPreviewStateChange?: (isActive: boolean) => void;
 };
 
-/** Color map for reaction type notifications. */
-const REACTION_STYLES: Record<string, { bg: string; border: string; text: string }> = {
-  positive: { bg: "bg-green-50", border: "border-green-200", text: "text-green-800" },
-  neutral: { bg: "bg-blue-50", border: "border-blue-200", text: "text-blue-800" },
-  warning: { bg: "bg-yellow-50", border: "border-yellow-200", text: "text-yellow-800" },
-  restriction_violation: { bg: "bg-red-50", border: "border-red-200", text: "text-red-800" },
+/** Color map for reaction type notifications (Premium Dark Glassmorphism). */
+const REACTION_STYLES: Record<string, { bg: string; border: string; glow: string }> = {
+  positive: { bg: "bg-surface/90 backdrop-blur-2xl", border: "border-green-500/30", glow: "shadow-[0_0_30px_-5px_rgba(34,197,94,0.15)]" },
+  neutral: { bg: "bg-surface/90 backdrop-blur-2xl", border: "border-blue-500/30", glow: "shadow-[0_0_30px_-5px_rgba(59,130,246,0.15)]" },
+  warning: { bg: "bg-surface/90 backdrop-blur-2xl", border: "border-yellow-500/30", glow: "shadow-[0_0_30px_-5px_rgba(234,179,8,0.15)]" },
+  restriction_violation: { bg: "bg-surface/90 backdrop-blur-2xl", border: "border-red-500/30", glow: "shadow-[0_0_30px_-5px_rgba(239,68,68,0.15)]" },
 };
 
 /**
@@ -222,7 +222,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
       {/* ── Photo Analysis Notification ─────────────────────────── */}
       {photoResult && (
         <div
-          className={`absolute bottom-[100%] left-0 right-0 flex flex-col rounded-2xl border shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] p-3 pb-12 text-sm overflow-y-auto max-h-[55vh] mb-3 z-[60] ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-surface-muted"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-border"} ${REACTION_STYLES[photoResult.reaction_type]?.text || "text-ink"}`}
+          className={`absolute bottom-[100%] left-0 right-0 flex flex-col rounded-[24px] border p-4 pb-14 text-sm overflow-y-auto max-h-[55vh] mb-3 z-[60] ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-surface/90 backdrop-blur-2xl"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-white/10"} ${REACTION_STYLES[photoResult.reaction_type]?.glow || "shadow-2xl"} text-ink`}
         >
           <button
             type="button"
@@ -235,74 +235,73 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
               sessionStorage.removeItem("vitograph_diary_name");
               sessionStorage.removeItem("vitograph_diary_weight");
             }}
-            className="absolute bottom-2 right-2 p-2 rounded-full hover:bg-black/10 text-ink-muted hover:text-red-600 transition-colors z-10"
+            className="absolute bottom-3 right-3 p-2 rounded-full hover:bg-white/10 text-ink/50 hover:text-red-500 transition-colors z-10"
             title={t('cancelAndClear')}
           >
             <Trash2 className="w-5 h-5" />
           </button>
-          <div className="flex justify-between items-start mb-2 gap-3 relative">
-            {/* Left Column: Title + Thumbnail */}
+
+          <div className="flex gap-4">
+            {/* Left: Thumbnail */}
+            {photoResult.imageUrl && (
+              <div className="shrink-0">
+                <img
+                  src={photoResult.imageUrl}
+                  alt={t('takePhoto')}
+                  className="w-[88px] h-[88px] object-cover rounded-[20px] shadow-lg border border-white/5"
+                />
+              </div>
+            )}
+            
+            {/* Right: Title, Score, Italic Summary */}
             <div className="flex flex-col flex-1 min-w-0">
-              <p className="font-medium mb-2 leading-snug">
+              <h3 className="font-bold text-[15px] leading-tight mb-2">
                 {photoResult.items.map((i) => `${i.name_ru} (~${i.estimated_weight_g}г)`).join(", ")}
-              </p>
-              {photoResult.imageUrl && (
-                <div className="rounded-lg overflow-hidden shrink-0 mt-auto max-w-[120px]">
-                  <img
-                    src={photoResult.imageUrl}
-                    alt={t('takePhoto')}
-                    className="w-full object-cover rounded-lg aspect-[3/4]"
-                  />
-                </div>
-              )}
-            </div>
-            {/* Right Column: Score Badge + Main Text */}
-            <div className="shrink-0">
+              </h3>
               <MealScoreBadge score={photoResult.meal_quality_score} />
-              {photoResult.health_reaction && (
-                <p className="mt-2 text-xs leading-relaxed max-w-[200px]">
-                  {photoResult.health_reaction}
+              {photoResult.meal_quality_reason && (
+                <p className="mt-1.5 text-[11px] italic text-ink/60 leading-tight">
+                  {photoResult.meal_quality_reason}
                 </p>
               )}
             </div>
           </div>
           
-          {/* Glycemic zone per item */}
+          {/* Main Reaction Text */}
+          {photoResult.health_reaction && (
+            <div className="mt-4 text-[13px] leading-relaxed text-ink/90 bg-white/5 rounded-[16px] p-3 border border-white/5">
+              {photoResult.health_reaction}
+            </div>
+          )}
+
+          {/* Glycemic Pills at the bottom */}
           {photoResult.items.length > 0 && (
-            <div className="flex flex-col gap-2 mb-4">
+            <div className="flex flex-wrap gap-2 mt-4 mb-2">
               {photoResult.items.map((item, idx) => {
                 const cls = item.glycemic_class ?? "flat";
                 const styleMap = {
-                  flat:     { bg: "bg-emerald-100", text: "text-emerald-800", label: "🟢 Flat",     bar: "bg-emerald-500" },
-                  moderate: { bg: "bg-amber-100",   text: "text-amber-800",   label: "🟡 Moderate", bar: "bg-amber-400"   },
-                  spike:    { bg: "bg-red-100",      text: "text-red-800",     label: "🔴 Spike",    bar: "bg-red-500"     },
+                  flat:     { bg: "bg-emerald-500/10", border: "border-emerald-500/20", text: "text-emerald-400", dot: "bg-emerald-400" },
+                  moderate: { bg: "bg-amber-500/10",   border: "border-amber-500/20",   text: "text-amber-400",   dot: "bg-amber-400" },
+                  spike:    { bg: "bg-red-500/10",     border: "border-red-500/20",     text: "text-red-400",     dot: "bg-red-400" },
                 } as const;
                 const s = styleMap[cls] ?? styleMap.flat;
                 const gi = item.glycemic_index ?? 0;
                 const gl = item.glycemic_load ?? 0;
-                const barPct = Math.min(100, Math.round((gl / 30) * 100));
                 return (
-                  <div key={idx} className={`rounded-xl px-3 py-2 ${s.bg}`}>
-                    <div className="flex items-start justify-between mb-1.5 gap-2">
-                      <span className={`text-sm font-bold ${s.text} leading-tight`}>{item.name_ru}</span>
-                      <span className={`text-[11px] font-bold ${s.text} whitespace-nowrap shrink-0 text-right mt-0.5`}>{s.label} · GI {gi} · GL {gl.toFixed(1)}</span>
-                    </div>
-                    <div className="w-full h-[6px] bg-black/10 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full transition-all duration-700 ${s.bar}`} style={{ width: `${barPct}%` }} />
-                    </div>
+                  <div key={idx} className={`px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-2 border ${s.border} ${s.bg} ${s.text}`}>
+                    <span className="truncate max-w-[120px] text-ink/90">{item.name_ru}</span>
+                    <div className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
+                    <span>GI {gi}</span>
+                    <span className="opacity-40">·</span>
+                    <span>GL {gl.toFixed(1)}</span>
                   </div>
                 );
               })}
             </div>
           )}
           
-          {photoResult.meal_quality_reason && (
-            <p className="mt-auto pt-4 text-xs text-ink-muted italic leading-relaxed border-t border-black/5 pb-16">
-              {photoResult.meal_quality_reason}
-            </p>
-          )}
           {photoResult.llmError && (
-            <p className="mt-2 text-xs opacity-60 text-red-500 pb-16">Ошибка: {photoResult.llmError}</p>
+            <p className="mt-2 text-xs opacity-60 text-red-500">Ошибка: {photoResult.llmError}</p>
           )}
         </div>
       )}
