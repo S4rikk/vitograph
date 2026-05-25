@@ -220,9 +220,6 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
 
   const isValid = name.trim().length > 0 && !isNaN(parseInt(weight, 10)) && parseInt(weight, 10) > 0;
 
-  return (
-    <div className="space-y-2">
-      {/* ── Photo Analysis Notification ─────────────────────────── */}
   const previewContent = photoResult && (
         <div
           className={`absolute inset-0 flex flex-col p-4 sm:p-5 overflow-y-auto pointer-events-auto z-[60] border-b ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-[#1a1a1e]/80 backdrop-blur-2xl"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-white/10"} ${REACTION_STYLES[photoResult.reaction_type]?.glow || "shadow-2xl"} text-ink`}
