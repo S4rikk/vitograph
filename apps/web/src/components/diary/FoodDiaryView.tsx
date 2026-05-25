@@ -478,7 +478,7 @@ export default function FoodDiaryView() {
         {/* ── Scrollable Content (Panels + Chat) ──────────────────────── */}
         <div className="flex-1 relative flex flex-col min-h-0 overflow-hidden">
           {isPreviewActive && (
-            <div className="absolute inset-0 z-[40] bg-surface/90 backdrop-blur-md animate-in fade-in" />
+            <div className="absolute inset-0 z-[40] bg-black/20 animate-in fade-in" />
           )}
           <div
             ref={scrollRef}

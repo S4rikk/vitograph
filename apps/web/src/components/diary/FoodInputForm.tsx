@@ -222,24 +222,8 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
       {/* ── Photo Analysis Notification ─────────────────────────── */}
       {photoResult && (
         <div
-          className={`absolute bottom-[100%] left-0 right-0 flex flex-col rounded-[24px] border p-4 pb-14 text-sm overflow-y-auto max-h-[55vh] mb-3 z-[60] ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-surface/90 backdrop-blur-2xl"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-white/10"} ${REACTION_STYLES[photoResult.reaction_type]?.glow || "shadow-2xl"} text-ink`}
+          className={`absolute bottom-[100%] left-2 right-2 flex flex-col rounded-[24px] border p-4 pb-4 text-sm overflow-y-auto max-h-[55vh] mb-3 z-[60] ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-[#1a1a1e]/80 backdrop-blur-2xl"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-white/10"} ${REACTION_STYLES[photoResult.reaction_type]?.glow || "shadow-2xl"} text-ink`}
         >
-          <button
-            type="button"
-            onClick={() => {
-              setPhotoResult(null);
-              setName("");
-              setWeight("");
-              // Clear draft
-              sessionStorage.removeItem("vitograph_diary_photoResult");
-              sessionStorage.removeItem("vitograph_diary_name");
-              sessionStorage.removeItem("vitograph_diary_weight");
-            }}
-            className="absolute bottom-3 right-3 p-2 rounded-full hover:bg-white/10 text-ink/50 hover:text-red-500 transition-colors z-10"
-            title={t('cancelAndClear')}
-          >
-            <Trash2 className="w-5 h-5" />
-          </button>
 
           <div className="flex gap-4">
             {/* Left: Thumbnail */}
@@ -274,31 +258,46 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
             </div>
           )}
 
-          {/* Glycemic Pills at the bottom */}
-          {photoResult.items.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4 mb-2">
-              {photoResult.items.map((item, idx) => {
-                const cls = item.glycemic_class ?? "flat";
-                const styleMap = {
-                  flat:     { bg: "bg-emerald-500/10", border: "border-emerald-500/20", text: "text-emerald-400", dot: "bg-emerald-400" },
-                  moderate: { bg: "bg-amber-500/10",   border: "border-amber-500/20",   text: "text-amber-400",   dot: "bg-amber-400" },
-                  spike:    { bg: "bg-red-500/10",     border: "border-red-500/20",     text: "text-red-400",     dot: "bg-red-400" },
-                } as const;
-                const s = styleMap[cls] ?? styleMap.flat;
-                const gi = item.glycemic_index ?? 0;
-                const gl = item.glycemic_load ?? 0;
-                return (
-                  <div key={idx} className={`px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-2 border ${s.border} ${s.bg} ${s.text}`}>
-                    <span className="truncate max-w-[120px] text-ink/90">{item.name_ru}</span>
-                    <div className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
-                    <span>GI {gi}</span>
-                    <span className="opacity-40">·</span>
-                    <span>GL {gl.toFixed(1)}</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          {/* Glycemic Pills and Trash Bin at the bottom */}
+          <div className="flex flex-wrap items-center gap-2 mt-4">
+            {photoResult.items.length > 0 && photoResult.items.map((item, idx) => {
+              const cls = item.glycemic_class ?? "flat";
+              const styleMap = {
+                flat:     { bg: "bg-emerald-500/10", border: "border-emerald-500/20", text: "text-emerald-400", dot: "bg-emerald-400" },
+                moderate: { bg: "bg-amber-500/10",   border: "border-amber-500/20",   text: "text-amber-400",   dot: "bg-amber-400" },
+                spike:    { bg: "bg-red-500/10",     border: "border-red-500/20",     text: "text-red-400",     dot: "bg-red-400" },
+              } as const;
+              const s = styleMap[cls] ?? styleMap.flat;
+              const gi = item.glycemic_index ?? 0;
+              const gl = item.glycemic_load ?? 0;
+              return (
+                <div key={idx} className={`px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-2 border ${s.border} ${s.bg} ${s.text}`}>
+                  <span className="truncate max-w-[120px] text-ink/90">{item.name_ru}</span>
+                  <div className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
+                  <span>GI {gi}</span>
+                  <span className="opacity-40">·</span>
+                  <span>GL {gl.toFixed(1)}</span>
+                </div>
+              );
+            })}
+            
+            <button
+              type="button"
+              onClick={() => {
+                setPhotoResult(null);
+                setName("");
+                setWeight("");
+                // Clear draft
+                sessionStorage.removeItem("vitograph_diary_photoResult");
+                sessionStorage.removeItem("vitograph_diary_name");
+                sessionStorage.removeItem("vitograph_diary_weight");
+              }}
+              className="ml-auto p-2 rounded-full hover:bg-white/10 text-ink/40 hover:text-red-500 transition-colors shrink-0"
+              title={t('cancelAndClear')}
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          </div>
           
           {photoResult.llmError && (
             <p className="mt-2 text-xs opacity-60 text-red-500">Ошибка: {photoResult.llmError}</p>
