@@ -222,7 +222,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
       {/* ── Photo Analysis Notification ─────────────────────────── */}
       {photoResult && (
         <div
-          className={`absolute bottom-[100%] left-0 right-0 flex flex-col rounded-2xl border shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] p-3 pb-12 text-sm overflow-y-auto max-h-[65vh] mb-3 z-[60] ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-surface-muted"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-border"} ${REACTION_STYLES[photoResult.reaction_type]?.text || "text-ink"}`}
+          className={`absolute bottom-[100%] left-0 right-0 flex flex-col rounded-2xl border shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] p-3 pb-12 text-sm overflow-y-auto max-h-[calc(100dvh-260px)] mb-3 z-[60] ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-surface-muted"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-border"} ${REACTION_STYLES[photoResult.reaction_type]?.text || "text-ink"}`}
         >
           <button
             type="button"
@@ -283,9 +283,9 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
                 const barPct = Math.min(100, Math.round((gl / 30) * 100));
                 return (
                   <div key={idx} className={`rounded-xl px-3 py-2 ${s.bg}`}>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className={`text-sm font-bold ${s.text}`}>{item.name_ru}</span>
-                      <span className={`text-[11px] font-bold ${s.text}`}>{s.label} · GI {gi} · GL {gl.toFixed(1)}</span>
+                    <div className="flex items-start justify-between mb-1.5 gap-2">
+                      <span className={`text-sm font-bold ${s.text} leading-tight`}>{item.name_ru}</span>
+                      <span className={`text-[11px] font-bold ${s.text} whitespace-nowrap shrink-0 text-right mt-0.5`}>{s.label} · GI {gi} · GL {gl.toFixed(1)}</span>
                     </div>
                     <div className="w-full h-[6px] bg-black/10 rounded-full overflow-hidden">
                       <div className={`h-full rounded-full transition-all duration-700 ${s.bar}`} style={{ width: `${barPct}%` }} />
