@@ -46,6 +46,7 @@ export default function FoodDiaryView() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isPreviewActive, setIsPreviewActive] = useState(false);
+  const [previewContainer, setPreviewContainer] = useState<HTMLDivElement | null>(null);
   const nextId = useRef(1000); // Start high to avoid collision with mapped history IDs
 
   // Date State for Time Machine feature
@@ -477,13 +478,11 @@ export default function FoodDiaryView() {
 
         {/* ── Scrollable Content (Panels + Chat) ──────────────────────── */}
         <div className="flex-1 relative flex flex-col min-h-0 overflow-hidden">
-          {isPreviewActive && (
-            <div className="absolute inset-0 z-[40] bg-black/20 animate-in fade-in" />
-          )}
+          <div ref={setPreviewContainer} className="absolute inset-0 z-[60] pointer-events-none" />
           <div
             ref={scrollRef}
             onScroll={handleScroll}
-            className="flex-1 overflow-y-auto bg-surface-subtle flex flex-col"
+            className={`flex-1 ${isPreviewActive ? 'overflow-hidden' : 'overflow-y-auto'} bg-surface-subtle flex flex-col`}
           >
             <div className="shrink-0 bg-surface flex flex-col pt-0">
             <GlycemicSurfPanel 
@@ -528,7 +527,7 @@ export default function FoodDiaryView() {
             <WaterTracker selectedDate={selectedDate} userTimezone={userTimezone} />
           </div>
           <div className="px-3 pb-3 pt-0 w-full">
-            <FoodInputForm onSubmit={handleSubmit} onPreviewStateChange={setIsPreviewActive} />
+            <FoodInputForm onSubmit={handleSubmit} onPreviewStateChange={setIsPreviewActive} previewContainer={previewContainer} />
           </div>
         </div>
 

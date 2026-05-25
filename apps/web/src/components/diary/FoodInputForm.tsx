@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { compressImage } from "@/lib/image-utils";
 import { apiClient } from "@/lib/api-client";
 import type { FoodRecognitionResult, LabelScannerOutput } from "@/lib/api-client";
@@ -14,14 +15,16 @@ type FoodInputFormProps = {
   onPhotoResult?: (result: FoodRecognitionResult) => void;
   /** Emits preview active state to parent layout */
   onPreviewStateChange?: (isActive: boolean) => void;
+  /** Portal container for the preview card to span the whole chat */
+  previewContainer?: HTMLDivElement | null;
 };
 
 /** Color map for reaction type notifications (Premium Dark Glassmorphism). */
 const REACTION_STYLES: Record<string, { bg: string; border: string; glow: string }> = {
-  positive: { bg: "bg-surface/90 backdrop-blur-2xl", border: "border-green-500/30", glow: "shadow-[0_0_30px_-5px_rgba(34,197,94,0.15)]" },
-  neutral: { bg: "bg-surface/90 backdrop-blur-2xl", border: "border-blue-500/30", glow: "shadow-[0_0_30px_-5px_rgba(59,130,246,0.15)]" },
-  warning: { bg: "bg-surface/90 backdrop-blur-2xl", border: "border-yellow-500/30", glow: "shadow-[0_0_30px_-5px_rgba(234,179,8,0.15)]" },
-  restriction_violation: { bg: "bg-surface/90 backdrop-blur-2xl", border: "border-red-500/30", glow: "shadow-[0_0_30px_-5px_rgba(239,68,68,0.15)]" },
+  positive: { bg: "bg-surface/30 backdrop-blur-[64px] backdrop-saturate-200 backdrop-brightness-110", border: "border-green-500/30", glow: "shadow-[0_0_30px_-5px_rgba(34,197,94,0.15)]" },
+  neutral: { bg: "bg-surface/30 backdrop-blur-[64px] backdrop-saturate-200 backdrop-brightness-110", border: "border-blue-500/30", glow: "shadow-[0_0_30px_-5px_rgba(59,130,246,0.15)]" },
+  warning: { bg: "bg-surface/30 backdrop-blur-[64px] backdrop-saturate-200 backdrop-brightness-110", border: "border-yellow-500/30", glow: "shadow-[0_0_30px_-5px_rgba(234,179,8,0.15)]" },
+  restriction_violation: { bg: "bg-surface/30 backdrop-blur-[64px] backdrop-saturate-200 backdrop-brightness-110", border: "border-red-500/30", glow: "shadow-[0_0_30px_-5px_rgba(239,68,68,0.15)]" },
 };
 
 /**
@@ -29,7 +32,7 @@ const REACTION_STYLES: Record<string, { bg: string; border: string; glow: string
  * - "Название блюда" (dish name) + 📷 camera
  * - "Вес (г)" (weight in grams)
  */
-export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateChange }: FoodInputFormProps) {
+export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateChange, previewContainer }: FoodInputFormProps) {
   const t = useTranslations('diary');
   const tCommon = useTranslations('common');
   const [name, setName] = useState("");
@@ -220,9 +223,9 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
   return (
     <div className="space-y-2">
       {/* ── Photo Analysis Notification ─────────────────────────── */}
-      {photoResult && (
+  const previewContent = photoResult && (
         <div
-          className={`absolute bottom-[100%] left-2 right-2 flex flex-col rounded-[24px] border p-4 pb-4 text-sm overflow-y-auto max-h-[55vh] mb-3 z-[60] ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-[#1a1a1e]/80 backdrop-blur-2xl"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-white/10"} ${REACTION_STYLES[photoResult.reaction_type]?.glow || "shadow-2xl"} text-ink`}
+          className={`absolute inset-0 flex flex-col p-4 sm:p-5 overflow-y-auto pointer-events-auto z-[60] border-b ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-[#1a1a1e]/80 backdrop-blur-2xl"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-white/10"} ${REACTION_STYLES[photoResult.reaction_type]?.glow || "shadow-2xl"} text-ink`}
         >
 
           <div className="flex gap-4">
@@ -303,7 +306,12 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
             <p className="mt-2 text-xs opacity-60 text-red-500">Ошибка: {photoResult.llmError}</p>
           )}
         </div>
-      )}
+  );
+
+  return (
+    <div className="space-y-2">
+      {/* ── Photo Analysis Notification ─────────────────────────── */}
+      {previewContent && previewContainer ? createPortal(previewContent, previewContainer) : previewContent}
 
       {/* ── Label Scanner Notification ─────────────────────────── */}
       {labelResult && (
