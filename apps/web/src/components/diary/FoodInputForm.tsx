@@ -251,7 +251,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
           <div className="shrink-0">
             <MealScoreBadge score={photoResult.meal_quality_score} />
             {photoResult.health_reaction && (
-              <p className="mt-2 text-xs leading-relaxed text-ink max-w-[200px]">
+              <p className="mt-2 text-xs leading-relaxed max-w-[200px]">
                 {photoResult.health_reaction}
               </p>
             )}
