@@ -305,10 +305,10 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
               <button
                 type="button"
                 onClick={(e) => handleSubmit(e)}
-                disabled={isUpdating || !isValid}
+                disabled={isAnalyzing || !isValid}
                 className="flex-1 rounded-[14px] bg-green-500/20 text-green-400 py-3 font-semibold hover:bg-green-500/30 transition-colors disabled:opacity-50"
               >
-                {isUpdating ? t('saving') : t('saveFood')}
+                {t('saveFood')}
               </button>
             </div>
           </div>
