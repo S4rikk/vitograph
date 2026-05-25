@@ -19,11 +19,11 @@ type FoodInputFormProps = {
   previewContainer?: HTMLDivElement | null;
 };
 
-const REACTION_STYLES: Record<string, { bg: string; border: string; glow: string }> = {
-  positive: { bg: "bg-[#111113]/50 backdrop-blur-lg backdrop-saturate-150", border: "border-green-500/30", glow: "shadow-[0_0_100px_rgba(34,197,94,0.3)]" },
-  neutral: { bg: "bg-[#111113]/50 backdrop-blur-lg backdrop-saturate-150", border: "border-blue-500/30", glow: "shadow-[0_0_100px_rgba(59,130,246,0.3)]" },
-  warning: { bg: "bg-[#111113]/50 backdrop-blur-lg backdrop-saturate-150", border: "border-yellow-500/30", glow: "shadow-[0_0_100px_rgba(234,179,8,0.3)]" },
-  restriction_violation: { bg: "bg-[#111113]/50 backdrop-blur-lg backdrop-saturate-150", border: "border-red-500/30", glow: "shadow-[0_0_100px_rgba(239,68,68,0.3)]" },
+const REACTION_STYLES: Record<string, { bg: string; border: string; glow: string; haloColor: string }> = {
+  positive: { bg: "bg-[#0d0f0e]/55 backdrop-blur-xl backdrop-saturate-150", border: "border-green-500/25", glow: "shadow-[0_0_30px_rgba(34,197,94,0.15),0_0_60px_rgba(34,197,94,0.08)]", haloColor: "rgba(34,197,94,0.12)" },
+  neutral: { bg: "bg-[#0d0e10]/55 backdrop-blur-xl backdrop-saturate-150", border: "border-blue-500/25", glow: "shadow-[0_0_30px_rgba(59,130,246,0.15),0_0_60px_rgba(59,130,246,0.08)]", haloColor: "rgba(59,130,246,0.12)" },
+  warning: { bg: "bg-[#100f0d]/55 backdrop-blur-xl backdrop-saturate-150", border: "border-yellow-500/25", glow: "shadow-[0_0_30px_rgba(234,179,8,0.15),0_0_60px_rgba(234,179,8,0.08)]", haloColor: "rgba(234,179,8,0.12)" },
+  restriction_violation: { bg: "bg-[#100d0d]/55 backdrop-blur-xl backdrop-saturate-150", border: "border-red-500/25", glow: "shadow-[0_0_30px_rgba(239,68,68,0.15),0_0_60px_rgba(239,68,68,0.08)]", haloColor: "rgba(239,68,68,0.12)" },
 };
 
 /**
@@ -219,15 +219,30 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
 
   const isValid = name.trim().length > 0 && !isNaN(parseInt(weight, 10)) && parseInt(weight, 10) > 0;
 
+  const reactionStyle = REACTION_STYLES[photoResult?.reaction_type ?? ''] ?? REACTION_STYLES.positive;
+
   const previewContent = photoResult && (
     <div className="absolute inset-0 z-[100] flex flex-col pointer-events-auto">
-      {/* Background Overlay: mild blur, slight brightness bump to illuminate dark elements, low opacity dark tint */}
-      <div className="absolute inset-0 bg-[#000000]/20 backdrop-blur-md backdrop-brightness-125 backdrop-saturate-150 pointer-events-none"></div>
+      {/* Transparent overlay — NO blur, content behind is fully visible */}
+      <div className="absolute inset-0 bg-black/10 pointer-events-none"></div>
 
       {/* Floating Card Container */}
       <div className="relative flex-1 flex flex-col items-center justify-center p-4 sm:p-5 overflow-y-auto">
+        {/* Gradient blur halo around the card — fades outward */}
         <div
-          className={`relative w-full max-w-md flex flex-col p-4 sm:p-5 rounded-[24px] border ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-[#1a1a1e]/80 backdrop-blur-lg"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-white/10"} ${REACTION_STYLES[photoResult.reaction_type]?.glow || "shadow-2xl"} text-ink`}
+          className="absolute pointer-events-none"
+          style={{
+            width: 'calc(100% + 80px)',
+            height: 'calc(100% + 80px)',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: `radial-gradient(ellipse at center, ${reactionStyle.haloColor} 40%, transparent 70%)`,
+            filter: 'blur(30px)',
+          }}
+        />
+        <div
+          className={`relative w-full max-w-md flex flex-col p-4 sm:p-5 rounded-[24px] border ${reactionStyle.bg} ${reactionStyle.border} ${reactionStyle.glow} text-ink`}
         >
 
           <div className="flex gap-4">
