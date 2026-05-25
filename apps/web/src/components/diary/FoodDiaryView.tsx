@@ -45,6 +45,7 @@ export default function FoodDiaryView() {
   const [isUpdating, setIsUpdating] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isPreviewActive, setIsPreviewActive] = useState(false);
   const nextId = useRef(1000); // Start high to avoid collision with mapped history IDs
 
   // Date State for Time Machine feature
@@ -475,12 +476,16 @@ export default function FoodDiaryView() {
         </div>
 
         {/* ── Scrollable Content (Panels + Chat) ──────────────────────── */}
-        <div
-          ref={scrollRef}
-          onScroll={handleScroll}
-          className="flex-1 overflow-y-auto bg-surface-subtle flex flex-col"
-        >
-          <div className="shrink-0 bg-surface flex flex-col pt-0">
+        <div className="flex-1 relative flex flex-col min-h-0 overflow-hidden">
+          {isPreviewActive && (
+            <div className="absolute inset-0 z-[40] bg-surface/90 backdrop-blur-md animate-in fade-in" />
+          )}
+          <div
+            ref={scrollRef}
+            onScroll={handleScroll}
+            className="flex-1 overflow-y-auto bg-surface-subtle flex flex-col"
+          >
+            <div className="shrink-0 bg-surface flex flex-col pt-0">
             <GlycemicSurfPanel 
               startIso={getTzDayBoundaries(selectedDate, userTimezone || "UTC").startIso}
               endIso={getTzDayBoundaries(selectedDate, userTimezone || "UTC").endIso}
@@ -517,12 +522,12 @@ export default function FoodDiaryView() {
         </div>
 
         {/* ── Input ─────────────────────────────────────────── */}
-        <div className="sticky bottom-0 z-20 flex flex-col bg-surface/80 backdrop-blur-md pb-[safe-area-inset-bottom]">
+        <div className={`sticky bottom-0 ${isPreviewActive ? 'z-[50]' : 'z-20'} flex flex-col bg-surface/80 backdrop-blur-md pb-[safe-area-inset-bottom] transition-all duration-300`}>
           <div className="w-full border-t border-border">
             <WaterTracker selectedDate={selectedDate} userTimezone={userTimezone} />
           </div>
           <div className="px-3 pb-3 pt-0 w-full">
-            <FoodInputForm onSubmit={handleSubmit} />
+            <FoodInputForm onSubmit={handleSubmit} onPreviewStateChange={setIsPreviewActive} />
           </div>
         </div>
 
