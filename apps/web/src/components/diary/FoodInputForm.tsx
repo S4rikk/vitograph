@@ -151,10 +151,10 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
         const objectUrl = URL.createObjectURL(file);
         setPhotoResult({ ...result, imageUrl: objectUrl });
 
-        // 4. Auto-fill form with total recognized weight and items names
+        // 4. Auto-fill form with total recognized weight and items names with weights
         if (result.items.length > 0) {
           const totalWeight = result.items.reduce((sum, i) => sum + (i.estimated_weight_g || 0), 0);
-          setName(result.items.map(i => i.name_ru).join(", "));
+          setName(result.items.map(i => `${i.name_ru} (~${i.estimated_weight_g}г)`).join(", "));
           setWeight(String(totalWeight));
         }
 
@@ -259,11 +259,8 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
               </div>
             )}
             
-            {/* Right: Title, Score, Italic Summary */}
+            {/* Right: Score, Italic Summary */}
             <div className="flex flex-col flex-1 min-w-0">
-              <h3 className="font-bold text-[15px] leading-tight mb-2">
-                {photoResult.items.map((i) => `${i.name_ru} (~${i.estimated_weight_g}г)`).join(", ")}
-              </h3>
               <MealScoreBadge score={photoResult.meal_quality_score} />
               {photoResult.meal_quality_reason && (
                 <p className="mt-1.5 text-[11px] italic text-ink/60 leading-tight">
