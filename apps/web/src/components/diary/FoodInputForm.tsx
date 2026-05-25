@@ -328,7 +328,8 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 
   return (
     <div className="space-y-2">
