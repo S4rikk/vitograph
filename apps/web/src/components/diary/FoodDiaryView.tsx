@@ -520,6 +520,7 @@ export default function FoodDiaryView() {
           )}
         </div>
         </div>
+        </div>
 
         {/* ── Input ─────────────────────────────────────────── */}
         <div className={`sticky bottom-0 ${isPreviewActive ? 'z-[50]' : 'z-20'} flex flex-col bg-surface/80 backdrop-blur-md pb-[safe-area-inset-bottom] transition-all duration-300`}>
