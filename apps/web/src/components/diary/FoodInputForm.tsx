@@ -20,10 +20,10 @@ type FoodInputFormProps = {
 };
 
 const REACTION_STYLES: Record<string, { bg: string; border: string; glow: string; haloColor: string }> = {
-  positive: { bg: "bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-[#2ed585]/40", glow: "shadow-[0_0_20px_rgba(46,213,133,0.3),inset_0_0_15px_rgba(46,213,133,0.15)]", haloColor: "rgba(46,213,133,0.15)" },
-  neutral: { bg: "bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-blue-500/40", glow: "shadow-[0_0_20px_rgba(59,130,246,0.3),inset_0_0_15px_rgba(59,130,246,0.15)]", haloColor: "rgba(59,130,246,0.15)" },
-  warning: { bg: "bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-yellow-500/40", glow: "shadow-[0_0_20px_rgba(234,179,8,0.3),inset_0_0_15px_rgba(234,179,8,0.15)]", haloColor: "rgba(234,179,8,0.15)" },
-  restriction_violation: { bg: "bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-red-500/40", glow: "shadow-[0_0_20px_rgba(239,68,68,0.3),inset_0_0_15px_rgba(239,68,68,0.15)]", haloColor: "rgba(239,68,68,0.15)" },
+  positive: { bg: "bg-white/70 dark:bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-[#2ed585]/40", glow: "shadow-[0_0_20px_rgba(46,213,133,0.3),inset_0_0_15px_rgba(46,213,133,0.15)]", haloColor: "rgba(46,213,133,0.15)" },
+  neutral: { bg: "bg-white/70 dark:bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-blue-500/40", glow: "shadow-[0_0_20px_rgba(59,130,246,0.3),inset_0_0_15px_rgba(59,130,246,0.15)]", haloColor: "rgba(59,130,246,0.15)" },
+  warning: { bg: "bg-white/70 dark:bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-yellow-500/40", glow: "shadow-[0_0_20px_rgba(234,179,8,0.3),inset_0_0_15px_rgba(234,179,8,0.15)]", haloColor: "rgba(234,179,8,0.15)" },
+  restriction_violation: { bg: "bg-white/70 dark:bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-red-500/40", glow: "shadow-[0_0_20px_rgba(239,68,68,0.3),inset_0_0_15px_rgba(239,68,68,0.15)]", haloColor: "rgba(239,68,68,0.15)" },
 };
 
 /**
@@ -283,9 +283,9 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
             {photoResult.items.length > 0 && photoResult.items.map((item, idx) => {
               const cls = item.glycemic_class ?? "flat";
               const styleMap = {
-                flat:     { bg: "bg-emerald-500/10", border: "border-emerald-500/20", text: "text-emerald-400" },
-                moderate: { bg: "bg-amber-500/10",   border: "border-amber-500/20",   text: "text-amber-400" },
-                spike:    { bg: "bg-red-500/10",     border: "border-red-500/20",     text: "text-red-400" },
+                flat:     { bg: "bg-emerald-500/20 dark:bg-emerald-500/10", border: "border-emerald-500/30 dark:border-emerald-500/20", text: "text-emerald-700 dark:text-emerald-400" },
+                moderate: { bg: "bg-amber-500/20 dark:bg-amber-500/10",   border: "border-amber-500/30 dark:border-amber-500/20",   text: "text-amber-700 dark:text-amber-400" },
+                spike:    { bg: "bg-red-500/20 dark:bg-red-500/10",     border: "border-red-500/30 dark:border-red-500/20",     text: "text-red-700 dark:text-red-400" },
               } as const;
               const s = styleMap[cls] ?? styleMap.flat;
               const gi = item.glycemic_index ?? 0;
