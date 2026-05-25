@@ -251,7 +251,7 @@ export default function FoodDiaryView() {
         threadId, 
         undefined, 
         "diary", 
-        undefined, 
+        nutritionalContext?.imageUrl || undefined, 
         nutritionalContext,
         undefined,
         (token) => {

@@ -2081,41 +2081,6 @@ export async function handleAnalyzeFood(
       // 3. Run GPT-4o Vision food analyzer
       const { data: result, errorMessage: llmError } = await runFoodVisionAnalyzer(imageUrl, userContext, locale);
 
-      const supabaseUrl = process.env.SUPABASE_URL;
-      const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
-      if (!supabaseUrl || !supabaseKey) {
-        throw new Error("Supabase credentials missing");
-      }
-      const supabase = createClient(supabaseUrl, supabaseKey, {
-        global: { headers: { Authorization: `Bearer ${token}` } },
-      });
-
-      // --- Save to ai_chat_messages ---
-      const actualThreadId = `${userId}-diary`;
-      const userMsgPayload: any = {
-        user_id: userId,
-        thread_id: actualThreadId,
-        role: "user",
-        content: "Пользователь загрузил фото еды",
-        image_url: imageUrl,
-      };
-      const aiContent = (result.items.map((i: any) => i.name_ru).join(", ") || "Распознал фото.") + `\n\n<meal_score score="${result.meal_quality_score}" reason="${result.meal_quality_reason}" />`;
-
-      const aiMsgPayload = {
-        user_id: userId,
-        thread_id: actualThreadId,
-        role: "assistant",
-        content: aiContent,
-      };
-
-      const { error: err1 } = await supabase.from("ai_chat_messages").insert([userMsgPayload]);
-      if (err1) console.error("[FoodVision] Error inserting user msg:", err1);
-
-      await new Promise(resolve => setTimeout(resolve, 10)); // 10ms delay
-
-      const { error: err2 } = await supabase.from("ai_chat_messages").insert([aiMsgPayload]);
-      if (err2) console.error("[FoodVision] Error inserting AI msg:", err2);
-
       // 5. Return results (include llmError for debugging)
       res.json({
         success: true,

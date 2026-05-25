@@ -4,7 +4,7 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["vg.sanderok.uk", "vitograph.com", "www.vitograph.com", "localhost:3000", "192.168.1.9:3000"],
+  allowedDevOrigins: ["vg.sanderok.uk", "vitograph.com", "www.vitograph.com", "localhost:3000", "192.168.1.9:3000", "192.168.1.6:3000", "192.168.1.5:3000"],
   reactCompiler: true,
   async rewrites() {
     return [

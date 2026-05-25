@@ -51,6 +51,32 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
     setIsMobile(/iPhone|iPad|Android/i.test(navigator.userAgent));
   }, []);
 
+  // Restore photo analysis draft from sessionStorage (survives page reload)
+  useEffect(() => {
+    try {
+      const savedPhotoResult = sessionStorage.getItem("vitograph_diary_photoResult");
+      const savedName = sessionStorage.getItem("vitograph_diary_name");
+      const savedWeight = sessionStorage.getItem("vitograph_diary_weight");
+      
+      if (savedPhotoResult) {
+        setPhotoResult(JSON.parse(savedPhotoResult));
+        if (savedName) setName(savedName);
+        if (savedWeight) setWeight(savedWeight);
+      }
+    } catch (e) {
+      console.error("[FoodInputForm] Failed to restore draft:", e);
+    }
+  }, []);
+
+  // Sync photo analysis state to sessionStorage
+  useEffect(() => {
+    if (photoResult) {
+      sessionStorage.setItem("vitograph_diary_photoResult", JSON.stringify(photoResult));
+      sessionStorage.setItem("vitograph_diary_name", name);
+      sessionStorage.setItem("vitograph_diary_weight", weight);
+    }
+  }, [photoResult, name, weight]);
+
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
@@ -70,6 +96,11 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
           imageUrl: photoResult.imageUrl, // Pass photo URL so FoodCard can display it
         };
       }
+
+      // Clear cached draft
+      sessionStorage.removeItem("vitograph_diary_photoResult");
+      sessionStorage.removeItem("vitograph_diary_name");
+      sessionStorage.removeItem("vitograph_diary_weight");
 
       onSubmit(trimmedName, parsedWeight, nutritionalContext);
       setName("");
@@ -92,6 +123,11 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
 
       try {
         setIsAnalyzing(true);
+        // Clear previous draft
+        sessionStorage.removeItem("vitograph_diary_photoResult");
+        sessionStorage.removeItem("vitograph_diary_name");
+        sessionStorage.removeItem("vitograph_diary_weight");
+
         setPhotoResult(null);
 
         // 1. Compress image to max 1024px
@@ -177,7 +213,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
       {/* ── Photo Analysis Notification ─────────────────────────── */}
       {photoResult && (
         <div
-          className={`relative rounded-xl border p-3 pr-8 text-sm ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-surface-muted"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-border"} ${REACTION_STYLES[photoResult.reaction_type]?.text || "text-ink"}`}
+          className={`relative rounded-xl border p-3 pr-8 text-sm max-h-[250px] overflow-y-auto scrollbar-thin scrollbar-thumb-black/10 hover:scrollbar-thumb-black/20 ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-surface-muted"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-border"} ${REACTION_STYLES[photoResult.reaction_type]?.text || "text-ink"}`}
         >
           <button
             type="button"
@@ -185,6 +221,10 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
               setPhotoResult(null);
               setName("");
               setWeight("");
+              // Clear draft
+              sessionStorage.removeItem("vitograph_diary_photoResult");
+              sessionStorage.removeItem("vitograph_diary_name");
+              sessionStorage.removeItem("vitograph_diary_weight");
             }}
             className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-black/5 text-ink-muted hover:text-ink transition-colors"
             title={t('cancelAndClear')}
@@ -209,7 +249,12 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
           </div>
           {/* Right Column: Score Badge */}
           <div className="shrink-0">
-            <MealScoreBadge score={photoResult.meal_quality_score} reason={photoResult.meal_quality_reason} />
+            <MealScoreBadge score={photoResult.meal_quality_score} />
+            {photoResult.health_reaction && (
+              <p className="mt-2 text-xs leading-relaxed text-ink max-w-[200px]">
+                {photoResult.health_reaction}
+              </p>
+            )}
           </div>
         </div>
           {/* Glycemic zone per item */}
@@ -240,7 +285,11 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
               })}
             </div>
           )}
-          <p className="mt-1 text-xs">{photoResult.health_reaction}</p>
+          {photoResult.meal_quality_reason && (
+            <p className="mt-1.5 text-[11px] text-ink-muted italic leading-relaxed">
+              {photoResult.meal_quality_reason}
+            </p>
+          )}
           {photoResult.llmError && (
             <p className="mt-1 text-xs opacity-60">Ошибка: {photoResult.llmError}</p>
           )}
@@ -250,7 +299,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
       {/* ── Label Scanner Notification ─────────────────────────── */}
       {labelResult && (
         <div
-          className={`rounded-xl border p-3 text-sm flex flex-col gap-2 ${
+          className={`rounded-xl border p-3 text-sm flex flex-col gap-2 max-h-[40vh] overflow-y-auto scrollbar-thin scrollbar-thumb-black/10 hover:scrollbar-thumb-black/20 ${
             labelResult.verdict === "GREEN"
               ? "bg-green-50 border-green-200 text-green-800"
               : labelResult.verdict === "YELLOW"
