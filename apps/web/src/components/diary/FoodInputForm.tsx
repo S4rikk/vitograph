@@ -20,10 +20,10 @@ type FoodInputFormProps = {
 };
 
 const REACTION_STYLES: Record<string, { bg: string; border: string; glow: string; haloColor: string }> = {
-  positive: { bg: "bg-[#0d0f0e]/55 backdrop-blur-xl backdrop-saturate-150", border: "border-green-500/25", glow: "shadow-[0_0_30px_rgba(34,197,94,0.15),0_0_60px_rgba(34,197,94,0.08)]", haloColor: "rgba(34,197,94,0.12)" },
-  neutral: { bg: "bg-[#0d0e10]/55 backdrop-blur-xl backdrop-saturate-150", border: "border-blue-500/25", glow: "shadow-[0_0_30px_rgba(59,130,246,0.15),0_0_60px_rgba(59,130,246,0.08)]", haloColor: "rgba(59,130,246,0.12)" },
-  warning: { bg: "bg-[#100f0d]/55 backdrop-blur-xl backdrop-saturate-150", border: "border-yellow-500/25", glow: "shadow-[0_0_30px_rgba(234,179,8,0.15),0_0_60px_rgba(234,179,8,0.08)]", haloColor: "rgba(234,179,8,0.12)" },
-  restriction_violation: { bg: "bg-[#100d0d]/55 backdrop-blur-xl backdrop-saturate-150", border: "border-red-500/25", glow: "shadow-[0_0_30px_rgba(239,68,68,0.15),0_0_60px_rgba(239,68,68,0.08)]", haloColor: "rgba(239,68,68,0.12)" },
+  positive: { bg: "bg-[#0d0f0e]/55 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-[#2ed585]/40", glow: "shadow-[0_0_20px_rgba(46,213,133,0.3),inset_0_0_15px_rgba(46,213,133,0.15)]", haloColor: "rgba(46,213,133,0.15)" },
+  neutral: { bg: "bg-[#0d0e10]/55 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-blue-500/40", glow: "shadow-[0_0_20px_rgba(59,130,246,0.3),inset_0_0_15px_rgba(59,130,246,0.15)]", haloColor: "rgba(59,130,246,0.15)" },
+  warning: { bg: "bg-[#100f0d]/55 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-yellow-500/40", glow: "shadow-[0_0_20px_rgba(234,179,8,0.3),inset_0_0_15px_rgba(234,179,8,0.15)]", haloColor: "rgba(234,179,8,0.15)" },
+  restriction_violation: { bg: "bg-[#100d0d]/55 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-red-500/40", glow: "shadow-[0_0_20px_rgba(239,68,68,0.3),inset_0_0_15px_rgba(239,68,68,0.15)]", haloColor: "rgba(239,68,68,0.15)" },
 };
 
 /**
