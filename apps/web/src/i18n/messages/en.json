@@ -111,7 +111,7 @@
     "returnToToday": "Return to today",
     "chatMessage": {
       "thinkAboutIt": "Let me think about it...",
-      "addFood": "{food}"
+      "addFood": "I'll eat it anyway"
     },
     "feedback": {
       "fileTooLarge": "File is too large",
