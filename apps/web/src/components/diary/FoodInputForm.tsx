@@ -222,7 +222,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
       {/* ── Photo Analysis Notification ─────────────────────────── */}
       {photoResult && (
         <div
-          className={`relative flex flex-col rounded-2xl border shadow-xl p-4 text-sm overflow-y-auto max-h-[70vh] mb-3 ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-surface-muted"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-border"} ${REACTION_STYLES[photoResult.reaction_type]?.text || "text-ink"}`}
+          className={`absolute bottom-[100%] left-0 right-0 flex flex-col rounded-2xl border shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] p-3 pb-12 text-sm overflow-y-auto max-h-[65vh] mb-3 z-[60] ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-surface-muted"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-border"} ${REACTION_STYLES[photoResult.reaction_type]?.text || "text-ink"}`}
         >
           <button
             type="button"
@@ -235,39 +235,37 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
               sessionStorage.removeItem("vitograph_diary_name");
               sessionStorage.removeItem("vitograph_diary_weight");
             }}
-            className="absolute bottom-3 right-3 p-3 rounded-full hover:bg-black/10 text-ink-muted hover:text-red-600 transition-colors bg-white/50 backdrop-blur shadow-sm z-10"
+            className="absolute bottom-2 right-2 p-2 rounded-full hover:bg-black/10 text-ink-muted hover:text-red-600 transition-colors z-10"
             title={t('cancelAndClear')}
           >
             <Trash2 className="w-5 h-5" />
           </button>
-          <div className="flex justify-between items-start mb-3 gap-3 relative">
+          <div className="flex justify-between items-start mb-2 gap-3 relative">
             {/* Left Column: Title + Thumbnail */}
             <div className="flex flex-col flex-1 min-w-0">
-              <p className="font-bold text-base mb-2 leading-snug">
+              <p className="font-medium mb-2 leading-snug">
                 {photoResult.items.map((i) => `${i.name_ru} (~${i.estimated_weight_g}г)`).join(", ")}
               </p>
               {photoResult.imageUrl && (
-                <div className="rounded-xl overflow-hidden shrink-0 mt-auto max-w-[140px]">
+                <div className="rounded-lg overflow-hidden shrink-0 mt-auto max-w-[120px]">
                   <img
                     src={photoResult.imageUrl}
                     alt={t('takePhoto')}
-                    className="w-full object-cover rounded-xl aspect-[3/4] shadow-sm border border-black/5"
+                    className="w-full object-cover rounded-lg aspect-[3/4]"
                   />
                 </div>
               )}
             </div>
-            {/* Right Column: Score Badge */}
-            <div className="shrink-0 flex flex-col items-end">
+            {/* Right Column: Score Badge + Main Text */}
+            <div className="shrink-0">
               <MealScoreBadge score={photoResult.meal_quality_score} />
+              {photoResult.health_reaction && (
+                <p className="mt-2 text-xs leading-relaxed max-w-[200px]">
+                  {photoResult.health_reaction}
+                </p>
+              )}
             </div>
           </div>
-          
-          {/* AI Health Reaction (Primary Text) */}
-          {photoResult.health_reaction && (
-            <p className="mb-4 text-[14px] leading-relaxed font-medium">
-              {photoResult.health_reaction}
-            </p>
-          )}
           
           {/* Glycemic zone per item */}
           {photoResult.items.length > 0 && (
