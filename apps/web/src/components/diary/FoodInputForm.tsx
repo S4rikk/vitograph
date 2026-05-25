@@ -20,10 +20,10 @@ type FoodInputFormProps = {
 };
 
 const REACTION_STYLES: Record<string, { bg: string; border: string; glow: string; haloColor: string }> = {
-  positive: { bg: "bg-white/70 dark:bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-[#2ed585]/40", glow: "shadow-[0_0_20px_rgba(46,213,133,0.3),inset_0_0_15px_rgba(46,213,133,0.15)]", haloColor: "rgba(46,213,133,0.15)" },
-  neutral: { bg: "bg-white/70 dark:bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-blue-500/40", glow: "shadow-[0_0_20px_rgba(59,130,246,0.3),inset_0_0_15px_rgba(59,130,246,0.15)]", haloColor: "rgba(59,130,246,0.15)" },
-  warning: { bg: "bg-white/70 dark:bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-yellow-500/40", glow: "shadow-[0_0_20px_rgba(234,179,8,0.3),inset_0_0_15px_rgba(234,179,8,0.15)]", haloColor: "rgba(234,179,8,0.15)" },
-  restriction_violation: { bg: "bg-white/70 dark:bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-red-500/40", glow: "shadow-[0_0_20px_rgba(239,68,68,0.3),inset_0_0_15px_rgba(239,68,68,0.15)]", haloColor: "rgba(239,68,68,0.15)" },
+  positive: { bg: "bg-white/25 dark:bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-[#2ed585]/40", glow: "shadow-[0_0_20px_rgba(46,213,133,0.3),inset_0_0_15px_rgba(46,213,133,0.15)]", haloColor: "rgba(46,213,133,0.15)" },
+  neutral: { bg: "bg-white/25 dark:bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-blue-500/40", glow: "shadow-[0_0_20px_rgba(59,130,246,0.3),inset_0_0_15px_rgba(59,130,246,0.15)]", haloColor: "rgba(59,130,246,0.15)" },
+  warning: { bg: "bg-white/25 dark:bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-yellow-500/40", glow: "shadow-[0_0_20px_rgba(234,179,8,0.3),inset_0_0_15px_rgba(234,179,8,0.15)]", haloColor: "rgba(234,179,8,0.15)" },
+  restriction_violation: { bg: "bg-white/25 dark:bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-red-500/40", glow: "shadow-[0_0_20px_rgba(239,68,68,0.3),inset_0_0_15px_rgba(239,68,68,0.15)]", haloColor: "rgba(239,68,68,0.15)" },
 };
 
 /**
@@ -224,7 +224,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
   const previewContent = photoResult && (
     <div className="absolute inset-0 z-[100] flex flex-col pointer-events-auto">
       {/* Transparent overlay — NO blur, content behind is fully visible */}
-      <div className="absolute inset-0 bg-black/10 pointer-events-none"></div>
+      <div className="absolute inset-0 pointer-events-none"></div>
 
       {/* Floating Card Container */}
       <div className="relative flex-1 flex flex-col items-center justify-center p-4 sm:p-5 overflow-y-auto">
