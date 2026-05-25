@@ -5,7 +5,7 @@ import { compressImage } from "@/lib/image-utils";
 import { apiClient } from "@/lib/api-client";
 import type { FoodRecognitionResult, LabelScannerOutput } from "@/lib/api-client";
 import { MealScoreBadge } from "./MealScoreBadge";
-import { X } from "lucide-react";
+import { X, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 type FoodInputFormProps = {
   /** Called when the form is submitted with valid data. */
@@ -213,7 +213,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
       {/* ── Photo Analysis Notification ─────────────────────────── */}
       {photoResult && (
         <div
-          className={`relative rounded-xl border p-3 pr-8 text-sm max-h-[250px] overflow-y-auto scrollbar-thin scrollbar-thumb-black/10 hover:scrollbar-thumb-black/20 ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-surface-muted"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-border"} ${REACTION_STYLES[photoResult.reaction_type]?.text || "text-ink"}`}
+          className={`relative rounded-xl border p-3 text-sm pb-12 ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-surface-muted"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-border"} ${REACTION_STYLES[photoResult.reaction_type]?.text || "text-ink"}`}
         >
           <button
             type="button"
@@ -226,10 +226,10 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
               sessionStorage.removeItem("vitograph_diary_name");
               sessionStorage.removeItem("vitograph_diary_weight");
             }}
-            className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-black/5 text-ink-muted hover:text-ink transition-colors"
+            className="absolute bottom-2 right-2 p-2 rounded-full hover:bg-black/10 text-ink-muted hover:text-red-600 transition-colors"
             title={t('cancelAndClear')}
           >
-            <X className="w-4 h-4" />
+            <Trash2 className="w-5 h-5" />
           </button>
         <div className="flex justify-between items-start mb-2 gap-3">
           {/* Left Column: Title + Thumbnail */}
