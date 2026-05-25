@@ -271,61 +271,53 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
             </div>
           </div>
           
-          {/* Main Reaction Text */}
+          {/* Main Reaction Text — no background, just plain text */}
           {photoResult.health_reaction && (
-            <div className="mt-4 text-[13px] leading-relaxed text-ink/90 bg-white/5 rounded-[16px] p-3 border border-white/5">
+            <p className="mt-4 text-[13px] leading-relaxed text-ink/90">
               {photoResult.health_reaction}
-            </div>
+            </p>
           )}
 
-          {/* Glycemic Pills and Trash Bin at the bottom */}
+          {/* GI/GL separate capsules + Trash in one row */}
           <div className="flex flex-wrap items-center gap-2 mt-4">
             {photoResult.items.length > 0 && photoResult.items.map((item, idx) => {
               const cls = item.glycemic_class ?? "flat";
               const styleMap = {
-                flat:     { bg: "bg-emerald-500/10", border: "border-emerald-500/20", text: "text-emerald-400", dot: "bg-emerald-400" },
-                moderate: { bg: "bg-amber-500/10",   border: "border-amber-500/20",   text: "text-amber-400",   dot: "bg-amber-400" },
-                spike:    { bg: "bg-red-500/10",     border: "border-red-500/20",     text: "text-red-400",     dot: "bg-red-400" },
+                flat:     { bg: "bg-emerald-500/10", border: "border-emerald-500/20", text: "text-emerald-400" },
+                moderate: { bg: "bg-amber-500/10",   border: "border-amber-500/20",   text: "text-amber-400" },
+                spike:    { bg: "bg-red-500/10",     border: "border-red-500/20",     text: "text-red-400" },
               } as const;
               const s = styleMap[cls] ?? styleMap.flat;
               const gi = item.glycemic_index ?? 0;
               const gl = item.glycemic_load ?? 0;
               return (
-                <div key={idx} className={`px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-2 border ${s.border} ${s.bg} ${s.text}`}>
-                  <span className="truncate max-w-[120px] text-ink/90">{item.name_ru}</span>
-                  <div className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
-                  <span>GI {gi}</span>
-                  <span className="opacity-40">·</span>
-                  <span>GL {gl.toFixed(1)}</span>
+                <div key={idx} className="flex items-center gap-1.5">
+                  <div className={`px-3 py-1.5 rounded-full text-[12px] font-bold border ${s.border} ${s.bg} ${s.text}`}>
+                    GI {gi}
+                  </div>
+                  <div className={`px-3 py-1.5 rounded-full text-[12px] font-bold border ${s.border} ${s.bg} ${s.text}`}>
+                    GL {gl.toFixed(1)}
+                  </div>
                 </div>
               );
             })}
-            
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setPhotoResult(null);
-                  setName("");
-                  setWeight("");
-                  sessionStorage.removeItem("vitograph_diary_photoResult");
-                  sessionStorage.removeItem("vitograph_diary_name");
-                  sessionStorage.removeItem("vitograph_diary_weight");
-                }}
-                className="p-3 rounded-[14px] bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors shrink-0 flex items-center justify-center"
-                title={t('cancelAndClear')}
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
-              <button
-                type="button"
-                onClick={(e) => handleSubmit(e)}
-                disabled={isAnalyzing || !isValid}
-                className="flex-1 rounded-[14px] bg-green-500/20 text-green-400 py-3 font-semibold hover:bg-green-500/30 transition-colors disabled:opacity-50"
-              >
-                {t('saveFood')}
-              </button>
-            </div>
+
+            {/* Trash button — same row as GI/GL */}
+            <button
+              type="button"
+              onClick={() => {
+                setPhotoResult(null);
+                setName("");
+                setWeight("");
+                sessionStorage.removeItem("vitograph_diary_photoResult");
+                sessionStorage.removeItem("vitograph_diary_name");
+                sessionStorage.removeItem("vitograph_diary_weight");
+              }}
+              className="ml-auto p-2 rounded-full hover:bg-white/10 text-ink/40 hover:text-red-500 transition-colors shrink-0"
+              title={t('cancelAndClear')}
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
           </div>
           
           {photoResult.llmError && (
