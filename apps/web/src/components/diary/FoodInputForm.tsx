@@ -21,10 +21,10 @@ type FoodInputFormProps = {
 
 /** Color map for reaction type notifications (Premium Dark Glassmorphism). */
 const REACTION_STYLES: Record<string, { bg: string; border: string; glow: string }> = {
-  positive: { bg: "bg-surface/30 backdrop-blur-[64px] backdrop-saturate-200 backdrop-brightness-110", border: "border-green-500/30", glow: "shadow-[0_0_30px_-5px_rgba(34,197,94,0.15)]" },
-  neutral: { bg: "bg-surface/30 backdrop-blur-[64px] backdrop-saturate-200 backdrop-brightness-110", border: "border-blue-500/30", glow: "shadow-[0_0_30px_-5px_rgba(59,130,246,0.15)]" },
-  warning: { bg: "bg-surface/30 backdrop-blur-[64px] backdrop-saturate-200 backdrop-brightness-110", border: "border-yellow-500/30", glow: "shadow-[0_0_30px_-5px_rgba(234,179,8,0.15)]" },
-  restriction_violation: { bg: "bg-surface/30 backdrop-blur-[64px] backdrop-saturate-200 backdrop-brightness-110", border: "border-red-500/30", glow: "shadow-[0_0_30px_-5px_rgba(239,68,68,0.15)]" },
+  positive: { bg: "bg-[#111113]/30 backdrop-blur-2xl backdrop-saturate-200", border: "border-green-500/30", glow: "shadow-[inset_0_0_80px_rgba(34,197,94,0.1)]" },
+  neutral: { bg: "bg-[#111113]/30 backdrop-blur-2xl backdrop-saturate-200", border: "border-blue-500/30", glow: "shadow-[inset_0_0_80px_rgba(59,130,246,0.1)]" },
+  warning: { bg: "bg-[#111113]/30 backdrop-blur-2xl backdrop-saturate-200", border: "border-yellow-500/30", glow: "shadow-[inset_0_0_80px_rgba(234,179,8,0.1)]" },
+  restriction_violation: { bg: "bg-[#111113]/30 backdrop-blur-2xl backdrop-saturate-200", border: "border-red-500/30", glow: "shadow-[inset_0_0_80px_rgba(239,68,68,0.1)]" },
 };
 
 /**
