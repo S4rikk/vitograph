@@ -212,88 +212,97 @@ export default function FoodInputForm({ onSubmit, onPhotoResult }: FoodInputForm
     <div className="space-y-2">
       {/* ── Photo Analysis Notification ─────────────────────────── */}
       {photoResult && (
-        <div
-          className={`relative rounded-xl border p-3 text-sm pb-12 ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-surface-muted"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-border"} ${REACTION_STYLES[photoResult.reaction_type]?.text || "text-ink"}`}
-        >
-          <button
-            type="button"
-            onClick={() => {
-              setPhotoResult(null);
-              setName("");
-              setWeight("");
-              // Clear draft
-              sessionStorage.removeItem("vitograph_diary_photoResult");
-              sessionStorage.removeItem("vitograph_diary_name");
-              sessionStorage.removeItem("vitograph_diary_weight");
-            }}
-            className="absolute bottom-2 right-2 p-2 rounded-full hover:bg-black/10 text-ink-muted hover:text-red-600 transition-colors"
-            title={t('cancelAndClear')}
+        <>
+          {/* Backdrop to block UI up to the top tabs */}
+          <div className="absolute bottom-full left-[-50vw] right-[-50vw] h-[100dvh] bg-surface/80 backdrop-blur-md z-[40]" />
+
+          {/* Overlay Card */}
+          <div
+            className={`absolute bottom-full left-0 right-0 mb-4 flex flex-col rounded-2xl border shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] p-4 text-sm z-[50] overflow-y-auto ${REACTION_STYLES[photoResult.reaction_type]?.bg || "bg-surface-muted"} ${REACTION_STYLES[photoResult.reaction_type]?.border || "border-border"} ${REACTION_STYLES[photoResult.reaction_type]?.text || "text-ink"}`}
+            style={{ height: 'calc(100dvh - 220px)', maxHeight: '800px' }}
           >
-            <Trash2 className="w-5 h-5" />
-          </button>
-        <div className="flex justify-between items-start mb-2 gap-3">
-          {/* Left Column: Title + Thumbnail */}
-          <div className="flex flex-col flex-1 min-w-0">
-            <p className="font-medium mb-2 leading-snug">
-              {photoResult.items.map((i) => `${i.name_ru} (~${i.estimated_weight_g}г)`).join(", ")}
-            </p>
-            {photoResult.imageUrl && (
-              <div className="rounded-lg overflow-hidden shrink-0 mt-auto max-w-[120px]">
-                <img
-                  src={photoResult.imageUrl}
-                  alt={t('takePhoto')}
-                  className="w-full object-cover rounded-lg aspect-[3/4]"
-                />
+            <button
+              type="button"
+              onClick={() => {
+                setPhotoResult(null);
+                setName("");
+                setWeight("");
+                // Clear draft
+                sessionStorage.removeItem("vitograph_diary_photoResult");
+                sessionStorage.removeItem("vitograph_diary_name");
+                sessionStorage.removeItem("vitograph_diary_weight");
+              }}
+              className="absolute bottom-3 right-3 p-3 rounded-full hover:bg-black/10 text-ink-muted hover:text-red-600 transition-colors bg-white/50 backdrop-blur shadow-sm z-10"
+              title={t('cancelAndClear')}
+            >
+              <Trash2 className="w-6 h-6" />
+            </button>
+            <div className="flex justify-between items-start mb-4 gap-3 relative">
+              {/* Left Column: Title + Thumbnail */}
+              <div className="flex flex-col flex-1 min-w-0">
+                <p className="font-bold text-lg mb-3 leading-snug">
+                  {photoResult.items.map((i) => `${i.name_ru} (~${i.estimated_weight_g}г)`).join(", ")}
+                </p>
+                {photoResult.imageUrl && (
+                  <div className="rounded-xl overflow-hidden shrink-0 mt-auto w-[160px]">
+                    <img
+                      src={photoResult.imageUrl}
+                      alt={t('takePhoto')}
+                      className="w-full object-cover rounded-xl aspect-[3/4] shadow-md border border-black/5"
+                    />
+                  </div>
+                )}
+              </div>
+              {/* Right Column: Score Badge */}
+              <div className="shrink-0 flex flex-col items-end">
+                <MealScoreBadge score={photoResult.meal_quality_score} />
+                {photoResult.health_reaction && (
+                  <p className="mt-3 text-[13px] leading-relaxed max-w-[160px] text-right font-medium">
+                    {photoResult.health_reaction}
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            {/* Glycemic zone per item */}
+            {photoResult.items.length > 0 && (
+              <div className="flex flex-col gap-2 mb-4">
+                {photoResult.items.map((item, idx) => {
+                  const cls = item.glycemic_class ?? "flat";
+                  const styleMap = {
+                    flat:     { bg: "bg-emerald-100", text: "text-emerald-800", label: "🟢 Flat",     bar: "bg-emerald-500" },
+                    moderate: { bg: "bg-amber-100",   text: "text-amber-800",   label: "🟡 Moderate", bar: "bg-amber-400"   },
+                    spike:    { bg: "bg-red-100",      text: "text-red-800",     label: "🔴 Spike",    bar: "bg-red-500"     },
+                  } as const;
+                  const s = styleMap[cls] ?? styleMap.flat;
+                  const gi = item.glycemic_index ?? 0;
+                  const gl = item.glycemic_load ?? 0;
+                  const barPct = Math.min(100, Math.round((gl / 30) * 100));
+                  return (
+                    <div key={idx} className={`rounded-xl px-3 py-2 ${s.bg}`}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className={`text-sm font-bold ${s.text}`}>{item.name_ru}</span>
+                        <span className={`text-[11px] font-bold ${s.text}`}>{s.label} · GI {gi} · GL {gl.toFixed(1)}</span>
+                      </div>
+                      <div className="w-full h-[6px] bg-black/10 rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full transition-all duration-700 ${s.bar}`} style={{ width: `${barPct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
-          </div>
-          {/* Right Column: Score Badge */}
-          <div className="shrink-0">
-            <MealScoreBadge score={photoResult.meal_quality_score} />
-            {photoResult.health_reaction && (
-              <p className="mt-2 text-xs leading-relaxed max-w-[200px]">
-                {photoResult.health_reaction}
+            
+            {photoResult.meal_quality_reason && (
+              <p className="mt-auto pt-4 text-xs text-ink-muted italic leading-relaxed border-t border-black/5 pb-16">
+                {photoResult.meal_quality_reason}
               </p>
             )}
+            {photoResult.llmError && (
+              <p className="mt-2 text-xs opacity-60 text-red-500 pb-16">Ошибка: {photoResult.llmError}</p>
+            )}
           </div>
-        </div>
-          {/* Glycemic zone per item */}
-          {photoResult.items.length > 0 && (
-            <div className="flex flex-col gap-1 mb-1.5">
-              {photoResult.items.map((item, idx) => {
-                const cls = item.glycemic_class ?? "flat";
-                const styleMap = {
-                  flat:     { bg: "bg-emerald-100", text: "text-emerald-800", label: "🟢 Flat",     bar: "bg-emerald-500" },
-                  moderate: { bg: "bg-amber-100",   text: "text-amber-800",   label: "🟡 Moderate", bar: "bg-amber-400"   },
-                  spike:    { bg: "bg-red-100",      text: "text-red-800",     label: "🔴 Spike",    bar: "bg-red-500"     },
-                } as const;
-                const s = styleMap[cls] ?? styleMap.flat;
-                const gi = item.glycemic_index ?? 0;
-                const gl = item.glycemic_load ?? 0;
-                const barPct = Math.min(100, Math.round((gl / 30) * 100));
-                return (
-                  <div key={idx} className={`rounded-lg px-2 py-1 ${s.bg}`}>
-                    <div className="flex items-center justify-between mb-0.5">
-                      <span className={`text-[0.6875rem] font-bold ${s.text}`}>{item.name_ru}</span>
-                      <span className={`text-[0.625rem] font-semibold ${s.text}`}>{s.label} · GI {gi} · GL {gl.toFixed(1)}</span>
-                    </div>
-                    <div className="w-full h-[4px] bg-black/10 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full transition-all duration-700 ${s.bar}`} style={{ width: `${barPct}%` }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          {photoResult.meal_quality_reason && (
-            <p className="mt-1.5 text-[11px] text-ink-muted italic leading-relaxed">
-              {photoResult.meal_quality_reason}
-            </p>
-          )}
-          {photoResult.llmError && (
-            <p className="mt-1 text-xs opacity-60">Ошибка: {photoResult.llmError}</p>
-          )}
-        </div>
+        </>
       )}
 
       {/* ── Label Scanner Notification ─────────────────────────── */}
