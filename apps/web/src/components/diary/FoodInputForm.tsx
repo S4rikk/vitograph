@@ -20,10 +20,10 @@ type FoodInputFormProps = {
 };
 
 const REACTION_STYLES: Record<string, { bg: string; border: string; glow: string; haloColor: string }> = {
-  positive: { bg: "bg-white/25 dark:bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-[#2ed585]/40", glow: "shadow-[0_0_20px_rgba(46,213,133,0.3),inset_0_0_15px_rgba(46,213,133,0.15)]", haloColor: "rgba(46,213,133,0.15)" },
-  neutral: { bg: "bg-white/25 dark:bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-blue-500/40", glow: "shadow-[0_0_20px_rgba(59,130,246,0.3),inset_0_0_15px_rgba(59,130,246,0.15)]", haloColor: "rgba(59,130,246,0.15)" },
-  warning: { bg: "bg-white/25 dark:bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-yellow-500/40", glow: "shadow-[0_0_20px_rgba(234,179,8,0.3),inset_0_0_15px_rgba(234,179,8,0.15)]", haloColor: "rgba(234,179,8,0.15)" },
-  restriction_violation: { bg: "bg-white/25 dark:bg-white/5 backdrop-blur-xl backdrop-saturate-150", border: "border-2 border-red-500/40", glow: "shadow-[0_0_20px_rgba(239,68,68,0.3),inset_0_0_15px_rgba(239,68,68,0.15)]", haloColor: "rgba(239,68,68,0.15)" },
+  positive: { bg: "bg-white/10 dark:bg-white/5 backdrop-blur-md backdrop-saturate-150", border: "border-2 border-[#2ed585]/40", glow: "shadow-[0_0_20px_rgba(46,213,133,0.3),inset_0_0_15px_rgba(46,213,133,0.15)]", haloColor: "rgba(46,213,133,0.15)" },
+  neutral: { bg: "bg-white/10 dark:bg-white/5 backdrop-blur-md backdrop-saturate-150", border: "border-2 border-blue-500/40", glow: "shadow-[0_0_20px_rgba(59,130,246,0.3),inset_0_0_15px_rgba(59,130,246,0.15)]", haloColor: "rgba(59,130,246,0.15)" },
+  warning: { bg: "bg-white/10 dark:bg-white/5 backdrop-blur-md backdrop-saturate-150", border: "border-2 border-yellow-500/40", glow: "shadow-[0_0_20px_rgba(234,179,8,0.3),inset_0_0_15px_rgba(234,179,8,0.15)]", haloColor: "rgba(234,179,8,0.15)" },
+  restriction_violation: { bg: "bg-white/10 dark:bg-white/5 backdrop-blur-md backdrop-saturate-150", border: "border-2 border-red-500/40", glow: "shadow-[0_0_20px_rgba(239,68,68,0.3),inset_0_0_15px_rgba(239,68,68,0.15)]", haloColor: "rgba(239,68,68,0.15)" },
 };
 
 /**
@@ -148,7 +148,8 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
         const result = await apiClient.analyzeFood(base64Image);
 
         // 3. Store result for notification display
-        setPhotoResult(result);
+        const objectUrl = URL.createObjectURL(file);
+        setPhotoResult({ ...result, imageUrl: objectUrl });
 
         // 4. Auto-fill form with total recognized weight and items names
         if (result.items.length > 0) {
@@ -227,23 +228,24 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
       <div className="absolute inset-0 pointer-events-none"></div>
 
       {/* Floating Card Container */}
-      <div className="relative flex-1 flex flex-col items-center justify-center p-4 sm:p-5 overflow-y-auto">
-        {/* Gradient blur halo around the card — fades outward */}
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            width: 'calc(100% + 80px)',
-            height: 'calc(100% + 80px)',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            background: `radial-gradient(ellipse at center, ${reactionStyle.haloColor} 40%, transparent 70%)`,
-            filter: 'blur(30px)',
-          }}
-        />
-        <div
-          className={`relative w-full max-w-md flex flex-col p-4 sm:p-5 rounded-[24px] border ${reactionStyle.bg} ${reactionStyle.border} ${reactionStyle.glow} text-ink`}
-        >
+      <div className="relative flex-1 p-4 sm:p-5 overflow-y-auto flex flex-col">
+        <div className="relative w-full max-w-md m-auto flex flex-col items-center justify-center">
+          {/* Gradient blur halo around the card — fades outward */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              width: 'calc(100% + 80px)',
+              height: 'calc(100% + 80px)',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              background: `radial-gradient(ellipse at center, ${reactionStyle.haloColor} 40%, transparent 70%)`,
+              filter: 'blur(30px)',
+            }}
+          />
+          <div
+            className={`relative w-full flex flex-col p-4 sm:p-5 rounded-[24px] border ${reactionStyle.bg} ${reactionStyle.border} ${reactionStyle.glow} text-ink`}
+          >
 
           <div className="flex gap-4">
             {/* Left: Thumbnail */}
