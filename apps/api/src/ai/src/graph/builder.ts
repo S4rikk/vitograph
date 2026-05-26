@@ -23,7 +23,7 @@ function sanitizeMessages(messages: BaseMessage[]): BaseMessage[] {
   
   for (let i = 0; i < messages.length; i++) {
     const msg = messages[i];
-    const msgType = msg._getType?.() || '';
+    const msgType = msg.type || '';
     
     // Check if this is an AI message with tool_calls
     if (msgType === 'ai' && 'tool_calls' in msg && Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0) {
@@ -35,7 +35,7 @@ function sanitizeMessages(messages: BaseMessage[]): BaseMessage[] {
       const foundIds = new Set<string>();
       for (let j = i + 1; j < messages.length; j++) {
         const nextMsg = messages[j];
-        const nextType = nextMsg._getType?.() || '';
+        const nextType = nextMsg.type || '';
         if (nextType === 'tool' && 'tool_call_id' in nextMsg) {
           foundIds.add((nextMsg as any).tool_call_id);
         } else {
@@ -65,7 +65,7 @@ function sanitizeMessages(messages: BaseMessage[]): BaseMessage[] {
     // Check if this is an orphaned tool response (tool message without preceding tool_calls)
     if (msgType === 'tool') {
       const prevMsg = result[result.length - 1];
-      const prevType = prevMsg?._getType?.() || '';
+      const prevType = prevMsg?.type || '';
       
       // If the previous message in result is not an AI with tool_calls, skip this tool message
       if (prevType !== 'ai' || !('tool_calls' in prevMsg) || !Array.isArray(prevMsg.tool_calls) || prevMsg.tool_calls.length === 0) {
@@ -73,11 +73,11 @@ function sanitizeMessages(messages: BaseMessage[]): BaseMessage[] {
         let hasParent = false;
         for (let k = result.length - 1; k >= 0; k--) {
           const candidate = result[k];
-          if (candidate._getType?.() === 'ai' && 'tool_calls' in candidate) {
+          if (candidate.type === 'ai' && 'tool_calls' in candidate) {
             hasParent = true;
             break;
           }
-          if (candidate._getType?.() !== 'tool') break;
+          if (candidate.type !== 'tool') break;
         }
         if (!hasParent) {
           console.warn(`[Sanitizer] ⚠️ Removing orphaned tool response (no parent tool_calls)`);
@@ -116,10 +116,10 @@ async function callModel(state: typeof GraphAnnotation.State, config?: any) {
   // Prevent token explosion: 
   // 1. Keep only the LATEST SystemMessage (LangGraph appends a new one on every request)
   // 2. Keep only the last 20 conversation messages
-  const systemMessages = state.messages.filter(m => m._getType && m._getType() === "system");
+  const systemMessages = state.messages.filter(m => m.type === "system");
   const latestSystemMessage = systemMessages.length > 0 ? systemMessages[systemMessages.length - 1] : null;
   
-  let convoMessages = state.messages.filter(m => !m._getType || m._getType() !== "system");
+  let convoMessages = state.messages.filter(m => m.type !== "system");
   
   // Identify messages to prune from the persistent state (keep last 20)
   const PRUNE_THRESHOLD = 20;
@@ -159,7 +159,7 @@ async function callModel(state: typeof GraphAnnotation.State, config?: any) {
     const fs = await import("fs");
     const chatMode = config?.configurable?.chatMode || 'default';
     const logFile = chatMode === 'diary' ? "debug_diary_prompt.txt" : "debug_assistant_prompt.txt";
-    const fullPromptLog = finalMessages.map(m => `--- ${m._getType?.() || 'unknown'} ---\n${m.content}`).join("\n\n");
+    const fullPromptLog = finalMessages.map(m => `--- ${m.type || 'unknown'} ---\n${m.content}`).join("\n\n");
     fs.writeFileSync(logFile, `[FULL PROMPT LOG (${chatMode}) - ${new Date().toISOString()}]\n${fullPromptLog}\n`);
   } catch (err) {
     console.error("[DEBUG] Failed to write full prompt log:", err);
@@ -177,10 +177,9 @@ async function callModel(state: typeof GraphAnnotation.State, config?: any) {
     if (error.message?.includes('INVALID_TOOL_RESULTS') || error.message?.includes("role 'tool'")) {
       console.warn(`[AGENT] 🔄 Retrying with fully cleaned messages (no tool history)`);
       const cleanMessages = finalMessages.filter(m => {
-        const type = m._getType?.() || '';
-        return type !== 'tool';
+        return m.type !== 'tool';
       }).map(m => {
-        if (m._getType?.() === 'ai' && 'tool_calls' in m && Array.isArray(m.tool_calls) && m.tool_calls.length > 0) {
+        if (m.type === 'ai' && 'tool_calls' in m && Array.isArray(m.tool_calls) && m.tool_calls.length > 0) {
           return new AIMessage(typeof m.content === 'string' ? m.content : 'Предыдущий запрос был прерван.');
         }
         return m;
