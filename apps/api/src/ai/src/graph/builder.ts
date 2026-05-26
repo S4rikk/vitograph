@@ -25,6 +25,22 @@ function sanitizeMessages(messages: BaseMessage[]): BaseMessage[] {
     const msg = messages[i];
     const msgType = msg.type || '';
     
+    // Sanitization for blob URLs in HumanMessage contents (from history)
+    if (msgType === 'human' && Array.isArray(msg.content)) {
+      let changed = false;
+      const newContent = msg.content.map((part: any) => {
+        if (part && typeof part === 'object' && part.type === 'image_url' && part.image_url?.url?.startsWith('blob:')) {
+          changed = true;
+          return { type: 'text', text: '[Изображение проанализировано локально. Blob URL удален.]' };
+        }
+        return part;
+      });
+      
+      if (changed) {
+        msg.content = newContent;
+      }
+    }
+    
     // Check if this is an AI message with tool_calls
     if (msgType === 'ai' && 'tool_calls' in msg && Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0) {
       // Look ahead: the next message(s) should be tool responses
