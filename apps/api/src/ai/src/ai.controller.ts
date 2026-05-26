@@ -1359,7 +1359,7 @@ export async function handleChat(
           messagesToInvoke.push(new SystemMessage(systemPrompt));
         }
       }
-      if (finalImageUrl) {
+      if (finalImageUrl && !finalImageUrl.startsWith("blob:")) {
         messagesToInvoke.push(
           new HumanMessage({
             content: [
@@ -1674,7 +1674,7 @@ export async function handleChatStream(
           messagesToInvoke.push(new SystemMessage(systemPrompt));
         }
       }
-      if (finalImageUrl) {
+      if (finalImageUrl && !finalImageUrl.startsWith("blob:")) {
         messagesToInvoke.push(
           new HumanMessage({
             content: [

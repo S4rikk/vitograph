@@ -1,7 +1,7 @@
-# Graph Report - VITOGRAPH  (2026-05-25)
+# Graph Report - VITOGRAPH  (2026-05-26)
 
 ## Corpus Check
-- 211 files · ~456,292 words
+- 211 files · ~456,526 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
