@@ -10,6 +10,7 @@ import React from "react";
 import HealthGoalsWidget from "@/components/shared/HealthGoalsWidget";
 import { useTypewriter } from "@/hooks/use-typewriter";
 import { useTranslations } from "next-intl";
+import { BrainCircuit } from "lucide-react";
 
 
 // ── CUSTOM PREMIUM RENDERERS ──
@@ -220,10 +221,27 @@ export default function AiAssistantView({ userId }: { userId: string }) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // Initialization flags
   const [isMounted, setIsMounted] = useState(false);
   const [zoomedImageId, setZoomedImageId] = useState<string | null>(null);
   const [profile, setProfile] = useState<any>(null);
+
+  // --- INSIGHT WIDGET STATE ---
+  const [isInsightReady, setIsInsightReady] = useState(true); // Default to true to show the feature
+  const [isInsightDismissed, setIsInsightDismissed] = useState(false);
+  const [showInsightPopover, setShowInsightPopover] = useState(false);
+
+  useEffect(() => {
+    const dismissed = sessionStorage.getItem("insight_dismissed");
+    if (dismissed === "true") {
+      setIsInsightDismissed(true);
+    }
+  }, []);
+
+  const dismissInsight = () => {
+    setIsInsightDismissed(true);
+    sessionStorage.setItem("insight_dismissed", "true");
+  };
+  // ----------------------------
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -474,13 +492,84 @@ export default function AiAssistantView({ userId }: { userId: string }) {
 
   return (
     <div className="relative flex flex-1 sm:flex-none flex-col overflow-hidden sm:rounded-2xl sm:border border-white/70 dark:border-white/30 bg-surface/80 backdrop-blur-2xl shadow-[0_10px_20px_-10px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_-10px_rgba(0,0,0,0.5)] sm:h-[750px] mb-[env(safe-area-inset-bottom)]">
+      {/* Insight Gradient Def */}
+      <svg width="0" height="0" className="absolute">
+        <defs>
+          <linearGradient id="insight-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#a855f7" />
+            <stop offset="100%" stopColor="#ec4899" />
+          </linearGradient>
+        </defs>
+      </svg>
       {/* Premium Glass Edge Overlay */}
       <div className="pointer-events-none absolute inset-0 sm:rounded-2xl shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_1px_0_2px_rgba(255,255,255,0.5),inset_-1px_0_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.2)] dark:shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_1px_0_2px_rgba(255,255,255,0.15),inset_-1px_0_2px_rgba(255,255,255,0.15),inset_0_-1px_2px_rgba(255,255,255,0.05)] z-50"></div>
       {/* Header with Clear Button */}
-      <div className="flex items-center justify-between border-b border-border/50 px-4 py-1 sm:py-1.5 bg-surface">
-        <h3 className="text-[0.6875rem] sm:text-xs font-semibold text-ink-muted uppercase tracking-widest">
-          {profile?.ai_name || t("defaultAssistantName")}
-        </h3>
+      <div className="flex items-center justify-between border-b border-border/50 px-4 py-1 sm:py-1.5 bg-surface relative">
+        <div className="flex items-center space-x-3">
+          <h3 className="text-[0.6875rem] sm:text-xs font-semibold text-ink-muted uppercase tracking-widest">
+            {profile?.ai_name || t("defaultAssistantName")}
+          </h3>
+          
+          {/* INSIGHT HEADER ICON */}
+          <div className="relative flex items-center">
+            <button 
+              onClick={() => {
+                if (isInsightReady && !isInsightDismissed) {
+                  // Scroll down to the big card
+                  const el = scrollRef.current;
+                  if (el) el.scrollTop = el.scrollHeight;
+                } else {
+                  setShowInsightPopover(!showInsightPopover);
+                }
+              }}
+              className="p-1 rounded-full transition-all focus:outline-none hover:bg-cloud-light"
+              title="Инсайты"
+            >
+              <BrainCircuit 
+                size={18} 
+                className={`transition-all duration-300 ${
+                  !isInsightReady 
+                    ? "opacity-40 text-ink-muted" 
+                    : isInsightDismissed 
+                      ? "opacity-100" 
+                      : "animate-pulse"
+                }`}
+                style={isInsightReady ? { stroke: "url(#insight-gradient)", strokeWidth: 2 } : { strokeWidth: 2 }}
+              />
+            </button>
+            
+            {showInsightPopover && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setShowInsightPopover(false)}
+                />
+                <div className="absolute top-full left-0 mt-2 w-72 p-4 bg-surface border border-border rounded-xl shadow-xl z-50 animate-in fade-in zoom-in duration-200">
+                  {!isInsightReady ? (
+                    <p className="text-sm text-ink-muted leading-relaxed">
+                      Анализ пока недоступен. Мне нужно еще 3 дней данных о питании и симптомах, чтобы найти скрытые связи.
+                    </p>
+                  ) : isInsightDismissed ? (
+                    <div className="flex flex-col space-y-3 relative z-10">
+                      <p className="text-sm text-ink font-medium">
+                        Инсайт готов. Запустить глубокий анализ?
+                      </p>
+                      <button 
+                        onClick={() => { 
+                          setShowInsightPopover(false); 
+                          alert("Запуск глубокого анализа..."); 
+                        }}
+                        className="w-full py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-semibold rounded-lg shadow-sm hover:opacity-90 transition-opacity"
+                      >
+                        Запуск
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
         <button
           onClick={handleClearChat}
           disabled={isLoading || messages.length <= 1}
@@ -542,6 +631,42 @@ export default function AiAssistantView({ userId }: { userId: string }) {
             </div>
           </div>
         ))}
+        
+        {/* BIG CARD (INSIGHT PROPOSAL) */}
+        {isInsightReady && !isInsightDismissed && (
+          <div className="flex justify-start mt-2 mb-4">
+            <div className="max-w-[95%] sm:max-w-[85%] rounded-2xl px-4 py-4 shadow-lg bg-gray-800/90 border border-gray-700 text-white rounded-bl-none animate-in fade-in slide-in-from-bottom-4 duration-500 backdrop-blur-md">
+              <div className="flex items-start space-x-3">
+                <div className="p-2 bg-gray-900/50 rounded-xl shrink-0">
+                  <BrainCircuit size={24} style={{ stroke: "url(#insight-gradient)", strokeWidth: 2 }} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-[0.9375rem] leading-relaxed">
+                    {profile?.first_name || "Саша"}, у нас накопилось достаточно записей о твоих симптомах. Я могу сопоставить их с дневником питания и найти скрытые причины. Запустить глубокий анализ?
+                  </p>
+                  <div className="mt-4 flex space-x-3">
+                    <button 
+                      className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:opacity-90 transition-opacity text-sm shadow-sm"
+                      onClick={() => {
+                        dismissInsight();
+                        alert("Запуск глубокого анализа...");
+                      }}
+                    >
+                      Да, давай!
+                    </button>
+                    <button 
+                      className="px-4 py-2 bg-gray-700 text-gray-200 font-medium rounded-lg hover:bg-gray-600 transition-colors text-sm"
+                      onClick={dismissInsight}
+                    >
+                      Позже
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {isLoading && messages.length > 0 && messages[messages.length - 1].content === "" && (
           <div className="flex justify-start">
             <div className="max-w-[85%] rounded-2xl bg-cloud-light px-4 py-3 text-ink shadow-sm rounded-bl-none">

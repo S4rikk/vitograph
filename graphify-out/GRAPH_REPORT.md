@@ -1,11 +1,11 @@
-# Graph Report - VITOGRAPH  (2026-05-26)
+# Graph Report - VITOGRAPH  (2026-05-27)
 
 ## Corpus Check
-- 211 files · ~456,526 words
+- 211 files · ~457,083 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 928 nodes · 1545 edges · 56 communities detected
+- 929 nodes · 1546 edges · 56 communities detected
 - Extraction: 59% EXTRACTED · 41% INFERRED · 0% AMBIGUOUS · INFERRED: 631 edges (avg confidence: 0.57)
 - Token cost: 0 input · 0 output
 
@@ -393,7 +393,7 @@ Nodes (1): Extract biomarkers from a batch of PHOTOS of a lab report using GPT-4
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `createClient()` connect `Community 1` to `Community 20`, `Community 3`, `Community 4`, `Community 5`?**
-  _High betweenness centrality (0.047) - this node is a cross-community bridge._
+  _High betweenness centrality (0.048) - this node is a cross-community bridge._
 - **Why does `DatabaseError` connect `Community 0` to `Community 10`, `Community 12`, `Community 21`?**
   _High betweenness centrality (0.025) - this node is a cross-community bridge._
 - **Why does `ProfileUpdate` connect `Community 0` to `Community 2`?**

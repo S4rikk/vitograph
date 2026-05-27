@@ -35,10 +35,11 @@ export function detectAndParseFoodLog(text: string, time: string): ParsedFoodLog
     const giMatch = text.match(glycemicRegex);
     // Fallback to legacy КБЖУ format (for old messages in chat history)
     const legacyMatch = !giMatch ? text.match(legacyMacroRegex) : null;
+    const mealIdMatch = /<meal_id\s+id="([^"]+)"\s*\/>/i.exec(text);
 
-    if (!giMatch && !legacyMatch) return null;
+    if (!giMatch && !legacyMatch && !mealIdMatch) return null;
 
-    let weight: number, name: string;
+    let weight = 0, name = "Запись из красной зоны";
     let gi: number | null = null, responseType: "flat" | "moderate" | "spike" | null = null, energyHours: number | null = null;
     let calories = 0, protein = 0, fat = 0, carbs = 0;
 
@@ -49,9 +50,9 @@ export function detectAndParseFoodLog(text: string, time: string): ParsedFoodLog
       gi = parseFloat(giMatch[3].replace(',', '.'));
       responseType = giMatch[4] as "flat" | "moderate" | "spike";
       energyHours = parseFloat(giMatch[5].replace(',', '.'));
-    } else {
+    } else if (legacyMatch) {
       // Legacy КБЖУ format
-      const [, weightStr, rawName, calStr, protStr, fatStr, carbStr] = legacyMatch!;
+      const [, weightStr, rawName, calStr, protStr, fatStr, carbStr] = legacyMatch;
       weight = parseFloat(weightStr.replace(',', '.'));
       name = rawName.trim();
       calories = parseFloat(calStr.replace(',', '.'));
@@ -62,7 +63,6 @@ export function detectAndParseFoodLog(text: string, time: string): ParsedFoodLog
 
     // Parse mealId (unchanged)
     let mealId = undefined;
-    const mealIdMatch = /<meal_id\s+id="([^"]+)"\s*\/>/i.exec(text);
     if (mealIdMatch) mealId = mealIdMatch[1];
     console.log("[Parser] Found mealId:", mealId);
 
@@ -98,9 +98,14 @@ export function detectAndParseFoodLog(text: string, time: string): ParsedFoodLog
     }
 
     // Build clean comment
-    const matchToStrip = giMatch ? glycemicRegex : legacyMacroRegex;
-    let comment = text
-      .replace(matchToStrip, '')
+    let comment = text;
+    if (giMatch) {
+      comment = comment.replace(glycemicRegex, '');
+    } else if (legacyMatch) {
+      comment = comment.replace(legacyMacroRegex, '');
+    }
+    
+    comment = comment
       .replace(/<meal_score\s+[\s\S]*?\/>/gi, '')
       .replace(/<meal_id[^>]*\/>/gi, '')
       .replace(/<nut[a-z]*\s+[^>]*type[a-z]*=["']micro["'][^>]*>[\s\S]*?<\/nut[a-z]*>/gi, '')

@@ -356,7 +356,11 @@ export const logMealTool = new DynamicStructuredTool({
     // Frontend parser relies on this EXACT format: "Записал [вес]г [название] | GI:[число] | [flat/moderate/spike] | [часы]ч энергии"
     const technicalLine = `Записал ${weight_g}г ${food_name} | GI:${glycemic_index ?? '?'} | ${responseWord} | ${energy_duration_hours ?? '?'}ч энергии`;
 
-    let baseResponse = `Successfully logged ${weight_g}g of ${food_name} (GI: ${glycemic_index ?? '?'}, Response: ${giLabel}${energyLabel ? ', ' + energyLabel : ''}) for ${meal_type}. AI INSTRUCTION: Do NOT mention calories, КБЖУ, or macros (protein/fat/carbs) to the user. Focus ONLY on glycemic impact, response type, and energy duration. CRITICAL: You MUST include this EXACT technical line at the END of your response (after your human text): ${technicalLine}`;
+    let baseResponse = `Successfully logged ${weight_g}g of ${food_name} (GI: ${glycemic_index ?? '?'}, Response: ${giLabel}${energyLabel ? ', ' + energyLabel : ''}) for ${meal_type}. `;
+    if (isRedZoneConfirmed) {
+      baseResponse += `WARNING: THIS IS A RED ZONE CONFIRMATION! Even though this is a confirmation, the meal is now logged successfully. `;
+    }
+    baseResponse += `AI INSTRUCTION: Do NOT mention calories, КБЖУ, or macros (protein/fat/carbs) to the user. Focus ONLY on glycemic impact, response type, and energy duration. CRITICAL: You MUST include this EXACT technical line at the END of your response (after your human text, DO NOT SKIP THIS EVEN FOR RED ZONE CONFIRMATIONS): ${technicalLine}`;
 
     if (microsList.length > 0) {
       baseResponse += ` Micronutrients found: ${microsList}. AI INSTRUCTION: You MUST mention these micronutrients in your final response to the user. When mentioning them in the main text, use <nutr type="marker">Name</nutr>. IN THE TECHNICAL BLOCK AT THE END, you MUST wrap each micronutrient name and value in a strict XML tag: <nutr type="micro">[Name] ([Value])</nutr>. Valid types for the main text are: iron, magnesium, vitamin_c, vitamin_b, omega, calcium, marker.`;
