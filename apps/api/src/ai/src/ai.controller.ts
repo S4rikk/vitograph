@@ -875,6 +875,48 @@ function formatLabDiagnosticReport(profile: any): string {
 }
 
 /**
+ * Fetch the most recent Insight report for the user (last 7 days).
+ */
+async function fetchLatestInsight(userId: string, token: string): Promise<any | null> {
+  try {
+    const supabaseUrl = process.env.SUPABASE_URL!;
+    const supabaseKey = process.env.SUPABASE_ANON_KEY!;
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } }
+    });
+    
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    const { data, error } = await supabase
+      .from('ai_insights')
+      .select('title, body, generated_at')
+      .eq('user_id', userId)
+      .gte('generated_at', sevenDaysAgo.toISOString())
+      .order('generated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+      
+    if (error) {
+      console.warn('[fetchLatestInsight] Error fetching insight:', error);
+      return null;
+    }
+    
+    if (data) {
+      return {
+        title: data.title,
+        body: data.body,
+        generatedAt: data.generated_at
+      };
+    }
+    return null;
+  } catch (err) {
+    console.error('[fetchLatestInsight] Exception:', err);
+    return null;
+  }
+}
+
+/**
  * Deep lab report formatter — includes FULL biomarker_assessments for detailed user questions.
  * Used when the user explicitly asks about their lab results.
  */
@@ -1202,12 +1244,13 @@ export async function handleChat(
 
       if (token) {
         // Parallel fetch: user context + memory context (independent)
-        const [dbContext, [emotionalProfile, semanticMemories, pastActions], activeSkills, matchedSkillDoc, kbContext] = await Promise.all([
+        const [dbContext, [emotionalProfile, semanticMemories, pastActions], activeSkills, matchedSkillDoc, kbContext, latestInsight] = await Promise.all([
           fetchUserContext(token, req.user.id),
           fetchAdvancedMemoryContext(req.user.id, body.message, token),
           fetchActiveSkills(req.user.id, token),
           fetchMatchingSkillDocument(req.user.id, body.message),
           fetchKnowledgeBaseContext(body.message, token),
+          fetchLatestInsight(req.user.id, token)
         ]);
 
         if (dbContext) {
@@ -1341,7 +1384,8 @@ export async function handleChat(
               .withGlycemicAwareRule()
               .withCoachingMode(activeSkills, isFirstMessageOfDay)
               .withSkillDocument(matchedSkillDoc)
-              .withKnowledgeBase(kbContext);
+              .withKnowledgeBase(kbContext)
+              .withPreviousInsight(latestInsight);
           }
 
           // Merge weather alert + skill check-in instruction if both present on first message of day
@@ -1520,12 +1564,13 @@ export async function handleChatStream(
 
       if (token) {
         // Parallel fetch: user context + memory context (independent)
-        const [dbContext, [emotionalProfile, semanticMemories, pastActions], activeSkills, matchedSkillDoc, kbContext] = await Promise.all([
+        const [dbContext, [emotionalProfile, semanticMemories, pastActions], activeSkills, matchedSkillDoc, kbContext, latestInsight] = await Promise.all([
           fetchUserContext(token, req.user.id),
           fetchAdvancedMemoryContext(req.user.id, body.message, token),
           fetchActiveSkills(req.user.id, token),
           fetchMatchingSkillDocument(req.user.id, body.message),
           fetchKnowledgeBaseContext(body.message, token),
+          fetchLatestInsight(req.user.id, token)
         ]);
 
         if (dbContext) {
@@ -1657,7 +1702,8 @@ export async function handleChatStream(
               .withGlycemicAwareRule()
               .withCoachingMode(activeSkills, isFirstMessageOfDay)
               .withSkillDocument(matchedSkillDoc)
-              .withKnowledgeBase(kbContext);
+              .withKnowledgeBase(kbContext)
+              .withPreviousInsight(latestInsight);
           }
 
           // Merge weather alert + skill check-in instruction if both present on first message of day

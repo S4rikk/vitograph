@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { apiClient } from "@/lib/api-client";
-import { Loader2, Plus, Sparkles, AlertCircle } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 interface Symptom {
@@ -27,10 +26,6 @@ export default function SymptomTrackerWidget() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // Correlation state
-  const [correlations, setCorrelations] = useState<CorrelationResult[] | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   const [supabase] = useState(() => createClient());
 
@@ -104,20 +99,6 @@ export default function SymptomTrackerWidget() {
     }
   };
 
-  const generateInsights = async () => {
-    setIsAnalyzing(true);
-    setAnalysisError(null);
-    try {
-      // NOTE: requires adding correlateSymptoms to apiClient
-      const insights = await apiClient.correlateSymptoms();
-      setCorrelations(insights);
-    } catch (err: any) {
-      console.error("Error generating correlations:", err);
-      setAnalysisError(err.message || t("errorGeneratingInsights"));
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
 
   return (
     <div className="w-full space-y-8">
@@ -200,85 +181,7 @@ export default function SymptomTrackerWidget() {
         </div>
       </div>
 
-      {/* AI Correlation Section */}
-      <div className="rounded-2xl border border-border bg-gradient-to-b from-purple-500/10 to-surface p-6 shadow-sm">
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-bold text-ink flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-purple-600" />
-              {t("aiCorrelationAnalysis")}
-            </h2>
-            <p className="mt-2 text-sm text-ink-muted max-w-2xl">
-              {t("aiCorrelationDescription")}
-            </p>
-          </div>
-          <button
-            onClick={generateInsights}
-            disabled={isAnalyzing}
-            className="shrink-0 flex items-center justify-center rounded-xl bg-purple-600 px-6 py-3 font-semibold text-white transition hover:bg-purple-700 disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_4px_14px_0_rgba(147,51,234,0.39)]"
-          >
-            {isAnalyzing ? (
-              <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" /> {t("analyzing")}
-              </>
-            ) : (
-              t("generateInsights")
-            )}
-          </button>
-        </div>
 
-        {analysisError && (
-          <div className="mb-6 rounded-xl bg-red-500/10 p-4 flex items-start gap-3 border border-red-500/20">
-            <AlertCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
-            <p className="text-sm text-red-700">{analysisError}</p>
-          </div>
-        )}
-
-        {isAnalyzing && (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {[1, 2].map((i) => (
-              <div key={i} className="animate-pulse rounded-xl border border-purple-500/20 bg-purple-500/10/50 p-5">
-                <div className="h-4 w-32 rounded bg-purple-200 mb-4" />
-                <div className="h-3 w-full rounded bg-purple-100 mb-2" />
-                <div className="h-3 w-4/5 rounded bg-purple-100" />
-              </div>
-            ))}
-          </div>
-        )}
-
-        {!isAnalyzing && correlations && correlations.length > 0 && (
-          <div className="grid gap-5 sm:grid-cols-2">
-            {correlations.map((corr, idx) => (
-              <div key={idx} className="rounded-xl border border-purple-500/20 bg-surface p-5 shadow-sm hover:shadow-md transition">
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="font-bold text-ink text-lg">{corr.symptom}</h3>
-                  <span className="flex items-center gap-1 rounded-full bg-purple-100 px-2.5 py-1 text-xs font-semibold text-purple-700">
-                    {t("confidenceLabel")} {Math.round(corr.confidence * 100)}%
-                  </span>
-                </div>
-                
-                <div className="mb-4 flex flex-wrap gap-2">
-                  {corr.triggers.map((trigger, i) => (
-                    <span key={i} className="rounded-md bg-rose-500/10 px-2 py-1 text-xs font-medium text-rose-700 border border-rose-500/20">
-                      {trigger}
-                    </span>
-                  ))}
-                </div>
-                
-                <div className="rounded-lg bg-surface-muted p-3 text-sm text-ink leading-relaxed">
-                  {corr.explanation}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {!isAnalyzing && correlations && correlations.length === 0 && (
-          <div className="rounded-xl border border-border bg-surface-muted p-8 text-center">
-            <p className="text-ink-muted text-sm">{t("noCorrelationsFound")}</p>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

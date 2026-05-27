@@ -882,8 +882,55 @@ export const logAssistantActionTool = new DynamicStructuredTool({
   },
 });
 
-export const assistantTools = [calculateNormsTool, updateProfileTool, get_today_diary_summary, manageHealthGoalsTool, logAssistantActionTool];
-export const diaryTools = [calculateNormsTool, updateProfileTool, logMealTool, log_supplement_intake_tool, get_today_diary_summary, logAssistantActionTool];
+export const saveSemanticMemoryTool = new DynamicStructuredTool({
+  name: "save_to_semantic_memory",
+  description: "Saves a confirmed, important medical fact or correlation (e.g. 'Coffee causes heartburn for this user') into permanent semantic memory so it is remembered forever.",
+  schema: z.object({
+    fact_content: z.string().describe("The concise fact or correlation to remember."),
+  }),
+  func: async ({ fact_content }, _runManager, config) => {
+    const userId = config?.configurable?.user_id;
+    const token = config?.configurable?.token;
+
+    if (!userId || !token) {
+      console.warn("[Tool:save_to_semantic_memory] No user context, skipping.");
+      return "skipped";
+    }
+
+    try {
+      const supabaseUrl = process.env.SUPABASE_URL;
+      const supabaseKey = process.env.SUPABASE_ANON_KEY;
+      if (!supabaseUrl || !supabaseKey) return "skipped";
+
+      const supabase = createClient(supabaseUrl, supabaseKey, {
+        global: { headers: { Authorization: `Bearer ${token}` } },
+      });
+
+      const embedding = await embeddings.embedQuery(fact_content);
+
+      const { error } = await supabase.from("user_memory_vectors").insert({
+        user_id: userId,
+        content: fact_content,
+        memory_type: "fact",
+        importance: 0.9,
+        embedding: embedding,
+        metadata: { source: "differential_insight" },
+      });
+
+      if (error) {
+        console.error("[Tool:save_to_semantic_memory] INSERT error:", error.message);
+        return `Failed to save: ${error.message}`;
+      }
+      return "Saved permanently to semantic memory.";
+    } catch (err) {
+      console.error("[Tool:save_to_semantic_memory] Unexpected error:", err);
+      return "Error saving to semantic memory.";
+    }
+  },
+});
+
+export const assistantTools = [calculateNormsTool, updateProfileTool, get_today_diary_summary, manageHealthGoalsTool, logAssistantActionTool, saveSemanticMemoryTool];
+export const diaryTools = [calculateNormsTool, updateProfileTool, logMealTool, log_supplement_intake_tool, get_today_diary_summary, logAssistantActionTool, saveSemanticMemoryTool];
 
 // We can export an array of all available tools for easy binding to ToolNode
 export const agentTools = [
@@ -894,4 +941,5 @@ export const agentTools = [
   get_today_diary_summary, 
   manageHealthGoalsTool,
   logAssistantActionTool,
+  saveSemanticMemoryTool,
 ];

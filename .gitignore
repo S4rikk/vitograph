@@ -33,8 +33,11 @@ debug_*.txt
 next_prompt.md
 vitograph_skills.json
 plan_correction*.md
-graphify-out/
 
 # Supabase & Tooling
 .temp/
 supabase/.temp/
+
+# Maya agent files
+.agents/
+debug_assistant_prompt.txt

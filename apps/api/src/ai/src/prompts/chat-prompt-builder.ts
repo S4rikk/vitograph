@@ -37,7 +37,7 @@ interface PromptSection {
 import { getLocalizedPersona } from "./localized-personas.js";
 
 export class ChatPromptBuilder {
-  static readonly PROMPT_VERSION = "1.3.0";
+  static readonly PROMPT_VERSION = "1.4.0";
 
   private sections: PromptSection[] = [];
 
@@ -74,9 +74,9 @@ ${localizedInstructions}
 </quality_constraints>
 
 ### CONVERSATIONAL RULES
-- MICRONUTRIENT SPAM RULE (CRITICAL): In your CONVERSATIONAL TEXT (the main human-readable part), NEVER output a massive list of micronutrient numbers! It wastes screen space on mobile devices. If the user asks about calories, meals, or daily stats, ONLY discuss Macros (Calories, Protein, Fat, Carbs) in the main text. You may only mention 1 or 2 specific micronutrients IF they are critically deficient today. NEVER list all micronutrients in prose like "Цинк: 1.8мг, Калий: 780мг, Железо: 2.2мг...". ⚠️ EXCEPTION: This rule does NOT apply to the TECHNICAL BLOCK at the end of the message! You MUST ALWAYS output ALL micronutrients as <nutr type="micro"> tags in the TECHNICAL BLOCK — this is machine-parsed data for the FoodCard UI, not visible as text.
+- MICRONUTRIENT SPAM RULE (CRITICAL): In your CONVERSATIONAL TEXT (the main human-readable part), NEVER output a massive list of micronutrient numbers! It wastes screen space on mobile devices. If the user asks about calories, meals, or daily stats, ONLY discuss Macros (Calories, Protein, Fat, Carbs) in the main text. You may only mention 1 or 2 specific micronutrients IF they are critically deficient today. NEVER list all micronutrients in prose like "Цинк: 1.8мг, Калий: 780мг, Железо: 2.2мг...". ⚠️ EXCEPTION: If you are in DIARY MODE and outputting a TECHNICAL BLOCK, you MUST output ALL micronutrients as <nutr type="micro"> tags there. DO NOT output a TECHNICAL BLOCK or <nutr type="micro"> tags in Assistant Mode or Insights!
 - NAME BOUNDARIES: You know your name is ${aiName}, but NEVER introduce yourself by name in your responses (e.g. NEVER say "Привет, я Майя" or "Я твой ИИ"). Start your responses directly and naturally.
-- MICRO TAG BOUNDARIES: ⚠️ NEVER use type="micro" inside the conversational narrative text! type="micro" is STRICTLY AND EXCLUSIVELY for the TECHNICAL BLOCK at the very end of the message. In the main text, ALWAYS use type="marker" (or specific types like vitamin_c) for vitamins, minerals, or probiotics. The TECHNICAL BLOCK MUST ALWAYS contain ALL micronutrient <nutr type="micro"> tags — this is NON-NEGOTIABLE and overrides the MICRONUTRIENT SPAM RULE.
+- MICRO TAG BOUNDARIES: ⚠️ NEVER use type="micro" inside the conversational narrative text! type="micro" is STRICTLY AND EXCLUSIVELY for the TECHNICAL BLOCK (allowed ONLY in Diary Mode). In the main text, ALWAYS use type="marker" (or specific types like vitamin_c) for vitamins, minerals, or probiotics.
 - APP BOUNDARIES (CRITICAL): You are strictly FOREVER FORBIDDEN from referencing, suggesting, or linking to ANY external internet resources, websites, browser extensions (e.g., Google Workspace), or third-party apps. EVERYTHING the user discusses must be addressed EXCLUSIVELY within the context of the Vitograph app, your own internal capabilities, and its built-in tools.
 - MEAL AWARENESS: Use the provided local time to suggest appropriate meals (Завтрак/Обед/Перекус/Ужин).
 - FLUIDITY: Write in clear, natural paragraphs. 
@@ -611,6 +611,25 @@ STEP 2 — COMMENT: After logging, add 1-2 sentences of glycemic context (GI lev
     section += `</documents>`;
 
     this.sections.push({ key: "global_knowledge_base", content: section, priority: 2 });
+    return this;
+  }
+
+  withPreviousInsight(insight: { title: string; body: string; generatedAt: string } | null): this {
+    if (insight) {
+      this.sections.push({
+        key: "previous_insight",
+        content: `### 🔍 DIFFERENTIAL INSIGHTS RULE
+Вот твой предыдущий отчет об инсайтах от ${new Date(insight.generatedAt).toLocaleDateString(this.locale || 'ru-RU')}:
+"${insight.title}\n${insight.body}"
+
+Твоя задача: СРАВНИТЬ новые данные (симптомы, питание) с этим отчетом.
+1. Если существенных изменений нет, просто ответь: "Изменений с прошлого отчета не найдено", и кратко напомни главное.
+2. Если есть новые триггеры или изменения, опиши ТОЛЬКО дельту (новые находки).
+3. При обнаружении сильной и стойкой связи (например, "кофе стабильно вызывает изжогу 3 дня подряд"), ты ОБЯЗАН использовать инструмент \`save_to_semantic_memory\`, чтобы сохранить этот факт в постоянную базу знаний пользователя.
+`,
+        priority: 1,
+      });
+    }
     return this;
   }
 

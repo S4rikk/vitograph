@@ -11,7 +11,7 @@ import HealthGoalsWidget from "@/components/shared/HealthGoalsWidget";
 import { useTypewriter } from "@/hooks/use-typewriter";
 import { useTranslations } from "next-intl";
 import { BrainCircuit } from "lucide-react";
-
+import { createClient } from "@/lib/supabase/client";
 
 // ── CUSTOM PREMIUM RENDERERS ──
 
@@ -226,8 +226,10 @@ export default function AiAssistantView({ userId }: { userId: string }) {
   const [profile, setProfile] = useState<any>(null);
 
   // --- INSIGHT WIDGET STATE ---
-  const [isInsightReady, setIsInsightReady] = useState(true); // Default to true to show the feature
+  const [supabase] = useState(() => createClient());
+  const [isInsightReady, setIsInsightReady] = useState(false);
   const [isInsightDismissed, setIsInsightDismissed] = useState(false);
+  const [isOnCooldown, setIsOnCooldown] = useState(false);
   const [showInsightPopover, setShowInsightPopover] = useState(false);
 
   useEffect(() => {
@@ -235,7 +237,30 @@ export default function AiAssistantView({ userId }: { userId: string }) {
     if (dismissed === "true") {
       setIsInsightDismissed(true);
     }
-  }, []);
+    
+    const todayDate = new Date().toISOString().split("T")[0];
+    const lastDate = localStorage.getItem("vitograph_last_insight_date");
+    if (lastDate === todayDate) {
+      setIsOnCooldown(true);
+    }
+    
+    async function checkInsightReadiness() {
+      if (!userId) return;
+      try {
+        const { count } = await supabase
+          .from('daily_symptoms')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId);
+          
+        if (count && count >= 3) {
+          setIsInsightReady(true);
+        }
+      } catch (err) {
+        console.error("Failed to check insight readiness", err);
+      }
+    }
+    checkInsightReadiness();
+  }, [supabase, userId]);
 
   const dismissInsight = () => {
     setIsInsightDismissed(true);
@@ -510,32 +535,30 @@ export default function AiAssistantView({ userId }: { userId: string }) {
             {profile?.ai_name || t("defaultAssistantName")}
           </h3>
           
-          {/* INSIGHT HEADER ICON */}
-          <div className="relative flex items-center">
-            <button 
+          {/* Action Icons (Insights, Supplements) */}
+          <div className="flex gap-2">
+            <button
               onClick={() => {
-                if (isInsightReady && !isInsightDismissed) {
-                  // Scroll down to the big card
-                  const el = scrollRef.current;
-                  if (el) el.scrollTop = el.scrollHeight;
-                } else {
+                if (isInsightReady && !isInsightDismissed && !isOnCooldown) {
                   setShowInsightPopover(!showInsightPopover);
+                } else {
+                  // Fallback: regular click if not ready or dismissed/cooldown
                 }
               }}
-              className="p-1 rounded-full transition-all focus:outline-none hover:bg-cloud-light"
+              className={`p-2 transition-all duration-300 relative ${
+                isInsightReady && !isInsightDismissed && !isOnCooldown
+                  ? "text-purple-600 bg-purple-100 hover:bg-purple-200 animate-pulse shadow-[0_0_15px_rgba(147,51,234,0.3)] rounded-full"
+                  : "text-ink-muted hover:bg-surface-muted rounded-full"
+              }`}
               title="Инсайты"
             >
-              <BrainCircuit 
-                size={18} 
-                className={`transition-all duration-300 ${
-                  !isInsightReady 
-                    ? "opacity-40 text-ink-muted" 
-                    : isInsightDismissed 
-                      ? "opacity-100" 
-                      : "animate-pulse"
-                }`}
-                style={isInsightReady ? { stroke: "url(#insight-gradient)", strokeWidth: 2 } : { strokeWidth: 2 }}
-              />
+              <BrainCircuit className="h-5 w-5" />
+              {isInsightReady && !isInsightDismissed && !isOnCooldown && (
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                </span>
+              )}
             </button>
             
             {showInsightPopover && (
@@ -632,10 +655,9 @@ export default function AiAssistantView({ userId }: { userId: string }) {
           </div>
         ))}
         
-        {/* BIG CARD (INSIGHT PROPOSAL) */}
-        {isInsightReady && !isInsightDismissed && (
-          <div className="flex justify-start mt-2 mb-4">
-            <div className="max-w-[95%] sm:max-w-[85%] rounded-2xl px-4 py-4 shadow-lg bg-gray-800/90 border border-gray-700 text-white rounded-bl-none animate-in fade-in slide-in-from-bottom-4 duration-500 backdrop-blur-md">
+        {/* THE BIG INSIGHT CARD */}
+      {isInsightReady && !isInsightDismissed && !isOnCooldown && (
+        <div className="mb-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl p-6 shadow-sm relative overflow-hidden group">
               <div className="flex items-start space-x-3">
                 <div className="p-2 bg-gray-900/50 rounded-xl shrink-0">
                   <BrainCircuit size={24} style={{ stroke: "url(#insight-gradient)", strokeWidth: 2 }} />
@@ -649,7 +671,11 @@ export default function AiAssistantView({ userId }: { userId: string }) {
                       className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:opacity-90 transition-opacity text-sm shadow-sm"
                       onClick={() => {
                         dismissInsight();
-                        alert("Запуск глубокого анализа...");
+                        const todayDate = new Date().toISOString().split("T")[0];
+                        localStorage.setItem("vitograph_last_insight_date", todayDate);
+                        setIsOnCooldown(true);
+                        const prompt = "Пожалуйста, проанализируй мои симптомы и питание за последние дни и найди скрытые связи.";
+                        sendChatMessage(prompt, threadId);
                       }}
                     >
                       Да, давай!
@@ -664,7 +690,6 @@ export default function AiAssistantView({ userId }: { userId: string }) {
                 </div>
               </div>
             </div>
-          </div>
         )}
 
         {isLoading && messages.length > 0 && messages[messages.length - 1].content === "" && (
