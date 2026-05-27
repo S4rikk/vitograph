@@ -2,6 +2,17 @@
 
 import type { LabDiagnosticReport } from "@/lib/api-client";
 import { useTranslations } from "next-intl";
+import { 
+    ClipboardList, 
+    Microscope, 
+    Search, 
+    Target, 
+    Stethoscope, 
+    Apple, 
+    AlertCircle, 
+    AlertTriangle, 
+    CheckCircle2 
+} from "lucide-react";
 
 /* ── Color Maps ──────────────────────────────────────────────── */
 
@@ -19,10 +30,10 @@ const SEVERITY_BORDER: Record<string, string> = {
     mild: "border-l-yellow-400",
 };
 
-const PRIORITY_BADGE: Record<string, { icon: string; color: string }> = {
-    urgent: { icon: "🔴", color: "bg-red-100 text-red-800" },
-    important: { icon: "🟡", color: "bg-amber-100 text-amber-800" },
-    routine: { icon: "🟢", color: "bg-green-100 text-green-700" },
+const PRIORITY_BADGE: Record<string, { icon: React.ReactNode; color: string }> = {
+    urgent: { icon: <AlertCircle className="w-3 h-3" />, color: "bg-red-100 text-red-800" },
+    important: { icon: <AlertTriangle className="w-3 h-3" />, color: "bg-amber-100 text-amber-800" },
+    routine: { icon: <CheckCircle2 className="w-3 h-3" />, color: "bg-green-100 text-green-700" },
 };
 
 /* ── Component ───────────────────────────────────────────────── */
@@ -45,7 +56,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
             {/* ── Header ──────────────────────────────────────────── */}
             <div className="flex items-center gap-3">
                 <div className="rounded-xl bg-purple-100 p-3">
-                    <span className="text-2xl">📋</span>
+                    <ClipboardList className="w-6 h-6 text-purple-600" />
                 </div>
                 <div>
                     <h3 className="text-lg font-semibold text-ink">
@@ -64,7 +75,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
             {report.biomarker_assessments.length > 0 && (
                 <section>
                     <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
-                        <span>🔬</span> {t("markersAssessment")}
+                        <Microscope className="w-4 h-4 text-ink-muted" /> {t("markersAssessment")}
                     </h4>
                     <div className="grid gap-2 sm:grid-cols-2">
                         {report.biomarker_assessments.map((b, i) => (
@@ -94,7 +105,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
             {report.diagnostic_patterns.length > 0 && (
                 <section>
                     <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
-                        <span>🔍</span> {t("identifiedPatterns")}
+                        <Search className="w-4 h-4 text-ink-muted" /> {t("identifiedPatterns")}
                     </h4>
                     <div className="space-y-3">
                         {report.diagnostic_patterns.map((p, i) => (
@@ -135,7 +146,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
             {report.priority_actions.length > 0 && (
                 <section>
                     <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
-                        <span>🎯</span> {t("priorityActions")}
+                        <Target className="w-4 h-4 text-ink-muted" /> {t("priorityActions")}
                     </h4>
                     <div className="space-y-2">
                         {report.priority_actions.map((a, i) => {
@@ -146,7 +157,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
                                     className="flex items-start gap-3 rounded-lg border border-border bg-surface p-3"
                                 >
                                     <span
-                                        className={`mt-0.5 rounded-full px-2 py-0.5 text-xs font-medium ${badge.color}`}
+                                        className={`mt-0.5 rounded-full px-2 py-0.5 text-xs font-medium flex items-center gap-1 ${badge.color}`}
                                     >
                                         {badge.icon} {a.priority}
                                     </span>
@@ -165,7 +176,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
             {report.recommended_additional_tests.length > 0 && (
                 <section>
                     <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
-                        <span>⚕️</span> {t("recommendedTests")}
+                        <Stethoscope className="w-4 h-4 text-ink-muted" /> {t("recommendedTests")}
                     </h4>
                     <ul className="space-y-2">
                         {report.recommended_additional_tests.map((t, i) => (
@@ -185,7 +196,7 @@ export default function DiagnosticReportCard({ report }: DiagnosticReportCardPro
             {report.dietary_recommendations.length > 0 && (
                 <section>
                     <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
-                        <span>🥗</span> {t("dietaryRecommendations")}
+                        <Apple className="w-4 h-4 text-ink-muted" /> {t("dietaryRecommendations")}
                     </h4>
                     <ul className="space-y-2">
                         {report.dietary_recommendations.map((d, i) => (

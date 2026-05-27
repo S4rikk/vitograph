@@ -91,6 +91,18 @@ const additions = {
       pt: 'Tire uma foto da área de pele problemática. A IA identificará padrões visíveis: ressecamento, erupções, pigmentação.',
       tr: 'Sorunlu cilt bölgesinin fotoğrafını çekin. Yapay zeka görünür desenleri belirleyecektir: kuruluk, döküntüler, pigmentasyon.',
       zh: '拍摄问题皮肤区域的照片。AI将识别可见模式：干燥、皮疹、色素沉着。'
+    },
+    chooseGallery: {
+      ru: 'Выбрать из галереи',
+      en: 'Choose from gallery',
+      es: 'Elegir de la galería',
+      de: 'Aus Galerie wählen',
+      fr: 'Choisir depuis la galerie',
+      ja: 'ギャラリーから選ぶ',
+      ko: '갤러리에서 선택',
+      pt: 'Escolher da galeria',
+      tr: 'Galeriden Seç',
+      zh: '从图库选择'
     }
   }
 };

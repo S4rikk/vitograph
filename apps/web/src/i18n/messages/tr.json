@@ -611,7 +611,8 @@
     "skinDescription": "Sorunlu cilt bölgesinin fotoğrafını çekin. Yapay zeka görünür desenleri belirleyecektir: kuruluk, döküntüler, pigmentasyon.",
     "flagNormal": "Normal",
     "flagLow": "Düşük",
-    "flagHigh": "Yüksek"
+    "flagHigh": "Yüksek",
+    "chooseGallery": "Galeriden Seç"
   },
   "onboarding": {
     "welcome": "VITOGRAPH'a Hoş Geldiniz",

@@ -611,7 +611,8 @@
     "skinDescription": "Prenez une photo de la zone cutanée problématique. L'IA identifiera les schémas visibles: sécheresse, éruptions, pigmentation.",
     "flagNormal": "Normal",
     "flagLow": "Faible",
-    "flagHigh": "Élevé"
+    "flagHigh": "Élevé",
+    "chooseGallery": "Choisir depuis la galerie"
   },
   "onboarding": {
     "welcome": "Bienvenue dans VITOGRAPH",

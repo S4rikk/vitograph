@@ -611,7 +611,8 @@
     "skinDescription": "Tire uma foto da área de pele problemática. A IA identificará padrões visíveis: ressecamento, erupções, pigmentação.",
     "flagNormal": "Normal",
     "flagLow": "Baixo",
-    "flagHigh": "Alto"
+    "flagHigh": "Alto",
+    "chooseGallery": "Escolher da galeria"
   },
   "onboarding": {
     "welcome": "Bem-vindo ao VITOGRAPH",

@@ -114,14 +114,19 @@ export default function SymptomTrackerWidget() {
           <div className="flex flex-wrap gap-2">
             {COMMON_SYMPTOMS_KEYS.map((key) => {
               const sym = t(`symptomsList.${key}`);
+              const isSelected = symptoms.some((s) => s.name === sym);
               return (
               <button
                 key={sym}
                 onClick={() => addSymptom(sym)}
-                disabled={symptoms.some((s) => s.name === sym)}
-                className="rounded-full border border-border bg-surface-muted px-3 py-1.5 text-sm font-medium text-ink-muted transition hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isSelected}
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 disabled:cursor-not-allowed ${
+                  isSelected
+                    ? "border border-emerald-400 bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 shadow-[inset_0_1px_2px_rgba(255,255,255,0.3),0_0_15px_rgba(16,185,129,0.6)] animate-pulse"
+                    : "border border-white/70 dark:border-white/30 bg-surface/80 text-ink-muted backdrop-blur-2xl shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_1px_0_2px_rgba(255,255,255,0.5),inset_-1px_0_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.2),0_10px_20px_-10px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_1px_0_2px_rgba(255,255,255,0.15),inset_-1px_0_2px_rgba(255,255,255,0.15),inset_0_-1px_2px_rgba(255,255,255,0.05),0_10px_20px_-10px_rgba(0,0,0,0.5)] hover:brightness-110"
+                }`}
               >
-                + {sym}
+                {isSelected ? "✓" : "+"} {sym}
               </button>
             )})}
           </div>
@@ -145,23 +150,23 @@ export default function SymptomTrackerWidget() {
         </div>
 
         {symptoms.length > 0 && (
-          <div className="space-y-4 mb-8">
-            <h3 className="text-sm font-semibold text-ink">{t("selected")}</h3>
+          <div className="space-y-2 mb-6">
+            <h3 className="text-sm font-semibold text-ink mb-1">{t("selected")}</h3>
             {symptoms.map((s) => (
-              <div key={s.name} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-surface-muted p-4">
-                <div className="flex items-center gap-3">
-                  <span className="font-medium text-ink">{s.name}</span>
-                  <button onClick={() => removeSymptom(s.name)} className="text-xs text-red-500 hover:text-red-700 underline">{t("delete")}</button>
+              <div key={s.name} className="flex flex-col gap-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 dark:bg-emerald-500/5 backdrop-blur-xl shadow-[inset_0_1px_2px_rgba(255,255,255,0.2),0_4px_12px_rgba(16,185,129,0.05)] p-3 transition-all">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-ink">{s.name}</span>
+                  <button onClick={() => removeSymptom(s.name)} className="text-[10px] font-bold uppercase tracking-wider text-red-500/90 hover:text-red-500 transition-colors bg-red-500/10 px-2 py-1 rounded-md">{t("delete")}</button>
                 </div>
-                <div className="flex items-center gap-4 flex-1 max-w-xs">
-                  <span className="text-xs text-ink-muted w-12 sm:text-right">{t("strengthLabel")} {s.severity}</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-medium text-ink-muted whitespace-nowrap min-w-[50px]">{t("strengthLabel")} {s.severity}</span>
                   <input
                     type="range"
                     min="1"
                     max="10"
                     value={s.severity}
                     onChange={(e) => updateSeverity(s.name, parseInt(e.target.value))}
-                    className="flex-1 accent-cyan-500"
+                    className="flex-1 accent-emerald-500"
                   />
                 </div>
               </div>
@@ -173,9 +178,14 @@ export default function SymptomTrackerWidget() {
           <button
             onClick={saveDay}
             disabled={isSaving || symptoms.length === 0}
-            className="rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white transition hover:bg-cyan-700 disabled:bg-surface-muted disabled:text-ink-muted disabled:border disabled:border-border disabled:cursor-not-allowed"
+            className="group relative flex items-center justify-center overflow-hidden rounded-xl border border-emerald-500/40 bg-emerald-500/15 px-6 py-2.5 text-sm font-semibold text-emerald-600 dark:text-emerald-400 backdrop-blur-xl shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_4px_12px_rgba(16,185,129,0.15)] transition-all duration-300 hover:bg-emerald-500/25 hover:border-emerald-400/60 hover:shadow-[inset_0_1px_4px_rgba(255,255,255,0.2),0_6px_16px_rgba(16,185,129,0.25)] hover:-translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none"
           >
-            {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : t("saveDay")}
+            {/* Glow effect on hover */}
+            <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full" />
+            
+            <span className="relative flex items-center gap-2">
+              {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : t("saveDay")}
+            </span>
           </button>
           {saveSuccess && <span className="text-sm font-medium text-green-600">{t("successfullySaved")}</span>}
         </div>

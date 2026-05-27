@@ -611,7 +611,8 @@
     "skinDescription": "문제가 있는 피부 부위를 촬영해 주세요. AI가 건조함, 발진, 색소침착 등의 패턴을 파악합니다.",
     "flagNormal": "정상",
     "flagLow": "낮음",
-    "flagHigh": "높음"
+    "flagHigh": "높음",
+    "chooseGallery": "갤러리에서 선택"
   },
   "onboarding": {
     "welcome": "VITOGRAPH에 오신 것을 환영합니다",

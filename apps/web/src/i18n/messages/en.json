@@ -612,7 +612,8 @@
     "flagNormal": "Normal",
     "flagLow": "Low",
     "flagHigh": "High",
-    "originalLabel": "Original"
+    "originalLabel": "Original",
+    "chooseGallery": "Choose from gallery"
   },
   "onboarding": {
     "welcome": "Welcome to VITOGRAPH",

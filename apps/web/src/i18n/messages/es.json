@@ -611,7 +611,8 @@
     "skinDescription": "Tome una foto del área de piel problemática. La IA identificará patrones visibles: sequedad, erupciones, pigmentación.",
     "flagNormal": "Normal",
     "flagLow": "Bajo",
-    "flagHigh": "Alto"
+    "flagHigh": "Alto",
+    "chooseGallery": "Elegir de la galería"
   },
   "onboarding": {
     "welcome": "Bienvenido a VITOGRAPH",

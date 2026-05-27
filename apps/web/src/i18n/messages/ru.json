@@ -612,7 +612,8 @@
     "flagNormal": "Норма",
     "flagLow": "Ниже нормы",
     "flagHigh": "Выше нормы",
-    "originalLabel": "Оригинал"
+    "originalLabel": "Оригинал",
+    "chooseGallery": "Выбрать из галереи"
   },
   "onboarding": {
     "welcome": "Добро пожаловать в VITOGRAPH",

@@ -611,7 +611,8 @@
     "skinDescription": "Fotografieren Sie den problematischen Hautbereich. Die KI erkennt sichtbare Muster: Trockenheit, Ausschläge, Pigmentierung.",
     "flagNormal": "Normal",
     "flagLow": "Niedrig",
-    "flagHigh": "Hoch"
+    "flagHigh": "Hoch",
+    "chooseGallery": "Aus Galerie wählen"
   },
   "onboarding": {
     "welcome": "Willkommen bei VITOGRAPH",

@@ -611,7 +611,8 @@
     "skinDescription": "問題のある肌の部分を撮影してください。AIが乾燥、発疹、色素沈着などの目に見えるパターンを特定します。",
     "flagNormal": "正常",
     "flagLow": "低い",
-    "flagHigh": "高い"
+    "flagHigh": "高い",
+    "chooseGallery": "ギャラリーから選ぶ"
   },
   "onboarding": {
     "welcome": "VITOGRAPHへようこそ",

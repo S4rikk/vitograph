@@ -611,7 +611,8 @@
     "skinDescription": "拍摄问题皮肤区域的照片。AI将识别可见模式：干燥、皮疹、色素沉着。",
     "flagNormal": "正常",
     "flagLow": "偏低",
-    "flagHigh": "偏高"
+    "flagHigh": "偏高",
+    "chooseGallery": "从图库选择"
   },
   "onboarding": {
     "welcome": "欢迎来到 VITOGRAPH",

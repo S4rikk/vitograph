@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import { Clock, Timer, CalendarDays, Trash2 } from "lucide-react";
 import UploadZone from "./UploadZone";
 import PhotoUploader from "./PhotoUploader";
 import SomaticAnalysisCard from "./SomaticAnalysisCard";
@@ -694,13 +695,13 @@ export default function MedicalResultsView() {
                             : "text-ink-muted hover:bg-surface/50 hover:text-ink"
                             }`}
                         >
-                          <span className="text-lg">{idx === 0 ? "🕒" : "⏱️"}</span>
+                          <span className="text-lg">{idx === 0 ? <Clock className="w-4 h-4 text-cyan-500" /> : <Timer className="w-4 h-4 text-cyan-500" />}</span>
                           {t("session")} {timeStr}
                         </button>
                       );
                     }) : (
                       <div className="px-4 py-2 text-sm font-medium text-ink-muted flex items-center gap-2">
-                        <span className="text-lg">🗓️</span>
+                        <CalendarDays className="w-5 h-5 text-ink-muted/80" />
                         {currentDateStr} • {new Date(currentReport.timestamp).toLocaleTimeString("ru-RU", { hour: '2-digit', minute: '2-digit' })}
                       </div>
                     )}
@@ -712,7 +713,7 @@ export default function MedicalResultsView() {
                     className="flex items-center gap-2 px-3 py-2 mr-2 rounded-xl text-xs font-medium text-red-500 hover:bg-red-500/10 hover:text-red-600 transition-colors disabled:opacity-50"
                     title={t("deleteSelectedReport")}
                   >
-                    🗑️ {t("delete")}
+                    <Trash2 className="w-4 h-4" /> {t("delete")}
                   </button>
                 </div>
               );
