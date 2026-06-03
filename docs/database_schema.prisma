@@ -955,12 +955,13 @@ model ReadinessScore {
 /// Manual wearable metric entry (append-only log for dynamics tracking).
 /// Users enter data from wearable devices via the Wearables Hub UI.
 model WearableManualMetric {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId     String   @map("user_id") @db.Uuid
-  category   String   // 'sleep' | 'cardio' | 'body' | 'metabolic' | 'stress'
-  metrics    Json     @default("{}") @db.JsonB
-  recordedAt DateTime @default(now()) @map("recorded_at") @db.Timestamptz
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId           String   @map("user_id") @db.Uuid
+  category         String   // 'sleep' | 'cardio' | 'body' | 'metabolic' | 'stress'
+  metrics          Json     @default("{}") @db.JsonB
+  semanticMetrics  Json     @default("{}") @map("semantic_metrics") @db.JsonB
+  recordedAt       DateTime @default(now()) @map("recorded_at") @db.Timestamptz
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
 

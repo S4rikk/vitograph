@@ -3666,6 +3666,63 @@ export const handleAnalyzeWearable = async (req: Request, res: Response, next: N
   }
 };
 
+export const handleSaveWearableMetrics = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Note: requires importing SaveWearableMetricsRequest
+    const { detectedCategory, extractedMetrics } = req.body as import('./request-schemas.js').SaveWearableMetricsRequest;
+    
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ error: "Missing authorization header" });
+    }
+    const token = authHeader.replace("Bearer ", "");
+    
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error("Missing Supabase credentials in environment");
+    }
+
+    const { createClient } = await import("@supabase/supabase-js");
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
+
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData?.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const userId = userData.user.id;
+
+    // Reduce array into dictionary (Record) as required
+    const semanticMetrics = extractedMetrics.reduce((acc: any, curr: any) => {
+      if (curr.standardizedCategory) {
+        acc[curr.standardizedCategory] = curr;
+      }
+      return acc;
+    }, {});
+
+    const { error: insertError } = await supabase
+      .from('wearable_manual_metrics')
+      .insert({
+        user_id: userId,
+        category: detectedCategory,
+        semantic_metrics: semanticMetrics,
+        recorded_at: new Date().toISOString(),
+      });
+
+    if (insertError) {
+      console.error("[handleSaveWearableMetrics] DB Insert Error:", insertError);
+      throw insertError;
+    }
+
+    res.json({ success: true, message: "Wearable metrics saved successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
 /**
  * GET /api/v1/ai/admin/system-graph
  * Serves the interactive architectural graph for admins.

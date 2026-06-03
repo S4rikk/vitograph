@@ -1,4 +1,5 @@
 "use client";
+import DynamicOcrDialog from "./DynamicOcrDialog";
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -39,8 +40,6 @@ import { apiClient } from "@/lib/api-client";
 import { createClient } from "@/lib/supabase/client";
 import { compressImage } from "@/lib/image-utils";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import DeviceWidgetCard from "./DeviceWidgetCard";
-import ManualEntryDialog from "./ManualEntryDialog";
 import { useFontScale } from "@/components/providers/FontScaleProvider";
 import { FeedbackButton } from "../diary/FeedbackButton";
 import type {
@@ -187,6 +186,11 @@ export default function UserProfileSheet({
     const tWearables = useTranslations("wearables");
     const [activeTab, setActiveTab] = useState("overview");
     const [mounted, setMounted] = useState(false);
+    const [ocrResult, setOcrResult] = useState<any>(null);
+    const [isOcrLoading, setIsOcrLoading] = useState(false);
+    
+    
+
     const { scale, setScale } = useFontScale();
     const currentLocale = useLocale();
     const [isChangingLocale, setIsChangingLocale] = useState(false);
@@ -198,6 +202,7 @@ export default function UserProfileSheet({
 
     // ── Profile data ──
     const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
+    const [latestSemanticMetrics, setLatestSemanticMetrics] = useState<any>({});
     const [initialFormData, setInitialFormData] = useState<Record<string, unknown> | null>(null);
     const [showUnsavedConfirm, setShowUnsavedConfirm] = useState(false);
     const [loadingProfile, setLoadingProfile] = useState(false);
@@ -216,10 +221,9 @@ export default function UserProfileSheet({
     const [wearableHistory, setWearableHistory] = useState<
         Record<string, { metrics: Record<string, number | null>; date: string }[]>
     >({});
-    const [activeManualEntry, setActiveManualEntry] =
-        useState<WearableCardCategory>(null);
+            useState<WearableCardCategory>(null);
 
-    const [isOcrLoading, setIsOcrLoading] = useState(false);
+    
     const [activeOcrCategory, setActiveOcrCategory] = useState<WearableCardCategory>(null);
     const [ocrInitialValues, setOcrInitialValues] = useState<Record<string, string>>({});
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -232,7 +236,7 @@ export default function UserProfileSheet({
                 const supabase = createClient();
                 const { data, error } = await supabase
                     .from('wearable_manual_metrics')
-                    .select('category, metrics, recorded_at')
+                    .select('category, metrics, semantic_metrics, recorded_at')
                     .eq('user_id', userId)
                     .order('recorded_at', { ascending: false });
                 
@@ -251,6 +255,16 @@ export default function UserProfileSheet({
                         });
                     }
                 }
+                
+                // Extract the freshest semantic_metrics across all categories
+                let latestSemantic: any = {};
+                for (const row of data) {
+                    if (row.semantic_metrics && Object.keys(row.semantic_metrics).length > 0) {
+                        latestSemantic = row.semantic_metrics;
+                        break;
+                    }
+                }
+                setLatestSemanticMetrics(latestSemantic);
                 
                 // Сохраняем полную историю для UI
                 setWearableHistory(historyByCategory);
@@ -608,7 +622,7 @@ export default function UserProfileSheet({
             );
             if (isDuplicate) {
                 // Данные идентичны — тихо закрываем диалог, ничего не сохраняем
-                setActiveManualEntry(null);
+                
                 return;
             }
 
@@ -641,7 +655,32 @@ export default function UserProfileSheet({
         [userId, wearableMetrics],
     );
 
-    const handleScreenshotTrigger = (category: WearableCardCategory) => {
+        const handleDynamicOcrSave = async (payload: any) => {
+        try {
+            const supabase = createClient();
+            const { error } = await supabase
+                .from('wearable_manual_metrics')
+                .insert({
+                    user_id: userId,
+                    category: payload.detectedCategory,
+                    metrics: {}, // Legacy column
+                    semantic_metrics: payload.extractedMetrics,
+                    recorded_at: new Date().toISOString(),
+                });
+            
+            if (error) throw error;
+            
+            // Trigger wearables reload
+            setWearablesLoaded(false);
+            setOcrResult(null);
+            toast.success(tProfile("ocrSuccess")); // Or custom translated save success
+        } catch (err) {
+            console.error('[Wearable] Save failed:', err);
+            toast.error(tProfile("ocrError"));
+        }
+    };
+
+const handleScreenshotTrigger = (category: WearableCardCategory) => {
         setActiveOcrCategory(category);
         fileInputRef.current?.click();
     };
@@ -656,21 +695,19 @@ export default function UserProfileSheet({
             
             const parsedResult = await apiClient.analyzeWearableScreenshot(base64);
             
-            if (parsedResult.detectedCategory === "unknown" || !parsedResult.metrics) {
+            if (parsedResult.detectedCategory === "unknown" || !parsedResult.extractedMetrics) {
                 toast.error(tProfile("ocrUnknownCategory"));
                 return;
             }
 
             const stringValues: Record<string, string> = {};
-            for (const [k, v] of Object.entries(parsedResult.metrics)) {
+            for (const [k, v] of Object.entries(parsedResult.extractedMetrics)) {
                 if (v !== null && v !== undefined) {
                     stringValues[k] = String(v);
                 }
             }
             
-            setOcrInitialValues(stringValues);
-            // АВТО-ПЕРЕКЛЮЧЕНИЕ: открываем окно той категории, которую нашел ИИ!
-            setActiveManualEntry(parsedResult.detectedCategory as WearableCardCategory);
+            setOcrResult(parsedResult);
             toast.success(tProfile("ocrSuccess"));
         } catch (err) {
             console.error("OCR Error:", err);
@@ -680,179 +717,6 @@ export default function UserProfileSheet({
             setActiveOcrCategory(null);
             if (fileInputRef.current) fileInputRef.current.value = "";
         }
-    };
-
-    // ── Build MetricItem arrays for each card ──
-
-    const sleepMetrics: MetricItem[] = (() => {
-        const sr = wearableMetrics.sleepRecovery;
-        const sleepHistory = wearableHistory['sleep'];
-
-        const buildHistory = (key: string): MetricHistoryPoint[] | undefined => {
-            if (!sleepHistory || sleepHistory.length <= 1) return undefined;
-            const points = sleepHistory.slice(1)
-                .map(h => ({ value: h.metrics[key] ?? null, date: h.date }))
-                .filter(h => h.value !== null);
-            return points.length > 0 ? points : undefined;
-        };
-
-        // Конвертация % → "Xч Yмин"
-        const percentToHM = (percent: number | null, totalHours: number | null): string | null => {
-            if (percent === null || totalHours === null) return null;
-            const totalMin = Math.round(totalHours * 60 * (percent / 100));
-            const h = Math.floor(totalMin / 60);
-            const m = totalMin % 60;
-            if (h === 0) return `${m}${tProfile("minsShort")}`;
-            return m === 0 ? `${h}${tProfile("hoursShort")}` : `${h}${tProfile("hoursShort")} ${m}${tProfile("minsShort")}`;
-        };
-
-        // Форматтер для истории: минуты → "Xч Yмин"
-        const minutesToHM = (totalMin: number): string => {
-            const h = Math.floor(totalMin / 60);
-            const m = totalMin % 60;
-            if (h === 0) return `${m}${tProfile("minsShort")}`;
-            return m === 0 ? `${h}${tProfile("hoursShort")}` : `${h}${tProfile("hoursShort")} ${m}${tProfile("minsShort")}`;
-        };
-
-        // История в минутах (для deep/REM)
-        const buildHistoryMinutes = (percentKey: string): MetricHistoryPoint[] | undefined => {
-            if (!sleepHistory || sleepHistory.length <= 1) return undefined;
-            const points = sleepHistory.slice(1)
-                .map(h => {
-                    const pct = h.metrics[percentKey];
-                    const dur = h.metrics["sleepDurationHours"];
-                    if (pct === null || pct === undefined || dur === null || dur === undefined) {
-                        return { value: null, date: h.date };
-                    }
-                    return { value: Math.round(dur * 60 * (pct / 100)), date: h.date };
-                })
-                .filter(h => h.value !== null);
-            return points.length > 0 ? points : undefined;
-        };
-
-        return [
-            {
-                id: "sleepDurationHours",
-                label: tWearables("sleepDuration"),
-                value: sr.sleepDurationHours,
-                unit: tWearables("units.h"),
-                history: buildHistory("sleepDurationHours"),
-            },
-            {
-                id: "deepSleepPercent",
-                label: tWearables("deepSleep"),
-                value: percentToHM(sr.deepSleepPercent, sr.sleepDurationHours),
-                unit: "",
-                history: buildHistoryMinutes("deepSleepPercent"),
-                historyValueFormatter: minutesToHM,
-            },
-            {
-                id: "remSleepPercent",
-                label: tWearables("remSleep"),
-                value: percentToHM(sr.remSleepPercent, sr.sleepDurationHours),
-                unit: "",
-                history: buildHistoryMinutes("remSleepPercent"),
-                historyValueFormatter: minutesToHM,
-            },
-            {
-                id: "readinessScore",
-                label: tWearables("readinessIndex"),
-                value: sr.readinessScore,
-                unit: "",
-                history: buildHistory("readinessScore"),
-            },
-            {
-                id: "hrvMs",
-                label: tWearables("hrv"),
-                value: sr.hrvMs,
-                unit: tWearables("units.ms"),
-                history: buildHistory("hrvMs"),
-            },
-            {
-                id: "respiratoryRateBrpm",
-                label: tWearables("respiratoryRate"),
-                value: sr.respiratoryRateBrpm,
-                unit: tWearables("units.brpm"),
-                history: buildHistory("respiratoryRateBrpm"),
-            },
-        ];
-    })();
-
-    const cardioMetrics: MetricItem[] = (() => {
-        const ca = wearableMetrics.cardioActivity;
-        const cardioHistory = wearableHistory['cardio'];
-        
-        const bpValue =
-            ca.bloodPressureSystolic !== null && ca.bloodPressureDiastolic !== null
-                ? `${ca.bloodPressureSystolic}/${ca.bloodPressureDiastolic}`
-                : null;
-        
-        const buildHistory = (key: string): MetricHistoryPoint[] | undefined => {
-            if (!cardioHistory || cardioHistory.length <= 1) return undefined;
-            const points = cardioHistory.slice(1)
-                .map(h => ({ value: h.metrics[key] ?? null, date: h.date }))
-                .filter(h => h.value !== null);
-            return points.length > 0 ? points : undefined;
-        };
-        
-        return [
-            { id: "restingHeartRateBpm", label: tWearables("restingHR"), value: ca.restingHeartRateBpm, unit: tWearables("units.bpm"), history: buildHistory("restingHeartRateBpm") },
-            { id: "vo2MaxMlKgMin", label: tWearables("vo2max"), value: ca.vo2MaxMlKgMin, unit: tWearables("units.mlKgMin"), history: buildHistory("vo2MaxMlKgMin") },
-            {
-                id: "steps",
-                label: tWearables("steps"),
-                value: ca.steps !== null ? `${ca.steps}${ca.stepsGoal ? ` / ${ca.stepsGoal}` : ""}` : null,
-                unit: "",
-                history: buildHistory("steps"),
-            },
-            { id: "activeCaloriesKcal", label: tWearables("activeCalories"), value: ca.activeCaloriesKcal, unit: tWearables("units.kcal"), history: buildHistory("activeCaloriesKcal") },
-            { id: "bloodPressure", label: tWearables("bloodPressureLabel"), value: bpValue, unit: tWearables("units.mmHg"), history: undefined },
-        ];
-    })();
-
-    const bodyMetrics: MetricItem[] = toMetricItems(
-        [
-            ["weightKg", tWearables("weightLabel"), tWearables("units.kg")],
-            ["bodyFatPercent", tWearables("bodyFat"), "%"],
-            ["muscleMassPercent", tWearables("muscleMass"), "%"],
-            ["bmrKcal", tWearables("basalMetabolism"), tWearables("units.kcal")],
-            ["visceralFatIndex", tWearables("visceralFat"), tWearables("units.index")],
-        ],
-        wearableMetrics.bodyComposition as unknown as Record<string, unknown>,
-        wearableHistory['body'],
-    );
-
-    const metabolicMetrics: MetricItem[] = toMetricItems(
-        [
-            ["glucoseMmol", tWearables("glucose"), tWearables("units.mmolL")],
-            ["timeInRangePercent", tWearables("timeInRange"), "%"],
-            ["glucoseVariabilityPercent", tWearables("glucoseVariability"), "%"],
-        ],
-        wearableMetrics.metabolic as unknown as Record<string, unknown>,
-        wearableHistory['metabolic'],
-    );
-
-    const stressMetrics: MetricItem[] = toMetricItems(
-        [
-            ["stressScore", tWearables("stressScore"), ""],
-            ["bodyTemperatureVariationC", tWearables("tempVariation"), "°C"],
-            ["spo2Percent", tWearables("spo2"), "%"],
-        ],
-        wearableMetrics.stressFemaleHealth as unknown as Record<string, unknown>,
-        wearableHistory['stress'],
-    );
-
-    // ── Dialog field definitions by category ──
-
-    const dialogConfig: Record<
-        string,
-        { title: string; fields: MetricFieldDefinition[] }
-    > = {
-        sleep: { title: tProfile("sleepRecoveryTab"), fields: getSleepFields(tWearables) },
-        cardio: { title: tProfile("cardioActivityTab"), fields: getCardioFields(tWearables) },
-        body: { title: tProfile("bodyCompositionTab"), fields: getBodyFields(tWearables) },
-        metabolic: { title: tProfile("metabolicTab"), fields: getMetabolicFields(tWearables) },
-        stress: { title: tProfile("stressHealthTab"), fields: getStressFields(tWearables) },
     };
 
     // ── Render ──
@@ -1772,81 +1636,148 @@ export default function UserProfileSheet({
                                         </div>
                                     </TabsContent>
 
-                                    {/* ═══ TAB 4: WEARABLES HUB ═══ */}
+                                                                        {/* ═══ TAB 4: WEARABLES HUB ═══ */}
                                     <TabsContent
                                         value="wearables"
                                         className="!mt-0 relative z-10 bg-white/60 dark:bg-surface/60 backdrop-blur-xl border border-white/70 border-t-transparent shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_-10px_rgba(0,0,0,0.1)] rounded-2xl rounded-tl-none p-5 sm:p-6 space-y-4 focus:outline-none"
                                     >
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            {/* Card 1: Sleep & Recovery */}
-                                            <DeviceWidgetCard
-                                                title={tProfile("sleepRecoveryTab")}
-                                                icon={<Moon size={20} />}
-                                                metrics={sleepMetrics}
-                                                onManualEntry={() => {
-                                                    setOcrInitialValues({});
-                                                    setActiveManualEntry("sleep");
-                                                }}
-                                                onScreenshotUpload={() => handleScreenshotTrigger("sleep")}
-                                                isUploading={isOcrLoading && activeOcrCategory === "sleep"}
-                                            />
+                                        <div className="flex flex-col gap-6">
+                                            {/* Top Action Bar */}
+                                            <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
+                                                <button
+                                                    onClick={() => handleScreenshotTrigger("manual" as any)}
+                                                    disabled={isOcrLoading}
+                                                    className="w-full sm:flex-1 py-3.5 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 disabled:opacity-50 transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
+                                                >
+                                                    {isOcrLoading ? (
+                                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                    ) : (
+                                                        <Activity size={20} />
+                                                    )}
+                                                    Сканировать данные
+                                                </button>
+                                                <button
+                                                    onClick={() => setOcrResult({ detectedCategory: "manual", extractedMetrics: [] })}
+                                                    className="w-full sm:w-auto px-6 py-3.5 bg-surface-muted text-ink font-semibold rounded-xl hover:bg-surface-hover transition-all shadow-sm border border-border cursor-pointer whitespace-nowrap"
+                                                >
+                                                    Ввести вручную
+                                                </button>
+                                            </div>
 
-                                            {/* Card 2: Cardio & Activity */}
-                                            <DeviceWidgetCard
-                                                title={tProfile("cardioActivityTab")}
-                                                icon={<Heart size={20} />}
-                                                metrics={cardioMetrics}
-                                                onManualEntry={() => {
-                                                    setOcrInitialValues({});
-                                                    setActiveManualEntry("cardio");
-                                                }}
-                                                onScreenshotUpload={() => handleScreenshotTrigger("cardio")}
-                                                isUploading={isOcrLoading && activeOcrCategory === "cardio"}
-                                            />
+                                            {Object.keys(latestSemanticMetrics).length === 0 ? (
+                                                /* Empty State (Zero Data) */
+                                                <div className="flex flex-col items-center justify-center py-16 px-4 text-center relative overflow-hidden rounded-3xl bg-surface/80 backdrop-blur-md border border-white/40 shadow-xl">
+                                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary-400/20 rounded-full blur-3xl pointer-events-none" />
+                                                    <div className="w-20 h-20 bg-gradient-to-br from-primary-400 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/30 mb-6 relative z-10">
+                                                        <Watch size={40} className="text-white" />
+                                                    </div>
+                                                    <h3 className="text-2xl font-bold text-ink mb-3 relative z-10">
+                                                        Умная синхронизация
+                                                    </h3>
+                                                    <p className="text-ink-muted max-w-sm mx-auto leading-relaxed relative z-10">
+                                                        Сделайте скриншот из любого фитнес-приложения (Garmin, Oura, Apple Health). Наш ИИ сам найдет метрики и бережно разложит их по полочкам.
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                /* Filled State */
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                                    {(() => {
+                                                        const rawMetrics = Object.values(latestSemanticMetrics) as any[];
+                                                        const finalGroups: {base: any, progress?: any}[] = [];
+                                                        const usedIndexes = new Set<number>();
 
-                                            {/* Card 3: Body Composition */}
-                                            <DeviceWidgetCard
-                                                title={tProfile("bodyCompositionTab")}
-                                                icon={<Scale size={20} />}
-                                                metrics={bodyMetrics}
-                                                onManualEntry={() => {
-                                                    setOcrInitialValues({});
-                                                    setActiveManualEntry("body");
-                                                }}
-                                                onScreenshotUpload={() => handleScreenshotTrigger("body")}
-                                                isUploading={isOcrLoading && activeOcrCategory === "body"}
-                                            />
+                                                        // 1. Group pairs (base + progress)
+                                                        rawMetrics.forEach((m1, i) => {
+                                                            if (usedIndexes.has(i)) return;
+                                                            
+                                                            const name1 = (m1.originalName || m1.semanticMeaning || "").toLowerCase();
+                                                            const isProgress1 = m1.unit === "%" || name1.includes("progress") || name1.includes("goal");
+                                                            
+                                                            let matchIdx = -1;
+                                                            for (let j = 0; j < rawMetrics.length; j++) {
+                                                                if (i === j || usedIndexes.has(j)) continue;
+                                                                const m2 = rawMetrics[j];
+                                                                const name2 = (m2.originalName || m2.semanticMeaning || "").toLowerCase();
+                                                                const isProgress2 = m2.unit === "%" || name2.includes("progress") || name2.includes("goal");
+                                                                
+                                                                if (isProgress1 === isProgress2) continue;
+                                                                
+                                                                const clean1 = name1.replace(" goal", "").replace(" progress", "").trim();
+                                                                const clean2 = name2.replace(" goal", "").replace(" progress", "").trim();
+                                                                
+                                                                if (clean1 === clean2 || clean1.startsWith(clean2) || clean2.startsWith(clean1)) {
+                                                                    matchIdx = j;
+                                                                    break;
+                                                                }
+                                                            }
+                                                            
+                                                            if (matchIdx !== -1) {
+                                                                usedIndexes.add(i);
+                                                                usedIndexes.add(matchIdx);
+                                                                const m2 = rawMetrics[matchIdx];
+                                                                finalGroups.push({
+                                                                    base: isProgress1 ? m2 : m1,
+                                                                    progress: isProgress1 ? m1 : m2
+                                                                });
+                                                            }
+                                                        });
 
-                                            {/* Card 4: Metabolic (CGM) */}
-                                            <DeviceWidgetCard
-                                                title={tProfile("metabolicTab")}
-                                                icon={<Droplets size={20} />}
-                                                metrics={metabolicMetrics}
-                                                onManualEntry={() => {
-                                                    setOcrInitialValues({});
-                                                    setActiveManualEntry("metabolic");
-                                                }}
-                                                onScreenshotUpload={() => handleScreenshotTrigger("metabolic")}
-                                                isUploading={isOcrLoading && activeOcrCategory === "metabolic"}
-                                            />
+                                                        // 2. Add remaining & deduplicate
+                                                        rawMetrics.forEach((m, i) => {
+                                                            if (!usedIndexes.has(i)) {
+                                                                const name = (m.originalName || m.semanticMeaning || "").toLowerCase().trim();
+                                                                // check exact duplicates by value and similar name
+                                                                const isDup = finalGroups.some(g => {
+                                                                    const gName = (g.base.originalName || g.base.semanticMeaning || "").toLowerCase().trim();
+                                                                    if (name.includes(gName) || gName.includes(name)) {
+                                                                        if (m.numericValue !== null && g.base.numericValue !== null && m.numericValue === g.base.numericValue) {
+                                                                            return true;
+                                                                        }
+                                                                        if (m.rawValue === g.base.rawValue) return true;
+                                                                    }
+                                                                    return false;
+                                                                });
+                                                                
+                                                                if (!isDup) {
+                                                                    finalGroups.push({ base: m });
+                                                                }
+                                                            }
+                                                        });
 
-                                            {/* Card 5: Stress & Female Health */}
-                                            <DeviceWidgetCard
-                                                title={tProfile("stressHealthTab")}
-                                                icon={<Brain size={20} />}
-                                                metrics={stressMetrics}
-                                                onManualEntry={() => {
-                                                    setOcrInitialValues({});
-                                                    setActiveManualEntry("stress");
-                                                }}
-                                                onScreenshotUpload={() => handleScreenshotTrigger("stress")}
-                                                isUploading={isOcrLoading && activeOcrCategory === "stress"}
-                                            />
+                                                        return finalGroups.map((group, idx) => {
+                                                            const { base, progress } = group;
+                                                            return (
+                                                                <div key={idx} className="bg-white dark:bg-surface p-3 sm:p-4 rounded-2xl border border-border shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden">
+                                                                    <div className="text-xs text-ink-muted font-medium mb-2 line-clamp-2 leading-tight" title={base.semanticMeaning}>
+                                                                        {base.originalName || base.semanticMeaning}
+                                                                    </div>
+                                                                    
+                                                                    <div className="mt-auto flex flex-col items-start gap-1">
+                                                                        {progress ? (
+                                                                            <div className="inline-flex items-center justify-center bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 font-bold text-[10px] sm:text-xs px-2 py-0.5 rounded-md">
+                                                                                {progress.numericValue !== null ? progress.numericValue : progress.rawValue}
+                                                                                {progress.unit ? progress.unit : "%"}
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="h-4 sm:h-5 invisible"></div>
+                                                                        )}
+                                                                        
+                                                                        <div className="flex items-baseline gap-1 whitespace-nowrap">
+                                                                            <span className="text-lg sm:text-xl font-bold text-ink">
+                                                                                {base.numericValue !== null ? base.numericValue : base.rawValue}
+                                                                            </span>
+                                                                            {base.unit && (
+                                                                                <span className="text-xs font-semibold text-ink-muted">{base.unit}</span>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        });
+                                                    })()}
+                                                </div>
+                                            )}
                                         </div>
-
-                                        <p className="mt-4 text-xs text-center font-medium text-ink-muted bg-surface-muted py-2.5 px-4 rounded-full">
-                                            {tProfile("wearablesSyncSoon")}
-                                        </p>
                                     </TabsContent>
                                 </Tabs>
                             </div>
@@ -1894,18 +1825,12 @@ export default function UserProfileSheet({
                     </div>
                 </div>
             )}
-
-            {/* ── Manual Entry Dialogs (one per wearable category) ── */}
-            {activeManualEntry && dialogConfig[activeManualEntry] && (
-                <ManualEntryDialog
-                    isOpen={true}
-                    onClose={() => setActiveManualEntry(null)}
-                    title={dialogConfig[activeManualEntry].title}
-                    fields={dialogConfig[activeManualEntry].fields}
-                    initialValues={ocrInitialValues}
-                    onSave={(values) => handleWearableSave(activeManualEntry, values)}
-                />
-            )}
+            <DynamicOcrDialog
+                isOpen={ocrResult !== null}
+                onClose={() => setOcrResult(null)}
+                ocrResult={ocrResult}
+                onSave={handleDynamicOcrSave}
+            />
 
             {/* Delete Confirmation Modal */}
             {showDeleteConfirm && (

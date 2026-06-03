@@ -211,6 +211,21 @@ export interface LabelScannerOutput {
   } | null;
 }
 
+export interface DynamicWearableMetric {
+  originalName: string;
+  standardizedCategory: string;
+  semanticMeaning: string;
+  rawValue: string;
+  numericValue: number | null;
+  unit: string;
+  confidence: number;
+}
+
+export interface DynamicWearableResult {
+  detectedCategory: string;
+  extractedMetrics: DynamicWearableMetric[];
+}
+
 /* ── API Client ────────────────────────────────────────────────────── */
 
 class AiApiClient {
@@ -795,9 +810,17 @@ class AiApiClient {
 
   /**
    * Analyzes a wearable screenshot (Apple Health, Oura, Garmin, etc.) for automated data entry.
+   * Returns a dynamic array of parsed metrics.
    */
-  async analyzeWearableScreenshot(imageBase64: string): Promise<{ detectedCategory: string; metrics: Record<string, number | null> }> {
-    return this.post<{ detectedCategory: string; metrics: Record<string, number | null> }>("/vision/wearable", { imageBase64 });
+  async analyzeWearableScreenshot(imageBase64: string): Promise<DynamicWearableResult> {
+    return this.post<DynamicWearableResult>("/vision/wearable", { imageBase64 });
+  }
+
+  /**
+   * Saves dynamically parsed wearable metrics to the database.
+   */
+  async saveWearableMetrics(payload: DynamicWearableResult): Promise<{ success: boolean; message: string }> {
+    return this.post<{ success: boolean; message: string }>("/vision/wearable/save", payload);
   }
 
   /**

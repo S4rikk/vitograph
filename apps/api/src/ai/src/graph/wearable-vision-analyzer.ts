@@ -1,38 +1,17 @@
 import { z } from "zod";
 import { callLlmStructured, LLM_TIMEOUTS, LLM_RETRIES, getConfigLlmModel } from "../llm-client.js";
 
-const UnifiedWearableSchema = z.object({
+const DynamicWearableSchema = z.object({
   detectedCategory: z.enum(["sleep", "cardio", "body", "metabolic", "stress", "unknown"]),
-  metrics: z.object({
-    // Sleep
-    sleepDurationHours: z.number().nullable(),
-    deepSleepPercent: z.number().nullable(),
-    remSleepPercent: z.number().nullable(),
-    readinessScore: z.number().nullable(),
-    hrvMs: z.number().nullable(),
-    respiratoryRateBrpm: z.number().nullable(),
-    // Cardio
-    restingHeartRateBpm: z.number().nullable(),
-    vo2MaxMlKgMin: z.number().nullable(),
-    steps: z.number().nullable(),
-    activeCaloriesKcal: z.number().nullable(),
-    bloodPressureSystolic: z.number().nullable(),
-    bloodPressureDiastolic: z.number().nullable(),
-    // Body
-    weightKg: z.number().nullable(),
-    bodyFatPercent: z.number().nullable(),
-    muscleMassPercent: z.number().nullable(),
-    bmrKcal: z.number().nullable(),
-    visceralFatIndex: z.number().nullable(),
-    // Metabolic
-    glucoseMmol: z.number().nullable(),
-    timeInRangePercent: z.number().nullable(),
-    glucoseVariabilityPercent: z.number().nullable(),
-    // Stress
-    stressScore: z.number().nullable(),
-    bodyTemperatureVariationC: z.number().nullable(),
-    spo2Percent: z.number().nullable(),
-  }).partial()
+  extractedMetrics: z.array(z.object({
+    originalName: z.string().describe("Оригинальное название метрики со скриншота (напр. 'Body Battery')"),
+    standardizedCategory: z.string().describe("Унифицированный ключ (snake_case) (напр. 'recovery_reserve', 'hrv')"),
+    semanticMeaning: z.string().describe("Краткий медицинский/фитнес смысл метрики для контекста агента"),
+    rawValue: z.string().describe("Точное значение со скриншота строкой (напр. '7h 30m', '120/80', '85')"),
+    numericValue: z.number().nullable().describe("Нормализованное десятичное число для графиков (напр. '7h 30m' -> 7.5, '120/80' -> null)"),
+    unit: z.string().describe("Единицы измерения (bpm, %, мс и т.д.)"),
+    confidence: z.number().describe("Уверенность распознавания от 0 до 1")
+  }))
 });
 
 export async function runWearableVisionAnalyzer(imageBase64: string) {
@@ -51,14 +30,14 @@ export async function runWearableVisionAnalyzer(imageBase64: string) {
   const model = await getConfigLlmModel("analysis_llm", "gpt-5.4-mini");
 
   const result = await callLlmStructured({
-    schema: UnifiedWearableSchema,
+    schema: DynamicWearableSchema,
     schemaName: "wearable_metrics",
-    systemPrompt: "You are an expert medical data extractor. Analyze the provided screenshot from a fitness tracker/health app. First, determine which category the screenshot belongs to (sleep, cardio, body, metabolic, or stress). If it's not a health screenshot, return 'unknown'. Then, extract all visible numeric metrics for that category into the `metrics` object. IMPORTANT: All values MUST be pure numbers. Do NOT include units.",
+    systemPrompt: "You are an expert medical data extractor. Analyze the provided screenshot from a fitness tracker/health app. First, determine which category the screenshot belongs to (sleep, cardio, body, metabolic, or stress). If it's not a health screenshot, return 'unknown'. Then, extract all visible health metrics into the `extractedMetrics` array. IMPORTANT: STRICTLY IGNORE system UI elements such as phone battery, time on the clock, carrier/WiFi signal, or navigation bars.",
     messages,
     timeoutMs: 60000, // Увеличили таймаут для Vision + Auto-Detect
     maxRetries: LLM_RETRIES.sync,
     model: model,
-    fallback: { detectedCategory: "unknown", metrics: {} },
+    fallback: { detectedCategory: "unknown", extractedMetrics: [] },
     temperature: 0.1,
   });
 

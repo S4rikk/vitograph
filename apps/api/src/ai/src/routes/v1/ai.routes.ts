@@ -48,8 +48,21 @@ import {
   handleWaterCronPush,
   handlePushUnsubscribe,
   handleAnalyzeWearable,
+  handleSaveWearableMetrics,
   handleGetSystemGraph,
 } from "../../ai.controller.js";
+import {
+  ChatRequestSchema,
+  AnalyzeRequestSchema,
+  DiagnoseRequestSchema,
+  AnalyzeSomaticRequestSchema,
+  AnalyzeFoodRequestSchema,
+  AnalyzeLabelRequestSchema,
+  AnalyzeLabReportRequestSchema,
+  UpdateMealLogSchema,
+  AnalyzeWearableRequestSchema,
+  SaveWearableMetricsSchema,
+} from "../../request-schemas.js";
 
 /** AI engine router — mount at /api/v1/ai */
 export const aiRouter = Router();
@@ -70,6 +83,7 @@ aiRouter.post("/analyze-somatic", validate(AnalyzeSomaticRequestSchema), handleA
 aiRouter.post("/analyze-food", validate(AnalyzeFoodRequestSchema), handleAnalyzeFood);
 aiRouter.post("/vision/label", validate(AnalyzeLabelRequestSchema), handleAnalyzeLabel);
 aiRouter.post("/vision/wearable", validate(AnalyzeWearableRequestSchema), handleAnalyzeWearable);
+aiRouter.post("/vision/wearable/save", validate(SaveWearableMetricsSchema), handleSaveWearableMetrics);
 aiRouter.post("/analyze-lab-report", validate(AnalyzeLabReportRequestSchema), handleAnalyzeLabReport);
 aiRouter.get("/lab-reports/history", handleGetLabReportsHistory);
 aiRouter.delete("/lab-reports/history/:timestamp", handleDeleteLabReport);

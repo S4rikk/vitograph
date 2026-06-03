@@ -179,3 +179,18 @@ export const AnalyzeWearableRequestSchema = z.object({
 });
 export type AnalyzeWearableRequest = z.infer<typeof AnalyzeWearableRequestSchema>;
 
+// ── POST /api/v1/ai/vision/wearable/save ─────────────────────────────
+
+export const SaveWearableMetricsSchema = z.object({
+  detectedCategory: z.string().min(1),
+  extractedMetrics: z.array(z.object({
+    originalName: z.string(),
+    standardizedCategory: z.string(),
+    semanticMeaning: z.string(),
+    rawValue: z.string(),
+    numericValue: z.number().nullable(),
+    unit: z.string(),
+    confidence: z.number()
+  }))
+});
+export type SaveWearableMetricsRequest = z.infer<typeof SaveWearableMetricsSchema>;
