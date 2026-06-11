@@ -5,23 +5,37 @@
 import { GoogleAuth } from 'google-auth-library';
 
 let authClient: GoogleAuth | null = null;
+let cachedCredentials: any = null;
+
+function getCredentials(): any {
+  if (cachedCredentials) return cachedCredentials;
+
+  const rawJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+  if (!rawJson) {
+    throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON env var is missing');
+  }
+
+  let cleanJson = rawJson.trim();
+  // Strip outer single or double quotes if present
+  if ((cleanJson.startsWith("'") && cleanJson.endsWith("'")) ||
+      (cleanJson.startsWith('"') && cleanJson.endsWith('"'))) {
+    cleanJson = cleanJson.substring(1, cleanJson.length - 1).trim();
+  }
+
+  try {
+    cachedCredentials = JSON.parse(cleanJson);
+    return cachedCredentials;
+  } catch (e) {
+    console.error('[FCM] Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON:', (e as Error).message);
+    console.error('[FCM] First 50 chars:', cleanJson.substring(0, 50));
+    throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON contains invalid JSON');
+  }
+}
 
 function getAuth(): GoogleAuth {
   if (authClient) return authClient;
 
-  const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-  if (!serviceAccountJson) {
-    throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON env var is missing');
-  }
-
-  let credentials: any;
-  try {
-    credentials = JSON.parse(serviceAccountJson);
-  } catch (e) {
-    console.error('[FCM] Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON:', (e as Error).message);
-    console.error('[FCM] First 50 chars:', serviceAccountJson.substring(0, 50));
-    throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON contains invalid JSON');
-  }
+  const credentials = getCredentials();
 
   authClient = new GoogleAuth({
     credentials,
@@ -45,7 +59,8 @@ export async function sendFcmNotification(
     const client = await auth.getClient();
     const accessToken = await client.getAccessToken();
 
-    const projectId = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON!).project_id;
+    const credentials = getCredentials();
+    const projectId = credentials.project_id;
 
     const response = await fetch(
       `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,

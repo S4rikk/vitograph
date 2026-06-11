@@ -21,6 +21,7 @@ import {
   AnalyzeLabReportRequestSchema,
   UpdateMealLogSchema,
   AnalyzeWearableRequestSchema,
+  SaveWearableMetricsSchema,
 } from "../../request-schemas.js";
 import {
   handleChat,
@@ -51,18 +52,6 @@ import {
   handleSaveWearableMetrics,
   handleGetSystemGraph,
 } from "../../ai.controller.js";
-import {
-  ChatRequestSchema,
-  AnalyzeRequestSchema,
-  DiagnoseRequestSchema,
-  AnalyzeSomaticRequestSchema,
-  AnalyzeFoodRequestSchema,
-  AnalyzeLabelRequestSchema,
-  AnalyzeLabReportRequestSchema,
-  UpdateMealLogSchema,
-  AnalyzeWearableRequestSchema,
-  SaveWearableMetricsSchema,
-} from "../../request-schemas.js";
 
 /** AI engine router — mount at /api/v1/ai */
 export const aiRouter = Router();

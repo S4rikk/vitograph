@@ -966,7 +966,11 @@ export async function handleUpdateMealLog(req: Request, res: Response, next: Nex
     const userId = req.user?.id;
     const token = req.headers.authorization?.split(" ")[1];
     const { id: mealLogId } = req.params;
-    const { new_weight_g } = req.body;
+    let new_weight_g = Number(req.body.new_weight_g);
+    if (isNaN(new_weight_g) || new_weight_g <= 0) {
+      console.warn(`[handleUpdateMealLog] Invalid weight received: ${req.body.new_weight_g}. Defaulting to 100g.`);
+      new_weight_g = 100;
+    }
 
     if (!userId || !token) throw new Error("Unauthorized");
 

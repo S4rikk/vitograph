@@ -145,7 +145,13 @@ export const logMealTool = new DynamicStructuredTool({
       sodium_mg: z.number().optional().describe("Sodium (mg). DO NOT translate key.")
     }).optional().describe("Estimated vitamins and minerals based on weight. Provide absolute values. NEVER leave empty if food contains them. DO NOT TRANSLATE JSON KEYS INTO RUSSIAN.")
   }),
-  func: async ({ meal_type, food_name, weight_g, calories, protein_g, fat_g, carbs_g, micronutrients, meal_quality_score, meal_quality_reason, source, glycemic_index, insulin_index, response_type, peak_time_min, energy_duration_hours, cooking_method }, runManager, config) => {
+  func: async ({ meal_type, food_name, weight_g: rawWeight_g, calories, protein_g, fat_g, carbs_g, micronutrients, meal_quality_score, meal_quality_reason, source, glycemic_index, insulin_index, response_type, peak_time_min, energy_duration_hours, cooking_method }, runManager, config) => {
+    let weight_g = Number(rawWeight_g);
+    if (isNaN(weight_g) || weight_g <= 0) {
+      console.warn(`[Tool:log_meal] Invalid weight_g received: ${rawWeight_g}. Defaulting to 100g.`);
+      weight_g = 100;
+    }
+
     const userId = config?.configurable?.user_id;
     const token = config?.configurable?.token;
     const ctx = config?.configurable?.nutritionalContext;

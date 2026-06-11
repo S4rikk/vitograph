@@ -9,6 +9,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getLocale } from 'next-intl/server';
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import LocaleSync from "@/components/providers/LocaleSync";
+import ServerActionErrorListener from "@/components/providers/ServerActionErrorListener";
 
 
 import { getTranslations } from 'next-intl/server';
@@ -73,6 +74,7 @@ export default async function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <NextIntlClientProvider messages={messages}>
           <LocaleSync profileLocale={profileLocale} />
+          <ServerActionErrorListener />
 
         <FontScaleProvider>
           {user && (

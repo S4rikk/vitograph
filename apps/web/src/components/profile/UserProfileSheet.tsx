@@ -142,6 +142,18 @@ type WearableCardCategory =
 
 // ── Helper: converts a category object to MetricItem array ──
 
+const DeleteBadge = ({ onConfirm }: { onConfirm: () => void }) => (
+    <button
+        onClick={(e) => {
+            e.stopPropagation();
+            onConfirm();
+        }}
+        className="absolute -top-2 -right-2 z-10 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-md transition-colors"
+    >
+        <X size={12} strokeWidth={3} />
+    </button>
+);
+
 function toMetricItems(
     entries: [string, string, string][],
     data: Record<string, unknown>,
@@ -209,7 +221,7 @@ export default function UserProfileSheet({
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [saveSuccess, setSaveSuccess] = useState(false);
-
+    const [isEditingMetrics, setIsEditingMetrics] = useState(false);
     // ── Tag inputs ──
     const [conditionInput, setConditionInput] = useState("");
     const [medicationInput, setMedicationInput] = useState("");
@@ -585,6 +597,44 @@ export default function UserProfileSheet({
         setMedicationInput("");
     };
 
+    const handleDeleteMetric = async (metricId: string) => {
+        const newMetrics = { ...latestSemanticMetrics };
+        let foundKey = Object.keys(newMetrics).find(k => {
+            const m = newMetrics[k];
+            const mId = m.id || `${m.originalName || m.semanticMeaning}_${isNaN(Number(m.numericValue !== null ? m.numericValue : m.rawValue)) ? 'text' : 'num'}_${m.unit || 'nounit'}`;
+            return mId === metricId;
+        });
+        if (foundKey) {
+            delete newMetrics[foundKey];
+            setLatestSemanticMetrics(newMetrics);
+            const supabase = createClient();
+            await supabase.from('wearable_manual_metrics').insert({
+                user_id: userId,
+                category: 'manual',
+                metrics: {},
+                semantic_metrics: newMetrics,
+                recorded_at: new Date().toISOString()
+            });
+            toast.success(tProfile("metricDeleted", { defaultValue: "Метрика удалена" }));
+        }
+    };
+    
+    const handleDeleteAllMetrics = async () => {
+        if (window.confirm("Удалить все показатели с гаджетов?")) {
+            setLatestSemanticMetrics({});
+            const supabase = createClient();
+            await supabase.from('wearable_manual_metrics').insert({
+                user_id: userId,
+                category: 'manual',
+                metrics: {},
+                semantic_metrics: {},
+                recorded_at: new Date().toISOString()
+            });
+            setIsEditingMetrics(false);
+            toast.success(tProfile("allMetricsDeleted", { defaultValue: "Все показатели удалены" }));
+        }
+    };
+
     const removeMedication = (index: number) => {
         setFormData((prev) => ({
             ...prev,
@@ -657,6 +707,26 @@ export default function UserProfileSheet({
 
         const handleDynamicOcrSave = async (payload: any) => {
         try {
+            const currentMetrics = { ...latestSemanticMetrics };
+            const newMetrics = payload.extractedMetrics || {};
+            
+            for (const [newKey, newM] of Object.entries(newMetrics)) {
+                const newName = (newM as any).standardizedCategory || (newM as any).originalName || (newM as any).semanticMeaning;
+                let foundKey = null;
+                for (const [oldKey, oldM] of Object.entries(currentMetrics)) {
+                    const oldName = (oldM as any).standardizedCategory || (oldM as any).originalName || (oldM as any).semanticMeaning;
+                    if (oldName && newName && oldName.toLowerCase() === newName.toLowerCase()) {
+                        foundKey = oldKey;
+                        break;
+                    }
+                }
+                if (foundKey) {
+                    currentMetrics[foundKey] = newM;
+                } else {
+                    currentMetrics[newKey] = newM;
+                }
+            }
+
             const supabase = createClient();
             const { error } = await supabase
                 .from('wearable_manual_metrics')
@@ -664,7 +734,7 @@ export default function UserProfileSheet({
                     user_id: userId,
                     category: payload.detectedCategory,
                     metrics: {}, // Legacy column
-                    semantic_metrics: payload.extractedMetrics,
+                    semantic_metrics: currentMetrics,
                     recorded_at: new Date().toISOString(),
                 });
             
@@ -1680,9 +1750,34 @@ const handleScreenshotTrigger = (category: WearableCardCategory) => {
                                                 </div>
                                             ) : (
                                                 /* Filled State */
-                                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                                                    {(() => {
-                                                        const rawMetrics = Object.values(latestSemanticMetrics) as any[];
+                                                <div className="bg-surface/80 backdrop-blur-md border border-white/20 rounded-3xl p-6 shadow-xl relative mt-4">
+                                                    <div className="flex justify-between items-center mb-6">
+                                                        <h3 className="text-xl font-bold text-ink flex items-center gap-2">
+                                                            <Watch className="text-primary-500" size={24} />
+                                                            Показатели с гаджетов
+                                                        </h3>
+                                                        <button 
+                                                            onClick={() => setIsEditingMetrics(!isEditingMetrics)}
+                                                            className={`p-2 rounded-full transition-colors ${isEditingMetrics ? 'bg-red-500/20 text-red-500' : 'bg-surface hover:bg-surface-hover text-ink-muted'}`}
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    {isEditingMetrics && (
+                                                        <div className="mb-4 flex justify-end">
+                                                            <button 
+                                                                onClick={handleDeleteAllMetrics}
+                                                                className="text-xs font-medium bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg shadow-sm transition-colors"
+                                                            >
+                                                                Очистить всё
+                                                            </button>
+                                                        </div>
+                                                    )}
+
+                                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                                        {(() => {
+                                                            const rawMetrics = Object.values(latestSemanticMetrics) as any[];
                                                         const finalGroups: {base: any, progress?: any}[] = [];
                                                         const usedIndexes = new Set<number>();
 
@@ -1748,6 +1843,16 @@ const handleScreenshotTrigger = (category: WearableCardCategory) => {
                                                             const { base, progress } = group;
                                                             return (
                                                                 <div key={idx} className="bg-white dark:bg-surface p-3 sm:p-4 rounded-2xl border border-border shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden">
+                                                                    {isEditingMetrics && (
+                                                                        <DeleteBadge onConfirm={() => {
+                                                                            const bId = base.id || `${base.originalName || base.semanticMeaning}_${isNaN(Number(base.numericValue !== null ? base.numericValue : base.rawValue)) ? 'text' : 'num'}_${base.unit || 'nounit'}`;
+                                                                            handleDeleteMetric(bId);
+                                                                            if (progress) {
+                                                                                const pId = progress.id || `${progress.originalName || progress.semanticMeaning}_${isNaN(Number(progress.numericValue !== null ? progress.numericValue : progress.rawValue)) ? 'text' : 'num'}_${progress.unit || 'nounit'}`;
+                                                                                handleDeleteMetric(pId);
+                                                                            }
+                                                                        }} />
+                                                                    )}
                                                                     <div className="text-xs text-ink-muted font-medium mb-2 line-clamp-2 leading-tight" title={base.semanticMeaning}>
                                                                         {base.originalName || base.semanticMeaning}
                                                                     </div>
@@ -1775,6 +1880,7 @@ const handleScreenshotTrigger = (category: WearableCardCategory) => {
                                                             );
                                                         });
                                                     })()}
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>

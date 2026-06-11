@@ -728,7 +728,8 @@
     "kg": "kg",
     "ft": "ft",
     "in": "in",
-    "lbs": "lbs"
+    "lbs": "lbs",
+    "ftIn": "ft/in"
   },
   "assistant": {
     "chat": {

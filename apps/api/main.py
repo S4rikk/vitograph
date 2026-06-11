@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import threading
 import traceback
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, List, Optional
@@ -24,11 +25,52 @@ from fastapi import (
 )
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastembed import TextEmbedding
 
 logger = logging.getLogger(__name__)
 
-embedding_model = TextEmbedding("BAAI/bge-small-en-v1.5")
+
+class LifespanTextEmbedding:
+    """Thread-safe wrapper for lifespan initialization of TextEmbedding.
+
+    Prevents ONNX Runtime from initializing on module import,
+    solving Windows spawn crash issues under uvicorn --reload.
+    """
+
+    def __init__(self, model_name: str) -> None:
+        """Initialize the thread-safe lifespan wrapper for TextEmbedding.
+
+        Args:
+            model_name: The name of the fastembed model to initialize.
+        """
+        self.model_name = model_name
+        self._model = None
+        self._lock = threading.Lock()
+
+    def load(self) -> None:
+        """Load the underlying TextEmbedding model thread-safely."""
+        if self._model is None:
+            with self._lock:
+                if self._model is None:
+                    from fastembed import TextEmbedding
+
+                    self._model = TextEmbedding(self.model_name)
+
+    def embed(self, *args: list, **kwargs: dict) -> Iterable:
+        """Generate embeddings for the input text using the loaded model.
+
+        Args:
+            *args: Variable length argument list passed to the model's embed.
+            **kwargs: Arbitrary keyword arguments passed to the model's embed.
+
+        Returns:
+            An iterable of numpy arrays representing the embeddings.
+        """
+        if self._model is None:
+            self.load()
+        return self._model.embed(*args, **kwargs)
+
+
+embedding_model = LifespanTextEmbedding("BAAI/bge-small-en-v1.5")
 
 from openai import AsyncOpenAI  # noqa: E402
 from pydantic import BaseModel  # noqa: E402
@@ -58,7 +100,7 @@ from services.norm_engine import (  # noqa: E402
 )
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
+    from collections.abc import AsyncIterator, Iterable
 
 
 # ── Lifespan ─────────────────────────────────────────────────────────
@@ -68,10 +110,18 @@ if TYPE_CHECKING:
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     """Manage application startup / shutdown resources.
 
+    On startup, the fastembed ONNX model is pre-loaded safely.
     On shutdown, the shared Supabase ``AsyncClient`` connection
     pool is closed gracefully.
+
+    Args:
+        _app: The FastAPI application instance.
+
+    Yields:
+        None.
     """
-    # Startup — client is created lazily, nothing to pre-init.
+    # Pre-load the heavy ML model during worker startup
+    embedding_model.load()
     yield
     # Shutdown — release connection pool.
     await supabase_manager.close()

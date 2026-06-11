@@ -167,7 +167,14 @@ export type AnalyzeLabReportRequest = z.infer<typeof AnalyzeLabReportRequestSche
 /** Schema for updating meal log weight (Phase 56) */
 export const UpdateMealLogSchema = z.object({
   /** New total weight of the meal in grams */
-  new_weight_g: z.number().positive("Weight must be positive"),
+  new_weight_g: z.preprocess((val) => {
+    const num = Number(val);
+    if (isNaN(num) || num <= 0) {
+      console.warn(`[UpdateMealLogSchema] Invalid weight ${val}, defaulting to 100`);
+      return 100;
+    }
+    return num;
+  }, z.number().positive()),
 });
 
 export type UpdateMealLogRequest = z.infer<typeof UpdateMealLogSchema>;
