@@ -27,7 +27,7 @@
       "source_file": "old_FoodInputForm_utf8.tsx",
       "source_location": "L1",
       "id": "old_foodinputform_utf8_tsx",
-      "community": 97,
+      "community": 98,
       "norm_label": "old_foodinputform_utf8.tsx"
     },
     {
@@ -36,7 +36,7 @@
       "source_file": "patch_i18n.py",
       "source_location": "L1",
       "id": "patch_i18n_py",
-      "community": 98,
+      "community": 99,
       "norm_label": "patch_i18n.py"
     },
     {
@@ -45,7 +45,7 @@
       "source_file": "prisma.config.ts",
       "source_location": "L1",
       "id": "prisma_config_ts",
-      "community": 99,
+      "community": 100,
       "norm_label": "prisma.config.ts"
     },
     {
@@ -72,7 +72,7 @@
       "source_file": "refactor.js",
       "source_location": "L1",
       "id": "refactor_js",
-      "community": 100,
+      "community": 101,
       "norm_label": "refactor.js"
     },
     {
@@ -81,7 +81,7 @@
       "source_file": "refactor10.js",
       "source_location": "L1",
       "id": "refactor10_js",
-      "community": 101,
+      "community": 102,
       "norm_label": "refactor10.js"
     },
     {
@@ -90,7 +90,7 @@
       "source_file": "refactor2.js",
       "source_location": "L1",
       "id": "refactor2_js",
-      "community": 102,
+      "community": 103,
       "norm_label": "refactor2.js"
     },
     {
@@ -99,7 +99,7 @@
       "source_file": "refactor3.js",
       "source_location": "L1",
       "id": "refactor3_js",
-      "community": 103,
+      "community": 104,
       "norm_label": "refactor3.js"
     },
     {
@@ -108,7 +108,7 @@
       "source_file": "refactor4.js",
       "source_location": "L1",
       "id": "refactor4_js",
-      "community": 104,
+      "community": 105,
       "norm_label": "refactor4.js"
     },
     {
@@ -117,7 +117,7 @@
       "source_file": "refactor5.js",
       "source_location": "L1",
       "id": "refactor5_js",
-      "community": 105,
+      "community": 106,
       "norm_label": "refactor5.js"
     },
     {
@@ -126,7 +126,7 @@
       "source_file": "refactor6.js",
       "source_location": "L1",
       "id": "refactor6_js",
-      "community": 106,
+      "community": 107,
       "norm_label": "refactor6.js"
     },
     {
@@ -135,7 +135,7 @@
       "source_file": "refactor8.js",
       "source_location": "L1",
       "id": "refactor8_js",
-      "community": 107,
+      "community": 108,
       "norm_label": "refactor8.js"
     },
     {
@@ -144,7 +144,7 @@
       "source_file": "refactor9.js",
       "source_location": "L1",
       "id": "refactor9_js",
-      "community": 108,
+      "community": 109,
       "norm_label": "refactor9.js"
     },
     {
@@ -153,7 +153,7 @@
       "source_file": "refactor_delete_logic.js",
       "source_location": "L1",
       "id": "refactor_delete_logic_js",
-      "community": 109,
+      "community": 110,
       "norm_label": "refactor_delete_logic.js"
     },
     {
@@ -162,7 +162,7 @@
       "source_file": "refactor_fallback_dedup.js",
       "source_location": "L1",
       "id": "refactor_fallback_dedup_js",
-      "community": 110,
+      "community": 111,
       "norm_label": "refactor_fallback_dedup.js"
     },
     {
@@ -171,7 +171,7 @@
       "source_file": "refactor_fallback_grouping.js",
       "source_location": "L1",
       "id": "refactor_fallback_grouping_js",
-      "community": 111,
+      "community": 112,
       "norm_label": "refactor_fallback_grouping.js"
     },
     {
@@ -180,7 +180,7 @@
       "source_file": "refactor_final.js",
       "source_location": "L1",
       "id": "refactor_final_js",
-      "community": 112,
+      "community": 113,
       "norm_label": "refactor_final.js"
     },
     {
@@ -189,7 +189,7 @@
       "source_file": "refactor_final_2.js",
       "source_location": "L1",
       "id": "refactor_final_2_js",
-      "community": 113,
+      "community": 114,
       "norm_label": "refactor_final_2.js"
     },
     {
@@ -198,7 +198,7 @@
       "source_file": "refactor_final_3.js",
       "source_location": "L1",
       "id": "refactor_final_3_js",
-      "community": 114,
+      "community": 115,
       "norm_label": "refactor_final_3.js"
     },
     {
@@ -207,7 +207,7 @@
       "source_file": "refactor_final_4.js",
       "source_location": "L1",
       "id": "refactor_final_4_js",
-      "community": 115,
+      "community": 116,
       "norm_label": "refactor_final_4.js"
     },
     {
@@ -216,7 +216,7 @@
       "source_file": "refactor_garmin_dashboard.js",
       "source_location": "L1",
       "id": "refactor_garmin_dashboard_js",
-      "community": 116,
+      "community": 117,
       "norm_label": "refactor_garmin_dashboard.js"
     },
     {
@@ -225,7 +225,7 @@
       "source_file": "refactor_group_metrics.js",
       "source_location": "L1",
       "id": "refactor_group_metrics_js",
-      "community": 117,
+      "community": 118,
       "norm_label": "refactor_group_metrics.js"
     },
     {
@@ -234,7 +234,7 @@
       "source_file": "refactor_group_metrics_2.js",
       "source_location": "L1",
       "id": "refactor_group_metrics_2_js",
-      "community": 118,
+      "community": 119,
       "norm_label": "refactor_group_metrics_2.js"
     },
     {
@@ -243,7 +243,7 @@
       "source_file": "refactor_group_metrics_3.js",
       "source_location": "L1",
       "id": "refactor_group_metrics_3_js",
-      "community": 119,
+      "community": 120,
       "norm_label": "refactor_group_metrics_3.js"
     },
     {
@@ -252,7 +252,7 @@
       "source_file": "refactor_group_metrics_4.js",
       "source_location": "L1",
       "id": "refactor_group_metrics_4_js",
-      "community": 120,
+      "community": 121,
       "norm_label": "refactor_group_metrics_4.js"
     },
     {
@@ -261,7 +261,7 @@
       "source_file": "refactor_group_metrics_5.js",
       "source_location": "L1",
       "id": "refactor_group_metrics_5_js",
-      "community": 121,
+      "community": 122,
       "norm_label": "refactor_group_metrics_5.js"
     },
     {
@@ -270,7 +270,7 @@
       "source_file": "refactor_group_metrics_6.js",
       "source_location": "L1",
       "id": "refactor_group_metrics_6_js",
-      "community": 122,
+      "community": 123,
       "norm_label": "refactor_group_metrics_6.js"
     },
     {
@@ -279,7 +279,7 @@
       "source_file": "refactor_group_metrics_7.js",
       "source_location": "L1",
       "id": "refactor_group_metrics_7_js",
-      "community": 123,
+      "community": 124,
       "norm_label": "refactor_group_metrics_7.js"
     },
     {
@@ -288,7 +288,7 @@
       "source_file": "refactor_group_metrics_9.js",
       "source_location": "L1",
       "id": "refactor_group_metrics_9_js",
-      "community": 124,
+      "community": 125,
       "norm_label": "refactor_group_metrics_9.js"
     },
     {
@@ -297,7 +297,7 @@
       "source_file": "refactor_hanging.js",
       "source_location": "L1",
       "id": "refactor_hanging_js",
-      "community": 125,
+      "community": 126,
       "norm_label": "refactor_hanging.js"
     },
     {
@@ -306,7 +306,7 @@
       "source_file": "refactor_import.js",
       "source_location": "L1",
       "id": "refactor_import_js",
-      "community": 126,
+      "community": 127,
       "norm_label": "refactor_import.js"
     },
     {
@@ -315,7 +315,7 @@
       "source_file": "refactor_inject_trash.js",
       "source_location": "L1",
       "id": "refactor_inject_trash_js",
-      "community": 127,
+      "community": 128,
       "norm_label": "refactor_inject_trash.js"
     },
     {
@@ -324,7 +324,7 @@
       "source_file": "refactor_inject_trash4.js",
       "source_location": "L1",
       "id": "refactor_inject_trash4_js",
-      "community": 128,
+      "community": 129,
       "norm_label": "refactor_inject_trash4.js"
     },
     {
@@ -333,7 +333,7 @@
       "source_file": "refactor_inject_trash5.js",
       "source_location": "L1",
       "id": "refactor_inject_trash5_js",
-      "community": 129,
+      "community": 130,
       "norm_label": "refactor_inject_trash5.js"
     },
     {
@@ -342,7 +342,7 @@
       "source_file": "refactor_inject_trash_regex.js",
       "source_location": "L1",
       "id": "refactor_inject_trash_regex_js",
-      "community": 130,
+      "community": 131,
       "norm_label": "refactor_inject_trash_regex.js"
     },
     {
@@ -351,7 +351,7 @@
       "source_file": "refactor_master_patch.js",
       "source_location": "L1",
       "id": "refactor_master_patch_js",
-      "community": 131,
+      "community": 132,
       "norm_label": "refactor_master_patch.js"
     },
     {
@@ -360,7 +360,7 @@
       "source_file": "refactor_master_patch_v2.js",
       "source_location": "L1",
       "id": "refactor_master_patch_v2_js",
-      "community": 132,
+      "community": 133,
       "norm_label": "refactor_master_patch_v2.js"
     },
     {
@@ -369,7 +369,7 @@
       "source_file": "refactor_metrics_loading.js",
       "source_location": "L1",
       "id": "refactor_metrics_loading_js",
-      "community": 133,
+      "community": 134,
       "norm_label": "refactor_metrics_loading.js"
     },
     {
@@ -378,7 +378,7 @@
       "source_file": "refactor_move_functions.js",
       "source_location": "L1",
       "id": "refactor_move_functions_js",
-      "community": 134,
+      "community": 135,
       "norm_label": "refactor_move_functions.js"
     },
     {
@@ -387,7 +387,7 @@
       "source_file": "refactor_ocr.js",
       "source_location": "L1",
       "id": "refactor_ocr_js",
-      "community": 135,
+      "community": 136,
       "norm_label": "refactor_ocr.js"
     },
     {
@@ -396,7 +396,7 @@
       "source_file": "refactor_reinject_functions.js",
       "source_location": "L1",
       "id": "refactor_reinject_functions_js",
-      "community": 136,
+      "community": 137,
       "norm_label": "refactor_reinject_functions.js"
     },
     {
@@ -405,7 +405,7 @@
       "source_file": "refactor_reinject_functions2.js",
       "source_location": "L1",
       "id": "refactor_reinject_functions2_js",
-      "community": 137,
+      "community": 138,
       "norm_label": "refactor_reinject_functions2.js"
     },
     {
@@ -414,7 +414,7 @@
       "source_file": "refactor_reinject_functions3.js",
       "source_location": "L1",
       "id": "refactor_reinject_functions3_js",
-      "community": 138,
+      "community": 139,
       "norm_label": "refactor_reinject_functions3.js"
     },
     {
@@ -423,7 +423,7 @@
       "source_file": "refactor_restore_and_fix.js",
       "source_location": "L1",
       "id": "refactor_restore_and_fix_js",
-      "community": 139,
+      "community": 140,
       "norm_label": "refactor_restore_and_fix.js"
     },
     {
@@ -432,7 +432,7 @@
       "source_file": "refactor_sync_logic.js",
       "source_location": "L1",
       "id": "refactor_sync_logic_js",
-      "community": 140,
+      "community": 141,
       "norm_label": "refactor_sync_logic.js"
     },
     {
@@ -441,7 +441,7 @@
       "source_file": "refactor_sync_logic2.js",
       "source_location": "L1",
       "id": "refactor_sync_logic2_js",
-      "community": 141,
+      "community": 142,
       "norm_label": "refactor_sync_logic2.js"
     },
     {
@@ -450,7 +450,7 @@
       "source_file": "refactor_sync_logic3.js",
       "source_location": "L1",
       "id": "refactor_sync_logic3_js",
-      "community": 142,
+      "community": 143,
       "norm_label": "refactor_sync_logic3.js"
     },
     {
@@ -459,7 +459,7 @@
       "source_file": "refactor_ui_delete_1.js",
       "source_location": "L1",
       "id": "refactor_ui_delete_1_js",
-      "community": 143,
+      "community": 144,
       "norm_label": "refactor_ui_delete_1.js"
     },
     {
@@ -468,7 +468,7 @@
       "source_file": "refactor_ui_delete_2.js",
       "source_location": "L1",
       "id": "refactor_ui_delete_2_js",
-      "community": 144,
+      "community": 145,
       "norm_label": "refactor_ui_delete_2.js"
     },
     {
@@ -477,7 +477,7 @@
       "source_file": "scratch_old.tsx",
       "source_location": "L1",
       "id": "scratch_old_tsx",
-      "community": 145,
+      "community": 146,
       "norm_label": "scratch_old.tsx"
     },
     {
@@ -504,7 +504,7 @@
       "source_file": "temp_fix.py",
       "source_location": "L1",
       "id": "temp_fix_py",
-      "community": 146,
+      "community": 147,
       "norm_label": "temp_fix.py"
     },
     {
@@ -540,7 +540,7 @@
       "source_file": "vitograph_3d_data.js",
       "source_location": "L1",
       "id": "vitograph_3d_data_js",
-      "community": 147,
+      "community": 148,
       "norm_label": "vitograph_3d_data.js"
     },
     {
@@ -1008,7 +1008,7 @@
       "source_file": "apps\\api\\api\\__init__.py",
       "source_location": "L1",
       "id": "apps_api_api_init_py",
-      "community": 148,
+      "community": 149,
       "norm_label": "__init__.py"
     },
     {
@@ -1017,7 +1017,7 @@
       "source_file": "apps\\api\\api\\v1\\__init__.py",
       "source_location": "L1",
       "id": "apps_api_api_v1_init_py",
-      "community": 149,
+      "community": 150,
       "norm_label": "__init__.py"
     },
     {
@@ -1350,7 +1350,7 @@
       "source_file": "apps\\api\\api\\v1\\endpoints\\__init__.py",
       "source_location": "L1",
       "id": "apps_api_api_v1_endpoints_init_py",
-      "community": 150,
+      "community": 151,
       "norm_label": "__init__.py"
     },
     {
@@ -1404,7 +1404,7 @@
       "source_file": "apps\\api\\core\\database.py",
       "source_location": "L1",
       "id": "apps_api_core_database_py",
-      "community": 11,
+      "community": 12,
       "norm_label": "database.py"
     },
     {
@@ -1413,7 +1413,7 @@
       "source_file": "apps\\api\\core\\database.py",
       "source_location": "L46",
       "id": "core_database_supabaseclientmanager",
-      "community": 11,
+      "community": 12,
       "norm_label": "supabaseclientmanager"
     },
     {
@@ -1422,7 +1422,7 @@
       "source_file": "apps\\api\\core\\database.py",
       "source_location": "L55",
       "id": "core_database_supabaseclientmanager_init",
-      "community": 11,
+      "community": 12,
       "norm_label": ".__init__()"
     },
     {
@@ -1431,7 +1431,7 @@
       "source_file": "apps\\api\\core\\database.py",
       "source_location": "L58",
       "id": "core_database_supabaseclientmanager_get_client",
-      "community": 11,
+      "community": 12,
       "norm_label": ".get_client()"
     },
     {
@@ -1440,7 +1440,7 @@
       "source_file": "apps\\api\\core\\database.py",
       "source_location": "L82",
       "id": "core_database_supabaseclientmanager_close",
-      "community": 11,
+      "community": 12,
       "norm_label": ".close()"
     },
     {
@@ -1449,7 +1449,7 @@
       "source_file": "apps\\api\\core\\database.py",
       "source_location": "L99",
       "id": "core_database_get_supabase_client",
-      "community": 11,
+      "community": 12,
       "norm_label": "get_supabase_client()"
     },
     {
@@ -1457,7 +1457,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\core\\database.py",
       "source_location": "L1",
-      "community": 11,
+      "community": 12,
       "norm_label": "async supabase client connection manager.  provides a lazily-initialised, appl",
       "id": "core_database_rationale_1"
     },
@@ -1466,7 +1466,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\core\\database.py",
       "source_location": "L47",
-      "community": 11,
+      "community": 12,
       "norm_label": "manages the lifecycle of a single ``asyncclient`` instance.      the client is",
       "id": "core_database_rationale_47"
     },
@@ -1475,7 +1475,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\core\\database.py",
       "source_location": "L59",
-      "community": 11,
+      "community": 12,
       "norm_label": "return the cached async supabase client.          creates the client on first",
       "id": "core_database_rationale_59"
     },
@@ -1484,7 +1484,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\core\\database.py",
       "source_location": "L83",
-      "community": 11,
+      "community": 12,
       "norm_label": "gracefully close the underlying http connections.",
       "id": "core_database_rationale_83"
     },
@@ -1493,7 +1493,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\core\\database.py",
       "source_location": "L100",
-      "community": 11,
+      "community": 12,
       "norm_label": "fastapi dependency that yields an async client.      if an authorization heade",
       "id": "core_database_rationale_100"
     },
@@ -1575,7 +1575,7 @@
       "source_file": "apps\\api\\core\\exceptions.py",
       "source_location": "L48",
       "id": "core_exceptions_databaseconnectionerror",
-      "community": 11,
+      "community": 12,
       "norm_label": "databaseconnectionerror"
     },
     {
@@ -1628,7 +1628,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\core\\exceptions.py",
       "source_location": "L49",
-      "community": 11,
+      "community": 12,
       "norm_label": "raised when the database client cannot be reached.",
       "id": "core_exceptions_rationale_49"
     },
@@ -1638,7 +1638,7 @@
       "source_file": "apps\\api\\core\\__init__.py",
       "source_location": "L1",
       "id": "apps_api_core_init_py",
-      "community": 151,
+      "community": 152,
       "norm_label": "__init__.py"
     },
     {
@@ -1755,7 +1755,7 @@
       "source_file": "apps\\api\\repositories\\__init__.py",
       "source_location": "L1",
       "id": "apps_api_repositories_init_py",
-      "community": 152,
+      "community": 153,
       "norm_label": "__init__.py"
     },
     {
@@ -2214,7 +2214,7 @@
       "source_file": "apps\\api\\schemas\\__init__.py",
       "source_location": "L1",
       "id": "apps_api_schemas_init_py",
-      "community": 153,
+      "community": 154,
       "norm_label": "__init__.py"
     },
     {
@@ -2906,7 +2906,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\pdf_service.py",
       "source_location": "L93",
-      "community": 154,
+      "community": 155,
       "norm_label": "extract all text from a pdf file.          reads every page of the pdf and con",
       "id": "services_pdf_service_rationale_93"
     },
@@ -2915,7 +2915,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\pdf_service.py",
       "source_location": "L145",
-      "community": 155,
+      "community": 156,
       "norm_label": "parse extracted text into structured biomarker data.          uses openai ``as",
       "id": "services_pdf_service_rationale_145"
     },
@@ -2925,7 +2925,7 @@
       "source_file": "apps\\api\\services\\__init__.py",
       "source_location": "L1",
       "id": "apps_api_services_init_py",
-      "community": 156,
+      "community": 157,
       "norm_label": "__init__.py"
     },
     {
@@ -3015,7 +3015,7 @@
       "source_file": "apps\\api\\src\\ai\\minimal.js",
       "source_location": "L1",
       "id": "apps_api_src_ai_minimal_js",
-      "community": 157,
+      "community": 158,
       "norm_label": "minimal.js"
     },
     {
@@ -3024,7 +3024,7 @@
       "source_file": "apps\\api\\src\\ai\\vitest.config.ts",
       "source_location": "L1",
       "id": "apps_api_src_ai_vitest_config_ts",
-      "community": 158,
+      "community": 159,
       "norm_label": "vitest.config.ts"
     },
     {
@@ -3292,7 +3292,7 @@
       "label": "handleChatStream()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1548",
+      "source_location": "L1571",
       "id": "src_ai_controller_handlechatstream",
       "community": 1,
       "norm_label": "handlechatstream()"
@@ -3301,7 +3301,7 @@
       "label": "handleAnalyze()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1886",
+      "source_location": "L1913",
       "id": "src_ai_controller_handleanalyze",
       "community": 5,
       "norm_label": "handleanalyze()"
@@ -3310,7 +3310,7 @@
       "label": "handleDiagnose()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1913",
+      "source_location": "L1940",
       "id": "src_ai_controller_handlediagnose",
       "community": 5,
       "norm_label": "handlediagnose()"
@@ -3319,7 +3319,7 @@
       "label": "handleAnalyzeSomatic()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1941",
+      "source_location": "L1968",
       "id": "src_ai_controller_handleanalyzesomatic",
       "community": 1,
       "norm_label": "handleanalyzesomatic()"
@@ -3328,7 +3328,7 @@
       "label": "handleGetChatHistory()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1985",
+      "source_location": "L2012",
       "id": "src_ai_controller_handlegetchathistory",
       "community": 1,
       "norm_label": "handlegetchathistory()"
@@ -3337,7 +3337,7 @@
       "label": "handleAnalyzeFood()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2099",
+      "source_location": "L2130",
       "id": "src_ai_controller_handleanalyzefood",
       "community": 1,
       "norm_label": "handleanalyzefood()"
@@ -3346,7 +3346,7 @@
       "label": "handleAnalyzeLabReport()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2157",
+      "source_location": "L2188",
       "id": "src_ai_controller_handleanalyzelabreport",
       "community": 1,
       "norm_label": "handleanalyzelabreport()"
@@ -3355,7 +3355,7 @@
       "label": "handleGetLabReportsHistory()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2235",
+      "source_location": "L2266",
       "id": "src_ai_controller_handlegetlabreportshistory",
       "community": 1,
       "norm_label": "handlegetlabreportshistory()"
@@ -3364,7 +3364,7 @@
       "label": "handleDeleteLabReport()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2293",
+      "source_location": "L2324",
       "id": "src_ai_controller_handledeletelabreport",
       "community": 1,
       "norm_label": "handledeletelabreport()"
@@ -3373,7 +3373,7 @@
       "label": "handleGetSomaticHistory()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2410",
+      "source_location": "L2441",
       "id": "src_ai_controller_handlegetsomatichistory",
       "community": 1,
       "norm_label": "handlegetsomatichistory()"
@@ -3382,7 +3382,7 @@
       "label": "handleGetNutritionTargets()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2455",
+      "source_location": "L2486",
       "id": "src_ai_controller_handlegetnutritiontargets",
       "community": 1,
       "norm_label": "handlegetnutritiontargets()"
@@ -3391,7 +3391,7 @@
       "label": "handleClearChatHistory()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2500",
+      "source_location": "L2531",
       "id": "src_ai_controller_handleclearchathistory",
       "community": 1,
       "norm_label": "handleclearchathistory()"
@@ -3400,7 +3400,7 @@
       "label": "handleClearLongTermMemory()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2570",
+      "source_location": "L2601",
       "id": "src_ai_controller_handleclearlongtermmemory",
       "community": 1,
       "norm_label": "handleclearlongtermmemory()"
@@ -3409,7 +3409,7 @@
       "label": "handleDeleteAccount()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2629",
+      "source_location": "L2660",
       "id": "src_ai_controller_handledeleteaccount",
       "community": 1,
       "norm_label": "handledeleteaccount()"
@@ -3418,7 +3418,7 @@
       "label": "parseSupplementMicro()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2728",
+      "source_location": "L2759",
       "id": "src_ai_controller_parsesupplementmicro",
       "community": 1,
       "norm_label": "parsesupplementmicro()"
@@ -3427,7 +3427,7 @@
       "label": "handleGetDiaryMacros()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2762",
+      "source_location": "L2793",
       "id": "src_ai_controller_handlegetdiarymacros",
       "community": 1,
       "norm_label": "handlegetdiarymacros()"
@@ -3436,7 +3436,7 @@
       "label": "handleCorrelateSymptoms()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2881",
+      "source_location": "L2912",
       "id": "src_ai_controller_handlecorrelatesymptoms",
       "community": 1,
       "norm_label": "handlecorrelatesymptoms()"
@@ -3445,7 +3445,7 @@
       "label": "handleAnalyzeLabel()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2949",
+      "source_location": "L2980",
       "id": "src_ai_controller_handleanalyzelabel",
       "community": 1,
       "norm_label": "handleanalyzelabel()"
@@ -3454,7 +3454,7 @@
       "label": "handleGetGlycemicTimeline()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L3014",
+      "source_location": "L3045",
       "id": "src_ai_controller_handlegetglycemictimeline",
       "community": 1,
       "norm_label": "handlegetglycemictimeline()"
@@ -3463,7 +3463,7 @@
       "label": "handlePushSubscribe()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L3238",
+      "source_location": "L3269",
       "id": "src_ai_controller_handlepushsubscribe",
       "community": 1,
       "norm_label": "handlepushsubscribe()"
@@ -3472,7 +3472,7 @@
       "label": "handleWaterCronPush()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L3321",
+      "source_location": "L3352",
       "id": "src_ai_controller_handlewatercronpush",
       "community": 1,
       "norm_label": "handlewatercronpush()"
@@ -3481,7 +3481,7 @@
       "label": "handlePushUnsubscribe()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L3528",
+      "source_location": "L3559",
       "id": "src_ai_controller_handlepushunsubscribe",
       "community": 1,
       "norm_label": "handlepushunsubscribe()"
@@ -3490,7 +3490,7 @@
       "label": "handleMediaCleanupCron()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L3584",
+      "source_location": "L3615",
       "id": "src_ai_controller_handlemediacleanupcron",
       "community": 1,
       "norm_label": "handlemediacleanupcron()"
@@ -3499,7 +3499,7 @@
       "label": "handleAnalyzeWearable()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L3663",
+      "source_location": "L3694",
       "id": "src_ai_controller_handleanalyzewearable",
       "community": 5,
       "norm_label": "handleanalyzewearable()"
@@ -3508,7 +3508,7 @@
       "label": "handleSaveWearableMetrics()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L3673",
+      "source_location": "L3704",
       "id": "src_ai_controller_handlesavewearablemetrics",
       "community": 1,
       "norm_label": "handlesavewearablemetrics()"
@@ -3517,7 +3517,7 @@
       "label": "handleGetSystemGraph()",
       "file_type": "code",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L3734",
+      "source_location": "L3765",
       "id": "src_ai_controller_handlegetsystemgraph",
       "community": 1,
       "norm_label": "handlegetsystemgraph()"
@@ -4086,7 +4086,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\graph\\vision-analyzer.ts",
       "source_location": "L1",
       "id": "apps_api_src_ai_src_graph_vision_analyzer_ts",
-      "community": 5,
+      "community": 1,
       "norm_label": "vision-analyzer.ts"
     },
     {
@@ -4095,7 +4095,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\graph\\vision-analyzer.ts",
       "source_location": "L70",
       "id": "graph_vision_analyzer_runsomaticvisionanalyzer",
-      "community": 5,
+      "community": 1,
       "norm_label": "runsomaticvisionanalyzer()"
     },
     {
@@ -4725,7 +4725,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\prompts\\index.ts",
       "source_location": "L1",
       "id": "apps_api_src_ai_src_prompts_index_ts",
-      "community": 159,
+      "community": 160,
       "norm_label": "index.ts"
     },
     {
@@ -5013,7 +5013,7 @@
       "source_file": "apps\\web\\eslint.config.mjs",
       "source_location": "L1",
       "id": "apps_web_eslint_config_mjs",
-      "community": 160,
+      "community": 161,
       "norm_label": "eslint.config.mjs"
     },
     {
@@ -5022,7 +5022,7 @@
       "source_file": "apps\\web\\fix_translations.py",
       "source_location": "L1",
       "id": "apps_web_fix_translations_py",
-      "community": 161,
+      "community": 162,
       "norm_label": "fix_translations.py"
     },
     {
@@ -5031,7 +5031,7 @@
       "source_file": "apps\\web\\next-env.d.ts",
       "source_location": "L1",
       "id": "apps_web_next_env_d_ts",
-      "community": 162,
+      "community": 163,
       "norm_label": "next-env.d.ts"
     },
     {
@@ -5040,7 +5040,7 @@
       "source_file": "apps\\web\\next.config.ts",
       "source_location": "L1",
       "id": "apps_web_next_config_ts",
-      "community": 163,
+      "community": 164,
       "norm_label": "next.config.ts"
     },
     {
@@ -5049,7 +5049,7 @@
       "source_file": "apps\\web\\playwright.config.ts",
       "source_location": "L1",
       "id": "apps_web_playwright_config_ts",
-      "community": 164,
+      "community": 165,
       "norm_label": "playwright.config.ts"
     },
     {
@@ -5058,7 +5058,7 @@
       "source_file": "apps\\web\\postcss.config.mjs",
       "source_location": "L1",
       "id": "apps_web_postcss_config_mjs",
-      "community": 165,
+      "community": 166,
       "norm_label": "postcss.config.mjs"
     },
     {
@@ -5094,7 +5094,7 @@
       "source_file": "apps\\web\\vitest.config.ts",
       "source_location": "L1",
       "id": "apps_web_vitest_config_ts",
-      "community": 166,
+      "community": 167,
       "norm_label": "vitest.config.ts"
     },
     {
@@ -5103,7 +5103,7 @@
       "source_file": "apps\\web\\vitest.setup.ts",
       "source_location": "L1",
       "id": "apps_web_vitest_setup_ts",
-      "community": 167,
+      "community": 168,
       "norm_label": "vitest.setup.ts"
     },
     {
@@ -5256,7 +5256,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\page.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_admin_page_tsx",
-      "community": 168,
+      "community": 169,
       "norm_label": "page.tsx"
     },
     {
@@ -5814,7 +5814,7 @@
       "source_file": "apps\\web\\src\\components\\admin\\AdminSidebar.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_admin_adminsidebar_tsx",
-      "community": 169,
+      "community": 170,
       "norm_label": "adminsidebar.tsx"
     },
     {
@@ -6039,8 +6039,17 @@
       "source_file": "apps\\web\\src\\components\\dashboard\\DashboardGrid.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_dashboard_dashboardgrid_tsx",
-      "community": 170,
+      "community": 80,
       "norm_label": "dashboardgrid.tsx"
+    },
+    {
+      "label": "DashboardGrid()",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\components\\dashboard\\DashboardGrid.tsx",
+      "source_location": "L13",
+      "id": "dashboard_dashboardgrid_dashboardgrid",
+      "community": 80,
+      "norm_label": "dashboardgrid()"
     },
     {
       "label": "DashboardHeader.tsx",
@@ -6048,7 +6057,7 @@
       "source_file": "apps\\web\\src\\components\\dashboard\\DashboardHeader.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_dashboard_dashboardheader_tsx",
-      "community": 80,
+      "community": 81,
       "norm_label": "dashboardheader.tsx"
     },
     {
@@ -6057,7 +6066,7 @@
       "source_file": "apps\\web\\src\\components\\dashboard\\DashboardHeader.tsx",
       "source_location": "L9",
       "id": "dashboard_dashboardheader_dashboardheader",
-      "community": 80,
+      "community": 81,
       "norm_label": "dashboardheader()"
     },
     {
@@ -6127,7 +6136,7 @@
       "label": "parseNutrientTags()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\diary\\ChatMessage.tsx",
-      "source_location": "L28",
+      "source_location": "L29",
       "id": "diary_chatmessage_parsenutrienttags",
       "community": 4,
       "norm_label": "parsenutrienttags()"
@@ -6280,7 +6289,7 @@
       "label": "fetchUserPreferences()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\diary\\FoodDiaryView.tsx",
-      "source_location": "L85",
+      "source_location": "L86",
       "id": "diary_fooddiaryview_fetchuserpreferences",
       "community": 15,
       "norm_label": "fetchuserpreferences()"
@@ -6289,7 +6298,7 @@
       "label": "loadHistory()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\diary\\FoodDiaryView.tsx",
-      "source_location": "L107",
+      "source_location": "L108",
       "id": "diary_fooddiaryview_loadhistory",
       "community": 15,
       "norm_label": "loadhistory()"
@@ -6298,7 +6307,7 @@
       "label": "handler()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\diary\\FoodDiaryView.tsx",
-      "source_location": "L175",
+      "source_location": "L177",
       "id": "diary_fooddiaryview_handler",
       "community": 15,
       "norm_label": "handler()"
@@ -6307,7 +6316,7 @@
       "label": "handleUpdateWeight()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\diary\\FoodDiaryView.tsx",
-      "source_location": "L412",
+      "source_location": "L431",
       "id": "diary_fooddiaryview_handleupdateweight",
       "community": 15,
       "norm_label": "handleupdateweight()"
@@ -6318,7 +6327,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\FoodInputForm.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_diary_foodinputform_tsx",
-      "community": 81,
+      "community": 82,
       "norm_label": "foodinputform.tsx"
     },
     {
@@ -6327,7 +6336,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\FoodInputForm.tsx",
       "source_location": "L12",
       "id": "diary_foodinputform_calculatetotalweight",
-      "community": 81,
+      "community": 82,
       "norm_label": "calculatetotalweight()"
     },
     {
@@ -6435,7 +6444,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\WaterTracker.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_diary_watertracker_tsx",
-      "community": 82,
+      "community": 83,
       "norm_label": "watertracker.tsx"
     },
     {
@@ -6444,7 +6453,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\WaterTracker.tsx",
       "source_location": "L58",
       "id": "diary_watertracker_updatewater",
-      "community": 82,
+      "community": 83,
       "norm_label": "updatewater()"
     },
     {
@@ -6507,7 +6516,7 @@
       "source_file": "apps\\web\\src\\components\\medical\\NailAnalysisCard.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_medical_nailanalysiscard_tsx",
-      "community": 83,
+      "community": 84,
       "norm_label": "nailanalysiscard.tsx"
     },
     {
@@ -6516,7 +6525,7 @@
       "source_file": "apps\\web\\src\\components\\medical\\NailAnalysisCard.tsx",
       "source_location": "L24",
       "id": "medical_nailanalysiscard_getmarkercolor",
-      "community": 83,
+      "community": 84,
       "norm_label": "getmarkercolor()"
     },
     {
@@ -6561,7 +6570,7 @@
       "source_file": "apps\\web\\src\\components\\medical\\SomaticAnalysisCard.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_medical_somaticanalysiscard_tsx",
-      "community": 84,
+      "community": 85,
       "norm_label": "somaticanalysiscard.tsx"
     },
     {
@@ -6570,7 +6579,7 @@
       "source_file": "apps\\web\\src\\components\\medical\\SomaticAnalysisCard.tsx",
       "source_location": "L16",
       "id": "medical_somaticanalysiscard_getmarkercolor",
-      "community": 84,
+      "community": 85,
       "norm_label": "getmarkercolor()"
     },
     {
@@ -6633,7 +6642,7 @@
       "source_file": "apps\\web\\src\\components\\medical\\UploadZone.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_medical_uploadzone_tsx",
-      "community": 85,
+      "community": 86,
       "norm_label": "uploadzone.tsx"
     },
     {
@@ -6642,7 +6651,7 @@
       "source_file": "apps\\web\\src\\components\\medical\\UploadZone.tsx",
       "source_location": "L34",
       "id": "medical_uploadzone_uploadzone",
-      "community": 85,
+      "community": 86,
       "norm_label": "uploadzone()"
     },
     {
@@ -6750,7 +6759,7 @@
       "source_file": "apps\\web\\src\\components\\profile\\ManualEntryDialog.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_profile_manualentrydialog_tsx",
-      "community": 86,
+      "community": 87,
       "norm_label": "manualentrydialog.tsx"
     },
     {
@@ -6759,7 +6768,7 @@
       "source_file": "apps\\web\\src\\components\\profile\\ManualEntryDialog.tsx",
       "source_location": "L51",
       "id": "profile_manualentrydialog_handlesubmit",
-      "community": 86,
+      "community": 87,
       "norm_label": "handlesubmit()"
     },
     {
@@ -6768,7 +6777,7 @@
       "source_file": "apps\\web\\src\\components\\profile\\MetricSparkline.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_profile_metricsparkline_tsx",
-      "community": 87,
+      "community": 88,
       "norm_label": "metricsparkline.tsx"
     },
     {
@@ -6777,7 +6786,7 @@
       "source_file": "apps\\web\\src\\components\\profile\\MetricSparkline.tsx",
       "source_location": "L20",
       "id": "profile_metricsparkline_metricsparkline",
-      "community": 87,
+      "community": 88,
       "norm_label": "metricsparkline()"
     },
     {
@@ -7011,7 +7020,7 @@
       "source_file": "apps\\web\\src\\components\\providers\\LocaleSync.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_providers_localesync_tsx",
-      "community": 88,
+      "community": 89,
       "norm_label": "localesync.tsx"
     },
     {
@@ -7020,7 +7029,7 @@
       "source_file": "apps\\web\\src\\components\\providers\\LocaleSync.tsx",
       "source_location": "L6",
       "id": "providers_localesync_localesync",
-      "community": 88,
+      "community": 89,
       "norm_label": "localesync()"
     },
     {
@@ -7029,7 +7038,7 @@
       "source_file": "apps\\web\\src\\components\\providers\\ServerActionErrorListener.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_providers_serveractionerrorlistener_tsx",
-      "community": 89,
+      "community": 90,
       "norm_label": "serveractionerrorlistener.tsx"
     },
     {
@@ -7038,7 +7047,7 @@
       "source_file": "apps\\web\\src\\components\\providers\\ServerActionErrorListener.tsx",
       "source_location": "L10",
       "id": "providers_serveractionerrorlistener_serveractionerrorlistener",
-      "community": 89,
+      "community": 90,
       "norm_label": "serveractionerrorlistener()"
     },
     {
@@ -7047,7 +7056,7 @@
       "source_file": "apps\\web\\src\\components\\providers\\ThemeProvider.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_providers_themeprovider_tsx",
-      "community": 90,
+      "community": 91,
       "norm_label": "themeprovider.tsx"
     },
     {
@@ -7056,7 +7065,7 @@
       "source_file": "apps\\web\\src\\components\\providers\\ThemeProvider.tsx",
       "source_location": "L7",
       "id": "providers_themeprovider_themeprovider",
-      "community": 90,
+      "community": 91,
       "norm_label": "themeprovider()"
     },
     {
@@ -7155,7 +7164,7 @@
       "source_file": "apps\\web\\src\\hooks\\useIsMobile.ts",
       "source_location": "L1",
       "id": "apps_web_src_hooks_useismobile_ts",
-      "community": 91,
+      "community": 92,
       "norm_label": "useismobile.ts"
     },
     {
@@ -7164,7 +7173,7 @@
       "source_file": "apps\\web\\src\\hooks\\useIsMobile.ts",
       "source_location": "L15",
       "id": "hooks_useismobile_useismobile",
-      "community": 91,
+      "community": 92,
       "norm_label": "useismobile()"
     },
     {
@@ -7245,7 +7254,7 @@
       "source_file": "apps\\web\\src\\hooks\\useUnits.ts",
       "source_location": "L1",
       "id": "apps_web_src_hooks_useunits_ts",
-      "community": 92,
+      "community": 93,
       "norm_label": "useunits.ts"
     },
     {
@@ -7254,7 +7263,7 @@
       "source_file": "apps\\web\\src\\hooks\\useUnits.ts",
       "source_location": "L13",
       "id": "hooks_useunits_useunits",
-      "community": 92,
+      "community": 93,
       "norm_label": "useunits()"
     },
     {
@@ -7281,7 +7290,7 @@
       "source_file": "apps\\web\\src\\i18n\\request.ts",
       "source_location": "L1",
       "id": "apps_web_src_i18n_request_ts",
-      "community": 93,
+      "community": 94,
       "norm_label": "request.ts"
     },
     {
@@ -7290,7 +7299,7 @@
       "source_file": "apps\\web\\src\\i18n\\request.ts",
       "source_location": "L20",
       "id": "i18n_request_negotiatelocale",
-      "community": 93,
+      "community": 94,
       "norm_label": "negotiatelocale()"
     },
     {
@@ -7875,7 +7884,7 @@
       "source_file": "apps\\web\\src\\lib\\prisma.ts",
       "source_location": "L1",
       "id": "apps_web_src_lib_prisma_ts",
-      "community": 94,
+      "community": 95,
       "norm_label": "prisma.ts"
     },
     {
@@ -7884,7 +7893,7 @@
       "source_file": "apps\\web\\src\\lib\\prisma.ts",
       "source_location": "L3",
       "id": "lib_prisma_prismaclientsingleton",
-      "community": 94,
+      "community": 95,
       "norm_label": "prismaclientsingleton()"
     },
     {
@@ -7983,7 +7992,7 @@
       "source_file": "apps\\web\\src\\lib\\utils.ts",
       "source_location": "L1",
       "id": "apps_web_src_lib_utils_ts",
-      "community": 95,
+      "community": 96,
       "norm_label": "utils.ts"
     },
     {
@@ -7992,7 +8001,7 @@
       "source_file": "apps\\web\\src\\lib\\utils.ts",
       "source_location": "L4",
       "id": "lib_utils_cn",
-      "community": 95,
+      "community": 96,
       "norm_label": "cn()"
     },
     {
@@ -8397,7 +8406,7 @@
       "source_file": "supabase\\functions\\generate-skill-document\\index.ts",
       "source_location": "L1",
       "id": "supabase_functions_generate_skill_document_index_ts",
-      "community": 96,
+      "community": 97,
       "norm_label": "index.ts"
     },
     {
@@ -8406,7 +8415,7 @@
       "source_file": "supabase\\functions\\generate-skill-document\\index.ts",
       "source_location": "L47",
       "id": "generate_skill_document_index_calculateage",
-      "community": 96,
+      "community": 97,
       "norm_label": "calculateage()"
     },
     {
@@ -8415,7 +8424,7 @@
       "source_file": "supabase\\functions\\kb-embed-query\\index.ts",
       "source_location": "L1",
       "id": "supabase_functions_kb_embed_query_index_ts",
-      "community": 12,
+      "community": 11,
       "norm_label": "index.ts"
     },
     {
@@ -8505,7 +8514,7 @@
       "source_file": "supabase\\functions\\match-skill-context\\index.ts",
       "source_location": "L1",
       "id": "supabase_functions_match_skill_context_index_ts",
-      "community": 12,
+      "community": 11,
       "norm_label": "index.ts"
     },
     {
@@ -8514,7 +8523,7 @@
       "source_file": "supabase\\functions\\memory-consolidator\\index.ts",
       "source_location": "L1",
       "id": "supabase_functions_memory_consolidator_index_ts",
-      "community": 12,
+      "community": 11,
       "norm_label": "index.ts"
     },
     {
@@ -8523,7 +8532,7 @@
       "source_file": "supabase\\functions\\memory-consolidator\\index.ts",
       "source_location": "L51",
       "id": "memory_consolidator_index_stripmarkdownfences",
-      "community": 12,
+      "community": 11,
       "norm_label": "stripmarkdownfences()"
     },
     {
@@ -8532,7 +8541,7 @@
       "source_file": "supabase\\functions\\memory-consolidator\\index.ts",
       "source_location": "L59",
       "id": "memory_consolidator_index_clamp",
-      "community": 12,
+      "community": 11,
       "norm_label": "clamp()"
     },
     {
@@ -8541,7 +8550,7 @@
       "source_file": "supabase\\functions\\memory-consolidator\\index.ts",
       "source_location": "L64",
       "id": "memory_consolidator_index_jsonresponse",
-      "community": 12,
+      "community": 11,
       "norm_label": "jsonresponse()"
     },
     {
@@ -8550,7 +8559,7 @@
       "source_file": "supabase\\functions\\memory-consolidator\\index.ts",
       "source_location": "L79",
       "id": "memory_consolidator_index_updateconsolidationlog",
-      "community": 12,
+      "community": 11,
       "norm_label": "updateconsolidationlog()"
     },
     {
@@ -8559,7 +8568,7 @@
       "source_file": "supabase\\functions\\memory-consolidator\\index.ts",
       "source_location": "L113",
       "id": "memory_consolidator_index_sanitizefacts",
-      "community": 12,
+      "community": 11,
       "norm_label": "sanitizefacts()"
     },
     {
@@ -8568,7 +8577,7 @@
       "source_file": "supabase\\functions\\sentiment-extractor\\index.ts",
       "source_location": "L1",
       "id": "supabase_functions_sentiment_extractor_index_ts",
-      "community": 12,
+      "community": 11,
       "norm_label": "index.ts"
     },
     {
@@ -8577,7 +8586,7 @@
       "source_file": "supabase\\functions\\sentiment-extractor\\index.ts",
       "source_location": "L49",
       "id": "sentiment_extractor_index_stripmarkdownfences",
-      "community": 12,
+      "community": 11,
       "norm_label": "stripmarkdownfences()"
     },
     {
@@ -8586,7 +8595,7 @@
       "source_file": "supabase\\functions\\sentiment-extractor\\index.ts",
       "source_location": "L57",
       "id": "sentiment_extractor_index_clamp",
-      "community": 12,
+      "community": 11,
       "norm_label": "clamp()"
     },
     {
@@ -8595,7 +8604,7 @@
       "source_file": "supabase\\functions\\sentiment-extractor\\index.ts",
       "source_location": "L69",
       "id": "sentiment_extractor_index_computemoodtrend",
-      "community": 12,
+      "community": 11,
       "norm_label": "computemoodtrend()"
     },
     {
@@ -8613,7 +8622,7 @@
       "source_file": "supabase\\functions\\_shared\\cors.ts",
       "source_location": "L1",
       "id": "supabase_functions_shared_cors_ts",
-      "community": 12,
+      "community": 11,
       "norm_label": "cors.ts"
     },
     {
@@ -20646,7 +20655,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1548",
+      "source_location": "L1571",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handlechatstream",
@@ -20658,7 +20667,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1886",
+      "source_location": "L1913",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handleanalyze",
@@ -20670,7 +20679,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1913",
+      "source_location": "L1940",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handlediagnose",
@@ -20682,7 +20691,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1941",
+      "source_location": "L1968",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handleanalyzesomatic",
@@ -20694,7 +20703,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1985",
+      "source_location": "L2012",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handlegetchathistory",
@@ -20706,7 +20715,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2099",
+      "source_location": "L2130",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handleanalyzefood",
@@ -20718,7 +20727,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2157",
+      "source_location": "L2188",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handleanalyzelabreport",
@@ -20730,7 +20739,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2235",
+      "source_location": "L2266",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handlegetlabreportshistory",
@@ -20742,7 +20751,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2293",
+      "source_location": "L2324",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handledeletelabreport",
@@ -20754,7 +20763,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2410",
+      "source_location": "L2441",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handlegetsomatichistory",
@@ -20766,7 +20775,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2455",
+      "source_location": "L2486",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handlegetnutritiontargets",
@@ -20778,7 +20787,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2500",
+      "source_location": "L2531",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handleclearchathistory",
@@ -20790,7 +20799,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2570",
+      "source_location": "L2601",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handleclearlongtermmemory",
@@ -20802,7 +20811,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2629",
+      "source_location": "L2660",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handledeleteaccount",
@@ -20814,7 +20823,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2728",
+      "source_location": "L2759",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_parsesupplementmicro",
@@ -20826,7 +20835,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2762",
+      "source_location": "L2793",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handlegetdiarymacros",
@@ -20838,7 +20847,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2881",
+      "source_location": "L2912",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handlecorrelatesymptoms",
@@ -20850,7 +20859,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2949",
+      "source_location": "L2980",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handleanalyzelabel",
@@ -20862,7 +20871,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L3014",
+      "source_location": "L3045",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handlegetglycemictimeline",
@@ -20874,7 +20883,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L3238",
+      "source_location": "L3269",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handlepushsubscribe",
@@ -20886,7 +20895,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L3321",
+      "source_location": "L3352",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handlewatercronpush",
@@ -20898,7 +20907,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L3528",
+      "source_location": "L3559",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handlepushunsubscribe",
@@ -20910,7 +20919,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L3584",
+      "source_location": "L3615",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handlemediacleanupcron",
@@ -20922,7 +20931,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L3663",
+      "source_location": "L3694",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handleanalyzewearable",
@@ -20934,7 +20943,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L3673",
+      "source_location": "L3704",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handlesavewearablemetrics",
@@ -20946,7 +20955,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L3734",
+      "source_location": "L3765",
       "weight": 1.0,
       "_src": "apps_api_src_ai_src_ai_controller_ts",
       "_tgt": "src_ai_controller_handlegetsystemgraph",
@@ -20994,7 +21003,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2481",
+      "source_location": "L2512",
       "weight": 1.0,
       "_src": "src_ai_controller_handlegetnutritiontargets",
       "_tgt": "src_ai_controller_computedeterministicmicros",
@@ -21006,7 +21015,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2478",
+      "source_location": "L2509",
       "weight": 1.0,
       "_src": "src_ai_controller_handlegetnutritiontargets",
       "_tgt": "src_ai_controller_computedeterministicmacros",
@@ -21030,7 +21039,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1572",
+      "source_location": "L1596",
       "weight": 1.0,
       "_src": "src_ai_controller_handlechatstream",
       "_tgt": "src_ai_controller_fetchusercontext",
@@ -21042,7 +21051,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2118",
+      "source_location": "L2149",
       "weight": 1.0,
       "_src": "src_ai_controller_handleanalyzefood",
       "_tgt": "src_ai_controller_fetchusercontext",
@@ -21054,7 +21063,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2173",
+      "source_location": "L2204",
       "weight": 1.0,
       "_src": "src_ai_controller_handleanalyzelabreport",
       "_tgt": "src_ai_controller_fetchusercontext",
@@ -21066,7 +21075,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2469",
+      "source_location": "L2500",
       "weight": 1.0,
       "_src": "src_ai_controller_handlegetnutritiontargets",
       "_tgt": "src_ai_controller_fetchusercontext",
@@ -21078,7 +21087,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2968",
+      "source_location": "L2999",
       "weight": 1.0,
       "_src": "src_ai_controller_handleanalyzelabel",
       "_tgt": "src_ai_controller_fetchusercontext",
@@ -21114,7 +21123,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1693",
+      "source_location": "L1717",
       "weight": 1.0,
       "_src": "src_ai_controller_handlechatstream",
       "_tgt": "src_ai_controller_formattestresults",
@@ -21138,7 +21147,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1677",
+      "source_location": "L1701",
       "weight": 1.0,
       "_src": "src_ai_controller_handlechatstream",
       "_tgt": "src_ai_controller_formatmeallogs",
@@ -21162,7 +21171,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1692",
+      "source_location": "L1716",
       "weight": 1.0,
       "_src": "src_ai_controller_handlechatstream",
       "_tgt": "src_ai_controller_formathistorysynopsis",
@@ -21174,7 +21183,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2126",
+      "source_location": "L2157",
       "weight": 1.0,
       "_src": "src_ai_controller_handleanalyzefood",
       "_tgt": "src_ai_controller_formathistorysynopsis",
@@ -21186,7 +21195,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2189",
+      "source_location": "L2220",
       "weight": 1.0,
       "_src": "src_ai_controller_handleanalyzelabreport",
       "_tgt": "src_ai_controller_formathistorysynopsis",
@@ -21210,7 +21219,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1667",
+      "source_location": "L1691",
       "weight": 1.0,
       "_src": "src_ai_controller_handlechatstream",
       "_tgt": "src_ai_controller_formatleanprofile",
@@ -21234,7 +21243,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1581",
+      "source_location": "L1605",
       "weight": 1.0,
       "_src": "src_ai_controller_handlechatstream",
       "_tgt": "src_ai_controller_getleanusercontext",
@@ -21246,7 +21255,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2120",
+      "source_location": "L2151",
       "weight": 1.0,
       "_src": "src_ai_controller_handleanalyzefood",
       "_tgt": "src_ai_controller_getleanusercontext",
@@ -21258,7 +21267,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2175",
+      "source_location": "L2206",
       "weight": 1.0,
       "_src": "src_ai_controller_handleanalyzelabreport",
       "_tgt": "src_ai_controller_getleanusercontext",
@@ -21270,7 +21279,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2969",
+      "source_location": "L3000",
       "weight": 1.0,
       "_src": "src_ai_controller_handleanalyzelabel",
       "_tgt": "src_ai_controller_getleanusercontext",
@@ -21294,7 +21303,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1675",
+      "source_location": "L1699",
       "weight": 1.0,
       "_src": "src_ai_controller_handlechatstream",
       "_tgt": "src_ai_controller_formatnutritiontargets",
@@ -21318,7 +21327,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1676",
+      "source_location": "L1700",
       "weight": 1.0,
       "_src": "src_ai_controller_handlechatstream",
       "_tgt": "src_ai_controller_formattodayprogress",
@@ -21342,7 +21351,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1668",
+      "source_location": "L1692",
       "weight": 1.0,
       "_src": "src_ai_controller_handlechatstream",
       "_tgt": "src_ai_controller_formatdietaryrestrictions",
@@ -21354,7 +21363,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2124",
+      "source_location": "L2155",
       "weight": 1.0,
       "_src": "src_ai_controller_handleanalyzefood",
       "_tgt": "src_ai_controller_formatdietaryrestrictions",
@@ -21366,7 +21375,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2981",
+      "source_location": "L3012",
       "weight": 1.0,
       "_src": "src_ai_controller_handleanalyzelabel",
       "_tgt": "src_ai_controller_formatdietaryrestrictions",
@@ -21390,7 +21399,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1691",
+      "source_location": "L1715",
       "weight": 1.0,
       "_src": "src_ai_controller_handlechatstream",
       "_tgt": "src_ai_controller_formatchronicconditions",
@@ -21414,7 +21423,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1703",
+      "source_location": "L1727",
       "weight": 1.0,
       "_src": "src_ai_controller_handlechatstream",
       "_tgt": "src_ai_controller_formatactiveknowledgebases",
@@ -21426,7 +21435,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2125",
+      "source_location": "L2156",
       "weight": 1.0,
       "_src": "src_ai_controller_handleanalyzefood",
       "_tgt": "src_ai_controller_formatactiveknowledgebases",
@@ -21450,7 +21459,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1678",
+      "source_location": "L1702",
       "weight": 1.0,
       "_src": "src_ai_controller_handlechatstream",
       "_tgt": "src_ai_controller_formatactivesupplementprotocol",
@@ -21474,7 +21483,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1679",
+      "source_location": "L1703",
       "weight": 1.0,
       "_src": "src_ai_controller_handlechatstream",
       "_tgt": "src_ai_controller_formattodaysupplements",
@@ -21498,7 +21507,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1674",
+      "source_location": "L1698",
       "weight": 1.0,
       "_src": "src_ai_controller_handlechatstream",
       "_tgt": "src_ai_controller_formatfoodcontraindicationzones",
@@ -21510,7 +21519,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2987",
+      "source_location": "L3018",
       "weight": 1.0,
       "_src": "src_ai_controller_handleanalyzelabel",
       "_tgt": "src_ai_controller_formatfoodcontraindicationzones",
@@ -21546,7 +21555,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1702",
+      "source_location": "L1726",
       "weight": 1.0,
       "_src": "src_ai_controller_handlechatstream",
       "_tgt": "src_ai_controller_formatlabdiagnosticreport",
@@ -21570,7 +21579,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1577",
+      "source_location": "L1601",
       "weight": 1.0,
       "_src": "src_ai_controller_handlechatstream",
       "_tgt": "src_ai_controller_fetchlatestinsight",
@@ -21606,7 +21615,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L1702",
+      "source_location": "L1726",
       "weight": 1.0,
       "_src": "src_ai_controller_handlechatstream",
       "_tgt": "src_ai_controller_formatlabreportdeep",
@@ -22002,7 +22011,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
-      "source_location": "L2845",
+      "source_location": "L2876",
       "weight": 1.0,
       "_src": "src_ai_controller_handlegetdiarymacros",
       "_tgt": "src_ai_controller_parsesupplementmicro",
@@ -25961,6 +25970,18 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "apps\\web\\src\\components\\dashboard\\DashboardGrid.tsx",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_src": "apps_web_src_components_dashboard_dashboardgrid_tsx",
+      "_tgt": "dashboard_dashboardgrid_dashboardgrid",
+      "source": "apps_web_src_components_dashboard_dashboardgrid_tsx",
+      "target": "dashboard_dashboardgrid_dashboardgrid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\dashboard\\DashboardHeader.tsx",
       "source_location": "L9",
       "weight": 1.0,
@@ -26022,7 +26043,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\diary\\ChatMessage.tsx",
-      "source_location": "L28",
+      "source_location": "L29",
       "weight": 1.0,
       "_src": "apps_web_src_components_diary_chatmessage_tsx",
       "_tgt": "diary_chatmessage_parsenutrienttags",
@@ -26202,7 +26223,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\diary\\FoodDiaryView.tsx",
-      "source_location": "L85",
+      "source_location": "L86",
       "weight": 1.0,
       "_src": "apps_web_src_components_diary_fooddiaryview_tsx",
       "_tgt": "diary_fooddiaryview_fetchuserpreferences",
@@ -26214,7 +26235,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\diary\\FoodDiaryView.tsx",
-      "source_location": "L107",
+      "source_location": "L108",
       "weight": 1.0,
       "_src": "apps_web_src_components_diary_fooddiaryview_tsx",
       "_tgt": "diary_fooddiaryview_loadhistory",
@@ -26226,7 +26247,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\diary\\FoodDiaryView.tsx",
-      "source_location": "L175",
+      "source_location": "L177",
       "weight": 1.0,
       "_src": "apps_web_src_components_diary_fooddiaryview_tsx",
       "_tgt": "diary_fooddiaryview_handler",
@@ -26238,7 +26259,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\diary\\FoodDiaryView.tsx",
-      "source_location": "L412",
+      "source_location": "L431",
       "weight": 1.0,
       "_src": "apps_web_src_components_diary_fooddiaryview_tsx",
       "_tgt": "diary_fooddiaryview_handleupdateweight",

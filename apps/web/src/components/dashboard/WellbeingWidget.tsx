@@ -62,11 +62,11 @@ export function WellbeingWidget({ onMoodSelect }: WellbeingWidgetProps) {
 
   const getMoodConfig = (mood: number) => {
     switch(mood) {
-      case 0: return { icon: <Frown size={24} />, text: 'Плохо', color: 'text-rose-500', gradient: 'radial-gradient(circle at center, rgba(244,63,94,0.60) 0%, rgba(244,63,94,0) 70%)', badgeBg: 'bg-rose-500/20', badgeText: 'text-rose-300' };
-      case 1: return { icon: <Battery size={24} />, text: 'Усталость', color: 'text-amber-400', gradient: 'radial-gradient(circle at center, rgba(245,158,11,0.50) 0%, rgba(245,158,11,0) 70%)', badgeBg: 'bg-amber-500/10', badgeText: 'text-amber-300' };
-      case 2: return { icon: <Meh size={24} />, text: 'Нормально', color: 'text-slate-300', gradient: 'radial-gradient(circle at center, rgba(148,163,184,0.40) 0%, rgba(148,163,184,0) 70%)', badgeBg: 'bg-slate-500/20', badgeText: 'text-slate-300' };
-      case 3: return { icon: <Smile size={24} />, text: 'Хорошо', color: 'text-teal-400', gradient: 'radial-gradient(circle at center, rgba(20,184,166,0.50) 0%, rgba(20,184,166,0) 70%)', badgeBg: 'bg-teal-500/10', badgeText: 'text-teal-300' };
-      case 4: return { icon: <Zap size={24} />, text: 'Бодрость', color: 'text-indigo-400', gradient: 'radial-gradient(circle at center, rgba(99,102,241,0.60) 0%, rgba(99,102,241,0) 70%)', badgeBg: 'bg-indigo-500/20', badgeText: 'text-indigo-300' };
+      case 0: return { icon: <Frown size={24} />, text: 'Плохо', color: 'text-rose-500', gradient: 'radial-gradient(circle at center, rgba(244,63,94,0.60) 0%, rgba(244,63,94,0) 70%)', badgeBg: 'bg-rose-500/45', badgeText: 'text-white' };
+      case 1: return { icon: <Battery size={24} />, text: 'Усталость', color: 'text-amber-400', gradient: 'radial-gradient(circle at center, rgba(245,158,11,0.50) 0%, rgba(245,158,11,0) 70%)', badgeBg: 'bg-amber-500/45', badgeText: 'text-white' };
+      case 2: return { icon: <Meh size={24} />, text: 'Нормально', color: 'text-slate-300', gradient: 'radial-gradient(circle at center, rgba(148,163,184,0.40) 0%, rgba(148,163,184,0) 70%)', badgeBg: 'bg-slate-500/45', badgeText: 'text-white' };
+      case 3: return { icon: <Smile size={24} />, text: 'Хорошо', color: 'text-teal-400', gradient: 'radial-gradient(circle at center, rgba(20,184,166,0.50) 0%, rgba(20,184,166,0) 70%)', badgeBg: 'bg-teal-500/55', badgeText: 'text-white' };
+      case 4: return { icon: <Zap size={24} />, text: 'Бодрость', color: 'text-indigo-400', gradient: 'radial-gradient(circle at center, rgba(99,102,241,0.60) 0%, rgba(99,102,241,0) 70%)', badgeBg: 'bg-indigo-500/45', badgeText: 'text-white' };
       default: return null;
     }
   };

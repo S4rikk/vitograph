@@ -97,7 +97,7 @@ export function BottomDock({ userId, userEmail, activeTab, onTabChange, isMedica
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 w-full h-[84px] z-50">
+    <div className="absolute bottom-0 left-0 w-full h-[84px] z-50">
       {/* Background Layer with Mask */}
       <div 
         className="absolute left-[-2000px] w-[4000px] h-[84px] bg-gradient-to-b from-[#1e293b]/50 to-[#0f172a]/65 shadow-[inset_0_1.5px_1px_rgba(255,255,255,0.05)] transition-transform duration-500 z-[40]" 

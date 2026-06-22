@@ -1,11 +1,11 @@
 # Graph Report - VITOGRAPH  (2026-06-22)
 
 ## Corpus Check
-- 267 files · ~475,940 words
+- 267 files · ~476,254 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1033 nodes · 1680 edges · 56 communities detected
+- 1034 nodes · 1681 edges · 56 communities detected
 - Extraction: 57% EXTRACTED · 43% INFERRED · 0% AMBIGUOUS · INFERRED: 721 edges (avg confidence: 0.57)
 - Token cost: 0 input · 0 output
 
@@ -21,7 +21,7 @@
 - [[_COMMUNITY_Community 8|Community 8]]
 - [[_COMMUNITY_Community 9|Community 9]]
 - [[_COMMUNITY_Community 10|Community 10]]
-- [[_COMMUNITY_Community 11|Community 11]]
+- [[_COMMUNITY_Community 12|Community 12]]
 - [[_COMMUNITY_Community 13|Community 13]]
 - [[_COMMUNITY_Community 14|Community 14]]
 - [[_COMMUNITY_Community 15|Community 15]]
@@ -39,8 +39,8 @@
 - [[_COMMUNITY_Community 39|Community 39]]
 - [[_COMMUNITY_Community 42|Community 42]]
 - [[_COMMUNITY_Community 43|Community 43]]
-- [[_COMMUNITY_Community 154|Community 154]]
 - [[_COMMUNITY_Community 155|Community 155]]
+- [[_COMMUNITY_Community 156|Community 156]]
 - [[_COMMUNITY_Community 181|Community 181]]
 - [[_COMMUNITY_Community 182|Community 182]]
 - [[_COMMUNITY_Community 183|Community 183]]
@@ -99,7 +99,7 @@ Nodes (81): DatabaseError, Custom exception hierarchy for database / repository 
 
 ### Community 1 - "Community 1"
 Cohesion: 0.04
-Nodes (76): AdminLayout(), run(), getAppConfigKeys(), updateAppConfigItem(), handleUpdate(), AiSettingsPage(), HomePage(), handleSubmit() (+68 more)
+Nodes (77): AdminLayout(), run(), getAppConfigKeys(), updateAppConfigItem(), handleUpdate(), AiSettingsPage(), HomePage(), handleSubmit() (+69 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.08
@@ -115,7 +115,7 @@ Nodes (25): ActiveTypewriterNode(), handleImageSelect(), handleUpdate(), NutrPil
 
 ### Community 5 - "Community 5"
 Cohesion: 0.07
-Nodes (31): analyzeSymptomCorrelation(), buildPsychologicalFallback(), generateDiagnosticHypothesis(), generatePsychologicalResponse(), callLlmStructured(), runFoodVisionAnalyzer(), formatBiomarkersForLLM(), generateBiomarkersHash() (+23 more)
+Nodes (30): analyzeSymptomCorrelation(), buildPsychologicalFallback(), generateDiagnosticHypothesis(), generatePsychologicalResponse(), callLlmStructured(), runFoodVisionAnalyzer(), formatBiomarkersForLLM(), generateBiomarkersHash() (+22 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.08
@@ -137,7 +137,7 @@ Nodes (12): get_lab_schedule(), get_micronutrient_trends(), REST API endpoints f
 Cohesion: 0.19
 Nodes (13): extract_biomarkers(), extract_biomarkers_from_image(), extract_biomarkers_from_image_batch(), _extract_text_from_docx(), _extract_text_from_pdf(), _extract_text_from_txt(), File Parser Service — Multi-format biomarker extraction using AI.  Supports PD, Decode plain-text bytes (UTF-8 with fallback to cp1251). (+5 more)
 
-### Community 11 - "Community 11"
+### Community 12 - "Community 12"
 Cohesion: 0.24
 Nodes (9): get_supabase_client(), Async Supabase client connection manager.  Provides a lazily-initialised, appl, FastAPI dependency that yields an async client.      If an Authorization heade, Manages the lifecycle of a single ``AsyncClient`` instance.      The client is, Return the cached async Supabase client.          Creates the client on first, Gracefully close the underlying HTTP connections., SupabaseClientManager, DatabaseConnectionError (+1 more)
 
@@ -209,11 +209,11 @@ Nodes (1): run()
 Cohesion: 1.0
 Nodes (2): set(), unflatten()
 
-### Community 154 - "Community 154"
+### Community 155 - "Community 155"
 Cohesion: 1.0
 Nodes (1): Extract all text from a PDF file.          Reads every page of the PDF and con
 
-### Community 155 - "Community 155"
+### Community 156 - "Community 156"
 Cohesion: 1.0
 Nodes (1): Parse extracted text into structured biomarker data.          Uses OpenAI ``As
 
@@ -334,9 +334,9 @@ Nodes (1): Extract biomarkers from a batch of PHOTOS of a lab report using GPT-4
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 43`** (3 nodes): `unflatten-json.js`, `set()`, `unflatten()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 154`** (1 nodes): `Extract all text from a PDF file.          Reads every page of the PDF and con`
+- **Thin community `Community 155`** (1 nodes): `Extract all text from a PDF file.          Reads every page of the PDF and con`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 155`** (1 nodes): `Parse extracted text into structured biomarker data.          Uses OpenAI ``As`
+- **Thin community `Community 156`** (1 nodes): `Parse extracted text into structured biomarker data.          Uses OpenAI ``As`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 181`** (1 nodes): `The root structure expected from the LLM.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
@@ -394,10 +394,10 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `createClient()` connect `Community 1` to `Community 20`, `Community 3`, `Community 4`, `Community 5`?**
   _High betweenness centrality (0.031) - this node is a cross-community bridge._
-- **Why does `DatabaseError` connect `Community 0` to `Community 21`, `Community 11`, `Community 13`?**
+- **Why does `DatabaseError` connect `Community 0` to `Community 21`, `Community 12`, `Community 13`?**
   _High betweenness centrality (0.021) - this node is a cross-community bridge._
 - **Why does `ProfileUpdate` connect `Community 0` to `Community 2`?**
-  _High betweenness centrality (0.018) - this node is a cross-community bridge._
+  _High betweenness centrality (0.017) - this node is a cross-community bridge._
 - **Are the 67 inferred relationships involving `LabReportExtraction` (e.g. with `LifespanTextEmbedding` and `RefreshNotesRequest`) actually correct?**
   _`LabReportExtraction` has 67 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 67 inferred relationships involving `ReferenceRange` (e.g. with `LifespanTextEmbedding` and `RefreshNotesRequest`) actually correct?**

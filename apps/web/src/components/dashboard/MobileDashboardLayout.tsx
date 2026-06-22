@@ -8,6 +8,7 @@ import { WellbeingWidget } from './WellbeingWidget';
 import { DashboardGrid } from './DashboardGrid';
 import { BottomDock } from './BottomDock';
 import MedicalResultsView from '@/components/medical/MedicalResultsView';
+import Logo from '@/components/ui/Logo';
 
 // Lazy load heavy components on mobile to optimize loading times and avoid hydration issues
 const FoodDiaryView = dynamic(() => import('@/components/diary/FoodDiaryView'), { ssr: false });
@@ -25,8 +26,13 @@ export function MobileDashboardLayout({ userId, userEmail, desktopChildren }: Mo
   const [subScreen, setSubScreen] = useState<'hub' | 'upload' | 'reports' | 'symptoms' | 'photo'>('hub');
   const [isMedicalDirty, setIsMedicalDirty] = useState(false);
   const [prevActiveTab, setPrevActiveTab] = useState(0);
-  const [alertSymptoms, setAlertSymptoms] = useState(false);
+  const [alertSymptoms, setAlertSymptoms] = useState<'normal' | 'fatigue' | 'bad' | 'inactive' | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Synchronize the last active non-profile tab
   useEffect(() => {
@@ -46,11 +52,16 @@ export function MobileDashboardLayout({ userId, userEmail, desktopChildren }: Mo
   }, [displayTab]);
 
   const handleMoodChange = (mood: number | null) => {
-    // Alert if mood is Плохо (0), Усталость (1), or Нормально (2)
-    if (mood !== null && mood <= 2) {
-      setAlertSymptoms(true);
+    if (mood === 0) {
+      setAlertSymptoms('bad');
+    } else if (mood === 1) {
+      setAlertSymptoms('fatigue');
+    } else if (mood === 2) {
+      setAlertSymptoms('normal');
+    } else if (mood === 3 || mood === 4) {
+      setAlertSymptoms('inactive');
     } else {
-      setAlertSymptoms(false);
+      setAlertSymptoms(null);
     }
   };
 
@@ -62,12 +73,34 @@ export function MobileDashboardLayout({ userId, userEmail, desktopChildren }: Mo
     setActiveTab(index);
   };
 
+  if (!mounted) {
+    return (
+      <div className="dark h-[100dvh] sm:h-[calc(100dvh-32px)] w-full sm:max-w-[440px] sm:mx-auto sm:my-4 sm:rounded-[36px] sm:border sm:border-white/10 sm:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8)] bg-[#050B14] flex flex-col items-center justify-center relative overflow-hidden">
+        {/* DNA Raster background */}
+        <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img 
+            src="/dna_raster.png" 
+            alt="DNA Background" 
+            className="w-full h-full object-cover object-center opacity-40 transition-all duration-75 blur-[20px]" 
+            style={{ transform: 'rotate(180deg) scale(1.1)' }} 
+          />
+        </div>
+        
+        {/* Animated logo container */}
+        <div className="relative z-10 animate-pulse duration-1000 flex flex-col items-center justify-center splash-logo">
+          <Logo size="lg" showSubtitle={false} />
+        </div>
+      </div>
+    );
+  }
+
   if (!isMobile) {
     return <>{desktopChildren}</>;
   }
 
   return (
-    <div className="dark h-[100dvh] w-full bg-[#050B14] text-white flex flex-col pb-[84px] relative overflow-hidden">
+    <div className="dark h-[100dvh] sm:h-[calc(100dvh-32px)] w-full sm:max-w-[440px] sm:mx-auto sm:my-4 sm:rounded-[36px] sm:border sm:border-white/10 sm:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8)] bg-[#050B14] text-white flex flex-col pb-[84px] relative overflow-hidden">
       {/* Растровый фон ДНК */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div className="absolute inset-0 w-full h-full">
@@ -87,9 +120,9 @@ export function MobileDashboardLayout({ userId, userEmail, desktopChildren }: Mo
       {displayTab === 0 && (
         <div className="flex-grow flex flex-col min-h-0 relative z-10">
           {subScreen === 'hub' ? (
-            <div className="flex-grow flex flex-col px-5 pt-3 pb-2 min-h-0 relative">
+            <div className="flex-grow flex flex-col px-5 pt-3 pb-1.5 min-h-0 relative">
               <DashboardHeader />
-              <div className="mb-2">
+              <div>
                 <WellbeingWidget onMoodSelect={handleMoodChange} />
               </div>
               <DashboardGrid alertSymptoms={alertSymptoms} onCardClick={setSubScreen} />
