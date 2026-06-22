@@ -28,7 +28,7 @@ export interface ParsedFoodLog {
   comment: string;
 }
 
-export function detectAndParseFoodLog(text: string, time: string): ParsedFoodLog | null {
+export function detectAndParseFoodLog(text: string, time: string, mealData?: any): ParsedFoodLog | null {
   console.log("[Parser] Full Text:", text);
   try {
     // Try new GI format first
@@ -59,6 +59,20 @@ export function detectAndParseFoodLog(text: string, time: string): ParsedFoodLog
       protein = parseFloat(protStr.replace(',', '.'));
       fat = parseFloat(fatStr.replace(',', '.'));
       carbs = parseFloat(carbStr.replace(',', '.'));
+    } else if (mealIdMatch && mealData) {
+      // Fallback: extract data from DB meal_items provided by backend
+      const dataItem = Array.isArray(mealData) ? mealData[0] : mealData;
+      if (dataItem) {
+        weight = dataItem.weight_g || 0;
+        name = dataItem.food_name || "Запись из красной зоны";
+        gi = dataItem.glycemic_index || null;
+        responseType = dataItem.response_type || null;
+        energyHours = dataItem.energy_duration_hours || null;
+        calories = dataItem.calories || 0;
+        protein = dataItem.protein_g || 0;
+        fat = dataItem.fat_g || 0;
+        carbs = dataItem.carbs_g || 0;
+      }
     }
 
     // Parse mealId (unchanged)

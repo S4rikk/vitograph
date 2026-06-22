@@ -22,5 +22,5 @@ export default async function HomePage() {
   const markers = profile?.lifestyle_markers as Record<string, any>;
   const needsOnboarding = !markers || Object.keys(markers).length === 0;
 
-  return <ClientPage needsOnboarding={needsOnboarding} userId={user.id} />;
+  return <ClientPage needsOnboarding={needsOnboarding} userId={user.id} userEmail={user.email || ""} />;
 }

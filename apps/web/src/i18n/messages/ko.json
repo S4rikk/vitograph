@@ -534,6 +534,8 @@
     "takePhoto": "사진 찍기",
     "analyzingDocument": "문서 분석 중",
     "reportGenerated": "보고서 생성됨",
+    "reportGeneratedHint": "You can view it in the ",
+    "reportGeneratedLink": "analysis reports section",
     "uploadNewResults": "새로운 결과 업로드",
     "uploadNewResultsSub": "새 데이터를 업로드하세요",
     "addNewAnalysis": "새 분석 추가",

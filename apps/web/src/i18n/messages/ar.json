@@ -534,6 +534,8 @@
     "takePhoto": "التقاط صورة",
     "analyzingDocument": "جارٍ تحليل المستند...",
     "reportGenerated": "تم إنشاء التقرير",
+    "reportGeneratedHint": "You can view it in the ",
+    "reportGeneratedLink": "analysis reports section",
     "uploadNewResults": "رفع نتائج جديدة",
     "uploadNewResultsSub": "ارفع التحاليل لتحليل الذكاء الاصطناعي",
     "addNewAnalysis": "إضافة تحليل جديد",

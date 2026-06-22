@@ -20,6 +20,7 @@ type Message = {
   text: string;
   time: string;
   mealMicros?: Record<string, number>;
+  mealData?: any;
   imageUrl?: string;
 };
 
@@ -76,7 +77,7 @@ export default function FoodDiaryView() {
       const aiTargets = await apiClient.getNutritionTargets();
       if (aiTargets?.micros) setDynamicMicros(aiTargets.micros);
     } catch (err) {
-      console.error("Failed to load nutrition targets:", err);
+      console.warn("Failed to load nutrition targets:", err);
     }
   }, []);
 
@@ -132,6 +133,7 @@ export default function FoodDiaryView() {
               text: m.content,
               time: `${dateStr.getHours().toString().padStart(2, "0")}:${dateStr.getMinutes().toString().padStart(2, "0")}`,
               mealMicros: m.mealMicros || undefined,
+              mealData: m.mealData || undefined,
               imageUrl,
             };
           });
@@ -270,16 +272,21 @@ export default function FoodDiaryView() {
         text: payload.response,
       };
 
+      if (payload.mealData) {
+        finalMsg.mealData = payload.mealData;
+      }
+
       const match = payload.response.match(/<meal_id id="([^"]+)"\s*\/>/);
       if (match && match[1]) {
         const mId = match[1];
         try {
-          const { data } = await supabase.from("meal_logs").select("micronutrients").eq("id", mId).single();
-          if (data && data.micronutrients) {
-            finalMsg.mealMicros = data.micronutrients as Record<string, number>;
+          const { data } = await supabase.from("meal_logs").select("micronutrients, meal_items(food_name, weight_g, glycemic_index, response_type, energy_duration_hours, calories, protein_g, fat_g, carbs_g)").eq("id", mId).single();
+          if (data) {
+            if (data.micronutrients) finalMsg.mealMicros = data.micronutrients as Record<string, number>;
+            if (data.meal_items) finalMsg.mealData = Array.isArray(data.meal_items) ? data.meal_items[0] : data.meal_items;
           }
         } catch (e) {
-          console.error("[Diary] Failed to fetch instant micros:", e);
+          console.error("[Diary] Failed to fetch instant micros and mealData:", e);
         }
       }
 
@@ -318,12 +325,20 @@ export default function FoodDiaryView() {
       .chat(textPayload, threadId, undefined, "diary", undefined, undefined, undefined, undefined, true)
       .then(async (payload) => {
         const aiMsg: Message = { id: nextId.current++, variant: "system", text: payload.response, time };
+        if (payload.mealData) {
+          aiMsg.mealData = payload.mealData;
+        }
         const match = payload.response.match(/<meal_id id="([^"]+)"\s*\/>/);
         if (match?.[1]) {
           try {
-            const { data } = await supabase.from("meal_logs").select("micronutrients").eq("id", match[1]).single();
-            if (data?.micronutrients) aiMsg.mealMicros = data.micronutrients as Record<string, number>;
-          } catch (e) { console.error("[Diary] micros fetch error:", e); }
+            const { data } = await supabase.from("meal_logs").select("micronutrients, meal_items(food_name, weight_g, glycemic_index, response_type, energy_duration_hours, calories, protein_g, fat_g, carbs_g)").eq("id", match[1]).single();
+            if (data) {
+              if (data.micronutrients) aiMsg.mealMicros = data.micronutrients as Record<string, number>;
+              if (data.meal_items) aiMsg.mealData = Array.isArray(data.meal_items) ? data.meal_items[0] : data.meal_items;
+            }
+          } catch (e) {
+            console.error("[Diary] Failed to fetch instant micros/mealData on red zone confirm:", e);
+          }
         }
         setMessages((prev) => [...prev, aiMsg]);
         fetchDailyMicros(selectedDate);
@@ -345,7 +360,11 @@ export default function FoodDiaryView() {
     apiClient
       .chat(textPayload, threadId, undefined, "diary")
       .then((payload) => {
-        setMessages((prev) => [...prev, { id: nextId.current++, variant: "system", text: payload.response, time }]);
+        const aiMsg: Message = { id: nextId.current++, variant: "system", text: payload.response, time };
+        if (payload.mealData) {
+          aiMsg.mealData = payload.mealData;
+        }
+        setMessages((prev) => [...prev, aiMsg]);
       })
       .catch((err) => {
         setMessages((prev) => [...prev, { id: nextId.current++, variant: "system", text: `⚠️ ${t('aiError')}${(err as Error).message}`, time }]);
@@ -468,11 +487,11 @@ export default function FoodDiaryView() {
 
   return (
     <>
-      <div className="relative flex flex-col h-[100dvh] sm:h-[85vh] sm:max-h-[1000px] sm:min-h-[750px] sm:rounded-2xl border-x sm:border border-white/70 dark:border-white/30 bg-surface/80 backdrop-blur-2xl shadow-[0_10px_20px_-10px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_-10px_rgba(0,0,0,0.5)] overflow-hidden">
+      <div className="relative flex flex-col h-full sm:h-[85vh] sm:max-h-[1000px] sm:min-h-[750px] sm:rounded-2xl sm:border border-white/70 dark:border-white/30 bg-surface/80 backdrop-blur-2xl shadow-[0_10px_20px_-10px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_-10px_rgba(0,0,0,0.5)] overflow-hidden">
         {/* Premium Glass Edge Overlay */}
         <div className="pointer-events-none absolute inset-0 sm:rounded-2xl shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_1px_0_2px_rgba(255,255,255,0.5),inset_-1px_0_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.2)] dark:shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_1px_0_2px_rgba(255,255,255,0.15),inset_-1px_0_2px_rgba(255,255,255,0.15),inset_0_-1px_2px_rgba(255,255,255,0.05)] z-50"></div>
         {/* ── Header & Time Machine ──────────────────────── */}
-        <div className="flex flex-col bg-surface-muted px-5 pt-0 sm:pt-5 pb-2 shrink-0 z-10 border-b border-border/50">
+        <div className="flex flex-col bg-surface-muted px-5 pt-3 sm:pt-5 pb-2 shrink-0 z-10 border-b border-border/50">
           <DatePaginator selectedDate={selectedDate} onChange={setSelectedDate} userTimezone={userTimezone} />
         </div>
 
@@ -504,6 +523,7 @@ export default function FoodDiaryView() {
               text={msg.text}
               time={msg.time}
               mealMicros={msg.mealMicros}
+              mealData={msg.mealData}
               imageUrl={msg.imageUrl}
               onDelete={handleDeleteMeal}
               onEdit={handleStartEdit}

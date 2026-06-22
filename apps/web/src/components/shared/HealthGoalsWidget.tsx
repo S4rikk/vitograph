@@ -86,8 +86,8 @@ export default function HealthGoalsWidget() {
   
   if (goals.length === 0) {
     return (
-      <div className="px-5 sm:px-12 py-2 animate-in fade-in slide-in-from-top-1 duration-500">
-        <div className="flex items-center gap-3 p-2 bg-surface-muted/50 border border-border rounded-2xl w-full shadow-sm">
+      <div className="w-full animate-in fade-in slide-in-from-top-1 duration-500">
+        <div className="flex items-center gap-3 p-2 bg-surface border border-border rounded-2xl w-full shadow-sm">
           <div className="flex shrink-0 items-center justify-center bg-surface border border-border text-primary-600 rounded-xl w-9 h-9">
             <Target className="w-4 h-4" />
           </div>
@@ -114,7 +114,7 @@ export default function HealthGoalsWidget() {
   }
 
   return (
-    <div className="mx-3 sm:mx-6 mt-2 mb-1 animate-in fade-in slide-in-from-top-1 duration-500">
+    <div className="w-full animate-in fade-in slide-in-from-top-1 duration-500">
       <div className="rounded-2xl border border-emerald-200/60 bg-gradient-to-r from-emerald-50/80 to-teal-50/50 shadow-sm overflow-hidden transition-all duration-300">
         {/* ── Clickable Header ──────────────────────────── */}
         <button 

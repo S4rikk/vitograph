@@ -182,6 +182,12 @@ function toMetricItems(
 interface UserProfileSheetProps {
     userId: string;
     userEmail: string;
+    children?: React.ReactNode;
+    isOpen?: boolean;
+    onClose?: () => void;
+    isDirtyChange?: (isDirty: boolean) => void;
+    triggerCloseCheck?: boolean;
+    onCloseCheckCancel?: () => void;
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -191,8 +197,24 @@ interface UserProfileSheetProps {
 export default function UserProfileSheet({
     userId,
     userEmail,
+    children,
+    isOpen: controlledIsOpen,
+    onClose: controlledOnClose,
+    isDirtyChange,
+    triggerCloseCheck,
+    onCloseCheckCancel,
 }: UserProfileSheetProps) {
-    const [isOpen, setIsOpen] = useState(false);
+    const [localIsOpen, setLocalIsOpen] = useState(false);
+    const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : localIsOpen;
+
+    const setIsOpen = useCallback((val: boolean) => {
+        if (!val && controlledOnClose) {
+            controlledOnClose();
+        } else {
+            setLocalIsOpen(val);
+        }
+    }, [controlledOnClose]);
+
     const tProfile = useTranslations("profile");
     const tLifestyle = useTranslations("lifestyle");
     const tWearables = useTranslations("wearables");
@@ -396,11 +418,30 @@ export default function UserProfileSheet({
 
     const isDirty = initialFormData ? JSON.stringify(formData) !== JSON.stringify(initialFormData) : false;
 
+    useEffect(() => {
+        if (isDirtyChange) {
+            isDirtyChange(isDirty);
+        }
+    }, [isDirty, isDirtyChange]);
+
+    useEffect(() => {
+        if (triggerCloseCheck) {
+            handleRequestClose();
+        }
+    }, [triggerCloseCheck]);
+
     const handleRequestClose = () => {
         if (isDirty) {
             setShowUnsavedConfirm(true);
         } else {
             setIsOpen(false);
+        }
+    };
+
+    const handleCancelClose = () => {
+        setShowUnsavedConfirm(false);
+        if (onCloseCheckCancel) {
+            onCloseCheckCancel();
         }
     };
 
@@ -794,22 +835,28 @@ const handleScreenshotTrigger = (category: WearableCardCategory) => {
     return (
         <>
             {/* Trigger Button */}
-            <button
-                onClick={() => setIsOpen(true)}
-                className="flex items-center gap-2 hover:bg-surface-muted px-3 py-1.5 rounded-full transition-colors cursor-pointer"
-            >
-                <div className="bg-primary-100 p-1.5 rounded-full text-primary-600">
-                    <User size={16} />
+            {children ? (
+                <div onClick={() => setIsOpen(true)} className="contents cursor-pointer">
+                    {children}
                 </div>
-                <span className="text-sm font-medium text-ink hidden sm:inline-block">
-                    {userEmail.split("@")[0]}
-                </span>
-            </button>
+            ) : (
+                <button
+                    onClick={() => setIsOpen(true)}
+                    className="flex items-center gap-2 hover:bg-surface-muted px-3 py-1.5 rounded-full transition-colors cursor-pointer"
+                >
+                    <div className="bg-primary-100 p-1.5 rounded-full text-primary-600">
+                        <User size={16} />
+                    </div>
+                    <span className="text-sm font-medium text-ink hidden sm:inline-block">
+                        {userEmail.split("@")[0]}
+                    </span>
+                </button>
+            )}
 
             {/* Overlay */}
             {mounted && isOpen && (
                 <div
-                    className="fixed inset-0 bg-black/50 z-40 transition-opacity backdrop-blur-sm"
+                    className="fixed inset-0 bg-black/50 z-[20] transition-opacity backdrop-blur-sm"
                     onClick={handleRequestClose}
                 />
             )}
@@ -817,7 +864,7 @@ const handleScreenshotTrigger = (category: WearableCardCategory) => {
             {/* Slide-out Sheet */}
             {mounted && (
                 <div
-                    className={`fixed inset-y-0 right-0 z-50 w-full sm:w-[520px] bg-transparent shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${isOpen ? "translate-x-0" : "translate-x-full"
+                    className={`fixed inset-y-0 right-0 z-[30] w-full sm:w-[520px] bg-transparent shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${isOpen ? "translate-x-0" : "translate-x-full"
                         }`}
                 >
                     {/* Header */}
@@ -826,16 +873,58 @@ const handleScreenshotTrigger = (category: WearableCardCategory) => {
                             <h2 className="text-xl font-bold text-ink">{tProfile("title")}</h2>
                             <p className="text-sm text-ink-muted mt-0.5">{userEmail}</p>
                         </div>
-                        <button
-                            onClick={handleRequestClose}
-                            className="p-2 text-ink-muted hover:text-ink hover:bg-surface-muted rounded-full transition-colors cursor-pointer"
-                        >
-                            <X size={20} />
-                        </button>
+                        <div className="flex items-center gap-3">
+                            {saveSuccess && (
+                                <span className="text-sm text-success font-semibold transition-all">
+                                    {tProfile("profileSaved")}
+                                </span>
+                            )}
+                            <button
+                                onClick={() => handleSaveProfile()}
+                                disabled={isSaving || loadingProfile}
+                                className={`px-4 py-2 bg-primary-600/20 hover:bg-primary-600/35 border border-primary-500/30 backdrop-blur-md text-sm font-semibold rounded-xl transition-all shadow-[0_4px_12px_rgba(0,0,0,0.1)] active:scale-95 flex items-center gap-1.5 cursor-pointer ${
+                                    isDirty ? "text-[#ccfbf1]" : "text-primary-100"
+                                }`}
+                            >
+                                {isSaving ? (
+                                    <>
+                                        <svg
+                                            className="animate-spin h-4 w-4 text-white"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            />
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            />
+                                        </svg>
+                                        {tProfile("saving")}
+                                    </>
+                                ) : (
+                                    tProfile("save")
+                                )}
+                            </button>
+                            <button
+                                onClick={handleRequestClose}
+                                className="p-2 text-ink-muted hover:text-ink hover:bg-surface-muted rounded-full transition-colors cursor-pointer"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
                     </div>
 
                     {/* Content Area */}
-                    <div className="flex-1 overflow-y-auto bg-transparent">
+                    <div className="flex-1 overflow-y-auto bg-transparent pb-[84px] sm:pb-0">
                         {loadingProfile ? (
                             <div className="p-6 space-y-4 animate-pulse">
                                 <div className="h-10 bg-surface-hover rounded-md w-full" />
@@ -1890,45 +1979,7 @@ const handleScreenshotTrigger = (category: WearableCardCategory) => {
                         )}
                     </div>
 
-                    {/* Footer */}
-                    <div className="p-5 border-t border-border bg-surface z-10 flex items-center justify-between">
-                        <span className="text-sm text-success font-semibold transition-opacity min-w-[150px]">
-                            {saveSuccess ? tProfile("profileSaved") : ""}
-                        </span>
-                        <button
-                            onClick={() => handleSaveProfile()}
-                            disabled={isSaving || loadingProfile}
-                            className="px-6 py-2.5 bg-primary-600 text-white text-sm font-semibold rounded-xl hover:bg-primary-700 disabled:opacity-50 transition-colors shadow-sm active:scale-95 flex items-center gap-2 cursor-pointer"
-                        >
-                            {isSaving ? (
-                                <>
-                                    <svg
-                                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <circle
-                                            className="opacity-25"
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            strokeWidth="4"
-                                        />
-                                        <path
-                                            className="opacity-75"
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                        />
-                                    </svg>
-                                    {tProfile("saving")}
-                                </>
-                            ) : (
-                                tProfile("save")
-                            )}
-                        </button>
-                    </div>
+
                 </div>
             )}
             <DynamicOcrDialog
@@ -1999,7 +2050,7 @@ const handleScreenshotTrigger = (category: WearableCardCategory) => {
                                 {tProfile("leaveWithout")}
                             </button>
                             <button
-                                onClick={() => setShowUnsavedConfirm(false)}
+                                onClick={handleCancelClose}
                                 className="mt-auto w-full py-4 bg-surface-muted text-ink font-bold rounded-2xl hover:bg-surface-hover transition-all border border-border cursor-pointer"
                             >
                                 {tProfile("stayAndContinue")}

@@ -534,6 +534,8 @@
     "takePhoto": "Foto machen",
     "analyzingDocument": "Dokument wird analysiert",
     "reportGenerated": "Bericht erstellt",
+    "reportGeneratedHint": "You can view it in the ",
+    "reportGeneratedLink": "analysis reports section",
     "uploadNewResults": "Neue Ergebnisse hochladen",
     "uploadNewResultsSub": "Laden Sie neue Daten hoch",
     "addNewAnalysis": "Neue Analyse hinzufügen",

@@ -30,6 +30,13 @@
   --theme-warning: #d97706;
   --theme-error: #dc2626;
 
+  /* Glows */
+  --theme-glow-rose: rgba(244, 63, 94, 0.3);
+  --theme-glow-amber: rgba(245, 158, 11, 0.3);
+  --theme-glow-slate: rgba(100, 116, 139, 0.3);
+  --theme-glow-teal: rgba(20, 184, 166, 0.3);
+  --theme-glow-indigo: rgba(99, 102, 241, 0.3);
+
   /* Border */
   --theme-border: #e2e8f0;
   --theme-border-strong: #cbd5e1;
@@ -90,6 +97,13 @@
   --theme-warning: #f59e0b;
   --theme-error: #ef4444;
 
+  /* Glows */
+  --theme-glow-rose: rgba(244, 63, 94, 0.3);
+  --theme-glow-amber: rgba(245, 158, 11, 0.3);
+  --theme-glow-slate: rgba(100, 116, 139, 0.3);
+  --theme-glow-teal: rgba(20, 184, 166, 0.3);
+  --theme-glow-indigo: rgba(99, 102, 241, 0.3);
+
   /* Macro Colors Stage 1 */
   --theme-cal-ring-track: #431407;
   --theme-cal-ring-fill: #ea580c;
@@ -143,6 +157,13 @@
   --color-success: var(--theme-success);
   --color-warning: var(--theme-warning);
   --color-error: var(--theme-error);
+
+  /* Glows */
+  --color-glow-rose: var(--theme-glow-rose);
+  --color-glow-amber: var(--theme-glow-amber);
+  --color-glow-slate: var(--theme-glow-slate);
+  --color-glow-teal: var(--theme-glow-teal);
+  --color-glow-indigo: var(--theme-glow-indigo);
 
   /* Border */
   --color-border: var(--theme-border);
@@ -247,4 +268,36 @@ body {
     rgba(255, 255, 255, 0)
   );
   animation: shimmer 2.5s infinite;
+}
+
+/* ── Custom Utilities & Animations ────────────────────────── */
+
+@keyframes alert-glow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.1); }
+}
+.animate-alert-glow {
+  animation: alert-glow 2s infinite ease-in-out;
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+.animate-breathe {
+  animation: breathe 4s infinite ease-in-out;
+}
+
+.card-glass {
+  background: rgba(30, 41, 59, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.card-glass:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.1);
 }

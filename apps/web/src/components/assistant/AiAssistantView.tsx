@@ -516,7 +516,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
   };
 
   return (
-    <div className="relative flex flex-1 sm:flex-none flex-col overflow-hidden sm:rounded-2xl sm:border border-white/70 dark:border-white/30 bg-surface/80 backdrop-blur-2xl shadow-[0_10px_20px_-10px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_-10px_rgba(0,0,0,0.5)] sm:h-[750px] mb-[env(safe-area-inset-bottom)]">
+    <div className="relative flex flex-col h-full sm:h-[750px] sm:rounded-2xl sm:border border-white/70 dark:border-white/30 bg-surface/80 backdrop-blur-2xl shadow-[0_10px_20px_-10px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_-10px_rgba(0,0,0,0.5)] overflow-hidden">
       {/* Insight Gradient Def */}
       <svg width="0" height="0" className="absolute">
         <defs>
@@ -528,46 +528,47 @@ export default function AiAssistantView({ userId }: { userId: string }) {
       </svg>
       {/* Premium Glass Edge Overlay */}
       <div className="pointer-events-none absolute inset-0 sm:rounded-2xl shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_1px_0_2px_rgba(255,255,255,0.5),inset_-1px_0_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.2)] dark:shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_1px_0_2px_rgba(255,255,255,0.15),inset_-1px_0_2px_rgba(255,255,255,0.15),inset_0_-1px_2px_rgba(255,255,255,0.05)] z-50"></div>
-      {/* Header with Clear Button */}
-      <div className="flex items-center justify-between border-b border-border/50 px-4 py-1 sm:py-1.5 bg-surface relative">
-        <div className="flex items-center space-x-3">
-          <h3 className="text-[0.6875rem] sm:text-xs font-semibold text-ink-muted uppercase tracking-widest">
-            {profile?.ai_name || t("defaultAssistantName")}
-          </h3>
+      
+      {/* ── Header & Goals ──────────────────────── */}
+      <div className="flex flex-col bg-surface-muted px-4 pt-3 sm:pt-5 pb-2 shrink-0 z-10 border-b border-border/50 relative">
+        <div className="flex items-center justify-between gap-2.5">
+          <div className="flex-1 min-w-0">
+            <HealthGoalsWidget />
+          </div>
           
-          {/* Action Icons (Insights, Supplements) */}
-          <div className="flex gap-2">
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Кнопка инсайтов */}
             <button
               onClick={() => {
                 if (isInsightReady && !isInsightDismissed && !isOnCooldown) {
                   setShowInsightPopover(!showInsightPopover);
-                } else {
-                  // Fallback: regular click if not ready or dismissed/cooldown
                 }
               }}
-              className={`p-2 transition-all duration-300 relative ${
+              className={`p-2 transition-all duration-300 relative rounded-xl border shadow-sm h-10 w-10 flex items-center justify-center ${
                 isInsightReady && !isInsightDismissed && !isOnCooldown
-                  ? "text-purple-600 bg-purple-100 hover:bg-purple-200 animate-pulse shadow-[0_0_15px_rgba(147,51,234,0.3)] rounded-full"
-                  : "text-ink-muted hover:bg-surface-muted rounded-full"
+                  ? "text-purple-600 bg-purple-100 border-purple-200 hover:bg-purple-200 animate-pulse"
+                  : "text-ink-muted bg-surface border-border hover:bg-surface-muted"
               }`}
               title="Инсайты"
             >
               <BrainCircuit className="h-5 w-5" />
               {isInsightReady && !isInsightDismissed && !isOnCooldown && (
-                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-purple-500"></span>
                 </span>
               )}
             </button>
-            
+
+            {/* Popover для инсайтов */}
             {showInsightPopover && (
               <>
                 <div 
                   className="fixed inset-0 z-40" 
                   onClick={() => setShowInsightPopover(false)}
                 />
-                <div className="absolute top-full left-0 mt-2 w-72 p-4 bg-surface border border-border rounded-xl shadow-xl z-50 animate-in fade-in zoom-in duration-200">
+                <div className="absolute top-full right-0 mt-2 w-72 p-4 bg-surface border border-border rounded-xl shadow-xl z-50 animate-in fade-in zoom-in duration-200 text-left">
                   {!isInsightReady ? (
                     <p className="text-sm text-ink-muted leading-relaxed">
                       Анализ пока недоступен. Мне нужно еще 3 дней данных о питании и симптомах, чтобы найти скрытые связи.
@@ -591,21 +592,21 @@ export default function AiAssistantView({ userId }: { userId: string }) {
                 </div>
               </>
             )}
+
+            {/* Кнопка очистки чата */}
+            <button
+              onClick={handleClearChat}
+              disabled={isLoading || messages.length <= 1}
+              className="p-2 text-ink-muted hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors disabled:opacity-30 disabled:cursor-not-allowed bg-surface border border-border shadow-sm h-10 w-10 flex items-center justify-center"
+              title={t("clearChatTitle")}
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
           </div>
         </div>
-        <button
-          onClick={handleClearChat}
-          disabled={isLoading || messages.length <= 1}
-          className="p-1.5 text-ink-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-          title={t("clearChatTitle")}
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-        </button>
       </div>
-
-      <HealthGoalsWidget />
 
       {/* Messages Area */}
       <div 
@@ -619,10 +620,10 @@ export default function AiAssistantView({ userId }: { userId: string }) {
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-[95%] sm:max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${
+              className={`max-w-[95%] sm:max-w-[85%] rounded-2xl px-4 py-3 shadow-[0_4px_15px_rgba(0,0,0,0.3)] ${
                 msg.role === "user"
                   ? "bg-primary-600 text-white rounded-br-none"
-                  : "bg-cloud-light text-ink rounded-bl-none"
+                  : "bg-cloud-light bg-[#1e293b]/70 text-white/95 rounded-bl-none"
               }`}
             >
                 <div className="flex flex-col space-y-2">
@@ -694,11 +695,11 @@ export default function AiAssistantView({ userId }: { userId: string }) {
 
         {isLoading && messages.length > 0 && messages[messages.length - 1].content === "" && (
           <div className="flex justify-start">
-            <div className="max-w-[85%] rounded-2xl bg-cloud-light px-4 py-3 text-ink shadow-sm rounded-bl-none">
+            <div className="max-w-[85%] rounded-2xl bg-cloud-light bg-[#1e293b]/70 text-white/95 px-4 py-3 shadow-[0_4px_15px_rgba(0,0,0,0.3)] rounded-bl-none">
               <div className="flex space-x-1">
-                <div className="h-2 w-2 animate-bounce rounded-full bg-ink-muted [animation-delay:-0.3s]"></div>
-                <div className="h-2 w-2 animate-bounce rounded-full bg-ink-muted [animation-delay:-0.15s]"></div>
-                <div className="h-2 w-2 animate-bounce rounded-full bg-ink-muted"></div>
+                <div className="h-2 w-2 animate-bounce rounded-full bg-white/60 [animation-delay:-0.3s]"></div>
+                <div className="h-2 w-2 animate-bounce rounded-full bg-white/60 [animation-delay:-0.15s]"></div>
+                <div className="h-2 w-2 animate-bounce rounded-full bg-white/60"></div>
               </div>
             </div>
           </div>

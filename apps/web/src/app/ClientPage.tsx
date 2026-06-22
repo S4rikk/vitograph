@@ -9,6 +9,7 @@ import OnboardingWizard from "@/components/onboarding/OnboardingWizard";
 import Logo from "@/components/ui/Logo";
 import { useTranslations } from "next-intl";
 import FoodDiaryView from "@/components/diary/FoodDiaryView";
+import { MobileDashboardLayout } from "@/components/dashboard/MobileDashboardLayout";
 
 /* ── SVG Icons ────────────────────────────────────────────── */
 
@@ -54,7 +55,7 @@ function AssistantIcon() {
 
 // TABS moved inside HomeContent for translation
 
-function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; userId: string }) {
+function HomeContent({ needsOnboarding, userId, userEmail }: { needsOnboarding: boolean; userId: string; userEmail: string }) {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
   const defaultTab = ["diary", "medical", "assistant"].includes(tabParam || "") ? tabParam! : "medical";
@@ -74,8 +75,9 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-2 sm:px-6 lg:px-8 sm:py-8 flex-1 flex flex-col min-h-0 sm:h-full">
-      {/* ── Header ────────────────────────────────────────── */}
+    <MobileDashboardLayout userId={userId} userEmail={userEmail} desktopChildren={
+      <div className="mx-auto w-full max-w-3xl px-2 sm:px-6 lg:px-8 sm:py-8 flex-1 flex flex-col min-h-0 sm:h-full">
+        {/* ── Header ────────────────────────────────────────── */}
       <header className="hidden sm:flex shrink-0 mb-8 justify-center">
         <Logo size="lg" showSubtitle={true} />
       </header>
@@ -122,16 +124,17 @@ function HomeContent({ needsOnboarding, userId }: { needsOnboarding: boolean; us
           className="flex-1 flex flex-col min-h-0"
         >
           <AiAssistantView userId={userId} />
-        </div>
-      </main>
-    </div>
+          </div>
+        </main>
+      </div>
+    } />
   );
 }
 
-export default function ClientPage({ needsOnboarding, userId }: { needsOnboarding: boolean; userId: string }) {
+export default function ClientPage({ needsOnboarding, userId, userEmail }: { needsOnboarding: boolean; userId: string; userEmail: string }) {
   return (
     <Suspense fallback={<div className="p-8 text-center text-ink-muted">Loading interface...</div>}>
-      <HomeContent needsOnboarding={needsOnboarding} userId={userId} />
+      <HomeContent needsOnboarding={needsOnboarding} userId={userId} userEmail={userEmail} />
     </Suspense>
   );
 }

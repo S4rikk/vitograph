@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Clock, Timer, CalendarDays, Trash2 } from "lucide-react";
+import { Clock, Timer, CalendarDays, Trash2, ArrowLeft } from "lucide-react";
 import UploadZone from "./UploadZone";
 import PhotoUploader from "./PhotoUploader";
 import SomaticAnalysisCard from "./SomaticAnalysisCard";
@@ -12,6 +12,13 @@ import SymptomTrackerWidget from "./SymptomTrackerWidget";
 import { useLabScanJob } from "@/hooks/useLabScanJob";
 import { useTranslations } from "next-intl";
 
+interface MedicalResultsViewProps {
+  activeSubScreen?: 'upload' | 'reports' | 'symptoms' | 'photo' | 'all';
+  onBack?: () => void;
+  isDirtyChange?: (isDirty: boolean) => void;
+  onNavigate?: (screen: 'hub' | 'upload' | 'reports' | 'symptoms' | 'photo') => void;
+}
+
 /**
  * Medical Results view — orchestrates:
  * 1. PDF upload zone
@@ -19,7 +26,12 @@ import { useTranslations } from "next-intl";
  * 3. Grid of Biomarker cards
  * 4. General Recommendations and GPT-5.4 diagnostic report
  */
-export default function MedicalResultsView() {
+export default function MedicalResultsView({
+  activeSubScreen = 'all',
+  onBack,
+  isDirtyChange,
+  onNavigate
+}: MedicalResultsViewProps = {}) {
   const [uploadState, setUploadState] = useState<
     "idle" | "hover" | "loading" | "done" | "error"
   >("idle");
@@ -35,6 +47,13 @@ export default function MedicalResultsView() {
   const controlsRef = useRef<HTMLDivElement>(null);
   const diagnosingRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("medical");
+  const tCommon = useTranslations("common");
+
+  useEffect(() => {
+    if (isDirtyChange) {
+      isDirtyChange(isDirty);
+    }
+  }, [isDirty, isDirtyChange]);
 
   useEffect(() => {
     if (uploadState === "done" && editableBiomarkers && editableBiomarkers.length > 0) {
@@ -100,51 +119,76 @@ export default function MedicalResultsView() {
       try {
         setIsLoadingHistory(true);
 
-        // 1. Restore draft if exists
-        const draftBiomarkersStr = sessionStorage.getItem("vitograph_draft_biomarkers");
-        const draftResultsStr = sessionStorage.getItem("vitograph_draft_results");
-        const draftIsDirtyStr = sessionStorage.getItem("vitograph_draft_isDirty");
-        
-        let hasDraft = false;
-        if (draftBiomarkersStr && draftResultsStr) {
-          try {
-            setEditableBiomarkers(JSON.parse(draftBiomarkersStr));
-            setResults(JSON.parse(draftResultsStr));
-            if (draftIsDirtyStr) setIsDirty(JSON.parse(draftIsDirtyStr));
-            setUploadState("done");
-            setReportAlreadyGenerated(false);
-            hasDraft = true;
-          } catch (e) {
-            console.error("Failed to parse draft", e);
-          }
+        if (activeSubScreen === 'symptoms') {
+          setIsLoadingHistory(false);
+          return;
         }
 
-        // 2. Fetch History
-        const [history, somatic] = await Promise.all([
-          apiClient.getLabReportsHistory(),
-          apiClient.getSomaticHistory()
-        ]);
-
-        setReportHistory(history || []);
-        if (history && history.length > 0) {
-          setSelectedTimestamp(history[0].timestamp);
+        // 1. Restore draft if exists (only for 'upload' or 'all')
+        let hasDraft = false;
+        if (activeSubScreen === 'upload' || activeSubScreen === 'all') {
+          const draftBiomarkersStr = sessionStorage.getItem("vitograph_draft_biomarkers");
+          const draftResultsStr = sessionStorage.getItem("vitograph_draft_results");
+          const draftIsDirtyStr = sessionStorage.getItem("vitograph_draft_isDirty");
           
-          if (!hasDraft) {
-            setReportAlreadyGenerated(true);
-            const latest = history[0];
-            if (latest.biomarkers && latest.biomarkers.length > 0) {
-              setEditableBiomarkers(latest.biomarkers);
-              setResults({ biomarkers: latest.biomarkers, general_recommendations: [] });
+          if (draftBiomarkersStr && draftResultsStr) {
+            try {
+              const parsedBiomarkers = JSON.parse(draftBiomarkersStr);
+              setEditableBiomarkers(parsedBiomarkers);
+              setResults(JSON.parse(draftResultsStr));
+              if (draftIsDirtyStr) {
+                const parsedDirty = JSON.parse(draftIsDirtyStr);
+                setIsDirty(parsedDirty);
+                if (isDirtyChange) isDirtyChange(parsedDirty);
+              }
               setUploadState("done");
+              setReportAlreadyGenerated(false);
+              hasDraft = true;
+            } catch (e) {
+              console.error("Failed to parse draft", e);
             }
           }
-        } else {
-          if (!hasDraft) {
-            setSelectedTimestamp(null);
-          }
         }
 
-        setSomaticHistory(somatic || {});
+        // 2. Fetch History based on activeSubScreen
+        if (activeSubScreen === 'photo') {
+          const somatic = await apiClient.getSomaticHistory();
+          setSomaticHistory(somatic || {});
+        } else if (activeSubScreen === 'reports') {
+          const history = await apiClient.getLabReportsHistory();
+          setReportHistory(history || []);
+          if (history && history.length > 0) {
+            setSelectedTimestamp(history[0].timestamp);
+          } else {
+            setSelectedTimestamp(null);
+          }
+        } else {
+          // 'upload' or 'all'
+          const [history, somatic] = await Promise.all([
+            apiClient.getLabReportsHistory(),
+            apiClient.getSomaticHistory()
+          ]);
+
+          setReportHistory(history || []);
+          if (history && history.length > 0) {
+            setSelectedTimestamp(history[0].timestamp);
+            
+            if (!hasDraft && activeSubScreen !== 'upload') {
+              setReportAlreadyGenerated(true);
+              const latest = history[0];
+              if (latest.biomarkers && latest.biomarkers.length > 0) {
+                setEditableBiomarkers(latest.biomarkers);
+                setResults({ biomarkers: latest.biomarkers, general_recommendations: [] });
+                setUploadState("done");
+              }
+            }
+          } else {
+            if (!hasDraft) {
+              setSelectedTimestamp(null);
+            }
+          }
+          setSomaticHistory(somatic || {});
+        }
       } catch (error) {
         console.error("Failed to load report history", error);
       } finally {
@@ -152,7 +196,7 @@ export default function MedicalResultsView() {
       }
     }
     fetchHistory();
-  }, []);
+  }, [activeSubScreen, isDirtyChange]);
 
   /**
    * Triggers GPT-5.4 diagnostic analysis after biomarker parsing.
@@ -349,25 +393,43 @@ export default function MedicalResultsView() {
 
   return (
     <div className="space-y-6">
+      {/* ── Back button (if onBack is passed) ── */}
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-cyan-500/30 active:scale-95 text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.15)] w-fit group"
+        >
+          <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-0.5" />
+          {tCommon("back")}
+        </button>
+      )}
+
       {/* ── Upload Zone ─────────────────────────────────── */}
-      <UploadZone
-        onFilesAccepted={handleFilesAccepted}
-        state={uploadState}
-        errorMessage={errorMessage}
-      />
+      {(activeSubScreen === 'all' || activeSubScreen === 'upload') && (
+        <UploadZone
+          onFilesAccepted={handleFilesAccepted}
+          state={uploadState}
+          errorMessage={errorMessage}
+          onViewReports={() => onNavigate?.('reports')}
+        />
+      )}
 
       {/* ── Symptom Tracker ─────────────────────────────────── */}
-      <SymptomTrackerWidget />
+      {(activeSubScreen === 'all' || activeSubScreen === 'symptoms') && (
+        <SymptomTrackerWidget />
+      )}
 
       {/* ── Photo Uploaders (Somatic Diagnostics) ───────────── */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <PhotoUploader type="nails" onAnalysisComplete={(res) => handleSomaticComplete("nails", res)} />
-        <PhotoUploader type="tongue" onAnalysisComplete={(res) => handleSomaticComplete("tongue", res)} />
-        <PhotoUploader type="skin" onAnalysisComplete={(res) => handleSomaticComplete("skin", res)} />
-      </div>
+      {(activeSubScreen === 'all' || activeSubScreen === 'photo') && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <PhotoUploader type="nails" onAnalysisComplete={(res) => handleSomaticComplete("nails", res)} />
+          <PhotoUploader type="tongue" onAnalysisComplete={(res) => handleSomaticComplete("tongue", res)} />
+          <PhotoUploader type="skin" onAnalysisComplete={(res) => handleSomaticComplete("skin", res)} />
+        </div>
+      )}
 
       {/* ── Somatic Analysis Results ─────────────────────────── */}
-      {(somaticHistory["nails_analysis_history"]?.length > 0 || somaticHistory["tongue_analysis_history"]?.length > 0 || somaticHistory["skin_analysis_history"]?.length > 0) && (
+      {(activeSubScreen === 'all' || activeSubScreen === 'photo') && (somaticHistory["nails_analysis_history"]?.length > 0 || somaticHistory["tongue_analysis_history"]?.length > 0 || somaticHistory["skin_analysis_history"]?.length > 0) && (
         <div className="space-y-4">
           {somaticHistory["nails_analysis_history"]?.length > 0 && (
             <SomaticAnalysisCard title={t("nailsAnalysis")} items={somaticHistory["nails_analysis_history"]} />
@@ -382,7 +444,7 @@ export default function MedicalResultsView() {
       )}
 
       {/* ── Loading Skeleton ─────────────────────────────── */}
-      {uploadState === "loading" && (
+      {(activeSubScreen === 'all' || activeSubScreen === 'upload') && uploadState === "loading" && (
         <div className="flex flex-col items-center gap-4 rounded-2xl border border-cyan-200 bg-gradient-to-br from-cyan-50 to-white p-8 shadow-sm">
           <div className="relative h-12 w-12">
             <div className="absolute inset-0 animate-spin rounded-full border-[3px] border-cyan-200 border-t-cyan-600" />
@@ -421,7 +483,7 @@ export default function MedicalResultsView() {
       )}
 
       {/* ── Results grid ──────────────────────────────────── */}
-      {editableBiomarkers && editableBiomarkers.length > 0 && uploadState === "done" && !reportAlreadyGenerated && (
+      {(activeSubScreen === 'all' || activeSubScreen === 'upload') && editableBiomarkers && editableBiomarkers.length > 0 && uploadState === "done" && !reportAlreadyGenerated && (
         <>
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-ink">
@@ -574,41 +636,16 @@ export default function MedicalResultsView() {
               </div>
             )}
           </div>
-
-          {/* ── Общие Рекомендации ───────────────────────────────────── */}
-          {results?.general_recommendations && results.general_recommendations.length > 0 && (
-            <div className="mt-10 overflow-hidden rounded-2xl border border-white/70 dark:border-white/30 bg-surface/80 backdrop-blur-2xl shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_1px_0_2px_rgba(255,255,255,0.5),inset_-1px_0_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.2),0_10px_20px_-10px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_1px_0_2px_rgba(255,255,255,0.15),inset_-1px_0_2px_rgba(255,255,255,0.15),inset_0_-1px_2px_rgba(255,255,255,0.05),0_10px_20px_-10px_rgba(0,0,0,0.5)]">
-              <div className="p-6 md:p-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100 text-cyan-600">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-ink">{t("aiMedicalAnalysis")}</h3>
-                </div>
-
-                <ul className="space-y-3">
-                  {results.general_recommendations.map((rec, i) => (
-                    <li key={i} className="flex gap-3 text-ink leading-relaxed">
-                      <span className="mt-1.5 flex h-1.5 w-1.5 flex-shrink-0 rounded-full bg-cyan-400"></span>
-                      <span>{rec}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
         </>
       )}
 
       {/* ── Empty State ───────────────────────────────────── */}
-      {(!results || (results.biomarkers?.length ?? 0) === 0) && uploadState === "done" && (
+      {(activeSubScreen === 'all' || activeSubScreen === 'upload') && (!results || (results.biomarkers?.length ?? 0) === 0) && uploadState === "done" && (
         <p className="text-center text-ink-muted">{t("noAnalysesFound")}</p>
       )}
 
       {/* ── GPT-5.4 Diagnostic Report ─────────────────────── */}
-      {isDiagnosing && (
+      {(activeSubScreen === 'all' || activeSubScreen === 'upload') && isDiagnosing && (
         <div ref={diagnosingRef} className="flex flex-col items-center gap-3 rounded-2xl border border-purple-500/20 bg-purple-500/10 p-8">
           <div className="relative h-10 w-10">
             <div className="absolute inset-0 animate-spin rounded-full border-2 border-purple-500/20 border-t-purple-600" />
@@ -622,7 +659,7 @@ export default function MedicalResultsView() {
         </div>
       )}
 
-      {diagnosisError && !isDiagnosing && (
+      {(activeSubScreen === 'all' || activeSubScreen === 'upload') && diagnosisError && !isDiagnosing && (
         <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-50 to-orange-50 p-6 shadow-sm">
           <div className="flex items-start gap-4">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
@@ -644,8 +681,30 @@ export default function MedicalResultsView() {
         </div>
       )}
 
+      {/* ── Navigation link on empty space in upload done state ── */}
+      {activeSubScreen === 'upload' && uploadState === 'done' && reportAlreadyGenerated && (
+        <div className="flex flex-col items-center justify-center py-16 text-center animate-in fade-in duration-300">
+          <button
+            onClick={() => onNavigate?.('reports')}
+            className="group flex flex-col items-center gap-4 focus:outline-none active:scale-95 transition-transform"
+          >
+            <div className="rounded-full bg-cyan-500/10 p-6 border border-cyan-500/20 group-hover:bg-cyan-500/20 group-hover:border-cyan-500/40 transition-all duration-300 shadow-[0_0_30px_rgba(6,182,212,0.15)] group-hover:shadow-[0_0_40px_rgba(6,182,212,0.3)]">
+              <svg className="w-10 h-10 text-cyan-400 group-hover:text-cyan-300 transition-colors" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+              </svg>
+            </div>
+            <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent group-hover:from-cyan-300 group-hover:to-blue-300 transition-all underline decoration-cyan-400/50 decoration-2 underline-offset-4">
+              {(() => {
+                const text = t("reportGeneratedLink");
+                return text ? text.charAt(0).toUpperCase() + text.slice(1) : "";
+              })()}
+            </span>
+          </button>
+        </div>
+      )}
+
       {/* ── Diagnostic Report History ─────────────────────── */}
-      {!isDiagnosing && reportHistory.length > 0 && (
+      {(activeSubScreen === 'all' || activeSubScreen === 'reports') && !isDiagnosing && reportHistory.length > 0 && (
         <div className="mt-8">
           <div className="flex flex-col gap-4 mb-6">
             <div className="flex items-center justify-between">
@@ -727,7 +786,7 @@ export default function MedicalResultsView() {
       )}
 
       {/* Loading history state fallback */}
-      {isLoadingHistory && reportHistory.length === 0 && (
+      {(activeSubScreen === 'all' || activeSubScreen === 'reports') && isLoadingHistory && reportHistory.length === 0 && (
         <div className="mt-8 flex justify-center">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-purple-500/20 border-t-purple-600" />
         </div>

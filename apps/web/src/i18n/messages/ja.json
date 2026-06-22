@@ -534,6 +534,8 @@
     "takePhoto": "写真を撮る",
     "analyzingDocument": "ドキュメント解析中",
     "reportGenerated": "レポートが生成されました",
+    "reportGeneratedHint": "You can view it in the ",
+    "reportGeneratedLink": "analysis reports section",
     "uploadNewResults": "新しい結果をアップロード",
     "uploadNewResultsSub": "新しいデータをアップロード",
     "addNewAnalysis": "新しい解析を追加",

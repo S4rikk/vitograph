@@ -12,6 +12,8 @@ type UploadZoneProps = {
   state?: UploadState;
   /** Error message to display in the error state. */
   errorMessage?: string;
+  /** Callback to navigate to reports screen */
+  onViewReports?: () => void;
 };
 
 const DOCUMENT_TYPES = [
@@ -33,6 +35,7 @@ export default function UploadZone({
   onFilesAccepted,
   state = "idle",
   errorMessage,
+  onViewReports,
 }: UploadZoneProps) {
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -228,17 +231,34 @@ export default function UploadZone({
       {/* ── Done ──────────────────────────────────────────── */}
       {effectiveState === "done" && (
         <div className="flex flex-col items-center gap-3 relative z-10">
-          <div className="flex items-center gap-2 bg-surface/60 px-4 py-2 rounded-full border border-success/30 shadow-sm mb-1">
-            <svg
-              className="h-4 w-4 text-success"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="text-sm font-bold text-success">{t("reportGenerated")}</span>
+          <div className="flex flex-col items-center gap-1.5 mb-1 text-center">
+            <div className="flex items-center gap-2 bg-surface/60 px-4 py-2 rounded-full border border-success/30 shadow-sm">
+              <svg
+                className="h-4 w-4 text-success"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-sm font-bold text-success">{t("reportGenerated")}</span>
+            </div>
+            {onViewReports && (
+              <p className="text-[11px] text-ink-muted leading-snug">
+                {t("reportGeneratedHint")}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onViewReports();
+                  }}
+                  className="text-cyan-500 underline font-semibold hover:text-cyan-400 transition-colors inline-block ml-0.5"
+                >
+                  {t("reportGeneratedLink")}
+                </button>
+              </p>
+            )}
           </div>
           
           <div className="text-center mb-1">

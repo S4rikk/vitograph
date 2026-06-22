@@ -534,6 +534,8 @@
     "takePhoto": "Fotoğraf Çek",
     "analyzingDocument": "Belge Analiz Ediliyor",
     "reportGenerated": "Rapor oluşturuldu",
+    "reportGeneratedHint": "You can view it in the ",
+    "reportGeneratedLink": "analysis reports section",
     "uploadNewResults": "Yeni Sonuçlar Yükle",
     "uploadNewResultsSub": "Yeni verileri yükleyin",
     "addNewAnalysis": "Yeni Analiz Ekleyin",

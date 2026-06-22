@@ -1458,6 +1458,7 @@ export async function handleChat(
 
     let finalContent = typeof aiResponse.content === "string" ? aiResponse.content : "";
 
+
     // Phase 54: Strip <think> blocks from finalContent to hide internal reasoning.
     finalContent = finalContent.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
 
@@ -1524,10 +1525,32 @@ export async function handleChat(
       }
     }
 
+    let mealData = undefined;
+    const mealIdMatch = finalContent.match(/<meal_id id="([^"]+)"\s*\/>/);
+    if (mealIdMatch && mealIdMatch[1]) {
+      const token = req.headers.authorization?.split(" ")[1];
+      const supabaseUrl = process.env.SUPABASE_URL;
+      const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
+      if (token && supabaseUrl && supabaseKey) {
+        const supabase = createClient(supabaseUrl, supabaseKey, {
+          global: { headers: { Authorization: `Bearer ${token}` } }
+        });
+        const { data: logMicros } = await supabase
+          .from("meal_logs")
+          .select("id, micronutrients, meal_items(food_name, weight_g, glycemic_index, response_type, energy_duration_hours, calories, protein_g, fat_g, carbs_g)")
+          .eq("id", mealIdMatch[1])
+          .single();
+        if (logMicros && logMicros.meal_items) {
+          mealData = Array.isArray(logMicros.meal_items) ? logMicros.meal_items[0] : logMicros.meal_items;
+        }
+      }
+    }
+
     res.json({
       success: true,
       data: {
         response: finalContent,
+        mealData,
       },
     });
   } catch (error: unknown) {
@@ -1558,6 +1581,7 @@ export async function handleChatStream(
     let finalImageUrl = body.imageUrl;
     let userTimezone = 'UTC';
     const messagesToInvoke: any[] = [];
+    let logMealArgs: any = null;
 
     // ── Reuse handleChat's setup logic (auth, context, system prompt) ──
     if (req.user?.id) {
@@ -1777,6 +1801,8 @@ export async function handleChatStream(
     let hasRedZone = false;
 
     for await (const [message, _metadata] of stream) {
+      const msg = message as any;
+
       // Capture RED ZONE tool messages 
       if (message._getType?.() === 'tool' || message.constructor?.name === 'ToolMessage') {
         const tc = typeof message.content === 'string' ? message.content : '';
@@ -1813,6 +1839,7 @@ export async function handleChatStream(
       res.write(rzTag);
       fullContent += rzTag;
     }
+
 
     // ── Post-stream: sanitize accumulated content ──
     fullContent = fullContent.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
@@ -2047,28 +2074,31 @@ export async function handleGetChatHistory(
       }
     });
 
-    const mealMicrosMap: Record<string, any> = {};
+    const mealDataMap: Record<string, any> = {};
     if (mealIdsToFetch.size > 0) {
       const { data: logMicros, error: msError } = await supabase
         .from("meal_logs")
-        .select("id, micronutrients")
+        .select("id, micronutrients, meal_items(food_name, weight_g, glycemic_index, response_type, energy_duration_hours, calories, protein_g, fat_g, carbs_g)")
         .in("id", Array.from(mealIdsToFetch));
         
       if (!msError && logMicros) {
-        logMicros.forEach(log => {
-          if (log.micronutrients) {
-            mealMicrosMap[log.id] = log.micronutrients;
-          }
+        logMicros.forEach((log: any) => {
+          mealDataMap[log.id] = {
+            micronutrients: log.micronutrients,
+            mealData: log.meal_items && Array.isArray(log.meal_items) ? log.meal_items[0] : log.meal_items
+          };
         });
       }
     }
 
     const history = (messages || []).map(msg => {
       let mealMicros = undefined;
+      let mealData = undefined;
       if (msg.role === "assistant") {
         const match = mealIdRegex.exec(msg.content);
-        if (match && match[1] && mealMicrosMap[match[1]]) {
-          mealMicros = mealMicrosMap[match[1]];
+        if (match && match[1] && mealDataMap[match[1]]) {
+          mealMicros = mealDataMap[match[1]].micronutrients;
+          mealData = mealDataMap[match[1]].mealData;
         }
       }
       return {
@@ -2078,6 +2108,7 @@ export async function handleGetChatHistory(
         imageUrl: msg.image_url || undefined,
         createdAt: msg.created_at,
         mealMicros: mealMicros,
+        mealData: mealData,
       };
     });
 

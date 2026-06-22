@@ -74,7 +74,7 @@ class LabReportExtraction(BaseModel):
         default_factory=list, description="Array of all found markers"
     )
     general_recommendations: List[str] = Field(
-        default_factory=list, description="General advice based on all deviations"
+        default_factory=list, description="Leave this list empty. DO NOT generate recommendations."
     )
 
 
@@ -177,14 +177,14 @@ async def extract_biomarkers(
 
     system_prompt = (
         "You are an expert medical lab report parser for VITOGRAPH.\n\n"
-        f"Your goal is to extract clinical data and return it using the strict JSON schema provided. ALL TEXT OUTPUTS (display_name, unit, notes, recommendations, context) MUST BE STRICTLY WRITTEN IN {target_language.upper()}.\n\n"  # noqa: E501
+        f"Your goal is to extract clinical data and return it using the strict JSON schema provided. ALL TEXT OUTPUTS (display_name, unit, notes, context) MUST BE STRICTLY WRITTEN IN {target_language.upper()}.\n\n"  # noqa: E501
         "STEPS:\n"
         "1. MENTAL OCR: First, carefully read the entire provided text and count EVERY unique biomarker row.\n"
         f"2. LANGUAGE TRANSLATION: If the report is NOT in {target_language.upper()}, translate names and units to {target_language.upper()}.\n"
         "   - `original_name`: Extract EXACTLY as written in the report (e.g., 'Натрий (Na)').\n"
         "   - `display_name`: Translate the name while preserving chemical symbols or abbreviations in parentheses (e.g., 'Sodium (Na)').\n"
         "   - `unit`: Translate units to their standard medical equivalents (e.g., 'ммоль/л' -> 'mmol/L', 'МЕ/л' -> 'IU/L'). Use Latin characters for units if appropriate for medical applications.\n"
-        f"   - `notes` & `recommendations`: Must be strictly in {target_language.upper()}.\n"
+        f"   - `notes`: Must be strictly in {target_language.upper()}.\n"
         "3. POPULATE `total_found_count`: This number MUST exactly match the total number of items in the `biomarkers` array.\n\n"  # noqa: E501
         "ZERO-TOLERANCE RULES:\n"
         "1. NO HALLUCINATIONS: If the reference range is NOT explicitly written in the provided text, "  # noqa: E501
@@ -265,7 +265,7 @@ async def extract_biomarkers_from_image(
     }.get(locale[:2].lower(), "English")
 
     system_prompt = (
-        f"You are an expert medical lab report parser for VITOGRAPH. ALL TEXT OUTPUTS (display_name, unit, notes, recommendations, context) MUST BE STRICTLY WRITTEN IN {target_language.upper()}.\n\n"  # noqa: E501
+        f"You are an expert medical lab report parser for VITOGRAPH. ALL TEXT OUTPUTS (display_name, unit, notes, context) MUST BE STRICTLY WRITTEN IN {target_language.upper()}.\n\n"  # noqa: E501
         "You are receiving a PHOTO of a printed lab report form.\n"
         "STEPS:\n"
         "1. VISUAL ANCHORS: Treat the page as a structured grid. Identify columns for 'Name', 'Result', 'Unit', and 'Reference Range'.\n"  # noqa: E501

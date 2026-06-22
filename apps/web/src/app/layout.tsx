@@ -64,7 +64,6 @@ export default async function RootLayout({
             } catch (e) {}
           `
         }} />
-        <link rel="manifest" href="/manifest.json" />
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
           rel="stylesheet"
@@ -77,15 +76,6 @@ export default async function RootLayout({
           <ServerActionErrorListener />
 
         <FontScaleProvider>
-          {user && (
-            <header className="shrink-0 bg-surface border-b border-border px-4 py-2 sm:px-6 sm:py-3 flex items-center justify-between shadow-sm relative z-50">
-              <Logo size="sm" showSubtitle={false} />
-              <div className="flex items-center gap-4">
-                <UserProfileSheet userId={user.id} userEmail={user.email || "User"} />
-                <SignOutButton />
-              </div>
-            </header>
-          )}
           <main className="flex-1 flex flex-col min-h-0">{children}</main>
         </FontScaleProvider>
         </NextIntlClientProvider>

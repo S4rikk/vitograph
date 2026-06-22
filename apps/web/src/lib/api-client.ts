@@ -273,7 +273,7 @@ class AiApiClient {
       // The API returns { success: true, data: T }
       return json.data as T;
     } catch (error) {
-      console.error(`[AiApiClient] Network/Parse Error:`, error);
+      // Just throw to let caller handle it instead of triggering Next.js error overlay
       throw error;
     }
   }
@@ -316,7 +316,7 @@ class AiApiClient {
       const json = await response.json();
       return json.data as T;
     } catch (error) {
-      console.error(`[AiApiClient] GET Network/Parse Error:`, error);
+      // Just throw to let caller handle it instead of triggering Next.js error overlay
       throw error;
     }
   }
@@ -338,7 +338,7 @@ class AiApiClient {
     imageBase64?: string,
     onToken?: (token: string) => void,
     redZoneConfirm?: boolean
-  ): Promise<{ response: string }> {
+  ): Promise<{ response: string; mealData?: any }> {
     // Generate a default session thread if one isn't provided
     const sessionThread = threadId || `session-${Math.random().toString(36).substring(7)}`;
 
@@ -405,8 +405,8 @@ class AiApiClient {
       // Backward compatibility: If the response is a legacy structure {"response": "..."}
       try {
         const json = JSON.parse(fullResponse);
-        if (json.data && json.data.response !== undefined) return { response: json.data.response };
-        if (json.response !== undefined) return { response: json.response };
+        if (json.data && json.data.response !== undefined) return { response: json.data.response, mealData: json.data.mealData };
+        if (json.response !== undefined) return { response: json.response, mealData: json.mealData };
       } catch (e) {
         // Plain text stream detected (Expected behavior), ignore catch
       }

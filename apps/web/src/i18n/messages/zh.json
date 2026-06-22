@@ -534,6 +534,8 @@
     "takePhoto": "拍照",
     "analyzingDocument": "分析文档",
     "reportGenerated": "报告已生成",
+    "reportGeneratedHint": "You can view it in the ",
+    "reportGeneratedLink": "analysis reports section",
     "uploadNewResults": "上传新结果",
     "uploadNewResultsSub": "上传新的数据",
     "addNewAnalysis": "添加新分析",

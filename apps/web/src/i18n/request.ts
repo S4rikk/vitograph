@@ -59,3 +59,4 @@ export default getRequestConfig(async () => {
     messages: (await messageImports[locale]()).default,
   };
 });
+// force cache invalidation 1

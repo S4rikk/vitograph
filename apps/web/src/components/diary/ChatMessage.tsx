@@ -21,6 +21,7 @@ type ChatMessageProps = {
   onRedZoneReject?: () => void;
   /** URL of food photo (from photo analysis) */
   imageUrl?: string;
+  mealData?: any;
 };
 
 // Logic moved to food-log-parser.ts
@@ -102,6 +103,7 @@ export default function ChatMessage({
   onRedZoneConfirm,
   onRedZoneReject,
   imageUrl,
+  mealData,
 }: ChatMessageProps) {
   const t = useTranslations("diary.chatMessage");
   const isUser = variant === "user";
@@ -111,7 +113,7 @@ export default function ChatMessage({
   const cleanedText = redZoneMatch ? text.replace(/<red_zone_confirm[^>]*\/?>/g, '').trim() : text;
 
   if (!isUser) {
-    const parsed = detectAndParseFoodLog(text, time);
+    const parsed = detectAndParseFoodLog(text, time, mealData);
     if (parsed) {
       if (mealMicros && (!parsed.cardProps.micros || parsed.cardProps.micros.length < 2)) {
         parsed.cardProps.micros = Object.entries(mealMicros).map(([key, val]) => {

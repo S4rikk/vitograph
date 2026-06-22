@@ -8,6 +8,25 @@ import type { FoodRecognitionResult, LabelScannerOutput } from "@/lib/api-client
 import { MealScoreBadge } from "./MealScoreBadge";
 import { X, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+
+function calculateTotalWeight(text: string): number | null {
+  const regex = /(?:^|\s|[.,;(\[-])(\d+)\s*(?:г|гр|g|grams?|грамм(?:ов|а)?)(?:\.?(?:\s|[.,;)(\]|-]|$))/gi;
+  let total = 0;
+  let hasMatches = false;
+  let match;
+  
+  regex.lastIndex = 0;
+  while ((match = regex.exec(text)) !== null) {
+    const val = parseInt(match[1], 10);
+    if (!isNaN(val)) {
+      total += val;
+      hasMatches = true;
+    }
+  }
+  
+  return hasMatches ? total : null;
+}
+
 type FoodInputFormProps = {
   /** Called when the form is submitted with valid data. */
   onSubmit: (name: string, weight: number, nutritionalContext?: any) => void;
@@ -458,7 +477,14 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
             id="food-name"
             placeholder={t('dishName')}
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setName(val);
+              const totalWeight = calculateTotalWeight(val);
+              if (totalWeight !== null) {
+                setWeight(String(totalWeight));
+              }
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();

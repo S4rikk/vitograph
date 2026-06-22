@@ -534,6 +534,8 @@
     "takePhoto": "Take Photo",
     "analyzingDocument": "Analyzing Document",
     "reportGenerated": "Report Generated",
+    "reportGeneratedHint": "You can view it in the ",
+    "reportGeneratedLink": "analysis reports section",
     "uploadNewResults": "Upload New Results",
     "uploadNewResultsSub": "Upload New Data",
     "addNewAnalysis": "Add New Analysis",
@@ -872,5 +874,34 @@
     "overdosePhosphorus": "Leaches calcium from bones.",
     "overdoseOmega3": "Reduces blood clotting.",
     "overdoseIodine": "May trigger hyperthyroidism."
+  },
+  "wellbeing": {
+    "title": "How are you feeling today?",
+    "statusUnselected": "Not selected",
+    "moods": {
+      "0": "Bad",
+      "1": "Fatigued",
+      "2": "Normal",
+      "3": "Good",
+      "4": "Energetic"
+    }
+  },
+  "dashboard_header": {
+    "greeting_morning": "Good morning",
+    "greeting_afternoon": "Good afternoon",
+    "greeting_evening": "Good evening",
+    "greeting_night": "Good night",
+    "subtitle": "How are you feeling today?"
+  },
+  "dashboard_grid": {
+    "tests_title": "Submit<br />tests",
+    "tests_subtitle": "Check-up",
+    "tests_badge": "NEW",
+    "reports_title": "Reports",
+    "reports_subtitle": "Ready",
+    "symptoms_title": "Symptoms<br />today",
+    "symptoms_subtitle": "Fill in",
+    "photo_title": "Photo<br />diagnosis",
+    "photo_subtitle": "Analysis"
   }
 }

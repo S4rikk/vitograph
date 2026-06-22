@@ -10,7 +10,7 @@ export default function Logo({ size = 'sm', showSubtitle = false }: LogoProps) {
   return (
     <div className="flex flex-col items-center">
       <div className="flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-200 -200 400 400" className={size === 'sm' ? "w-8 h-8" : "w-12 h-12"}>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-200 -200 400 400" className={size === 'sm' ? "w-8 h-8" : "w-[68px] h-[68px] mr-1.5 drop-shadow-[0_0_12px_rgba(20,184,166,0.3)]"}>
             <defs>
                 <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stopColor="#0ea5e9" />
@@ -55,8 +55,8 @@ export default function Logo({ size = 'sm', showSubtitle = false }: LogoProps) {
                 <circle cx="0" cy="0" r="8" fill="#0ea5e9" />
             </g>
         </svg>
-        <span className={size === 'sm' ? "-ml-1 font-bold text-lg tracking-tight" : "-ml-1 text-lg font-bold tracking-tight sm:text-3xl"}>
-          <span className="text-ink">VITO</span><span className="text-primary-600">GRAPH</span>
+        <span className={size === 'sm' ? "-ml-1 font-bold text-lg tracking-tight" : "-ml-1 font-bold tracking-tight text-[26px]"}>
+          <span className="text-white">VITO</span><span className="text-[#10b981]">GRAPH</span>
         </span>
       </div>
       {showSubtitle && (

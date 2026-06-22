@@ -534,6 +534,8 @@
     "takePhoto": "Сделать фото",
     "analyzingDocument": "Анализируем документ...",
     "reportGenerated": "Отчет сгенерирован",
+    "reportGeneratedHint": "Вы можете просмотреть его в разделе ",
+    "reportGeneratedLink": "отчеты по анализам",
     "uploadNewResults": "Загрузить новые результаты",
     "uploadNewResultsSub": "Загрузите анализы для AI расшифровки",
     "addNewAnalysis": "Добавить анализ",
@@ -718,6 +720,7 @@
     "active": "Активен",
     "blocked": "Заблокирован"
   },
+
   "units": {
     "mg": "мг",
     "mcg": "мкг",
@@ -872,5 +875,34 @@
     "overdosePhosphorus": "Вымывает кальций из костей.",
     "overdoseOmega3": "Снижает свертываемость крови.",
     "overdoseIodine": "Может спровоцировать гипертиреоз."
+  },
+  "wellbeing": {
+    "title": "Как ваше самочувствие сегодня?",
+    "statusUnselected": "Не выбрано",
+    "moods": {
+      "0": "Плохо",
+      "1": "Усталость",
+      "2": "Нормально",
+      "3": "Хорошо",
+      "4": "Бодрость"
+    }
+  },
+  "dashboard_header": {
+    "greeting_morning": "Доброе утро",
+    "greeting_afternoon": "Добрый день",
+    "greeting_evening": "Добрый вечер",
+    "greeting_night": "Доброй ночи",
+    "subtitle": "Как ваше самочувствие сегодня?"
+  },
+  "dashboard_grid": {
+    "tests_title": "Подача<br />анализов",
+    "tests_subtitle": "Чек-ап",
+    "tests_badge": "NEW",
+    "reports_title": "Отчеты",
+    "reports_subtitle": "Готовы",
+    "symptoms_title": "Симптомы<br />сегодня",
+    "symptoms_subtitle": "Заполнить",
+    "photo_title": "Фото<br />диагностика",
+    "photo_subtitle": "Анализ"
   }
 }

@@ -9,7 +9,7 @@
       "source_file": "old_FoodInputForm.tsx",
       "source_location": "L1",
       "id": "old_foodinputform_tsx",
-      "community": 48,
+      "community": 52,
       "norm_label": "old_foodinputform.tsx"
     },
     {
@@ -18,7 +18,7 @@
       "source_file": "old_FoodInputForm.tsx",
       "source_location": "L154",
       "id": "vitograph_old_foodinputform_f",
-      "community": 48,
+      "community": 52,
       "norm_label": "f()"
     },
     {
@@ -27,7 +27,7 @@
       "source_file": "old_FoodInputForm_utf8.tsx",
       "source_location": "L1",
       "id": "old_foodinputform_utf8_tsx",
-      "community": 88,
+      "community": 97,
       "norm_label": "old_foodinputform_utf8.tsx"
     },
     {
@@ -36,7 +36,7 @@
       "source_file": "patch_i18n.py",
       "source_location": "L1",
       "id": "patch_i18n_py",
-      "community": 89,
+      "community": 98,
       "norm_label": "patch_i18n.py"
     },
     {
@@ -45,7 +45,7 @@
       "source_file": "prisma.config.ts",
       "source_location": "L1",
       "id": "prisma_config_ts",
-      "community": 90,
+      "community": 99,
       "norm_label": "prisma.config.ts"
     },
     {
@@ -54,7 +54,7 @@
       "source_file": "recover_script.js",
       "source_location": "L1",
       "id": "recover_script_js",
-      "community": 49,
+      "community": 53,
       "norm_label": "recover_script.js"
     },
     {
@@ -63,7 +63,7 @@
       "source_file": "recover_script.js",
       "source_location": "L4",
       "id": "vitograph_recover_script_processlinebyline",
-      "community": 49,
+      "community": 53,
       "norm_label": "processlinebyline()"
     },
     {
@@ -72,7 +72,7 @@
       "source_file": "refactor.js",
       "source_location": "L1",
       "id": "refactor_js",
-      "community": 91,
+      "community": 100,
       "norm_label": "refactor.js"
     },
     {
@@ -81,7 +81,7 @@
       "source_file": "refactor10.js",
       "source_location": "L1",
       "id": "refactor10_js",
-      "community": 92,
+      "community": 101,
       "norm_label": "refactor10.js"
     },
     {
@@ -90,7 +90,7 @@
       "source_file": "refactor2.js",
       "source_location": "L1",
       "id": "refactor2_js",
-      "community": 93,
+      "community": 102,
       "norm_label": "refactor2.js"
     },
     {
@@ -99,7 +99,7 @@
       "source_file": "refactor3.js",
       "source_location": "L1",
       "id": "refactor3_js",
-      "community": 94,
+      "community": 103,
       "norm_label": "refactor3.js"
     },
     {
@@ -108,7 +108,7 @@
       "source_file": "refactor4.js",
       "source_location": "L1",
       "id": "refactor4_js",
-      "community": 95,
+      "community": 104,
       "norm_label": "refactor4.js"
     },
     {
@@ -117,7 +117,7 @@
       "source_file": "refactor5.js",
       "source_location": "L1",
       "id": "refactor5_js",
-      "community": 96,
+      "community": 105,
       "norm_label": "refactor5.js"
     },
     {
@@ -126,7 +126,7 @@
       "source_file": "refactor6.js",
       "source_location": "L1",
       "id": "refactor6_js",
-      "community": 97,
+      "community": 106,
       "norm_label": "refactor6.js"
     },
     {
@@ -135,7 +135,7 @@
       "source_file": "refactor8.js",
       "source_location": "L1",
       "id": "refactor8_js",
-      "community": 98,
+      "community": 107,
       "norm_label": "refactor8.js"
     },
     {
@@ -144,7 +144,7 @@
       "source_file": "refactor9.js",
       "source_location": "L1",
       "id": "refactor9_js",
-      "community": 99,
+      "community": 108,
       "norm_label": "refactor9.js"
     },
     {
@@ -153,7 +153,7 @@
       "source_file": "refactor_delete_logic.js",
       "source_location": "L1",
       "id": "refactor_delete_logic_js",
-      "community": 100,
+      "community": 109,
       "norm_label": "refactor_delete_logic.js"
     },
     {
@@ -162,7 +162,7 @@
       "source_file": "refactor_fallback_dedup.js",
       "source_location": "L1",
       "id": "refactor_fallback_dedup_js",
-      "community": 101,
+      "community": 110,
       "norm_label": "refactor_fallback_dedup.js"
     },
     {
@@ -171,7 +171,7 @@
       "source_file": "refactor_fallback_grouping.js",
       "source_location": "L1",
       "id": "refactor_fallback_grouping_js",
-      "community": 102,
+      "community": 111,
       "norm_label": "refactor_fallback_grouping.js"
     },
     {
@@ -180,7 +180,7 @@
       "source_file": "refactor_final.js",
       "source_location": "L1",
       "id": "refactor_final_js",
-      "community": 103,
+      "community": 112,
       "norm_label": "refactor_final.js"
     },
     {
@@ -189,7 +189,7 @@
       "source_file": "refactor_final_2.js",
       "source_location": "L1",
       "id": "refactor_final_2_js",
-      "community": 104,
+      "community": 113,
       "norm_label": "refactor_final_2.js"
     },
     {
@@ -198,7 +198,7 @@
       "source_file": "refactor_final_3.js",
       "source_location": "L1",
       "id": "refactor_final_3_js",
-      "community": 105,
+      "community": 114,
       "norm_label": "refactor_final_3.js"
     },
     {
@@ -207,7 +207,7 @@
       "source_file": "refactor_final_4.js",
       "source_location": "L1",
       "id": "refactor_final_4_js",
-      "community": 106,
+      "community": 115,
       "norm_label": "refactor_final_4.js"
     },
     {
@@ -216,7 +216,7 @@
       "source_file": "refactor_garmin_dashboard.js",
       "source_location": "L1",
       "id": "refactor_garmin_dashboard_js",
-      "community": 107,
+      "community": 116,
       "norm_label": "refactor_garmin_dashboard.js"
     },
     {
@@ -225,7 +225,7 @@
       "source_file": "refactor_group_metrics.js",
       "source_location": "L1",
       "id": "refactor_group_metrics_js",
-      "community": 108,
+      "community": 117,
       "norm_label": "refactor_group_metrics.js"
     },
     {
@@ -234,7 +234,7 @@
       "source_file": "refactor_group_metrics_2.js",
       "source_location": "L1",
       "id": "refactor_group_metrics_2_js",
-      "community": 109,
+      "community": 118,
       "norm_label": "refactor_group_metrics_2.js"
     },
     {
@@ -243,7 +243,7 @@
       "source_file": "refactor_group_metrics_3.js",
       "source_location": "L1",
       "id": "refactor_group_metrics_3_js",
-      "community": 110,
+      "community": 119,
       "norm_label": "refactor_group_metrics_3.js"
     },
     {
@@ -252,7 +252,7 @@
       "source_file": "refactor_group_metrics_4.js",
       "source_location": "L1",
       "id": "refactor_group_metrics_4_js",
-      "community": 111,
+      "community": 120,
       "norm_label": "refactor_group_metrics_4.js"
     },
     {
@@ -261,7 +261,7 @@
       "source_file": "refactor_group_metrics_5.js",
       "source_location": "L1",
       "id": "refactor_group_metrics_5_js",
-      "community": 112,
+      "community": 121,
       "norm_label": "refactor_group_metrics_5.js"
     },
     {
@@ -270,7 +270,7 @@
       "source_file": "refactor_group_metrics_6.js",
       "source_location": "L1",
       "id": "refactor_group_metrics_6_js",
-      "community": 113,
+      "community": 122,
       "norm_label": "refactor_group_metrics_6.js"
     },
     {
@@ -279,7 +279,7 @@
       "source_file": "refactor_group_metrics_7.js",
       "source_location": "L1",
       "id": "refactor_group_metrics_7_js",
-      "community": 114,
+      "community": 123,
       "norm_label": "refactor_group_metrics_7.js"
     },
     {
@@ -288,7 +288,7 @@
       "source_file": "refactor_group_metrics_9.js",
       "source_location": "L1",
       "id": "refactor_group_metrics_9_js",
-      "community": 115,
+      "community": 124,
       "norm_label": "refactor_group_metrics_9.js"
     },
     {
@@ -297,7 +297,7 @@
       "source_file": "refactor_hanging.js",
       "source_location": "L1",
       "id": "refactor_hanging_js",
-      "community": 116,
+      "community": 125,
       "norm_label": "refactor_hanging.js"
     },
     {
@@ -306,7 +306,7 @@
       "source_file": "refactor_import.js",
       "source_location": "L1",
       "id": "refactor_import_js",
-      "community": 117,
+      "community": 126,
       "norm_label": "refactor_import.js"
     },
     {
@@ -315,7 +315,7 @@
       "source_file": "refactor_inject_trash.js",
       "source_location": "L1",
       "id": "refactor_inject_trash_js",
-      "community": 118,
+      "community": 127,
       "norm_label": "refactor_inject_trash.js"
     },
     {
@@ -324,7 +324,7 @@
       "source_file": "refactor_inject_trash4.js",
       "source_location": "L1",
       "id": "refactor_inject_trash4_js",
-      "community": 119,
+      "community": 128,
       "norm_label": "refactor_inject_trash4.js"
     },
     {
@@ -333,7 +333,7 @@
       "source_file": "refactor_inject_trash5.js",
       "source_location": "L1",
       "id": "refactor_inject_trash5_js",
-      "community": 120,
+      "community": 129,
       "norm_label": "refactor_inject_trash5.js"
     },
     {
@@ -342,7 +342,7 @@
       "source_file": "refactor_inject_trash_regex.js",
       "source_location": "L1",
       "id": "refactor_inject_trash_regex_js",
-      "community": 121,
+      "community": 130,
       "norm_label": "refactor_inject_trash_regex.js"
     },
     {
@@ -351,7 +351,7 @@
       "source_file": "refactor_master_patch.js",
       "source_location": "L1",
       "id": "refactor_master_patch_js",
-      "community": 122,
+      "community": 131,
       "norm_label": "refactor_master_patch.js"
     },
     {
@@ -360,7 +360,7 @@
       "source_file": "refactor_master_patch_v2.js",
       "source_location": "L1",
       "id": "refactor_master_patch_v2_js",
-      "community": 123,
+      "community": 132,
       "norm_label": "refactor_master_patch_v2.js"
     },
     {
@@ -369,7 +369,7 @@
       "source_file": "refactor_metrics_loading.js",
       "source_location": "L1",
       "id": "refactor_metrics_loading_js",
-      "community": 124,
+      "community": 133,
       "norm_label": "refactor_metrics_loading.js"
     },
     {
@@ -378,7 +378,7 @@
       "source_file": "refactor_move_functions.js",
       "source_location": "L1",
       "id": "refactor_move_functions_js",
-      "community": 125,
+      "community": 134,
       "norm_label": "refactor_move_functions.js"
     },
     {
@@ -387,7 +387,7 @@
       "source_file": "refactor_ocr.js",
       "source_location": "L1",
       "id": "refactor_ocr_js",
-      "community": 126,
+      "community": 135,
       "norm_label": "refactor_ocr.js"
     },
     {
@@ -396,7 +396,7 @@
       "source_file": "refactor_reinject_functions.js",
       "source_location": "L1",
       "id": "refactor_reinject_functions_js",
-      "community": 127,
+      "community": 136,
       "norm_label": "refactor_reinject_functions.js"
     },
     {
@@ -405,7 +405,7 @@
       "source_file": "refactor_reinject_functions2.js",
       "source_location": "L1",
       "id": "refactor_reinject_functions2_js",
-      "community": 128,
+      "community": 137,
       "norm_label": "refactor_reinject_functions2.js"
     },
     {
@@ -414,7 +414,7 @@
       "source_file": "refactor_reinject_functions3.js",
       "source_location": "L1",
       "id": "refactor_reinject_functions3_js",
-      "community": 129,
+      "community": 138,
       "norm_label": "refactor_reinject_functions3.js"
     },
     {
@@ -423,7 +423,7 @@
       "source_file": "refactor_restore_and_fix.js",
       "source_location": "L1",
       "id": "refactor_restore_and_fix_js",
-      "community": 130,
+      "community": 139,
       "norm_label": "refactor_restore_and_fix.js"
     },
     {
@@ -432,7 +432,7 @@
       "source_file": "refactor_sync_logic.js",
       "source_location": "L1",
       "id": "refactor_sync_logic_js",
-      "community": 131,
+      "community": 140,
       "norm_label": "refactor_sync_logic.js"
     },
     {
@@ -441,7 +441,7 @@
       "source_file": "refactor_sync_logic2.js",
       "source_location": "L1",
       "id": "refactor_sync_logic2_js",
-      "community": 132,
+      "community": 141,
       "norm_label": "refactor_sync_logic2.js"
     },
     {
@@ -450,7 +450,7 @@
       "source_file": "refactor_sync_logic3.js",
       "source_location": "L1",
       "id": "refactor_sync_logic3_js",
-      "community": 133,
+      "community": 142,
       "norm_label": "refactor_sync_logic3.js"
     },
     {
@@ -459,7 +459,7 @@
       "source_file": "refactor_ui_delete_1.js",
       "source_location": "L1",
       "id": "refactor_ui_delete_1_js",
-      "community": 134,
+      "community": 143,
       "norm_label": "refactor_ui_delete_1.js"
     },
     {
@@ -468,7 +468,7 @@
       "source_file": "refactor_ui_delete_2.js",
       "source_location": "L1",
       "id": "refactor_ui_delete_2_js",
-      "community": 135,
+      "community": 144,
       "norm_label": "refactor_ui_delete_2.js"
     },
     {
@@ -477,7 +477,7 @@
       "source_file": "scratch_old.tsx",
       "source_location": "L1",
       "id": "scratch_old_tsx",
-      "community": 136,
+      "community": 145,
       "norm_label": "scratch_old.tsx"
     },
     {
@@ -486,7 +486,7 @@
       "source_file": "sync_keys.js",
       "source_location": "L1",
       "id": "sync_keys_js",
-      "community": 50,
+      "community": 54,
       "norm_label": "sync_keys.js"
     },
     {
@@ -495,7 +495,7 @@
       "source_file": "sync_keys.js",
       "source_location": "L11",
       "id": "vitograph_sync_keys_synckeys",
-      "community": 50,
+      "community": 54,
       "norm_label": "synckeys()"
     },
     {
@@ -504,7 +504,7 @@
       "source_file": "temp_fix.py",
       "source_location": "L1",
       "id": "temp_fix_py",
-      "community": 137,
+      "community": 146,
       "norm_label": "temp_fix.py"
     },
     {
@@ -513,7 +513,7 @@
       "source_file": "verify_fixes.py",
       "source_location": "L1",
       "id": "verify_fixes_py",
-      "community": 38,
+      "community": 40,
       "norm_label": "verify_fixes.py"
     },
     {
@@ -522,7 +522,7 @@
       "source_file": "verify_fixes.py",
       "source_location": "L8",
       "id": "vitograph_verify_fixes_test_supabase_syntax_fix",
-      "community": 38,
+      "community": 40,
       "norm_label": "test_supabase_syntax_fix()"
     },
     {
@@ -531,7 +531,7 @@
       "source_file": "verify_fixes.py",
       "source_location": "L28",
       "id": "vitograph_verify_fixes_test_patch_me",
-      "community": 38,
+      "community": 40,
       "norm_label": "test_patch_me()"
     },
     {
@@ -540,7 +540,7 @@
       "source_file": "vitograph_3d_data.js",
       "source_location": "L1",
       "id": "vitograph_3d_data_js",
-      "community": 138,
+      "community": 147,
       "norm_label": "vitograph_3d_data.js"
     },
     {
@@ -549,7 +549,7 @@
       "source_file": "apps\\api\\check.js",
       "source_location": "L1",
       "id": "apps_api_check_js",
-      "community": 51,
+      "community": 55,
       "norm_label": "check.js"
     },
     {
@@ -558,7 +558,7 @@
       "source_file": "apps\\api\\check.js",
       "source_location": "L4",
       "id": "api_check_run",
-      "community": 51,
+      "community": 55,
       "norm_label": "run()"
     },
     {
@@ -567,7 +567,7 @@
       "source_file": "apps\\api\\fetchMeals.ts",
       "source_location": "L1",
       "id": "apps_api_fetchmeals_ts",
-      "community": 52,
+      "community": 56,
       "norm_label": "fetchmeals.ts"
     },
     {
@@ -576,7 +576,7 @@
       "source_file": "apps\\api\\fetchMeals.ts",
       "source_location": "L18",
       "id": "api_fetchmeals_run",
-      "community": 52,
+      "community": 56,
       "norm_label": "run()"
     },
     {
@@ -585,7 +585,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L1",
       "id": "apps_api_main_py",
-      "community": 1,
+      "community": 2,
       "norm_label": "main.py"
     },
     {
@@ -594,7 +594,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L32",
       "id": "api_main_lifespantextembedding",
-      "community": 1,
+      "community": 2,
       "norm_label": "lifespantextembedding"
     },
     {
@@ -603,7 +603,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L39",
       "id": "api_main_lifespantextembedding_init",
-      "community": 1,
+      "community": 2,
       "norm_label": ".__init__()"
     },
     {
@@ -612,7 +612,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L49",
       "id": "api_main_lifespantextembedding_load",
-      "community": 1,
+      "community": 2,
       "norm_label": ".load()"
     },
     {
@@ -621,7 +621,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L58",
       "id": "api_main_lifespantextembedding_embed",
-      "community": 1,
+      "community": 2,
       "norm_label": ".embed()"
     },
     {
@@ -630,7 +630,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L110",
       "id": "api_main_lifespan",
-      "community": 1,
+      "community": 2,
       "norm_label": "lifespan()"
     },
     {
@@ -639,7 +639,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L155",
       "id": "api_main_http_exception_handler",
-      "community": 1,
+      "community": 2,
       "norm_label": "http_exception_handler()"
     },
     {
@@ -648,7 +648,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L164",
       "id": "api_main_global_exception_handler",
-      "community": 1,
+      "community": 2,
       "norm_label": "global_exception_handler()"
     },
     {
@@ -657,7 +657,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L219",
       "id": "api_main_refreshnotesrequest",
-      "community": 1,
+      "community": 2,
       "norm_label": "refreshnotesrequest"
     },
     {
@@ -666,7 +666,7 @@
       "source_file": "",
       "source_location": "",
       "id": "basemodel",
-      "community": 1,
+      "community": 2,
       "norm_label": "basemodel"
     },
     {
@@ -675,7 +675,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L223",
       "id": "api_main_refreshedmarker",
-      "community": 1,
+      "community": 2,
       "norm_label": "refreshedmarker"
     },
     {
@@ -684,7 +684,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L229",
       "id": "api_main_refreshnotesresponse",
-      "community": 1,
+      "community": 2,
       "norm_label": "refreshnotesresponse"
     },
     {
@@ -693,7 +693,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L233",
       "id": "api_main_recalculate_flag",
-      "community": 1,
+      "community": 2,
       "norm_label": "recalculate_flag()"
     },
     {
@@ -702,7 +702,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L289",
       "id": "api_main_enrich_biomarkers_with_insights",
-      "community": 1,
+      "community": 2,
       "norm_label": "enrich_biomarkers_with_insights()"
     },
     {
@@ -711,7 +711,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L524",
       "id": "api_main_refresh_biomarker_notes",
-      "community": 1,
+      "community": 2,
       "norm_label": "refresh_biomarker_notes()"
     },
     {
@@ -720,7 +720,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L549",
       "id": "api_main_parse_lab_report",
-      "community": 1,
+      "community": 2,
       "norm_label": "parse_lab_report()"
     },
     {
@@ -729,7 +729,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L579",
       "id": "api_main_parse_lab_report_image",
-      "community": 1,
+      "community": 2,
       "norm_label": "parse_lab_report_image()"
     },
     {
@@ -738,7 +738,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L616",
       "id": "api_main_parse_lab_report_image_batch",
-      "community": 1,
+      "community": 2,
       "norm_label": "parse_lab_report_image_batch()"
     },
     {
@@ -747,7 +747,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L673",
       "id": "api_main_process_ocr_job",
-      "community": 1,
+      "community": 2,
       "norm_label": "_process_ocr_job()"
     },
     {
@@ -756,7 +756,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L764",
       "id": "api_main_parse_lab_report_image_batch_async",
-      "community": 1,
+      "community": 2,
       "norm_label": "parse_lab_report_image_batch_async()"
     },
     {
@@ -765,7 +765,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L851",
       "id": "api_main_get_lab_scan_status",
-      "community": 1,
+      "community": 2,
       "norm_label": "get_lab_scan_status()"
     },
     {
@@ -774,7 +774,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L877",
       "id": "api_main_calculate_norm",
-      "community": 1,
+      "community": 2,
       "norm_label": "calculate_norm()"
     },
     {
@@ -783,7 +783,7 @@
       "source_file": "apps\\api\\main.py",
       "source_location": "L897",
       "id": "api_main_health_check",
-      "community": 1,
+      "community": 2,
       "norm_label": "health_check()"
     },
     {
@@ -791,7 +791,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L1",
-      "community": 1,
+      "community": 2,
       "norm_label": "vitograph \u2014 fastapi application entry point.  initialises the fastapi app with",
       "id": "api_main_rationale_1"
     },
@@ -800,7 +800,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L33",
-      "community": 1,
+      "community": 2,
       "norm_label": "thread-safe wrapper for lifespan initialization of textembedding.      prevent",
       "id": "api_main_rationale_33"
     },
@@ -809,7 +809,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L40",
-      "community": 1,
+      "community": 2,
       "norm_label": "initialize the thread-safe lifespan wrapper for textembedding.          args:",
       "id": "api_main_rationale_40"
     },
@@ -818,7 +818,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L50",
-      "community": 1,
+      "community": 2,
       "norm_label": "load the underlying textembedding model thread-safely.",
       "id": "api_main_rationale_50"
     },
@@ -827,7 +827,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L59",
-      "community": 1,
+      "community": 2,
       "norm_label": "generate embeddings for the input text using the loaded model.          args:",
       "id": "api_main_rationale_59"
     },
@@ -836,7 +836,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L111",
-      "community": 1,
+      "community": 2,
       "norm_label": "manage application startup / shutdown resources.      on startup, the fastembe",
       "id": "api_main_rationale_111"
     },
@@ -845,7 +845,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L156",
-      "community": 1,
+      "community": 2,
       "norm_label": "pass through httpexceptions so they aren't caught by the global handler.",
       "id": "api_main_rationale_156"
     },
@@ -854,7 +854,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L165",
-      "community": 1,
+      "community": 2,
       "norm_label": "catch all unhandled exceptions and log full traceback.",
       "id": "api_main_rationale_165"
     },
@@ -863,7 +863,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L236",
-      "community": 1,
+      "community": 2,
       "norm_label": "deterministically recalculate flag based on numeric value and reference range.",
       "id": "api_main_rationale_236"
     },
@@ -872,7 +872,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L293",
-      "community": 1,
+      "community": 2,
       "norm_label": "enrich biomarkers with ai clinical notes via semantic cache + llm fallback.",
       "id": "api_main_rationale_293"
     },
@@ -881,7 +881,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L525",
-      "community": 1,
+      "community": 2,
       "norm_label": "background: run ocr on images, save result to lab_scans table.      args:",
       "id": "api_main_rationale_525"
     },
@@ -890,7 +890,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L550",
-      "community": 1,
+      "community": 2,
       "norm_label": "upload pdf/docx/txt -> extract biomarkers dynamically via ai.",
       "id": "api_main_rationale_550"
     },
@@ -899,7 +899,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L580",
-      "community": 1,
+      "community": 2,
       "norm_label": "upload a photo of a lab report -> ocr via gpt-4o vision -> extract biomarkers.",
       "id": "api_main_rationale_580"
     },
@@ -908,7 +908,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L617",
-      "community": 1,
+      "community": 2,
       "norm_label": "upload a batch of photos (up to 10) of a lab report -> ocr via gpt-4o vision ->",
       "id": "api_main_rationale_617"
     },
@@ -917,7 +917,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L680",
-      "community": 1,
+      "community": 2,
       "norm_label": "calculate dynamic norm (mock logic).",
       "id": "api_main_rationale_680"
     },
@@ -926,7 +926,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L769",
-      "community": 1,
+      "community": 2,
       "norm_label": "initiate async batch ocr. returns job_id immediately.",
       "id": "api_main_rationale_769"
     },
@@ -935,7 +935,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L852",
-      "community": 1,
+      "community": 2,
       "norm_label": "polling fallback: check async ocr job status.",
       "id": "api_main_rationale_852"
     },
@@ -944,7 +944,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L878",
-      "community": 1,
+      "community": 2,
       "norm_label": "calculate dynamic norm (mock logic).",
       "id": "api_main_rationale_878"
     },
@@ -953,7 +953,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L898",
-      "community": 1,
+      "community": 2,
       "norm_label": "return a simple health-check response.",
       "id": "api_main_rationale_898"
     },
@@ -963,7 +963,7 @@
       "source_file": "apps\\api\\test-remote-chat.mjs",
       "source_location": "L1",
       "id": "apps_api_test_remote_chat_mjs",
-      "community": 53,
+      "community": 57,
       "norm_label": "test-remote-chat.mjs"
     },
     {
@@ -972,7 +972,7 @@
       "source_file": "apps\\api\\test-remote-chat.mjs",
       "source_location": "L15",
       "id": "api_test_remote_chat_runtest",
-      "community": 53,
+      "community": 57,
       "norm_label": "runtest()"
     },
     {
@@ -981,7 +981,7 @@
       "source_file": "apps\\api\\verify_fixes.py",
       "source_location": "L1",
       "id": "apps_api_verify_fixes_py",
-      "community": 39,
+      "community": 41,
       "norm_label": "verify_fixes.py"
     },
     {
@@ -990,7 +990,7 @@
       "source_file": "apps\\api\\verify_fixes.py",
       "source_location": "L8",
       "id": "api_verify_fixes_test_supabase_syntax_fix",
-      "community": 39,
+      "community": 41,
       "norm_label": "test_supabase_syntax_fix()"
     },
     {
@@ -999,7 +999,7 @@
       "source_file": "apps\\api\\verify_fixes.py",
       "source_location": "L21",
       "id": "api_verify_fixes_test_patch_me",
-      "community": 39,
+      "community": 41,
       "norm_label": "test_patch_me()"
     },
     {
@@ -1008,7 +1008,7 @@
       "source_file": "apps\\api\\api\\__init__.py",
       "source_location": "L1",
       "id": "apps_api_api_init_py",
-      "community": 139,
+      "community": 148,
       "norm_label": "__init__.py"
     },
     {
@@ -1017,7 +1017,7 @@
       "source_file": "apps\\api\\api\\v1\\__init__.py",
       "source_location": "L1",
       "id": "apps_api_api_v1_init_py",
-      "community": 140,
+      "community": 149,
       "norm_label": "__init__.py"
     },
     {
@@ -1350,7 +1350,7 @@
       "source_file": "apps\\api\\api\\v1\\endpoints\\__init__.py",
       "source_location": "L1",
       "id": "apps_api_api_v1_endpoints_init_py",
-      "community": 141,
+      "community": 150,
       "norm_label": "__init__.py"
     },
     {
@@ -1359,7 +1359,7 @@
       "source_file": "apps\\api\\core\\config.py",
       "source_location": "L1",
       "id": "apps_api_core_config_py",
-      "community": 26,
+      "community": 27,
       "norm_label": "config.py"
     },
     {
@@ -1368,7 +1368,7 @@
       "source_file": "apps\\api\\core\\config.py",
       "source_location": "L12",
       "id": "core_config_settings",
-      "community": 26,
+      "community": 27,
       "norm_label": "settings"
     },
     {
@@ -1377,7 +1377,7 @@
       "source_file": "",
       "source_location": "",
       "id": "basesettings",
-      "community": 26,
+      "community": 27,
       "norm_label": "basesettings"
     },
     {
@@ -1385,7 +1385,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\core\\config.py",
       "source_location": "L1",
-      "community": 26,
+      "community": 27,
       "norm_label": "application configuration loaded from environment variables.  uses ``pydantic-",
       "id": "core_config_rationale_1"
     },
@@ -1394,7 +1394,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\core\\config.py",
       "source_location": "L13",
-      "community": 26,
+      "community": 27,
       "norm_label": "central configuration for the vitograph api.      attributes:         supabas",
       "id": "core_config_rationale_13"
     },
@@ -1638,7 +1638,7 @@
       "source_file": "apps\\api\\core\\__init__.py",
       "source_location": "L1",
       "id": "apps_api_core_init_py",
-      "community": 142,
+      "community": 151,
       "norm_label": "__init__.py"
     },
     {
@@ -1755,7 +1755,7 @@
       "source_file": "apps\\api\\repositories\\__init__.py",
       "source_location": "L1",
       "id": "apps_api_repositories_init_py",
-      "community": 143,
+      "community": 152,
       "norm_label": "__init__.py"
     },
     {
@@ -2214,7 +2214,7 @@
       "source_file": "apps\\api\\schemas\\__init__.py",
       "source_location": "L1",
       "id": "apps_api_schemas_init_py",
-      "community": 144,
+      "community": 153,
       "norm_label": "__init__.py"
     },
     {
@@ -2547,7 +2547,7 @@
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L24",
       "id": "services_file_parser_referencerange",
-      "community": 1,
+      "community": 2,
       "norm_label": "referencerange"
     },
     {
@@ -2556,7 +2556,7 @@
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L34",
       "id": "services_file_parser_biomarkerresult",
-      "community": 1,
+      "community": 2,
       "norm_label": "biomarkerresult"
     },
     {
@@ -2565,7 +2565,7 @@
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L63",
       "id": "services_file_parser_labreportextraction",
-      "community": 1,
+      "community": 2,
       "norm_label": "labreportextraction"
     },
     {
@@ -2636,7 +2636,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L25",
-      "community": 1,
+      "community": 2,
       "norm_label": "encapsulates the reference range explicitly stated in the document.",
       "id": "services_file_parser_rationale_25"
     },
@@ -2645,7 +2645,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L35",
-      "community": 1,
+      "community": 2,
       "norm_label": "a single biomarker extracted dynamically from the lab report.",
       "id": "services_file_parser_rationale_35"
     },
@@ -2654,7 +2654,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L64",
-      "community": 1,
+      "community": 2,
       "norm_label": "the root structure expected from the llm.",
       "id": "services_file_parser_rationale_64"
     },
@@ -2718,7 +2718,7 @@
       "source_file": "apps\\api\\services\\norm_engine.py",
       "source_location": "L1",
       "id": "apps_api_services_norm_engine_py",
-      "community": 1,
+      "community": 2,
       "norm_label": "norm_engine.py"
     },
     {
@@ -2727,7 +2727,7 @@
       "source_file": "apps\\api\\services\\norm_engine.py",
       "source_location": "L11",
       "id": "services_norm_engine_userprofile",
-      "community": 1,
+      "community": 2,
       "norm_label": "userprofile"
     },
     {
@@ -2736,7 +2736,7 @@
       "source_file": "apps\\api\\services\\norm_engine.py",
       "source_location": "L23",
       "id": "services_norm_engine_normresult",
-      "community": 1,
+      "community": 2,
       "norm_label": "normresult"
     },
     {
@@ -2745,7 +2745,7 @@
       "source_file": "apps\\api\\services\\norm_engine.py",
       "source_location": "L54",
       "id": "services_norm_engine_calculate_dynamic_norm",
-      "community": 1,
+      "community": 2,
       "norm_label": "calculate_dynamic_norm()"
     },
     {
@@ -2753,7 +2753,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\norm_engine.py",
       "source_location": "L1",
-      "community": 1,
+      "community": 2,
       "norm_label": "norm engine \u2014 mock implementation of dynamic norm logic.  calculates personali",
       "id": "services_norm_engine_rationale_1"
     },
@@ -2762,7 +2762,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\norm_engine.py",
       "source_location": "L55",
-      "community": 1,
+      "community": 2,
       "norm_label": "calculate personalized norms based on profile factors (mock logic).",
       "id": "services_norm_engine_rationale_55"
     },
@@ -2772,7 +2772,7 @@
       "source_file": "apps\\api\\services\\pdf_parser.py",
       "source_location": "L1",
       "id": "apps_api_services_pdf_parser_py",
-      "community": 1,
+      "community": 26,
       "norm_label": "pdf_parser.py"
     },
     {
@@ -2781,7 +2781,7 @@
       "source_file": "apps\\api\\services\\pdf_parser.py",
       "source_location": "L22",
       "id": "services_pdf_parser_biomarkerresult",
-      "community": 1,
+      "community": 26,
       "norm_label": "biomarkerresult"
     },
     {
@@ -2790,7 +2790,7 @@
       "source_file": "apps\\api\\services\\pdf_parser.py",
       "source_location": "L76",
       "id": "services_pdf_parser_extract_biomarkers",
-      "community": 1,
+      "community": 26,
       "norm_label": "extract_biomarkers()"
     },
     {
@@ -2798,7 +2798,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\pdf_parser.py",
       "source_location": "L1",
-      "community": 1,
+      "community": 26,
       "norm_label": "pdf parser service \u2014 regex-based extraction of biomarker values.  this service",
       "id": "services_pdf_parser_rationale_1"
     },
@@ -2807,7 +2807,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\pdf_parser.py",
       "source_location": "L77",
-      "community": 1,
+      "community": 26,
       "norm_label": "extract standard biomarkers from pdf bytes using regex.",
       "id": "services_pdf_parser_rationale_77"
     },
@@ -2906,7 +2906,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\pdf_service.py",
       "source_location": "L93",
-      "community": 145,
+      "community": 154,
       "norm_label": "extract all text from a pdf file.          reads every page of the pdf and con",
       "id": "services_pdf_service_rationale_93"
     },
@@ -2915,7 +2915,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\pdf_service.py",
       "source_location": "L145",
-      "community": 146,
+      "community": 155,
       "norm_label": "parse extracted text into structured biomarker data.          uses openai ``as",
       "id": "services_pdf_service_rationale_145"
     },
@@ -2925,7 +2925,7 @@
       "source_file": "apps\\api\\services\\__init__.py",
       "source_location": "L1",
       "id": "apps_api_services_init_py",
-      "community": 147,
+      "community": 156,
       "norm_label": "__init__.py"
     },
     {
@@ -2934,7 +2934,7 @@
       "source_file": "apps\\api\\src\\ai\\check_latest_goal.mjs",
       "source_location": "L1",
       "id": "apps_api_src_ai_check_latest_goal_mjs",
-      "community": 54,
+      "community": 58,
       "norm_label": "check_latest_goal.mjs"
     },
     {
@@ -2943,7 +2943,7 @@
       "source_file": "apps\\api\\src\\ai\\check_latest_goal.mjs",
       "source_location": "L8",
       "id": "ai_check_latest_goal_main",
-      "community": 54,
+      "community": 58,
       "norm_label": "main()"
     },
     {
@@ -2952,7 +2952,7 @@
       "source_file": "apps\\api\\src\\ai\\debug-goals.ts",
       "source_location": "L1",
       "id": "apps_api_src_ai_debug_goals_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "debug-goals.ts"
     },
     {
@@ -2961,7 +2961,7 @@
       "source_file": "apps\\api\\src\\ai\\debug-goals.ts",
       "source_location": "L4",
       "id": "ai_debug_goals_run",
-      "community": 2,
+      "community": 1,
       "norm_label": "run()"
     },
     {
@@ -2970,7 +2970,7 @@
       "source_file": "apps\\api\\src\\ai\\find_sleep_skill.mjs",
       "source_location": "L1",
       "id": "apps_api_src_ai_find_sleep_skill_mjs",
-      "community": 55,
+      "community": 59,
       "norm_label": "find_sleep_skill.mjs"
     },
     {
@@ -2979,7 +2979,7 @@
       "source_file": "apps\\api\\src\\ai\\find_sleep_skill.mjs",
       "source_location": "L7",
       "id": "ai_find_sleep_skill_findsleepskill",
-      "community": 55,
+      "community": 59,
       "norm_label": "findsleepskill()"
     },
     {
@@ -2988,7 +2988,7 @@
       "source_file": "apps\\api\\src\\ai\\flush_queue.js",
       "source_location": "L1",
       "id": "apps_api_src_ai_flush_queue_js",
-      "community": 40,
+      "community": 42,
       "norm_label": "flush_queue.js"
     },
     {
@@ -2997,7 +2997,7 @@
       "source_file": "apps\\api\\src\\ai\\flush_queue.mjs",
       "source_location": "L9",
       "id": "ai_flush_queue_run",
-      "community": 40,
+      "community": 42,
       "norm_label": "run()"
     },
     {
@@ -3006,7 +3006,7 @@
       "source_file": "apps\\api\\src\\ai\\flush_queue.mjs",
       "source_location": "L1",
       "id": "apps_api_src_ai_flush_queue_mjs",
-      "community": 40,
+      "community": 42,
       "norm_label": "flush_queue.mjs"
     },
     {
@@ -3015,7 +3015,7 @@
       "source_file": "apps\\api\\src\\ai\\minimal.js",
       "source_location": "L1",
       "id": "apps_api_src_ai_minimal_js",
-      "community": 148,
+      "community": 157,
       "norm_label": "minimal.js"
     },
     {
@@ -3024,7 +3024,7 @@
       "source_file": "apps\\api\\src\\ai\\vitest.config.ts",
       "source_location": "L1",
       "id": "apps_api_src_ai_vitest_config_ts",
-      "community": 149,
+      "community": 158,
       "norm_label": "vitest.config.ts"
     },
     {
@@ -3087,7 +3087,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L1",
       "id": "apps_api_src_ai_src_ai_controller_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "ai.controller.ts"
     },
     {
@@ -3096,7 +3096,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L86",
       "id": "src_ai_controller_computedeterministicmicros",
-      "community": 2,
+      "community": 1,
       "norm_label": "computedeterministicmicros()"
     },
     {
@@ -3105,7 +3105,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L317",
       "id": "src_ai_controller_computedeterministicmacros",
-      "community": 2,
+      "community": 1,
       "norm_label": "computedeterministicmacros()"
     },
     {
@@ -3114,7 +3114,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L368",
       "id": "src_ai_controller_fetchusercontext",
-      "community": 2,
+      "community": 1,
       "norm_label": "fetchusercontext()"
     },
     {
@@ -3123,7 +3123,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L448",
       "id": "src_ai_controller_formattestresults",
-      "community": 2,
+      "community": 1,
       "norm_label": "formattestresults()"
     },
     {
@@ -3132,7 +3132,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L466",
       "id": "src_ai_controller_formatmeallogs",
-      "community": 2,
+      "community": 1,
       "norm_label": "formatmeallogs()"
     },
     {
@@ -3141,7 +3141,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L516",
       "id": "src_ai_controller_formathistorysynopsis",
-      "community": 2,
+      "community": 1,
       "norm_label": "formathistorysynopsis()"
     },
     {
@@ -3150,7 +3150,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L532",
       "id": "src_ai_controller_formatleanprofile",
-      "community": 2,
+      "community": 1,
       "norm_label": "formatleanprofile()"
     },
     {
@@ -3159,7 +3159,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L552",
       "id": "src_ai_controller_getleanusercontext",
-      "community": 2,
+      "community": 1,
       "norm_label": "getleanusercontext()"
     },
     {
@@ -3168,7 +3168,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L609",
       "id": "src_ai_controller_formatnutritiontargets",
-      "community": 2,
+      "community": 1,
       "norm_label": "formatnutritiontargets()"
     },
     {
@@ -3177,7 +3177,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L626",
       "id": "src_ai_controller_formattodayprogress",
-      "community": 2,
+      "community": 1,
       "norm_label": "formattodayprogress()"
     },
     {
@@ -3186,7 +3186,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L682",
       "id": "src_ai_controller_formatdietaryrestrictions",
-      "community": 2,
+      "community": 1,
       "norm_label": "formatdietaryrestrictions()"
     },
     {
@@ -3195,7 +3195,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L706",
       "id": "src_ai_controller_formatchronicconditions",
-      "community": 2,
+      "community": 1,
       "norm_label": "formatchronicconditions()"
     },
     {
@@ -3204,7 +3204,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L725",
       "id": "src_ai_controller_formatactiveknowledgebases",
-      "community": 2,
+      "community": 1,
       "norm_label": "formatactiveknowledgebases()"
     },
     {
@@ -3213,7 +3213,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L760",
       "id": "src_ai_controller_formatactivesupplementprotocol",
-      "community": 2,
+      "community": 1,
       "norm_label": "formatactivesupplementprotocol()"
     },
     {
@@ -3222,7 +3222,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L792",
       "id": "src_ai_controller_formattodaysupplements",
-      "community": 2,
+      "community": 1,
       "norm_label": "formattodaysupplements()"
     },
     {
@@ -3231,7 +3231,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L804",
       "id": "src_ai_controller_formatfoodcontraindicationzones",
-      "community": 2,
+      "community": 1,
       "norm_label": "formatfoodcontraindicationzones()"
     },
     {
@@ -3240,7 +3240,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L831",
       "id": "src_ai_controller_formatlabdiagnosticreport",
-      "community": 2,
+      "community": 1,
       "norm_label": "formatlabdiagnosticreport()"
     },
     {
@@ -3249,7 +3249,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L880",
       "id": "src_ai_controller_fetchlatestinsight",
-      "community": 2,
+      "community": 1,
       "norm_label": "fetchlatestinsight()"
     },
     {
@@ -3258,7 +3258,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L923",
       "id": "src_ai_controller_formatlabreportdeep",
-      "community": 2,
+      "community": 1,
       "norm_label": "formatlabreportdeep()"
     },
     {
@@ -3267,7 +3267,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L964",
       "id": "src_ai_controller_handleupdatemeallog",
-      "community": 2,
+      "community": 1,
       "norm_label": "handleupdatemeallog()"
     },
     {
@@ -3276,7 +3276,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L1125",
       "id": "src_ai_controller_handledeletemeallog",
-      "community": 2,
+      "community": 1,
       "norm_label": "handledeletemeallog()"
     },
     {
@@ -3285,7 +3285,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L1227",
       "id": "src_ai_controller_handlechat",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlechat()"
     },
     {
@@ -3294,7 +3294,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L1548",
       "id": "src_ai_controller_handlechatstream",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlechatstream()"
     },
     {
@@ -3321,7 +3321,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L1941",
       "id": "src_ai_controller_handleanalyzesomatic",
-      "community": 2,
+      "community": 1,
       "norm_label": "handleanalyzesomatic()"
     },
     {
@@ -3330,7 +3330,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L1985",
       "id": "src_ai_controller_handlegetchathistory",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlegetchathistory()"
     },
     {
@@ -3339,7 +3339,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L2099",
       "id": "src_ai_controller_handleanalyzefood",
-      "community": 2,
+      "community": 1,
       "norm_label": "handleanalyzefood()"
     },
     {
@@ -3348,7 +3348,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L2157",
       "id": "src_ai_controller_handleanalyzelabreport",
-      "community": 2,
+      "community": 1,
       "norm_label": "handleanalyzelabreport()"
     },
     {
@@ -3357,7 +3357,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L2235",
       "id": "src_ai_controller_handlegetlabreportshistory",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlegetlabreportshistory()"
     },
     {
@@ -3366,7 +3366,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L2293",
       "id": "src_ai_controller_handledeletelabreport",
-      "community": 2,
+      "community": 1,
       "norm_label": "handledeletelabreport()"
     },
     {
@@ -3375,7 +3375,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L2410",
       "id": "src_ai_controller_handlegetsomatichistory",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlegetsomatichistory()"
     },
     {
@@ -3384,7 +3384,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L2455",
       "id": "src_ai_controller_handlegetnutritiontargets",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlegetnutritiontargets()"
     },
     {
@@ -3393,7 +3393,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L2500",
       "id": "src_ai_controller_handleclearchathistory",
-      "community": 2,
+      "community": 1,
       "norm_label": "handleclearchathistory()"
     },
     {
@@ -3402,7 +3402,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L2570",
       "id": "src_ai_controller_handleclearlongtermmemory",
-      "community": 2,
+      "community": 1,
       "norm_label": "handleclearlongtermmemory()"
     },
     {
@@ -3411,7 +3411,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L2629",
       "id": "src_ai_controller_handledeleteaccount",
-      "community": 2,
+      "community": 1,
       "norm_label": "handledeleteaccount()"
     },
     {
@@ -3420,7 +3420,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L2728",
       "id": "src_ai_controller_parsesupplementmicro",
-      "community": 2,
+      "community": 1,
       "norm_label": "parsesupplementmicro()"
     },
     {
@@ -3429,7 +3429,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L2762",
       "id": "src_ai_controller_handlegetdiarymacros",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlegetdiarymacros()"
     },
     {
@@ -3438,7 +3438,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L2881",
       "id": "src_ai_controller_handlecorrelatesymptoms",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlecorrelatesymptoms()"
     },
     {
@@ -3447,7 +3447,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L2949",
       "id": "src_ai_controller_handleanalyzelabel",
-      "community": 2,
+      "community": 1,
       "norm_label": "handleanalyzelabel()"
     },
     {
@@ -3456,7 +3456,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L3014",
       "id": "src_ai_controller_handlegetglycemictimeline",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlegetglycemictimeline()"
     },
     {
@@ -3465,7 +3465,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L3238",
       "id": "src_ai_controller_handlepushsubscribe",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlepushsubscribe()"
     },
     {
@@ -3474,7 +3474,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L3321",
       "id": "src_ai_controller_handlewatercronpush",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlewatercronpush()"
     },
     {
@@ -3483,7 +3483,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L3528",
       "id": "src_ai_controller_handlepushunsubscribe",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlepushunsubscribe()"
     },
     {
@@ -3492,7 +3492,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L3584",
       "id": "src_ai_controller_handlemediacleanupcron",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlemediacleanupcron()"
     },
     {
@@ -3510,7 +3510,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L3673",
       "id": "src_ai_controller_handlesavewearablemetrics",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlesavewearablemetrics()"
     },
     {
@@ -3519,7 +3519,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\ai.controller.ts",
       "source_location": "L3734",
       "id": "src_ai_controller_handlegetsystemgraph",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlegetsystemgraph()"
     },
     {
@@ -3528,7 +3528,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\backfill_profiles.ts",
       "source_location": "L1",
       "id": "apps_api_src_ai_src_backfill_profiles_ts",
-      "community": 56,
+      "community": 60,
       "norm_label": "backfill_profiles.ts"
     },
     {
@@ -3537,7 +3537,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\backfill_profiles.ts",
       "source_location": "L16",
       "id": "src_backfill_profiles_main",
-      "community": 56,
+      "community": 60,
       "norm_label": "main()"
     },
     {
@@ -3546,7 +3546,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\debug_meals.ts",
       "source_location": "L1",
       "id": "apps_api_src_ai_src_debug_meals_ts",
-      "community": 57,
+      "community": 61,
       "norm_label": "debug_meals.ts"
     },
     {
@@ -3555,7 +3555,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\debug_meals.ts",
       "source_location": "L16",
       "id": "src_debug_meals_debug",
-      "community": 57,
+      "community": 61,
       "norm_label": "debug()"
     },
     {
@@ -3564,7 +3564,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\debug_profile.ts",
       "source_location": "L1",
       "id": "apps_api_src_ai_src_debug_profile_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "debug_profile.ts"
     },
     {
@@ -3573,7 +3573,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\debug_profile.ts",
       "source_location": "L11",
       "id": "src_debug_profile_checkprofile",
-      "community": 2,
+      "community": 1,
       "norm_label": "checkprofile()"
     },
     {
@@ -3708,7 +3708,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\migrate-threads.ts",
       "source_location": "L1",
       "id": "apps_api_src_ai_src_migrate_threads_ts",
-      "community": 58,
+      "community": 62,
       "norm_label": "migrate-threads.ts"
     },
     {
@@ -3717,7 +3717,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\migrate-threads.ts",
       "source_location": "L9",
       "id": "src_migrate_threads_migratethreads",
-      "community": 58,
+      "community": 62,
       "norm_label": "migratethreads()"
     },
     {
@@ -3780,7 +3780,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\test-chat.mjs",
       "source_location": "L1",
       "id": "apps_api_src_ai_src_test_chat_mjs",
-      "community": 59,
+      "community": 63,
       "norm_label": "test-chat.mjs"
     },
     {
@@ -3789,7 +3789,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\test-chat.mjs",
       "source_location": "L16",
       "id": "src_test_chat_runtest",
-      "community": 59,
+      "community": 63,
       "norm_label": "runtest()"
     },
     {
@@ -3798,7 +3798,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\test-fetch.js",
       "source_location": "L1",
       "id": "apps_api_src_ai_src_test_fetch_js",
-      "community": 60,
+      "community": 64,
       "norm_label": "test-fetch.js"
     },
     {
@@ -3807,7 +3807,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\test-fetch.js",
       "source_location": "L3",
       "id": "src_test_fetch_testfetch",
-      "community": 60,
+      "community": 64,
       "norm_label": "testfetch()"
     },
     {
@@ -3870,7 +3870,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\weather.service.ts",
       "source_location": "L1",
       "id": "apps_api_src_ai_src_weather_service_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "weather.service.ts"
     },
     {
@@ -3879,7 +3879,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\weather.service.ts",
       "source_location": "L6",
       "id": "src_weather_service_calculatemaxpressuredrop",
-      "community": 2,
+      "community": 1,
       "norm_label": "calculatemaxpressuredrop()"
     },
     {
@@ -3888,7 +3888,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\weather.service.ts",
       "source_location": "L20",
       "id": "src_weather_service_getorfetchweathercontext",
-      "community": 2,
+      "community": 1,
       "norm_label": "getorfetchweathercontext()"
     },
     {
@@ -4122,7 +4122,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\lib\\fcm-sender.ts",
       "source_location": "L1",
       "id": "apps_api_src_ai_src_lib_fcm_sender_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "fcm-sender.ts"
     },
     {
@@ -4131,7 +4131,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\lib\\fcm-sender.ts",
       "source_location": "L10",
       "id": "lib_fcm_sender_getcredentials",
-      "community": 2,
+      "community": 1,
       "norm_label": "getcredentials()"
     },
     {
@@ -4140,7 +4140,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\lib\\fcm-sender.ts",
       "source_location": "L35",
       "id": "lib_fcm_sender_getauth",
-      "community": 2,
+      "community": 1,
       "norm_label": "getauth()"
     },
     {
@@ -4149,7 +4149,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\lib\\fcm-sender.ts",
       "source_location": "L52",
       "id": "lib_fcm_sender_sendfcmnotification",
-      "community": 2,
+      "community": 1,
       "norm_label": "sendfcmnotification()"
     },
     {
@@ -4284,7 +4284,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\lib\\storage.ts",
       "source_location": "L1",
       "id": "apps_api_src_ai_src_lib_storage_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "storage.ts"
     },
     {
@@ -4293,7 +4293,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\lib\\storage.ts",
       "source_location": "L7",
       "id": "lib_storage_uploadnailphoto",
-      "community": 2,
+      "community": 1,
       "norm_label": "uploadnailphoto()"
     },
     {
@@ -4302,7 +4302,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\lib\\storage.ts",
       "source_location": "L19",
       "id": "lib_storage_uploadfoodphoto",
-      "community": 2,
+      "community": 1,
       "norm_label": "uploadfoodphoto()"
     },
     {
@@ -4311,7 +4311,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\lib\\storage.ts",
       "source_location": "L31",
       "id": "lib_storage_uploadtonguephoto",
-      "community": 2,
+      "community": 1,
       "norm_label": "uploadtonguephoto()"
     },
     {
@@ -4320,7 +4320,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\lib\\storage.ts",
       "source_location": "L42",
       "id": "lib_storage_uploadmediafile",
-      "community": 2,
+      "community": 1,
       "norm_label": "uploadmediafile()"
     },
     {
@@ -4725,7 +4725,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\prompts\\index.ts",
       "source_location": "L1",
       "id": "apps_api_src_ai_src_prompts_index_ts",
-      "community": 150,
+      "community": 159,
       "norm_label": "index.ts"
     },
     {
@@ -4833,7 +4833,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\services\\kb.service.ts",
       "source_location": "L1",
       "id": "apps_api_src_ai_src_services_kb_service_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "kb.service.ts"
     },
     {
@@ -4842,7 +4842,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\services\\kb.service.ts",
       "source_location": "L50",
       "id": "services_kb_service_fetchknowledgebasecontext",
-      "community": 2,
+      "community": 1,
       "norm_label": "fetchknowledgebasecontext()"
     },
     {
@@ -4851,7 +4851,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\services\\memory.service.ts",
       "source_location": "L1",
       "id": "apps_api_src_ai_src_services_memory_service_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "memory.service.ts"
     },
     {
@@ -4860,7 +4860,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\services\\memory.service.ts",
       "source_location": "L18",
       "id": "services_memory_service_fetchadvancedmemorycontext",
-      "community": 2,
+      "community": 1,
       "norm_label": "fetchadvancedmemorycontext()"
     },
     {
@@ -4869,7 +4869,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\services\\memory.service.ts",
       "source_location": "L60",
       "id": "services_memory_service_fetchemotionalprofile",
-      "community": 2,
+      "community": 1,
       "norm_label": "fetchemotionalprofile()"
     },
     {
@@ -4878,7 +4878,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\services\\memory.service.ts",
       "source_location": "L85",
       "id": "services_memory_service_fetchsemanticmemories",
-      "community": 2,
+      "community": 1,
       "norm_label": "fetchsemanticmemories()"
     },
     {
@@ -4887,7 +4887,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\services\\memory.service.ts",
       "source_location": "L121",
       "id": "services_memory_service_fetchpastactions",
-      "community": 2,
+      "community": 1,
       "norm_label": "fetchpastactions()"
     },
     {
@@ -4896,7 +4896,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\services\\skills.service.ts",
       "source_location": "L1",
       "id": "apps_api_src_ai_src_services_skills_service_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "skills.service.ts"
     },
     {
@@ -4905,7 +4905,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\services\\skills.service.ts",
       "source_location": "L27",
       "id": "services_skills_service_fetchactiveskills",
-      "community": 2,
+      "community": 1,
       "norm_label": "fetchactiveskills()"
     },
     {
@@ -4914,7 +4914,7 @@
       "source_file": "apps\\api\\src\\ai\\src\\services\\skills.service.ts",
       "source_location": "L78",
       "id": "services_skills_service_fetchmatchingskilldocument",
-      "community": 2,
+      "community": 1,
       "norm_label": "fetchmatchingskilldocument()"
     },
     {
@@ -5013,7 +5013,7 @@
       "source_file": "apps\\web\\eslint.config.mjs",
       "source_location": "L1",
       "id": "apps_web_eslint_config_mjs",
-      "community": 151,
+      "community": 160,
       "norm_label": "eslint.config.mjs"
     },
     {
@@ -5022,7 +5022,7 @@
       "source_file": "apps\\web\\fix_translations.py",
       "source_location": "L1",
       "id": "apps_web_fix_translations_py",
-      "community": 152,
+      "community": 161,
       "norm_label": "fix_translations.py"
     },
     {
@@ -5031,7 +5031,7 @@
       "source_file": "apps\\web\\next-env.d.ts",
       "source_location": "L1",
       "id": "apps_web_next_env_d_ts",
-      "community": 153,
+      "community": 162,
       "norm_label": "next-env.d.ts"
     },
     {
@@ -5040,7 +5040,7 @@
       "source_file": "apps\\web\\next.config.ts",
       "source_location": "L1",
       "id": "apps_web_next_config_ts",
-      "community": 154,
+      "community": 163,
       "norm_label": "next.config.ts"
     },
     {
@@ -5049,7 +5049,7 @@
       "source_file": "apps\\web\\playwright.config.ts",
       "source_location": "L1",
       "id": "apps_web_playwright_config_ts",
-      "community": 155,
+      "community": 164,
       "norm_label": "playwright.config.ts"
     },
     {
@@ -5058,7 +5058,7 @@
       "source_file": "apps\\web\\postcss.config.mjs",
       "source_location": "L1",
       "id": "apps_web_postcss_config_mjs",
-      "community": 156,
+      "community": 165,
       "norm_label": "postcss.config.mjs"
     },
     {
@@ -5067,7 +5067,7 @@
       "source_file": "apps\\web\\unflatten-json.js",
       "source_location": "L1",
       "id": "apps_web_unflatten_json_js",
-      "community": 41,
+      "community": 43,
       "norm_label": "unflatten-json.js"
     },
     {
@@ -5076,7 +5076,7 @@
       "source_file": "apps\\web\\unflatten-json.js",
       "source_location": "L5",
       "id": "web_unflatten_json_set",
-      "community": 41,
+      "community": 43,
       "norm_label": "set()"
     },
     {
@@ -5085,7 +5085,7 @@
       "source_file": "apps\\web\\unflatten-json.js",
       "source_location": "L17",
       "id": "web_unflatten_json_unflatten",
-      "community": 41,
+      "community": 43,
       "norm_label": "unflatten()"
     },
     {
@@ -5094,7 +5094,7 @@
       "source_file": "apps\\web\\vitest.config.ts",
       "source_location": "L1",
       "id": "apps_web_vitest_config_ts",
-      "community": 157,
+      "community": 166,
       "norm_label": "vitest.config.ts"
     },
     {
@@ -5103,7 +5103,7 @@
       "source_file": "apps\\web\\vitest.setup.ts",
       "source_location": "L1",
       "id": "apps_web_vitest_setup_ts",
-      "community": 158,
+      "community": 167,
       "norm_label": "vitest.setup.ts"
     },
     {
@@ -5112,7 +5112,7 @@
       "source_file": "apps\\web\\src\\proxy.ts",
       "source_location": "L1",
       "id": "apps_web_src_proxy_ts",
-      "community": 27,
+      "community": 32,
       "norm_label": "proxy.ts"
     },
     {
@@ -5121,7 +5121,7 @@
       "source_file": "apps\\web\\src\\proxy.ts",
       "source_location": "L12",
       "id": "src_proxy_proxy",
-      "community": 27,
+      "community": 32,
       "norm_label": "proxy()"
     },
     {
@@ -5130,7 +5130,7 @@
       "source_file": "apps\\web\\src\\proxy.ts",
       "source_location": "L39",
       "id": "src_proxy_negotiatelocale",
-      "community": 27,
+      "community": 32,
       "norm_label": "negotiatelocale()"
     },
     {
@@ -5139,25 +5139,25 @@
       "source_file": "apps\\web\\src\\app\\ClientPage.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_clientpage_tsx",
-      "community": 42,
+      "community": 44,
       "norm_label": "clientpage.tsx"
     },
     {
       "label": "MedicalIcon()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\app\\ClientPage.tsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "id": "app_clientpage_medicalicon",
-      "community": 42,
+      "community": 44,
       "norm_label": "medicalicon()"
     },
     {
       "label": "AssistantIcon()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\app\\ClientPage.tsx",
-      "source_location": "L39",
+      "source_location": "L40",
       "id": "app_clientpage_assistanticon",
-      "community": 42,
+      "community": 44,
       "norm_label": "assistanticon()"
     },
     {
@@ -5166,7 +5166,7 @@
       "source_file": "apps\\web\\src\\app\\error.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_error_tsx",
-      "community": 61,
+      "community": 65,
       "norm_label": "error.tsx"
     },
     {
@@ -5175,7 +5175,7 @@
       "source_file": "apps\\web\\src\\app\\error.tsx",
       "source_location": "L5",
       "id": "app_error_globalerror",
-      "community": 61,
+      "community": 65,
       "norm_label": "globalerror()"
     },
     {
@@ -5184,7 +5184,7 @@
       "source_file": "apps\\web\\src\\app\\layout.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_layout_tsx",
-      "community": 62,
+      "community": 66,
       "norm_label": "layout.tsx"
     },
     {
@@ -5193,8 +5193,26 @@
       "source_file": "apps\\web\\src\\app\\layout.tsx",
       "source_location": "L18",
       "id": "app_layout_generatemetadata",
-      "community": 62,
+      "community": 66,
       "norm_label": "generatemetadata()"
+    },
+    {
+      "label": "manifest.ts",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\app\\manifest.ts",
+      "source_location": "L1",
+      "id": "apps_web_src_app_manifest_ts",
+      "community": 67,
+      "norm_label": "manifest.ts"
+    },
+    {
+      "label": "manifest()",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\app\\manifest.ts",
+      "source_location": "L3",
+      "id": "app_manifest_manifest",
+      "community": 67,
+      "norm_label": "manifest()"
     },
     {
       "label": "page.tsx",
@@ -5202,7 +5220,7 @@
       "source_file": "apps\\web\\src\\app\\page.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_page_tsx",
-      "community": 2,
+      "community": 1,
       "norm_label": "page.tsx"
     },
     {
@@ -5211,7 +5229,7 @@
       "source_file": "apps\\web\\src\\app\\page.tsx",
       "source_location": "L5",
       "id": "app_page_homepage",
-      "community": 2,
+      "community": 1,
       "norm_label": "homepage()"
     },
     {
@@ -5220,7 +5238,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\layout.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_admin_layout_tsx",
-      "community": 2,
+      "community": 1,
       "norm_label": "layout.tsx"
     },
     {
@@ -5229,7 +5247,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\layout.tsx",
       "source_location": "L11",
       "id": "admin_layout_adminlayout",
-      "community": 2,
+      "community": 1,
       "norm_label": "adminlayout()"
     },
     {
@@ -5238,7 +5256,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\page.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_admin_page_tsx",
-      "community": 159,
+      "community": 168,
       "norm_label": "page.tsx"
     },
     {
@@ -5247,7 +5265,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\ai-settings\\actions.ts",
       "source_location": "L1",
       "id": "apps_web_src_app_admin_ai_settings_actions_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "actions.ts"
     },
     {
@@ -5256,7 +5274,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\ai-settings\\actions.ts",
       "source_location": "L6",
       "id": "ai_settings_actions_getappconfigkeys",
-      "community": 2,
+      "community": 1,
       "norm_label": "getappconfigkeys()"
     },
     {
@@ -5265,7 +5283,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\ai-settings\\actions.ts",
       "source_location": "L27",
       "id": "ai_settings_actions_updateappconfigitem",
-      "community": 2,
+      "community": 1,
       "norm_label": "updateappconfigitem()"
     },
     {
@@ -5274,7 +5292,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\ai-settings\\AiSettingsForm.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_admin_ai_settings_aisettingsform_tsx",
-      "community": 2,
+      "community": 1,
       "norm_label": "aisettingsform.tsx"
     },
     {
@@ -5283,7 +5301,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\ai-settings\\AiSettingsForm.tsx",
       "source_location": "L33",
       "id": "ai_settings_aisettingsform_handleupdate",
-      "community": 2,
+      "community": 1,
       "norm_label": "handleupdate()"
     },
     {
@@ -5292,7 +5310,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\ai-settings\\page.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_admin_ai_settings_page_tsx",
-      "community": 2,
+      "community": 1,
       "norm_label": "page.tsx"
     },
     {
@@ -5301,7 +5319,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\ai-settings\\page.tsx",
       "source_location": "L4",
       "id": "ai_settings_page_aisettingspage",
-      "community": 2,
+      "community": 1,
       "norm_label": "aisettingspage()"
     },
     {
@@ -5310,7 +5328,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\feedback\\actions.ts",
       "source_location": "L1",
       "id": "apps_web_src_app_admin_feedback_actions_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "actions.ts"
     },
     {
@@ -5319,7 +5337,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\feedback\\actions.ts",
       "source_location": "L12",
       "id": "feedback_actions_updatefeedbackstatus",
-      "community": 2,
+      "community": 1,
       "norm_label": "updatefeedbackstatus()"
     },
     {
@@ -5328,7 +5346,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\feedback\\page.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_admin_feedback_page_tsx",
-      "community": 43,
+      "community": 45,
       "norm_label": "page.tsx"
     },
     {
@@ -5337,7 +5355,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\feedback\\page.tsx",
       "source_location": "L28",
       "id": "feedback_page_getcategorybadge",
-      "community": 43,
+      "community": 45,
       "norm_label": "getcategorybadge()"
     },
     {
@@ -5346,7 +5364,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\feedback\\page.tsx",
       "source_location": "L53",
       "id": "feedback_page_getstatusbadge",
-      "community": 43,
+      "community": 45,
       "norm_label": "getstatusbadge()"
     },
     {
@@ -5355,7 +5373,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\feedback\\StatusSelect.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_admin_feedback_statusselect_tsx",
-      "community": 63,
+      "community": 68,
       "norm_label": "statusselect.tsx"
     },
     {
@@ -5364,7 +5382,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\feedback\\StatusSelect.tsx",
       "source_location": "L17",
       "id": "feedback_statusselect_statusselect",
-      "community": 63,
+      "community": 68,
       "norm_label": "statusselect()"
     },
     {
@@ -5373,7 +5391,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\knowledge\\actions.ts",
       "source_location": "L1",
       "id": "apps_web_src_app_admin_knowledge_actions_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "actions.ts"
     },
     {
@@ -5382,7 +5400,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\knowledge\\actions.ts",
       "source_location": "L6",
       "id": "knowledge_actions_createkbdocument",
-      "community": 2,
+      "community": 1,
       "norm_label": "createkbdocument()"
     },
     {
@@ -5391,7 +5409,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\knowledge\\actions.ts",
       "source_location": "L46",
       "id": "knowledge_actions_deleteknowledgedocument",
-      "community": 2,
+      "community": 1,
       "norm_label": "deleteknowledgedocument()"
     },
     {
@@ -5400,7 +5418,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\knowledge\\AddDocumentModal.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_admin_knowledge_adddocumentmodal_tsx",
-      "community": 2,
+      "community": 1,
       "norm_label": "adddocumentmodal.tsx"
     },
     {
@@ -5409,7 +5427,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\knowledge\\AddDocumentModal.tsx",
       "source_location": "L18",
       "id": "knowledge_adddocumentmodal_handlesubmit",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlesubmit()"
     },
     {
@@ -5418,7 +5436,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\knowledge\\DeleteDocumentButton.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_admin_knowledge_deletedocumentbutton_tsx",
-      "community": 2,
+      "community": 1,
       "norm_label": "deletedocumentbutton.tsx"
     },
     {
@@ -5427,7 +5445,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\knowledge\\DeleteDocumentButton.tsx",
       "source_location": "L17",
       "id": "knowledge_deletedocumentbutton_handledelete",
-      "community": 2,
+      "community": 1,
       "norm_label": "handledelete()"
     },
     {
@@ -5436,7 +5454,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\knowledge\\page.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_admin_knowledge_page_tsx",
-      "community": 64,
+      "community": 69,
       "norm_label": "page.tsx"
     },
     {
@@ -5445,7 +5463,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\knowledge\\page.tsx",
       "source_location": "L22",
       "id": "knowledge_page_getstatusicon",
-      "community": 64,
+      "community": 69,
       "norm_label": "getstatusicon()"
     },
     {
@@ -5454,7 +5472,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\system-graph\\page.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_admin_system_graph_page_tsx",
-      "community": 65,
+      "community": 70,
       "norm_label": "page.tsx"
     },
     {
@@ -5463,7 +5481,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\system-graph\\page.tsx",
       "source_location": "L13",
       "id": "system_graph_page_fetchgraph",
-      "community": 65,
+      "community": 70,
       "norm_label": "fetchgraph()"
     },
     {
@@ -5526,7 +5544,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\users\\AddUserModal.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_admin_users_addusermodal_tsx",
-      "community": 66,
+      "community": 71,
       "norm_label": "addusermodal.tsx"
     },
     {
@@ -5535,7 +5553,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\users\\AddUserModal.tsx",
       "source_location": "L12",
       "id": "users_addusermodal_addusermodal",
-      "community": 66,
+      "community": 71,
       "norm_label": "addusermodal()"
     },
     {
@@ -5544,7 +5562,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\users\\CopyEmail.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_admin_users_copyemail_tsx",
-      "community": 67,
+      "community": 72,
       "norm_label": "copyemail.tsx"
     },
     {
@@ -5553,7 +5571,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\users\\CopyEmail.tsx",
       "source_location": "L10",
       "id": "users_copyemail_copyemail",
-      "community": 67,
+      "community": 72,
       "norm_label": "copyemail()"
     },
     {
@@ -5562,7 +5580,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\users\\page.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_admin_users_page_tsx",
-      "community": 68,
+      "community": 73,
       "norm_label": "page.tsx"
     },
     {
@@ -5571,7 +5589,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\users\\page.tsx",
       "source_location": "L32",
       "id": "users_page_isbanned",
-      "community": 68,
+      "community": 73,
       "norm_label": "isbanned()"
     },
     {
@@ -5580,7 +5598,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\users\\UserActions.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_admin_users_useractions_tsx",
-      "community": 31,
+      "community": 33,
       "norm_label": "useractions.tsx"
     },
     {
@@ -5589,7 +5607,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\users\\UserActions.tsx",
       "source_location": "L47",
       "id": "users_useractions_handlebantoggle",
-      "community": 31,
+      "community": 33,
       "norm_label": "handlebantoggle()"
     },
     {
@@ -5598,7 +5616,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\users\\UserActions.tsx",
       "source_location": "L65",
       "id": "users_useractions_handledelete",
-      "community": 31,
+      "community": 33,
       "norm_label": "handledelete()"
     },
     {
@@ -5607,7 +5625,7 @@
       "source_file": "apps\\web\\src\\app\\admin\\users\\UserActions.tsx",
       "source_location": "L81",
       "id": "users_useractions_handleemailsubmit",
-      "community": 31,
+      "community": 33,
       "norm_label": "handleemailsubmit()"
     },
     {
@@ -5616,7 +5634,7 @@
       "source_file": "apps\\web\\src\\app\\api\\analyze-lab-report\\route.ts",
       "source_location": "L1",
       "id": "apps_web_src_app_api_analyze_lab_report_route_ts",
-      "community": 69,
+      "community": 74,
       "norm_label": "route.ts"
     },
     {
@@ -5625,7 +5643,7 @@
       "source_file": "apps\\web\\src\\app\\api\\analyze-lab-report\\route.ts",
       "source_location": "L7",
       "id": "analyze_lab_report_route_post",
-      "community": 69,
+      "community": 74,
       "norm_label": "post()"
     },
     {
@@ -5634,7 +5652,7 @@
       "source_file": "apps\\web\\src\\app\\api\\chat\\route.ts",
       "source_location": "L1",
       "id": "apps_web_src_app_api_chat_route_ts",
-      "community": 44,
+      "community": 46,
       "norm_label": "route.ts"
     },
     {
@@ -5643,7 +5661,7 @@
       "source_file": "apps\\web\\src\\app\\api\\chat\\route.ts",
       "source_location": "L8",
       "id": "chat_route_post",
-      "community": 44,
+      "community": 46,
       "norm_label": "post()"
     },
     {
@@ -5652,7 +5670,7 @@
       "source_file": "apps\\web\\src\\app\\api\\chat\\route.ts",
       "source_location": "L54",
       "id": "chat_route_delete",
-      "community": 44,
+      "community": 46,
       "norm_label": "delete()"
     },
     {
@@ -5688,7 +5706,7 @@
       "source_file": "apps\\web\\src\\app\\api\\parse-image\\route.ts",
       "source_location": "L1",
       "id": "apps_web_src_app_api_parse_image_route_ts",
-      "community": 70,
+      "community": 75,
       "norm_label": "route.ts"
     },
     {
@@ -5697,7 +5715,7 @@
       "source_file": "apps\\web\\src\\app\\api\\parse-image\\route.ts",
       "source_location": "L7",
       "id": "parse_image_route_post",
-      "community": 70,
+      "community": 75,
       "norm_label": "post()"
     },
     {
@@ -5724,7 +5742,7 @@
       "source_file": "apps\\web\\src\\app\\api\\refresh-notes\\route.ts",
       "source_location": "L1",
       "id": "apps_web_src_app_api_refresh_notes_route_ts",
-      "community": 71,
+      "community": 76,
       "norm_label": "route.ts"
     },
     {
@@ -5733,7 +5751,7 @@
       "source_file": "apps\\web\\src\\app\\api\\refresh-notes\\route.ts",
       "source_location": "L7",
       "id": "refresh_notes_route_post",
-      "community": 71,
+      "community": 76,
       "norm_label": "post()"
     },
     {
@@ -5742,7 +5760,7 @@
       "source_file": "apps\\web\\src\\app\\login\\page.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_login_page_tsx",
-      "community": 32,
+      "community": 34,
       "norm_label": "page.tsx"
     },
     {
@@ -5751,7 +5769,7 @@
       "source_file": "apps\\web\\src\\app\\login\\page.tsx",
       "source_location": "L21",
       "id": "login_page_generatesecurepassword",
-      "community": 32,
+      "community": 34,
       "norm_label": "generatesecurepassword()"
     },
     {
@@ -5760,7 +5778,7 @@
       "source_file": "apps\\web\\src\\app\\login\\page.tsx",
       "source_location": "L40",
       "id": "login_page_checksession",
-      "community": 32,
+      "community": 34,
       "norm_label": "checksession()"
     },
     {
@@ -5769,7 +5787,7 @@
       "source_file": "apps\\web\\src\\app\\login\\page.tsx",
       "source_location": "L61",
       "id": "login_page_handlelogin",
-      "community": 32,
+      "community": 34,
       "norm_label": "handlelogin()"
     },
     {
@@ -5778,7 +5796,7 @@
       "source_file": "apps\\web\\src\\app\\unauthorized\\page.tsx",
       "source_location": "L1",
       "id": "apps_web_src_app_unauthorized_page_tsx",
-      "community": 72,
+      "community": 77,
       "norm_label": "page.tsx"
     },
     {
@@ -5787,7 +5805,7 @@
       "source_file": "apps\\web\\src\\app\\unauthorized\\page.tsx",
       "source_location": "L4",
       "id": "unauthorized_page_unauthorizedpage",
-      "community": 72,
+      "community": 77,
       "norm_label": "unauthorizedpage()"
     },
     {
@@ -5796,7 +5814,7 @@
       "source_file": "apps\\web\\src\\components\\admin\\AdminSidebar.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_admin_adminsidebar_tsx",
-      "community": 160,
+      "community": 169,
       "norm_label": "adminsidebar.tsx"
     },
     {
@@ -5805,7 +5823,7 @@
       "source_file": "apps\\web\\src\\components\\admin\\UserGrowthChart.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_admin_usergrowthchart_tsx",
-      "community": 45,
+      "community": 47,
       "norm_label": "usergrowthchart.tsx"
     },
     {
@@ -5814,7 +5832,7 @@
       "source_file": "apps\\web\\src\\components\\admin\\UserGrowthChart.tsx",
       "source_location": "L23",
       "id": "admin_usergrowthchart_formatdateshort",
-      "community": 45,
+      "community": 47,
       "norm_label": "formatdateshort()"
     },
     {
@@ -5823,7 +5841,7 @@
       "source_file": "apps\\web\\src\\components\\admin\\UserGrowthChart.tsx",
       "source_location": "L28",
       "id": "admin_usergrowthchart_formatdatefull",
-      "community": 45,
+      "community": 47,
       "norm_label": "formatdatefull()"
     },
     {
@@ -5940,7 +5958,7 @@
       "source_file": "apps\\web\\src\\components\\auth\\SignOutButton.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_auth_signoutbutton_tsx",
-      "community": 73,
+      "community": 78,
       "norm_label": "signoutbutton.tsx"
     },
     {
@@ -5949,8 +5967,152 @@
       "source_file": "apps\\web\\src\\components\\auth\\SignOutButton.tsx",
       "source_location": "L8",
       "id": "auth_signoutbutton_signoutbutton",
-      "community": 73,
+      "community": 78,
       "norm_label": "signoutbutton()"
+    },
+    {
+      "label": "BottomDock.tsx",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\components\\dashboard\\BottomDock.tsx",
+      "source_location": "L1",
+      "id": "apps_web_src_components_dashboard_bottomdock_tsx",
+      "community": 28,
+      "norm_label": "bottomdock.tsx"
+    },
+    {
+      "label": "updateMaskPosition()",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\components\\dashboard\\BottomDock.tsx",
+      "source_location": "L35",
+      "id": "dashboard_bottomdock_updatemaskposition",
+      "community": 28,
+      "norm_label": "updatemaskposition()"
+    },
+    {
+      "label": "handleTabClick()",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\components\\dashboard\\BottomDock.tsx",
+      "source_location": "L51",
+      "id": "dashboard_bottomdock_handletabclick",
+      "community": 28,
+      "norm_label": "handletabclick()"
+    },
+    {
+      "label": "handleCloseCheckCancel()",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\components\\dashboard\\BottomDock.tsx",
+      "source_location": "L65",
+      "id": "dashboard_bottomdock_handleclosecheckcancel",
+      "community": 28,
+      "norm_label": "handleclosecheckcancel()"
+    },
+    {
+      "label": "handleCloseProfile()",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\components\\dashboard\\BottomDock.tsx",
+      "source_location": "L70",
+      "id": "dashboard_bottomdock_handlecloseprofile",
+      "community": 28,
+      "norm_label": "handlecloseprofile()"
+    },
+    {
+      "label": "DashboardCard.tsx",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\components\\dashboard\\DashboardCard.tsx",
+      "source_location": "L1",
+      "id": "apps_web_src_components_dashboard_dashboardcard_tsx",
+      "community": 79,
+      "norm_label": "dashboardcard.tsx"
+    },
+    {
+      "label": "DashboardCard()",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\components\\dashboard\\DashboardCard.tsx",
+      "source_location": "L64",
+      "id": "dashboard_dashboardcard_dashboardcard",
+      "community": 79,
+      "norm_label": "dashboardcard()"
+    },
+    {
+      "label": "DashboardGrid.tsx",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\components\\dashboard\\DashboardGrid.tsx",
+      "source_location": "L1",
+      "id": "apps_web_src_components_dashboard_dashboardgrid_tsx",
+      "community": 170,
+      "norm_label": "dashboardgrid.tsx"
+    },
+    {
+      "label": "DashboardHeader.tsx",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\components\\dashboard\\DashboardHeader.tsx",
+      "source_location": "L1",
+      "id": "apps_web_src_components_dashboard_dashboardheader_tsx",
+      "community": 80,
+      "norm_label": "dashboardheader.tsx"
+    },
+    {
+      "label": "DashboardHeader()",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\components\\dashboard\\DashboardHeader.tsx",
+      "source_location": "L9",
+      "id": "dashboard_dashboardheader_dashboardheader",
+      "community": 80,
+      "norm_label": "dashboardheader()"
+    },
+    {
+      "label": "MobileDashboardLayout.tsx",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\components\\dashboard\\MobileDashboardLayout.tsx",
+      "source_location": "L1",
+      "id": "apps_web_src_components_dashboard_mobiledashboardlayout_tsx",
+      "community": 48,
+      "norm_label": "mobiledashboardlayout.tsx"
+    },
+    {
+      "label": "handleMoodChange()",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\components\\dashboard\\MobileDashboardLayout.tsx",
+      "source_location": "L48",
+      "id": "dashboard_mobiledashboardlayout_handlemoodchange",
+      "community": 48,
+      "norm_label": "handlemoodchange()"
+    },
+    {
+      "label": "handleTabChange()",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\components\\dashboard\\MobileDashboardLayout.tsx",
+      "source_location": "L57",
+      "id": "dashboard_mobiledashboardlayout_handletabchange",
+      "community": 48,
+      "norm_label": "handletabchange()"
+    },
+    {
+      "label": "WellbeingWidget.tsx",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\components\\dashboard\\WellbeingWidget.tsx",
+      "source_location": "L1",
+      "id": "apps_web_src_components_dashboard_wellbeingwidget_tsx",
+      "community": 49,
+      "norm_label": "wellbeingwidget.tsx"
+    },
+    {
+      "label": "fetchMood()",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\components\\dashboard\\WellbeingWidget.tsx",
+      "source_location": "L24",
+      "id": "dashboard_wellbeingwidget_fetchmood",
+      "community": 49,
+      "norm_label": "fetchmood()"
+    },
+    {
+      "label": "handleSelect()",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\components\\dashboard\\WellbeingWidget.tsx",
+      "source_location": "L46",
+      "id": "dashboard_wellbeingwidget_handleselect",
+      "community": 49,
+      "norm_label": "handleselect()"
     },
     {
       "label": "ChatMessage.tsx",
@@ -5976,7 +6138,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\DatePaginator.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_diary_datepaginator_tsx",
-      "community": 33,
+      "community": 35,
       "norm_label": "datepaginator.tsx"
     },
     {
@@ -5985,7 +6147,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\DatePaginator.tsx",
       "source_location": "L42",
       "id": "diary_datepaginator_handleprev",
-      "community": 33,
+      "community": 35,
       "norm_label": "handleprev()"
     },
     {
@@ -5994,7 +6156,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\DatePaginator.tsx",
       "source_location": "L48",
       "id": "diary_datepaginator_handlenext",
-      "community": 33,
+      "community": 35,
       "norm_label": "handlenext()"
     },
     {
@@ -6003,7 +6165,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\DatePaginator.tsx",
       "source_location": "L54",
       "id": "diary_datepaginator_handletoday",
-      "community": 33,
+      "community": 35,
       "norm_label": "handletoday()"
     },
     {
@@ -6012,7 +6174,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\FeedbackButton.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_diary_feedbackbutton_tsx",
-      "community": 2,
+      "community": 1,
       "norm_label": "feedbackbutton.tsx"
     },
     {
@@ -6021,7 +6183,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\FeedbackButton.tsx",
       "source_location": "L19",
       "id": "diary_feedbackbutton_handlefilechange",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlefilechange()"
     },
     {
@@ -6030,7 +6192,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\FeedbackButton.tsx",
       "source_location": "L30",
       "id": "diary_feedbackbutton_removefile",
-      "community": 2,
+      "community": 1,
       "norm_label": "removefile()"
     },
     {
@@ -6039,7 +6201,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\FeedbackButton.tsx",
       "source_location": "L37",
       "id": "diary_feedbackbutton_handlesubmit",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlesubmit()"
     },
     {
@@ -6066,7 +6228,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\FoodCard.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_diary_foodcard_tsx",
-      "community": 28,
+      "community": 29,
       "norm_label": "foodcard.tsx"
     },
     {
@@ -6075,7 +6237,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\FoodCard.tsx",
       "source_location": "L30",
       "id": "diary_foodcard_getemojiforfood",
-      "community": 28,
+      "community": 29,
       "norm_label": "getemojiforfood()"
     },
     {
@@ -6084,7 +6246,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\FoodCard.tsx",
       "source_location": "L114",
       "id": "diary_foodcard_gethealthscorestyle",
-      "community": 28,
+      "community": 29,
       "norm_label": "gethealthscorestyle()"
     },
     {
@@ -6093,7 +6255,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\FoodCard.tsx",
       "source_location": "L121",
       "id": "diary_foodcard_getresponsebadge",
-      "community": 28,
+      "community": 29,
       "norm_label": "getresponsebadge()"
     },
     {
@@ -6102,7 +6264,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\FoodCard.tsx",
       "source_location": "L158",
       "id": "diary_foodcard_getgicolor",
-      "community": 28,
+      "community": 29,
       "norm_label": "getgicolor()"
     },
     {
@@ -6156,8 +6318,17 @@
       "source_file": "apps\\web\\src\\components\\diary\\FoodInputForm.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_diary_foodinputform_tsx",
-      "community": 161,
+      "community": 81,
       "norm_label": "foodinputform.tsx"
+    },
+    {
+      "label": "calculateTotalWeight()",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\components\\diary\\FoodInputForm.tsx",
+      "source_location": "L12",
+      "id": "diary_foodinputform_calculatetotalweight",
+      "community": 81,
+      "norm_label": "calculatetotalweight()"
     },
     {
       "label": "GlycemicCurveChart.tsx",
@@ -6165,7 +6336,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\GlycemicCurveChart.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_diary_glycemiccurvechart_tsx",
-      "community": 34,
+      "community": 36,
       "norm_label": "glycemiccurvechart.tsx"
     },
     {
@@ -6174,7 +6345,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\GlycemicCurveChart.tsx",
       "source_location": "L21",
       "id": "diary_glycemiccurvechart_toy",
-      "community": 34,
+      "community": 36,
       "norm_label": "toy()"
     },
     {
@@ -6183,7 +6354,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\GlycemicCurveChart.tsx",
       "source_location": "L61",
       "id": "diary_glycemiccurvechart_tox",
-      "community": 34,
+      "community": 36,
       "norm_label": "tox()"
     },
     {
@@ -6192,7 +6363,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\GlycemicCurveChart.tsx",
       "source_location": "L95",
       "id": "diary_glycemiccurvechart_buildsmoothcurve",
-      "community": 34,
+      "community": 36,
       "norm_label": "buildsmoothcurve()"
     },
     {
@@ -6255,7 +6426,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\MealScoreBadge.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_diary_mealscorebadge_tsx",
-      "community": 162,
+      "community": 171,
       "norm_label": "mealscorebadge.tsx"
     },
     {
@@ -6264,7 +6435,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\WaterTracker.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_diary_watertracker_tsx",
-      "community": 74,
+      "community": 82,
       "norm_label": "watertracker.tsx"
     },
     {
@@ -6273,7 +6444,7 @@
       "source_file": "apps\\web\\src\\components\\diary\\WaterTracker.tsx",
       "source_location": "L58",
       "id": "diary_watertracker_updatewater",
-      "community": 74,
+      "community": 82,
       "norm_label": "updatewater()"
     },
     {
@@ -6282,7 +6453,7 @@
       "source_file": "apps\\web\\src\\components\\medical\\DiagnosticReportCard.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_medical_diagnosticreportcard_tsx",
-      "community": 163,
+      "community": 172,
       "norm_label": "diagnosticreportcard.tsx"
     },
     {
@@ -6291,43 +6462,43 @@
       "source_file": "apps\\web\\src\\components\\medical\\MedicalResultsView.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_medical_medicalresultsview_tsx",
-      "community": 29,
+      "community": 30,
       "norm_label": "medicalresultsview.tsx"
     },
     {
       "label": "fetchHistory()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\medical\\MedicalResultsView.tsx",
-      "source_location": "L99",
+      "source_location": "L118",
       "id": "medical_medicalresultsview_fetchhistory",
-      "community": 29,
+      "community": 30,
       "norm_label": "fetchhistory()"
     },
     {
       "label": "handleMarkerChange()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\medical\\MedicalResultsView.tsx",
-      "source_location": "L265",
+      "source_location": "L309",
       "id": "medical_medicalresultsview_handlemarkerchange",
-      "community": 29,
+      "community": 30,
       "norm_label": "handlemarkerchange()"
     },
     {
       "label": "handleRefreshNotes()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\medical\\MedicalResultsView.tsx",
-      "source_location": "L284",
+      "source_location": "L328",
       "id": "medical_medicalresultsview_handlerefreshnotes",
-      "community": 29,
+      "community": 30,
       "norm_label": "handlerefreshnotes()"
     },
     {
       "label": "handleDeleteReport()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\medical\\MedicalResultsView.tsx",
-      "source_location": "L324",
+      "source_location": "L368",
       "id": "medical_medicalresultsview_handledeletereport",
-      "community": 29,
+      "community": 30,
       "norm_label": "handledeletereport()"
     },
     {
@@ -6336,7 +6507,7 @@
       "source_file": "apps\\web\\src\\components\\medical\\NailAnalysisCard.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_medical_nailanalysiscard_tsx",
-      "community": 75,
+      "community": 83,
       "norm_label": "nailanalysiscard.tsx"
     },
     {
@@ -6345,7 +6516,7 @@
       "source_file": "apps\\web\\src\\components\\medical\\NailAnalysisCard.tsx",
       "source_location": "L24",
       "id": "medical_nailanalysiscard_getmarkercolor",
-      "community": 75,
+      "community": 83,
       "norm_label": "getmarkercolor()"
     },
     {
@@ -6381,7 +6552,7 @@
       "source_file": "apps\\web\\src\\components\\medical\\ResultCard.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_medical_resultcard_tsx",
-      "community": 164,
+      "community": 173,
       "norm_label": "resultcard.tsx"
     },
     {
@@ -6390,7 +6561,7 @@
       "source_file": "apps\\web\\src\\components\\medical\\SomaticAnalysisCard.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_medical_somaticanalysiscard_tsx",
-      "community": 76,
+      "community": 84,
       "norm_label": "somaticanalysiscard.tsx"
     },
     {
@@ -6399,7 +6570,7 @@
       "source_file": "apps\\web\\src\\components\\medical\\SomaticAnalysisCard.tsx",
       "source_location": "L16",
       "id": "medical_somaticanalysiscard_getmarkercolor",
-      "community": 76,
+      "community": 84,
       "norm_label": "getmarkercolor()"
     },
     {
@@ -6462,16 +6633,16 @@
       "source_file": "apps\\web\\src\\components\\medical\\UploadZone.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_medical_uploadzone_tsx",
-      "community": 77,
+      "community": 85,
       "norm_label": "uploadzone.tsx"
     },
     {
       "label": "UploadZone()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\medical\\UploadZone.tsx",
-      "source_location": "L32",
+      "source_location": "L34",
       "id": "medical_uploadzone_uploadzone",
-      "community": 77,
+      "community": 85,
       "norm_label": "uploadzone()"
     },
     {
@@ -6543,7 +6714,7 @@
       "source_file": "apps\\web\\src\\components\\profile\\DynamicOcrDialog.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_profile_dynamicocrdialog_tsx",
-      "community": 35,
+      "community": 37,
       "norm_label": "dynamicocrdialog.tsx"
     },
     {
@@ -6552,7 +6723,7 @@
       "source_file": "apps\\web\\src\\components\\profile\\DynamicOcrDialog.tsx",
       "source_location": "L26",
       "id": "profile_dynamicocrdialog_handledelete",
-      "community": 35,
+      "community": 37,
       "norm_label": "handledelete()"
     },
     {
@@ -6561,7 +6732,7 @@
       "source_file": "apps\\web\\src\\components\\profile\\DynamicOcrDialog.tsx",
       "source_location": "L30",
       "id": "profile_dynamicocrdialog_handlevaluechange",
-      "community": 35,
+      "community": 37,
       "norm_label": "handlevaluechange()"
     },
     {
@@ -6570,7 +6741,7 @@
       "source_file": "apps\\web\\src\\components\\profile\\DynamicOcrDialog.tsx",
       "source_location": "L38",
       "id": "profile_dynamicocrdialog_handlesave",
-      "community": 35,
+      "community": 37,
       "norm_label": "handlesave()"
     },
     {
@@ -6579,7 +6750,7 @@
       "source_file": "apps\\web\\src\\components\\profile\\ManualEntryDialog.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_profile_manualentrydialog_tsx",
-      "community": 78,
+      "community": 86,
       "norm_label": "manualentrydialog.tsx"
     },
     {
@@ -6588,7 +6759,7 @@
       "source_file": "apps\\web\\src\\components\\profile\\ManualEntryDialog.tsx",
       "source_location": "L51",
       "id": "profile_manualentrydialog_handlesubmit",
-      "community": 78,
+      "community": 86,
       "norm_label": "handlesubmit()"
     },
     {
@@ -6597,7 +6768,7 @@
       "source_file": "apps\\web\\src\\components\\profile\\MetricSparkline.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_profile_metricsparkline_tsx",
-      "community": 79,
+      "community": 87,
       "norm_label": "metricsparkline.tsx"
     },
     {
@@ -6606,7 +6777,7 @@
       "source_file": "apps\\web\\src\\components\\profile\\MetricSparkline.tsx",
       "source_location": "L20",
       "id": "profile_metricsparkline_metricsparkline",
-      "community": 79,
+      "community": 87,
       "norm_label": "metricsparkline()"
     },
     {
@@ -6640,7 +6811,7 @@
       "label": "loadWearables()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L246",
+      "source_location": "L268",
       "id": "profile_userprofilesheet_loadwearables",
       "community": 4,
       "norm_label": "loadwearables()"
@@ -6649,7 +6820,7 @@
       "label": "handleDeleteAccount()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L334",
+      "source_location": "L356",
       "id": "profile_userprofilesheet_handledeleteaccount",
       "community": 4,
       "norm_label": "handledeleteaccount()"
@@ -6658,7 +6829,7 @@
       "label": "handleClearLongTermMemory()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L358",
+      "source_location": "L380",
       "id": "profile_userprofilesheet_handleclearlongtermmemory",
       "community": 4,
       "norm_label": "handleclearlongtermmemory()"
@@ -6667,16 +6838,25 @@
       "label": "handleRequestClose()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L399",
+      "source_location": "L433",
       "id": "profile_userprofilesheet_handlerequestclose",
       "community": 4,
       "norm_label": "handlerequestclose()"
     },
     {
+      "label": "handleCancelClose()",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
+      "source_location": "L441",
+      "id": "profile_userprofilesheet_handlecancelclose",
+      "community": 4,
+      "norm_label": "handlecancelclose()"
+    },
+    {
       "label": "handleForceClose()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L407",
+      "source_location": "L448",
       "id": "profile_userprofilesheet_handleforceclose",
       "community": 4,
       "norm_label": "handleforceclose()"
@@ -6685,7 +6865,7 @@
       "label": "loadProfile()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L424",
+      "source_location": "L465",
       "id": "profile_userprofilesheet_loadprofile",
       "community": 4,
       "norm_label": "loadprofile()"
@@ -6694,7 +6874,7 @@
       "label": "handleSaveProfile()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L479",
+      "source_location": "L520",
       "id": "profile_userprofilesheet_handlesaveprofile",
       "community": 4,
       "norm_label": "handlesaveprofile()"
@@ -6703,7 +6883,7 @@
       "label": "bmiCategory()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L555",
+      "source_location": "L596",
       "id": "profile_userprofilesheet_bmicategory",
       "community": 4,
       "norm_label": "bmicategory()"
@@ -6712,7 +6892,7 @@
       "label": "addCondition()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L567",
+      "source_location": "L608",
       "id": "profile_userprofilesheet_addcondition",
       "community": 4,
       "norm_label": "addcondition()"
@@ -6721,7 +6901,7 @@
       "label": "removeCondition()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L579",
+      "source_location": "L620",
       "id": "profile_userprofilesheet_removecondition",
       "community": 4,
       "norm_label": "removecondition()"
@@ -6730,7 +6910,7 @@
       "label": "addMedication()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L588",
+      "source_location": "L629",
       "id": "profile_userprofilesheet_addmedication",
       "community": 4,
       "norm_label": "addmedication()"
@@ -6739,7 +6919,7 @@
       "label": "handleDeleteMetric()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L600",
+      "source_location": "L641",
       "id": "profile_userprofilesheet_handledeletemetric",
       "community": 4,
       "norm_label": "handledeletemetric()"
@@ -6748,7 +6928,7 @@
       "label": "handleDeleteAllMetrics()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L622",
+      "source_location": "L663",
       "id": "profile_userprofilesheet_handledeleteallmetrics",
       "community": 4,
       "norm_label": "handledeleteallmetrics()"
@@ -6757,7 +6937,7 @@
       "label": "removeMedication()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L638",
+      "source_location": "L679",
       "id": "profile_userprofilesheet_removemedication",
       "community": 4,
       "norm_label": "removemedication()"
@@ -6766,7 +6946,7 @@
       "label": "handleDynamicOcrSave()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L708",
+      "source_location": "L749",
       "id": "profile_userprofilesheet_handledynamicocrsave",
       "community": 4,
       "norm_label": "handledynamicocrsave()"
@@ -6775,7 +6955,7 @@
       "label": "handleScreenshotTrigger()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L753",
+      "source_location": "L794",
       "id": "profile_userprofilesheet_handlescreenshottrigger",
       "community": 4,
       "norm_label": "handlescreenshottrigger()"
@@ -6784,7 +6964,7 @@
       "label": "handleScreenshotChange()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L758",
+      "source_location": "L799",
       "id": "profile_userprofilesheet_handlescreenshotchange",
       "community": 4,
       "norm_label": "handlescreenshotchange()"
@@ -6793,7 +6973,7 @@
       "label": "String()",
       "file_type": "code",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L1508",
+      "source_location": "L1597",
       "id": "profile_userprofilesheet_string",
       "community": 4,
       "norm_label": "string()"
@@ -6804,7 +6984,7 @@
       "source_file": "apps\\web\\src\\components\\providers\\FontScaleProvider.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_providers_fontscaleprovider_tsx",
-      "community": 46,
+      "community": 50,
       "norm_label": "fontscaleprovider.tsx"
     },
     {
@@ -6813,7 +6993,7 @@
       "source_file": "apps\\web\\src\\components\\providers\\FontScaleProvider.tsx",
       "source_location": "L14",
       "id": "providers_fontscaleprovider_fontscaleprovider",
-      "community": 46,
+      "community": 50,
       "norm_label": "fontscaleprovider()"
     },
     {
@@ -6822,7 +7002,7 @@
       "source_file": "apps\\web\\src\\components\\providers\\FontScaleProvider.tsx",
       "source_location": "L58",
       "id": "providers_fontscaleprovider_usefontscale",
-      "community": 46,
+      "community": 50,
       "norm_label": "usefontscale()"
     },
     {
@@ -6831,7 +7011,7 @@
       "source_file": "apps\\web\\src\\components\\providers\\LocaleSync.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_providers_localesync_tsx",
-      "community": 80,
+      "community": 88,
       "norm_label": "localesync.tsx"
     },
     {
@@ -6840,7 +7020,7 @@
       "source_file": "apps\\web\\src\\components\\providers\\LocaleSync.tsx",
       "source_location": "L6",
       "id": "providers_localesync_localesync",
-      "community": 80,
+      "community": 88,
       "norm_label": "localesync()"
     },
     {
@@ -6849,7 +7029,7 @@
       "source_file": "apps\\web\\src\\components\\providers\\ServerActionErrorListener.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_providers_serveractionerrorlistener_tsx",
-      "community": 81,
+      "community": 89,
       "norm_label": "serveractionerrorlistener.tsx"
     },
     {
@@ -6858,7 +7038,7 @@
       "source_file": "apps\\web\\src\\components\\providers\\ServerActionErrorListener.tsx",
       "source_location": "L10",
       "id": "providers_serveractionerrorlistener_serveractionerrorlistener",
-      "community": 81,
+      "community": 89,
       "norm_label": "serveractionerrorlistener()"
     },
     {
@@ -6867,7 +7047,7 @@
       "source_file": "apps\\web\\src\\components\\providers\\ThemeProvider.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_providers_themeprovider_tsx",
-      "community": 82,
+      "community": 90,
       "norm_label": "themeprovider.tsx"
     },
     {
@@ -6876,7 +7056,7 @@
       "source_file": "apps\\web\\src\\components\\providers\\ThemeProvider.tsx",
       "source_location": "L7",
       "id": "providers_themeprovider_themeprovider",
-      "community": 82,
+      "community": 90,
       "norm_label": "themeprovider()"
     },
     {
@@ -6885,7 +7065,7 @@
       "source_file": "apps\\web\\src\\components\\shared\\HealthGoalsWidget.tsx",
       "source_location": "L1",
       "id": "apps_web_src_components_shared_healthgoalswidget_tsx",
-      "community": 36,
+      "community": 38,
       "norm_label": "healthgoalswidget.tsx"
     },
     {
@@ -6894,7 +7074,7 @@
       "source_file": "apps\\web\\src\\components\\shared\\HealthGoalsWidget.tsx",
       "source_location": "L23",
       "id": "shared_healthgoalswidget_loaddata",
-      "community": 36,
+      "community": 38,
       "norm_label": "loaddata()"
     },
     {
@@ -6903,7 +7083,7 @@
       "source_file": "apps\\web\\src\\components\\shared\\HealthGoalsWidget.tsx",
       "source_location": "L51",
       "id": "shared_healthgoalswidget_handleupdate",
-      "community": 36,
+      "community": 38,
       "norm_label": "handleupdate()"
     },
     {
@@ -6912,7 +7092,7 @@
       "source_file": "apps\\web\\src\\components\\shared\\HealthGoalsWidget.tsx",
       "source_location": "L56",
       "id": "shared_healthgoalswidget_handleremovegoal",
-      "community": 36,
+      "community": 38,
       "norm_label": "handleremovegoal()"
     },
     {
@@ -6970,12 +7150,30 @@
       "norm_label": "usetypewriter()"
     },
     {
+      "label": "useIsMobile.ts",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\hooks\\useIsMobile.ts",
+      "source_location": "L1",
+      "id": "apps_web_src_hooks_useismobile_ts",
+      "community": 91,
+      "norm_label": "useismobile.ts"
+    },
+    {
+      "label": "useIsMobile()",
+      "file_type": "code",
+      "source_file": "apps\\web\\src\\hooks\\useIsMobile.ts",
+      "source_location": "L15",
+      "id": "hooks_useismobile_useismobile",
+      "community": 91,
+      "norm_label": "useismobile()"
+    },
+    {
       "label": "useLabScanJob.ts",
       "file_type": "code",
       "source_file": "apps\\web\\src\\hooks\\useLabScanJob.ts",
       "source_location": "L1",
       "id": "apps_web_src_hooks_uselabscanjob_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "uselabscanjob.ts"
     },
     {
@@ -6984,7 +7182,7 @@
       "source_file": "apps\\web\\src\\hooks\\useLabScanJob.ts",
       "source_location": "L19",
       "id": "hooks_uselabscanjob_getauthtoken",
-      "community": 2,
+      "community": 1,
       "norm_label": "getauthtoken()"
     },
     {
@@ -6993,7 +7191,7 @@
       "source_file": "apps\\web\\src\\hooks\\useLabScanJob.ts",
       "source_location": "L25",
       "id": "hooks_uselabscanjob_uselabscanjob",
-      "community": 2,
+      "community": 1,
       "norm_label": "uselabscanjob()"
     },
     {
@@ -7002,7 +7200,7 @@
       "source_file": "apps\\web\\src\\hooks\\usePushNotifications.ts",
       "source_location": "L1",
       "id": "apps_web_src_hooks_usepushnotifications_ts",
-      "community": 30,
+      "community": 31,
       "norm_label": "usepushnotifications.ts"
     },
     {
@@ -7011,7 +7209,7 @@
       "source_file": "apps\\web\\src\\hooks\\usePushNotifications.ts",
       "source_location": "L4",
       "id": "hooks_usepushnotifications_urlbase64touint8array",
-      "community": 30,
+      "community": 31,
       "norm_label": "urlbase64touint8array()"
     },
     {
@@ -7020,7 +7218,7 @@
       "source_file": "apps\\web\\src\\hooks\\usePushNotifications.ts",
       "source_location": "L14",
       "id": "hooks_usepushnotifications_iscapacitornative",
-      "community": 30,
+      "community": 31,
       "norm_label": "iscapacitornative()"
     },
     {
@@ -7029,7 +7227,7 @@
       "source_file": "apps\\web\\src\\hooks\\usePushNotifications.ts",
       "source_location": "L19",
       "id": "hooks_usepushnotifications_getcapacitorpush",
-      "community": 30,
+      "community": 31,
       "norm_label": "getcapacitorpush()"
     },
     {
@@ -7038,7 +7236,7 @@
       "source_file": "apps\\web\\src\\hooks\\usePushNotifications.ts",
       "source_location": "L23",
       "id": "hooks_usepushnotifications_usepushnotifications",
-      "community": 30,
+      "community": 31,
       "norm_label": "usepushnotifications()"
     },
     {
@@ -7047,7 +7245,7 @@
       "source_file": "apps\\web\\src\\hooks\\useUnits.ts",
       "source_location": "L1",
       "id": "apps_web_src_hooks_useunits_ts",
-      "community": 83,
+      "community": 92,
       "norm_label": "useunits.ts"
     },
     {
@@ -7056,7 +7254,7 @@
       "source_file": "apps\\web\\src\\hooks\\useUnits.ts",
       "source_location": "L13",
       "id": "hooks_useunits_useunits",
-      "community": 83,
+      "community": 92,
       "norm_label": "useunits()"
     },
     {
@@ -7065,7 +7263,7 @@
       "source_file": "apps\\web\\src\\i18n\\add_trans.py",
       "source_location": "L1",
       "id": "apps_web_src_i18n_add_trans_py",
-      "community": 165,
+      "community": 174,
       "norm_label": "add_trans.py"
     },
     {
@@ -7074,7 +7272,7 @@
       "source_file": "apps\\web\\src\\i18n\\config.ts",
       "source_location": "L1",
       "id": "apps_web_src_i18n_config_ts",
-      "community": 166,
+      "community": 175,
       "norm_label": "config.ts"
     },
     {
@@ -7083,7 +7281,7 @@
       "source_file": "apps\\web\\src\\i18n\\request.ts",
       "source_location": "L1",
       "id": "apps_web_src_i18n_request_ts",
-      "community": 84,
+      "community": 93,
       "norm_label": "request.ts"
     },
     {
@@ -7092,7 +7290,7 @@
       "source_file": "apps\\web\\src\\i18n\\request.ts",
       "source_location": "L20",
       "id": "i18n_request_negotiatelocale",
-      "community": 84,
+      "community": 93,
       "norm_label": "negotiatelocale()"
     },
     {
@@ -7677,7 +7875,7 @@
       "source_file": "apps\\web\\src\\lib\\prisma.ts",
       "source_location": "L1",
       "id": "apps_web_src_lib_prisma_ts",
-      "community": 85,
+      "community": 94,
       "norm_label": "prisma.ts"
     },
     {
@@ -7686,7 +7884,7 @@
       "source_file": "apps\\web\\src\\lib\\prisma.ts",
       "source_location": "L3",
       "id": "lib_prisma_prismaclientsingleton",
-      "community": 85,
+      "community": 94,
       "norm_label": "prismaclientsingleton()"
     },
     {
@@ -7785,7 +7983,7 @@
       "source_file": "apps\\web\\src\\lib\\utils.ts",
       "source_location": "L1",
       "id": "apps_web_src_lib_utils_ts",
-      "community": 86,
+      "community": 95,
       "norm_label": "utils.ts"
     },
     {
@@ -7794,7 +7992,7 @@
       "source_file": "apps\\web\\src\\lib\\utils.ts",
       "source_location": "L4",
       "id": "lib_utils_cn",
-      "community": 86,
+      "community": 95,
       "norm_label": "cn()"
     },
     {
@@ -7857,7 +8055,7 @@
       "source_file": "apps\\web\\src\\lib\\food-diary\\ai-schemas.ts",
       "source_location": "L1",
       "id": "apps_web_src_lib_food_diary_ai_schemas_ts",
-      "community": 167,
+      "community": 176,
       "norm_label": "ai-schemas.ts"
     },
     {
@@ -7992,7 +8190,7 @@
       "source_file": "apps\\web\\src\\lib\\food-diary\\meal.schemas.ts",
       "source_location": "L1",
       "id": "apps_web_src_lib_food_diary_meal_schemas_ts",
-      "community": 168,
+      "community": 177,
       "norm_label": "meal.schemas.ts"
     },
     {
@@ -8055,7 +8253,7 @@
       "source_file": "apps\\web\\src\\lib\\food-diary\\nutrient-utils.ts",
       "source_location": "L1",
       "id": "apps_web_src_lib_food_diary_nutrient_utils_ts",
-      "community": 37,
+      "community": 39,
       "norm_label": "nutrient-utils.ts"
     },
     {
@@ -8064,7 +8262,7 @@
       "source_file": "apps\\web\\src\\lib\\food-diary\\nutrient-utils.ts",
       "source_location": "L39",
       "id": "food_diary_nutrient_utils_normalizemicronutrientkey",
-      "community": 37,
+      "community": 39,
       "norm_label": "normalizemicronutrientkey()"
     },
     {
@@ -8073,7 +8271,7 @@
       "source_file": "apps\\web\\src\\lib\\food-diary\\nutrient-utils.ts",
       "source_location": "L53",
       "id": "food_diary_nutrient_utils_translateunit",
-      "community": 37,
+      "community": 39,
       "norm_label": "translateunit()"
     },
     {
@@ -8082,7 +8280,7 @@
       "source_file": "apps\\web\\src\\lib\\food-diary\\nutrient-utils.ts",
       "source_location": "L59",
       "id": "food_diary_nutrient_utils_translatevaluewithunit",
-      "community": 37,
+      "community": 39,
       "norm_label": "translatevaluewithunit()"
     },
     {
@@ -8109,7 +8307,7 @@
       "source_file": "apps\\web\\src\\lib\\supabase\\client.ts",
       "source_location": "L1",
       "id": "apps_web_src_lib_supabase_client_ts",
-      "community": 47,
+      "community": 51,
       "norm_label": "client.ts"
     },
     {
@@ -8118,7 +8316,7 @@
       "source_file": "apps\\web\\src\\lib\\supabase\\client.ts",
       "source_location": "L4",
       "id": "supabase_client_dummylock",
-      "community": 47,
+      "community": 51,
       "norm_label": "dummylock()"
     },
     {
@@ -8127,7 +8325,7 @@
       "source_file": "apps\\web\\src\\lib\\supabase\\client.ts",
       "source_location": "L8",
       "id": "supabase_client_createclient",
-      "community": 47,
+      "community": 51,
       "norm_label": "createclient()"
     },
     {
@@ -8136,7 +8334,7 @@
       "source_file": "apps\\web\\src\\lib\\supabase\\middleware.ts",
       "source_location": "L1",
       "id": "apps_web_src_lib_supabase_middleware_ts",
-      "community": 27,
+      "community": 32,
       "norm_label": "middleware.ts"
     },
     {
@@ -8145,7 +8343,7 @@
       "source_file": "apps\\web\\src\\lib\\supabase\\middleware.ts",
       "source_location": "L4",
       "id": "supabase_middleware_updatesession",
-      "community": 27,
+      "community": 32,
       "norm_label": "updatesession()"
     },
     {
@@ -8154,7 +8352,7 @@
       "source_file": "apps\\web\\src\\lib\\supabase\\server.ts",
       "source_location": "L1",
       "id": "apps_web_src_lib_supabase_server_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "server.ts"
     },
     {
@@ -8163,7 +8361,7 @@
       "source_file": "apps\\web\\src\\lib\\supabase\\server.ts",
       "source_location": "L4",
       "id": "supabase_server_createclient",
-      "community": 2,
+      "community": 1,
       "norm_label": "createclient()"
     },
     {
@@ -8172,7 +8370,7 @@
       "source_file": "apps\\web\\src\\lib\\types\\profile.ts",
       "source_location": "L1",
       "id": "apps_web_src_lib_types_profile_ts",
-      "community": 169,
+      "community": 178,
       "norm_label": "profile.ts"
     },
     {
@@ -8181,7 +8379,7 @@
       "source_file": "apps\\web\\src\\types\\health-core.ts",
       "source_location": "L1",
       "id": "apps_web_src_types_health_core_ts",
-      "community": 170,
+      "community": 179,
       "norm_label": "health-core.ts"
     },
     {
@@ -8190,7 +8388,7 @@
       "source_file": "apps\\web\\src\\types\\wearable-types.ts",
       "source_location": "L1",
       "id": "apps_web_src_types_wearable_types_ts",
-      "community": 171,
+      "community": 180,
       "norm_label": "wearable-types.ts"
     },
     {
@@ -8199,7 +8397,7 @@
       "source_file": "supabase\\functions\\generate-skill-document\\index.ts",
       "source_location": "L1",
       "id": "supabase_functions_generate_skill_document_index_ts",
-      "community": 87,
+      "community": 96,
       "norm_label": "index.ts"
     },
     {
@@ -8208,7 +8406,7 @@
       "source_file": "supabase\\functions\\generate-skill-document\\index.ts",
       "source_location": "L47",
       "id": "generate_skill_document_index_calculateage",
-      "community": 87,
+      "community": 96,
       "norm_label": "calculateage()"
     },
     {
@@ -8406,7 +8604,7 @@
       "source_file": "supabase\\functions\\sentiment-extractor\\index.ts",
       "source_location": "L81",
       "id": "sentiment_extractor_index_jsonresponse",
-      "community": 1,
+      "community": 2,
       "norm_label": "jsonresponse()"
     },
     {
@@ -8423,7 +8621,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L69",
-      "community": 1,
+      "community": 2,
       "norm_label": "manage application startup / shutdown resources.      on shutdown, the shared",
       "id": "api_main_rationale_69"
     },
@@ -8432,7 +8630,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L106",
-      "community": 1,
+      "community": 2,
       "norm_label": "pass through httpexceptions so they aren't caught by the global handler.",
       "id": "api_main_rationale_106"
     },
@@ -8441,7 +8639,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L115",
-      "community": 1,
+      "community": 2,
       "norm_label": "catch all unhandled exceptions and log full traceback.",
       "id": "api_main_rationale_115"
     },
@@ -8450,7 +8648,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L186",
-      "community": 1,
+      "community": 2,
       "norm_label": "deterministically recalculate flag based on numeric value and reference range.",
       "id": "api_main_rationale_186"
     },
@@ -8459,7 +8657,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L243",
-      "community": 1,
+      "community": 2,
       "norm_label": "enrich biomarkers with ai clinical notes via semantic cache + llm fallback.",
       "id": "api_main_rationale_243"
     },
@@ -8468,7 +8666,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L475",
-      "community": 1,
+      "community": 2,
       "norm_label": "recalculate flags and generate concise ai clinical notes for updated biomarkers.",
       "id": "api_main_rationale_475"
     },
@@ -8477,7 +8675,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L500",
-      "community": 1,
+      "community": 2,
       "norm_label": "upload pdf/docx/txt -> extract biomarkers dynamically via ai.",
       "id": "api_main_rationale_500"
     },
@@ -8486,7 +8684,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L530",
-      "community": 1,
+      "community": 2,
       "norm_label": "upload a photo of a lab report -> ocr via gpt-4o vision -> extract biomarkers.",
       "id": "api_main_rationale_530"
     },
@@ -8495,7 +8693,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L567",
-      "community": 1,
+      "community": 2,
       "norm_label": "upload a batch of photos (up to 10) of a lab report -> ocr via gpt-4o vision ->",
       "id": "api_main_rationale_567"
     },
@@ -8504,7 +8702,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L630",
-      "community": 1,
+      "community": 2,
       "norm_label": "background: run ocr on images, save result to lab_scans table.      args:",
       "id": "api_main_rationale_630"
     },
@@ -8513,7 +8711,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L719",
-      "community": 1,
+      "community": 2,
       "norm_label": "initiate async batch ocr. returns job_id immediately.",
       "id": "api_main_rationale_719"
     },
@@ -8522,7 +8720,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L802",
-      "community": 1,
+      "community": 2,
       "norm_label": "polling fallback: check async ocr job status.",
       "id": "api_main_rationale_802"
     },
@@ -8531,7 +8729,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L828",
-      "community": 1,
+      "community": 2,
       "norm_label": "calculate dynamic norm (mock logic).",
       "id": "api_main_rationale_828"
     },
@@ -8540,7 +8738,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L848",
-      "community": 1,
+      "community": 2,
       "norm_label": "return a simple health-check response.",
       "id": "api_main_rationale_848"
     },
@@ -8549,7 +8747,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L61",
-      "community": 172,
+      "community": 181,
       "norm_label": "the root structure expected from the llm.",
       "id": "services_file_parser_rationale_61"
     },
@@ -8558,7 +8756,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L85",
-      "community": 173,
+      "community": 182,
       "norm_label": "extract text from pdf bytes using pypdf.",
       "id": "services_file_parser_rationale_85"
     },
@@ -8567,7 +8765,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L95",
-      "community": 174,
+      "community": 183,
       "norm_label": "extract text from docx bytes using python-docx.",
       "id": "services_file_parser_rationale_95"
     },
@@ -8576,7 +8774,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L112",
-      "community": 175,
+      "community": 184,
       "norm_label": "decode plain-text bytes (utf-8 with fallback to cp1251).",
       "id": "services_file_parser_rationale_112"
     },
@@ -8585,7 +8783,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L125",
-      "community": 176,
+      "community": 185,
       "norm_label": "extract standard biomarkers from pdf, docx, or txt file using ai.      args:",
       "id": "services_file_parser_rationale_125"
     },
@@ -8594,7 +8792,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L218",
-      "community": 177,
+      "community": 186,
       "norm_label": "extract biomarkers from a photo of a lab report using gpt-4o vision.      send",
       "id": "services_file_parser_rationale_218"
     },
@@ -8603,7 +8801,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L318",
-      "community": 178,
+      "community": 187,
       "norm_label": "extract biomarkers from a batch of photos of a lab report using gpt-4o vision.",
       "id": "services_file_parser_rationale_318"
     },
@@ -8612,7 +8810,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\schemas\\profile_schema.py",
       "source_location": "L65",
-      "community": 179,
+      "community": 188,
       "norm_label": "schema for creating a new user profile.      the ``id`` is provided by supabas",
       "id": "schemas_profile_schema_rationale_65"
     },
@@ -8621,7 +8819,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\schemas\\profile_schema.py",
       "source_location": "L78",
-      "community": 180,
+      "community": 189,
       "norm_label": "schema for partial profile updates (patch semantics).      all fields are opti",
       "id": "schemas_profile_schema_rationale_78"
     },
@@ -8630,7 +8828,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\schemas\\profile_schema.py",
       "source_location": "L114",
-      "community": 181,
+      "community": 190,
       "norm_label": "schema returned by the api when reading a profile.",
       "id": "schemas_profile_schema_rationale_114"
     },
@@ -8639,7 +8837,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L49",
-      "community": 1,
+      "community": 2,
       "norm_label": "manage application startup / shutdown resources.      on shutdown, the shared",
       "id": "api_main_rationale_49"
     },
@@ -8648,7 +8846,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L85",
-      "community": 1,
+      "community": 2,
       "norm_label": "pass through httpexceptions so they aren't caught by the global handler.",
       "id": "api_main_rationale_85"
     },
@@ -8657,7 +8855,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L94",
-      "community": 1,
+      "community": 2,
       "norm_label": "catch all unhandled exceptions and log full traceback.",
       "id": "api_main_rationale_94"
     },
@@ -8666,7 +8864,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L162",
-      "community": 1,
+      "community": 2,
       "norm_label": "deterministically recalculate flag based on numeric value and reference range.",
       "id": "api_main_rationale_162"
     },
@@ -8675,7 +8873,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L215",
-      "community": 1,
+      "community": 2,
       "norm_label": "enrich biomarkers with ai clinical notes via semantic cache + llm fallback.",
       "id": "api_main_rationale_215"
     },
@@ -8684,7 +8882,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L418",
-      "community": 1,
+      "community": 2,
       "norm_label": "recalculate flags and generate concise ai clinical notes for updated biomarkers.",
       "id": "api_main_rationale_418"
     },
@@ -8693,7 +8891,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L440",
-      "community": 1,
+      "community": 2,
       "norm_label": "upload pdf/docx/txt -> extract biomarkers dynamically via ai.",
       "id": "api_main_rationale_440"
     },
@@ -8702,7 +8900,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L470",
-      "community": 1,
+      "community": 2,
       "norm_label": "upload a batch of photos (up to 10) of a lab report -> ocr via gpt-4o vision ->",
       "id": "api_main_rationale_470"
     },
@@ -8711,7 +8909,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L505",
-      "community": 1,
+      "community": 2,
       "norm_label": "upload a batch of photos (up to 10) of a lab report -> ocr via gpt-4o vision ->",
       "id": "api_main_rationale_505"
     },
@@ -8720,7 +8918,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L563",
-      "community": 1,
+      "community": 2,
       "norm_label": "background: run ocr on images, save result to lab_scans table.      args:",
       "id": "api_main_rationale_563"
     },
@@ -8729,7 +8927,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L624",
-      "community": 1,
+      "community": 2,
       "norm_label": "initiate async batch ocr. returns job_id immediately.",
       "id": "api_main_rationale_624"
     },
@@ -8738,7 +8936,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L697",
-      "community": 1,
+      "community": 2,
       "norm_label": "polling fallback: check async ocr job status.",
       "id": "api_main_rationale_697"
     },
@@ -8747,7 +8945,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L720",
-      "community": 1,
+      "community": 2,
       "norm_label": "calculate dynamic norm (mock logic).",
       "id": "api_main_rationale_720"
     },
@@ -8756,7 +8954,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L740",
-      "community": 1,
+      "community": 2,
       "norm_label": "return a simple health-check response.",
       "id": "api_main_rationale_740"
     },
@@ -8828,7 +9026,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\schemas\\analytics_schema.py",
       "source_location": "L16",
-      "community": 182,
+      "community": 191,
       "norm_label": "represents aggregated micronutrients for a single day.          since the keys",
       "id": "schemas_analytics_schema_rationale_16"
     },
@@ -8837,7 +9035,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\schemas\\analytics_schema.py",
       "source_location": "L33",
-      "community": 183,
+      "community": 192,
       "norm_label": "represents a recommendation for a single biomarker test.",
       "id": "schemas_analytics_schema_rationale_33"
     },
@@ -8846,7 +9044,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L24",
-      "community": 184,
+      "community": 193,
       "norm_label": "encapsulates the reference range explicitly stated in the document.",
       "id": "services_file_parser_rationale_24"
     },
@@ -8855,7 +9053,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L31",
-      "community": 185,
+      "community": 194,
       "norm_label": "a single biomarker extracted dynamically from the lab report.",
       "id": "services_file_parser_rationale_31"
     },
@@ -8864,7 +9062,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L43",
-      "community": 186,
+      "community": 195,
       "norm_label": "the root structure expected from the llm.",
       "id": "services_file_parser_rationale_43"
     },
@@ -8873,7 +9071,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L57",
-      "community": 187,
+      "community": 196,
       "norm_label": "extract text from pdf bytes using pypdf.",
       "id": "services_file_parser_rationale_57"
     },
@@ -8882,7 +9080,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L67",
-      "community": 188,
+      "community": 197,
       "norm_label": "extract text from docx bytes using python-docx.",
       "id": "services_file_parser_rationale_67"
     },
@@ -8891,7 +9089,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L84",
-      "community": 189,
+      "community": 198,
       "norm_label": "decode plain-text bytes (utf-8 with fallback to cp1251).",
       "id": "services_file_parser_rationale_84"
     },
@@ -8900,7 +9098,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L94",
-      "community": 190,
+      "community": 199,
       "norm_label": "extract standard biomarkers from pdf, docx, or txt file using ai.      args:",
       "id": "services_file_parser_rationale_94"
     },
@@ -8909,7 +9107,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L176",
-      "community": 191,
+      "community": 200,
       "norm_label": "extract biomarkers from a photo of a lab report using gpt-4o vision.      send",
       "id": "services_file_parser_rationale_176"
     },
@@ -8918,7 +9116,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L268",
-      "community": 192,
+      "community": 201,
       "norm_label": "extract biomarkers from a batch of photos of a lab report using gpt-4o vision.",
       "id": "services_file_parser_rationale_268"
     },
@@ -8927,7 +9125,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\norm_engine.py",
       "source_location": "L52",
-      "community": 193,
+      "community": 202,
       "norm_label": "calculate personalized norms based on profile factors (mock logic).",
       "id": "services_norm_engine_rationale_52"
     },
@@ -8936,7 +9134,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\pdf_parser.py",
       "source_location": "L47",
-      "community": 194,
+      "community": 203,
       "norm_label": "extract standard biomarkers from pdf bytes using regex.",
       "id": "services_pdf_parser_rationale_47"
     },
@@ -8945,7 +9143,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L383",
-      "community": 1,
+      "community": 2,
       "norm_label": "recalculate flags and generate concise ai clinical notes for updated biomarkers.",
       "id": "api_main_rationale_383"
     },
@@ -8954,7 +9152,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L405",
-      "community": 1,
+      "community": 2,
       "norm_label": "upload pdf/docx/txt -> extract biomarkers dynamically via ai.",
       "id": "api_main_rationale_405"
     },
@@ -8963,7 +9161,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L435",
-      "community": 1,
+      "community": 2,
       "norm_label": "upload a photo of a lab report -> ocr via gpt-4o vision -> extract biomarkers.",
       "id": "api_main_rationale_435"
     },
@@ -8972,7 +9170,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L528",
-      "community": 1,
+      "community": 2,
       "norm_label": "background: run ocr on images, save result to lab_scans table.      args:",
       "id": "api_main_rationale_528"
     },
@@ -8981,7 +9179,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L589",
-      "community": 1,
+      "community": 2,
       "norm_label": "initiate async batch ocr. returns job_id immediately.",
       "id": "api_main_rationale_589"
     },
@@ -8990,7 +9188,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L662",
-      "community": 1,
+      "community": 2,
       "norm_label": "polling fallback: check async ocr job status.",
       "id": "api_main_rationale_662"
     },
@@ -8999,7 +9197,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L685",
-      "community": 1,
+      "community": 2,
       "norm_label": "calculate dynamic norm (mock logic).",
       "id": "api_main_rationale_685"
     },
@@ -9008,7 +9206,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L705",
-      "community": 1,
+      "community": 2,
       "norm_label": "return a simple health-check response.",
       "id": "api_main_rationale_705"
     },
@@ -9017,7 +9215,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L170",
-      "community": 195,
+      "community": 204,
       "norm_label": "extract biomarkers from a photo of a lab report using gpt-4o vision.      send",
       "id": "services_file_parser_rationale_170"
     },
@@ -9026,7 +9224,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\services\\file_parser.py",
       "source_location": "L256",
-      "community": 196,
+      "community": 205,
       "norm_label": "extract biomarkers from a batch of photos of a lab report using gpt-4o vision.",
       "id": "services_file_parser_rationale_256"
     },
@@ -9035,7 +9233,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L214",
-      "community": 1,
+      "community": 2,
       "norm_label": "enrich biomarkers with ai clinical notes via semantic cache + llm fallback.",
       "id": "api_main_rationale_214"
     },
@@ -9044,7 +9242,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L382",
-      "community": 1,
+      "community": 2,
       "norm_label": "recalculate flags and generate concise ai clinical notes for updated biomarkers.",
       "id": "api_main_rationale_382"
     },
@@ -9053,7 +9251,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L403",
-      "community": 1,
+      "community": 2,
       "norm_label": "upload pdf/docx/txt -> extract biomarkers dynamically via ai.",
       "id": "api_main_rationale_403"
     },
@@ -9062,7 +9260,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L433",
-      "community": 1,
+      "community": 2,
       "norm_label": "upload a photo of a lab report -> ocr via gpt-4o vision -> extract biomarkers.",
       "id": "api_main_rationale_433"
     },
@@ -9071,7 +9269,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L468",
-      "community": 1,
+      "community": 2,
       "norm_label": "upload a batch of photos (up to 10) of a lab report -> ocr via gpt-4o vision ->",
       "id": "api_main_rationale_468"
     },
@@ -9080,7 +9278,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L586",
-      "community": 1,
+      "community": 2,
       "norm_label": "initiate async batch ocr. returns job_id immediately.",
       "id": "api_main_rationale_586"
     },
@@ -9089,7 +9287,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L657",
-      "community": 1,
+      "community": 2,
       "norm_label": "polling fallback: check async ocr job status.",
       "id": "api_main_rationale_657"
     },
@@ -9098,7 +9296,7 @@
       "file_type": "rationale",
       "source_file": "apps\\api\\main.py",
       "source_location": "L700",
-      "community": 1,
+      "community": 2,
       "norm_label": "return a simple health-check response.",
       "id": "api_main_rationale_700"
     }
@@ -24684,7 +24882,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\app\\ClientPage.tsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0,
       "_src": "apps_web_src_app_clientpage_tsx",
       "_tgt": "app_clientpage_medicalicon",
@@ -24696,7 +24894,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\app\\ClientPage.tsx",
-      "source_location": "L39",
+      "source_location": "L40",
       "weight": 1.0,
       "_src": "apps_web_src_app_clientpage_tsx",
       "_tgt": "app_clientpage_assistanticon",
@@ -24726,6 +24924,18 @@
       "_tgt": "app_layout_generatemetadata",
       "source": "apps_web_src_app_layout_tsx",
       "target": "app_layout_generatemetadata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps\\web\\src\\app\\manifest.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_src": "apps_web_src_app_manifest_ts",
+      "_tgt": "app_manifest_manifest",
+      "source": "apps_web_src_app_manifest_ts",
+      "target": "app_manifest_manifest",
       "confidence_score": 1.0
     },
     {
@@ -25691,6 +25901,126 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "apps\\web\\src\\components\\dashboard\\BottomDock.tsx",
+      "source_location": "L35",
+      "weight": 1.0,
+      "_src": "apps_web_src_components_dashboard_bottomdock_tsx",
+      "_tgt": "dashboard_bottomdock_updatemaskposition",
+      "source": "apps_web_src_components_dashboard_bottomdock_tsx",
+      "target": "dashboard_bottomdock_updatemaskposition",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps\\web\\src\\components\\dashboard\\BottomDock.tsx",
+      "source_location": "L51",
+      "weight": 1.0,
+      "_src": "apps_web_src_components_dashboard_bottomdock_tsx",
+      "_tgt": "dashboard_bottomdock_handletabclick",
+      "source": "apps_web_src_components_dashboard_bottomdock_tsx",
+      "target": "dashboard_bottomdock_handletabclick",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps\\web\\src\\components\\dashboard\\BottomDock.tsx",
+      "source_location": "L65",
+      "weight": 1.0,
+      "_src": "apps_web_src_components_dashboard_bottomdock_tsx",
+      "_tgt": "dashboard_bottomdock_handleclosecheckcancel",
+      "source": "apps_web_src_components_dashboard_bottomdock_tsx",
+      "target": "dashboard_bottomdock_handleclosecheckcancel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps\\web\\src\\components\\dashboard\\BottomDock.tsx",
+      "source_location": "L70",
+      "weight": 1.0,
+      "_src": "apps_web_src_components_dashboard_bottomdock_tsx",
+      "_tgt": "dashboard_bottomdock_handlecloseprofile",
+      "source": "apps_web_src_components_dashboard_bottomdock_tsx",
+      "target": "dashboard_bottomdock_handlecloseprofile",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps\\web\\src\\components\\dashboard\\DashboardCard.tsx",
+      "source_location": "L64",
+      "weight": 1.0,
+      "_src": "apps_web_src_components_dashboard_dashboardcard_tsx",
+      "_tgt": "dashboard_dashboardcard_dashboardcard",
+      "source": "apps_web_src_components_dashboard_dashboardcard_tsx",
+      "target": "dashboard_dashboardcard_dashboardcard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps\\web\\src\\components\\dashboard\\DashboardHeader.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_src": "apps_web_src_components_dashboard_dashboardheader_tsx",
+      "_tgt": "dashboard_dashboardheader_dashboardheader",
+      "source": "apps_web_src_components_dashboard_dashboardheader_tsx",
+      "target": "dashboard_dashboardheader_dashboardheader",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps\\web\\src\\components\\dashboard\\MobileDashboardLayout.tsx",
+      "source_location": "L48",
+      "weight": 1.0,
+      "_src": "apps_web_src_components_dashboard_mobiledashboardlayout_tsx",
+      "_tgt": "dashboard_mobiledashboardlayout_handlemoodchange",
+      "source": "apps_web_src_components_dashboard_mobiledashboardlayout_tsx",
+      "target": "dashboard_mobiledashboardlayout_handlemoodchange",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps\\web\\src\\components\\dashboard\\MobileDashboardLayout.tsx",
+      "source_location": "L57",
+      "weight": 1.0,
+      "_src": "apps_web_src_components_dashboard_mobiledashboardlayout_tsx",
+      "_tgt": "dashboard_mobiledashboardlayout_handletabchange",
+      "source": "apps_web_src_components_dashboard_mobiledashboardlayout_tsx",
+      "target": "dashboard_mobiledashboardlayout_handletabchange",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps\\web\\src\\components\\dashboard\\WellbeingWidget.tsx",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_src": "apps_web_src_components_dashboard_wellbeingwidget_tsx",
+      "_tgt": "dashboard_wellbeingwidget_fetchmood",
+      "source": "apps_web_src_components_dashboard_wellbeingwidget_tsx",
+      "target": "dashboard_wellbeingwidget_fetchmood",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps\\web\\src\\components\\dashboard\\WellbeingWidget.tsx",
+      "source_location": "L46",
+      "weight": 1.0,
+      "_src": "apps_web_src_components_dashboard_wellbeingwidget_tsx",
+      "_tgt": "dashboard_wellbeingwidget_handleselect",
+      "source": "apps_web_src_components_dashboard_wellbeingwidget_tsx",
+      "target": "dashboard_wellbeingwidget_handleselect",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\diary\\ChatMessage.tsx",
       "source_location": "L28",
       "weight": 1.0,
@@ -25955,6 +26285,18 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "apps\\web\\src\\components\\diary\\FoodInputForm.tsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_src": "apps_web_src_components_diary_foodinputform_tsx",
+      "_tgt": "diary_foodinputform_calculatetotalweight",
+      "source": "apps_web_src_components_diary_foodinputform_tsx",
+      "target": "diary_foodinputform_calculatetotalweight",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\diary\\GlycemicCurveChart.tsx",
       "source_location": "L21",
       "weight": 1.0,
@@ -26064,7 +26406,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\medical\\MedicalResultsView.tsx",
-      "source_location": "L99",
+      "source_location": "L118",
       "weight": 1.0,
       "_src": "apps_web_src_components_medical_medicalresultsview_tsx",
       "_tgt": "medical_medicalresultsview_fetchhistory",
@@ -26076,7 +26418,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\medical\\MedicalResultsView.tsx",
-      "source_location": "L265",
+      "source_location": "L309",
       "weight": 1.0,
       "_src": "apps_web_src_components_medical_medicalresultsview_tsx",
       "_tgt": "medical_medicalresultsview_handlemarkerchange",
@@ -26088,7 +26430,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\medical\\MedicalResultsView.tsx",
-      "source_location": "L284",
+      "source_location": "L328",
       "weight": 1.0,
       "_src": "apps_web_src_components_medical_medicalresultsview_tsx",
       "_tgt": "medical_medicalresultsview_handlerefreshnotes",
@@ -26100,7 +26442,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\medical\\MedicalResultsView.tsx",
-      "source_location": "L324",
+      "source_location": "L368",
       "weight": 1.0,
       "_src": "apps_web_src_components_medical_medicalresultsview_tsx",
       "_tgt": "medical_medicalresultsview_handledeletereport",
@@ -26232,7 +26574,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\medical\\UploadZone.tsx",
-      "source_location": "L32",
+      "source_location": "L34",
       "weight": 1.0,
       "_src": "apps_web_src_components_medical_uploadzone_tsx",
       "_tgt": "medical_uploadzone_uploadzone",
@@ -26424,7 +26766,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L246",
+      "source_location": "L268",
       "weight": 1.0,
       "_src": "apps_web_src_components_profile_userprofilesheet_tsx",
       "_tgt": "profile_userprofilesheet_loadwearables",
@@ -26436,7 +26778,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L334",
+      "source_location": "L356",
       "weight": 1.0,
       "_src": "apps_web_src_components_profile_userprofilesheet_tsx",
       "_tgt": "profile_userprofilesheet_handledeleteaccount",
@@ -26448,7 +26790,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L358",
+      "source_location": "L380",
       "weight": 1.0,
       "_src": "apps_web_src_components_profile_userprofilesheet_tsx",
       "_tgt": "profile_userprofilesheet_handleclearlongtermmemory",
@@ -26460,7 +26802,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L399",
+      "source_location": "L433",
       "weight": 1.0,
       "_src": "apps_web_src_components_profile_userprofilesheet_tsx",
       "_tgt": "profile_userprofilesheet_handlerequestclose",
@@ -26472,7 +26814,19 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L407",
+      "source_location": "L441",
+      "weight": 1.0,
+      "_src": "apps_web_src_components_profile_userprofilesheet_tsx",
+      "_tgt": "profile_userprofilesheet_handlecancelclose",
+      "source": "apps_web_src_components_profile_userprofilesheet_tsx",
+      "target": "profile_userprofilesheet_handlecancelclose",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
+      "source_location": "L448",
       "weight": 1.0,
       "_src": "apps_web_src_components_profile_userprofilesheet_tsx",
       "_tgt": "profile_userprofilesheet_handleforceclose",
@@ -26484,7 +26838,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L424",
+      "source_location": "L465",
       "weight": 1.0,
       "_src": "apps_web_src_components_profile_userprofilesheet_tsx",
       "_tgt": "profile_userprofilesheet_loadprofile",
@@ -26496,7 +26850,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L479",
+      "source_location": "L520",
       "weight": 1.0,
       "_src": "apps_web_src_components_profile_userprofilesheet_tsx",
       "_tgt": "profile_userprofilesheet_handlesaveprofile",
@@ -26508,7 +26862,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L555",
+      "source_location": "L596",
       "weight": 1.0,
       "_src": "apps_web_src_components_profile_userprofilesheet_tsx",
       "_tgt": "profile_userprofilesheet_bmicategory",
@@ -26520,7 +26874,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L567",
+      "source_location": "L608",
       "weight": 1.0,
       "_src": "apps_web_src_components_profile_userprofilesheet_tsx",
       "_tgt": "profile_userprofilesheet_addcondition",
@@ -26532,7 +26886,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L579",
+      "source_location": "L620",
       "weight": 1.0,
       "_src": "apps_web_src_components_profile_userprofilesheet_tsx",
       "_tgt": "profile_userprofilesheet_removecondition",
@@ -26544,7 +26898,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L588",
+      "source_location": "L629",
       "weight": 1.0,
       "_src": "apps_web_src_components_profile_userprofilesheet_tsx",
       "_tgt": "profile_userprofilesheet_addmedication",
@@ -26556,7 +26910,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L600",
+      "source_location": "L641",
       "weight": 1.0,
       "_src": "apps_web_src_components_profile_userprofilesheet_tsx",
       "_tgt": "profile_userprofilesheet_handledeletemetric",
@@ -26568,7 +26922,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L622",
+      "source_location": "L663",
       "weight": 1.0,
       "_src": "apps_web_src_components_profile_userprofilesheet_tsx",
       "_tgt": "profile_userprofilesheet_handledeleteallmetrics",
@@ -26580,7 +26934,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L638",
+      "source_location": "L679",
       "weight": 1.0,
       "_src": "apps_web_src_components_profile_userprofilesheet_tsx",
       "_tgt": "profile_userprofilesheet_removemedication",
@@ -26592,7 +26946,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L708",
+      "source_location": "L749",
       "weight": 1.0,
       "_src": "apps_web_src_components_profile_userprofilesheet_tsx",
       "_tgt": "profile_userprofilesheet_handledynamicocrsave",
@@ -26604,7 +26958,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L753",
+      "source_location": "L794",
       "weight": 1.0,
       "_src": "apps_web_src_components_profile_userprofilesheet_tsx",
       "_tgt": "profile_userprofilesheet_handlescreenshottrigger",
@@ -26616,7 +26970,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L758",
+      "source_location": "L799",
       "weight": 1.0,
       "_src": "apps_web_src_components_profile_userprofilesheet_tsx",
       "_tgt": "profile_userprofilesheet_handlescreenshotchange",
@@ -26628,7 +26982,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L1508",
+      "source_location": "L1597",
       "weight": 1.0,
       "_src": "apps_web_src_components_profile_userprofilesheet_tsx",
       "_tgt": "profile_userprofilesheet_string",
@@ -26640,7 +26994,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L436",
+      "source_location": "L477",
       "weight": 1.0,
       "_src": "profile_userprofilesheet_loadprofile",
       "_tgt": "profile_userprofilesheet_maplegacyvalue",
@@ -26676,7 +27030,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L490",
+      "source_location": "L531",
       "weight": 1.0,
       "_src": "profile_userprofilesheet_handlesaveprofile",
       "_tgt": "profile_userprofilesheet_string",
@@ -26724,7 +27078,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps\\web\\src\\components\\profile\\UserProfileSheet.tsx",
-      "source_location": "L776",
+      "source_location": "L817",
       "weight": 1.0,
       "_src": "profile_userprofilesheet_handlescreenshotchange",
       "_tgt": "profile_userprofilesheet_string",
@@ -26922,6 +27276,18 @@
       "_tgt": "hooks_use_typewriter_usetypewriter",
       "source": "apps_web_src_hooks_use_typewriter_ts",
       "target": "hooks_use_typewriter_usetypewriter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps\\web\\src\\hooks\\useIsMobile.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_src": "apps_web_src_hooks_useismobile_ts",
+      "_tgt": "hooks_useismobile_useismobile",
+      "source": "apps_web_src_hooks_useismobile_ts",
+      "target": "hooks_useismobile_useismobile",
       "confidence_score": 1.0
     },
     {
