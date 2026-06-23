@@ -6,6 +6,8 @@ import { GraphAnnotation } from "./state.js";
 import { agentTools, assistantTools, diaryTools } from "./tools.js";
 import { checkpointer } from "./checkpointer.js";
 import { getLLMConfig } from "../services/config.service.js";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
 
 /**
  * Sanitizes the message history to prevent INVALID_TOOL_RESULTS errors.

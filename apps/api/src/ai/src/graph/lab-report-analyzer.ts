@@ -27,6 +27,11 @@ interface BiomarkerInput {
     readonly value_string?: string | null;
     readonly unit?: string | null;
     readonly flag?: string | null;
+    readonly reference_range?: {
+        readonly low?: number | null;
+        readonly high?: number | null;
+        readonly text?: string | null;
+    } | null;
 }
 
 // ── Constants ───────────────────────────────────────────────────────
@@ -108,11 +113,32 @@ function formatBiomarkersForLLM(results: BiomarkerInput[]): string {
 /**
  * Maps a biomarker flag (Low/High/Normal/null) to the Zod status enum value.
  */
-function mapFlagToStatus(flag: string | null | undefined): "critical_low" | "low" | "normal" | "high" | "critical_high" {
+function mapFlagToStatus(
+    flag: string | null | undefined,
+    value?: number | null,
+    refLow?: number | null,
+    refHigh?: number | null
+): "critical_low" | "low" | "normal" | "high" | "critical_high" {
     if (!flag) return "normal";
-    const f = flag.toLowerCase();
-    if (f === "low") return "low";
-    if (f === "high") return "high";
+    const f = flag.toLowerCase().replace(/[\s_-]+/g, "_");
+    
+    if (f === "critical_low" || f === "critical_l" || f === "cl") return "critical_low";
+    if (f === "critical_high" || f === "critical_h" || f === "ch") return "critical_high";
+    
+    if (f === "critical") {
+        if (value !== undefined && value !== null) {
+            if (refLow !== undefined && refLow !== null && value < refLow) {
+                return "critical_low";
+            }
+            if (refHigh !== undefined && refHigh !== null && value > refHigh) {
+                return "critical_high";
+            }
+        }
+        return "critical_low"; // default fallback for 'critical'
+    }
+    
+    if (f === "low" || f === "l") return "low";
+    if (f === "high" || f === "h") return "high";
     return "normal";
 }
 
@@ -263,7 +289,12 @@ SUPPLEMENTS: ${JSON.stringify(supps ? supps : [])}
                 value: bm.value_numeric ?? 0,
                 unit: bm.unit ?? "",
                 reference_range: "",
-                status: mapFlagToStatus(bm.flag),
+                status: mapFlagToStatus(
+                    bm.flag,
+                    bm.value_numeric,
+                    bm.reference_range?.low,
+                    bm.reference_range?.high
+                ),
                 clinical_significance: cached,
             });
         } else {

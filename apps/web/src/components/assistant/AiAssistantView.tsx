@@ -665,7 +665,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
                 </div>
                 <div className="flex-1">
                   <p className="text-[0.9375rem] leading-relaxed">
-                    {profile?.first_name || "Саша"}, у нас накопилось достаточно записей о твоих симптомах. Я могу сопоставить их с дневником питания и найти скрытые причины. Запустить глубокий анализ?
+                    {profile?.first_name?.trim() ? `${profile.first_name.trim()}, у` : 'У'} нас накопилось достаточно записей о твоих симптомах. Я могу сопоставить их с дневником питания и найти скрытые причины. Запустить глубокий анализ?
                   </p>
                   <div className="mt-4 flex space-x-3">
                     <button 

@@ -49,7 +49,7 @@ export function DashboardHeader() {
         {/* Приветствие */}
         <div className="pl-1">
           <h1 className="text-[22px] font-bold text-white tracking-tight leading-tight whitespace-nowrap">
-            {getGreeting()}, {firstName || 'Саша'}!
+            {firstName?.trim() ? `${getGreeting()}, ${firstName.trim()}!` : `${getGreeting()}!`}
           </h1>
         </div>
       </div>

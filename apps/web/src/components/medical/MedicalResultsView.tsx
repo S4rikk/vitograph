@@ -483,7 +483,7 @@ export default function MedicalResultsView({
       )}
 
       {/* ── Results grid ──────────────────────────────────── */}
-      {(activeSubScreen === 'all' || activeSubScreen === 'upload') && editableBiomarkers && editableBiomarkers.length > 0 && uploadState === "done" && !reportAlreadyGenerated && (
+      {(activeSubScreen === 'all' || activeSubScreen === 'upload') && editableBiomarkers && editableBiomarkers.length > 0 && uploadState === "done" && (
         <>
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-ink">
@@ -541,10 +541,13 @@ export default function MedicalResultsView({
                           value={marker.value_numeric !== null ? (marker.value_numeric ?? "") : (marker.value_string ?? "")}
                           onChange={(e) => handleMarkerChange(index, marker.value_numeric !== null ? 'value_numeric' : 'value_string', e.target.value)}
                           step="any"
-                          className={`w-full max-w-[120px] rounded-lg px-2 py-1 text-2xl font-bold tracking-tight focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all ${
+                          readOnly={reportAlreadyGenerated}
+                          className={`w-full max-w-[120px] rounded-lg px-2 py-1 text-2xl font-bold tracking-tight focus:outline-none transition-all ${
                             isValueMissing 
                               ? "bg-rose-500/10 border-2 border-rose-400 text-rose-900 animate-pulse shadow-[0_0_10px_rgba(251,113,133,0.3)]" 
-                              : "bg-surface-muted border border-border text-ink focus:bg-surface"
+                              : reportAlreadyGenerated
+                                ? "bg-transparent border-transparent text-ink cursor-default"
+                                : "bg-surface-muted border border-border text-ink focus:bg-surface focus:ring-2 focus:ring-cyan-500"
                           }`}
                         />
                       );
@@ -563,10 +566,13 @@ export default function MedicalResultsView({
                           value={marker.reference_range?.text ?? ""}
                           onChange={(e) => handleMarkerChange(index, 'ref_text', e.target.value)}
                           placeholder={t("noData")}
+                          readOnly={reportAlreadyGenerated}
                           className={`flex-1 border-b px-1 py-0.5 text-sm transition-all focus:outline-none ${
                             isNormMissing
                               ? "bg-rose-500/10/50 border-rose-300 text-rose-700 animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite] placeholder:text-rose-300"
-                              : "bg-transparent border-border hover:border-border focus:border-cyan-400 text-ink-muted"
+                              : reportAlreadyGenerated
+                                ? "bg-transparent border-transparent text-ink-muted cursor-default"
+                                : "bg-transparent border-border hover:border-border focus:border-cyan-400 text-ink-muted"
                           }`}
                         />
                       );
@@ -629,11 +635,13 @@ export default function MedicalResultsView({
                 </div>
               </div>
             ) : (
-              <div className="ml-auto w-full lg:w-auto flex items-center justify-center rounded-xl bg-amber-500/10/50 px-5 py-3 border border-amber-500/20/30 transition-all duration-300 hover:bg-amber-500/10 hover:border-amber-500/20/60">
-                <div className="text-sm font-semibold text-amber-700">
-                  ⚠️ {t("verifyData")}
+              !reportAlreadyGenerated && (
+                <div className="ml-auto w-full lg:w-auto flex items-center justify-center rounded-xl bg-amber-500/10/50 px-5 py-3 border border-amber-500/20/30 transition-all duration-300 hover:bg-amber-500/10 hover:border-amber-500/20/60">
+                  <div className="text-sm font-semibold text-amber-700">
+                    ⚠️ {t("verifyData")}
+                  </div>
                 </div>
-              </div>
+              )
             )}
           </div>
         </>
