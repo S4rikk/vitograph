@@ -1,12 +1,12 @@
-# Graph Report - VITOGRAPH  (2026-06-22)
+# Graph Report - VITOGRAPH  (2026-06-23)
 
 ## Corpus Check
-- 267 files · ~476,254 words
+- 204 files · ~135,350 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1034 nodes · 1681 edges · 56 communities detected
-- Extraction: 57% EXTRACTED · 43% INFERRED · 0% AMBIGUOUS · INFERRED: 721 edges (avg confidence: 0.57)
+- 955 nodes · 1663 edges · 57 communities detected
+- Extraction: 57% EXTRACTED · 43% INFERRED · 0% AMBIGUOUS · INFERRED: 720 edges (avg confidence: 0.57)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -24,48 +24,49 @@
 - [[_COMMUNITY_Community 12|Community 12]]
 - [[_COMMUNITY_Community 13|Community 13]]
 - [[_COMMUNITY_Community 14|Community 14]]
-- [[_COMMUNITY_Community 15|Community 15]]
+- [[_COMMUNITY_Community 16|Community 16]]
 - [[_COMMUNITY_Community 17|Community 17]]
 - [[_COMMUNITY_Community 18|Community 18]]
 - [[_COMMUNITY_Community 19|Community 19]]
 - [[_COMMUNITY_Community 20|Community 20]]
 - [[_COMMUNITY_Community 21|Community 21]]
-- [[_COMMUNITY_Community 25|Community 25]]
-- [[_COMMUNITY_Community 26|Community 26]]
-- [[_COMMUNITY_Community 27|Community 27]]
-- [[_COMMUNITY_Community 32|Community 32]]
+- [[_COMMUNITY_Community 22|Community 22]]
+- [[_COMMUNITY_Community 23|Community 23]]
+- [[_COMMUNITY_Community 24|Community 24]]
+- [[_COMMUNITY_Community 28|Community 28]]
+- [[_COMMUNITY_Community 29|Community 29]]
 - [[_COMMUNITY_Community 34|Community 34]]
-- [[_COMMUNITY_Community 38|Community 38]]
-- [[_COMMUNITY_Community 39|Community 39]]
+- [[_COMMUNITY_Community 36|Community 36]]
+- [[_COMMUNITY_Community 40|Community 40]]
+- [[_COMMUNITY_Community 41|Community 41]]
 - [[_COMMUNITY_Community 42|Community 42]]
-- [[_COMMUNITY_Community 43|Community 43]]
-- [[_COMMUNITY_Community 155|Community 155]]
-- [[_COMMUNITY_Community 156|Community 156]]
-- [[_COMMUNITY_Community 181|Community 181]]
-- [[_COMMUNITY_Community 182|Community 182]]
-- [[_COMMUNITY_Community 183|Community 183]]
-- [[_COMMUNITY_Community 184|Community 184]]
-- [[_COMMUNITY_Community 185|Community 185]]
-- [[_COMMUNITY_Community 186|Community 186]]
-- [[_COMMUNITY_Community 187|Community 187]]
-- [[_COMMUNITY_Community 188|Community 188]]
-- [[_COMMUNITY_Community 189|Community 189]]
-- [[_COMMUNITY_Community 190|Community 190]]
-- [[_COMMUNITY_Community 191|Community 191]]
-- [[_COMMUNITY_Community 192|Community 192]]
-- [[_COMMUNITY_Community 193|Community 193]]
-- [[_COMMUNITY_Community 194|Community 194]]
-- [[_COMMUNITY_Community 195|Community 195]]
-- [[_COMMUNITY_Community 196|Community 196]]
-- [[_COMMUNITY_Community 197|Community 197]]
-- [[_COMMUNITY_Community 198|Community 198]]
-- [[_COMMUNITY_Community 199|Community 199]]
-- [[_COMMUNITY_Community 200|Community 200]]
-- [[_COMMUNITY_Community 201|Community 201]]
-- [[_COMMUNITY_Community 202|Community 202]]
-- [[_COMMUNITY_Community 203|Community 203]]
-- [[_COMMUNITY_Community 204|Community 204]]
-- [[_COMMUNITY_Community 205|Community 205]]
+- [[_COMMUNITY_Community 95|Community 95]]
+- [[_COMMUNITY_Community 96|Community 96]]
+- [[_COMMUNITY_Community 122|Community 122]]
+- [[_COMMUNITY_Community 123|Community 123]]
+- [[_COMMUNITY_Community 124|Community 124]]
+- [[_COMMUNITY_Community 125|Community 125]]
+- [[_COMMUNITY_Community 126|Community 126]]
+- [[_COMMUNITY_Community 127|Community 127]]
+- [[_COMMUNITY_Community 128|Community 128]]
+- [[_COMMUNITY_Community 129|Community 129]]
+- [[_COMMUNITY_Community 130|Community 130]]
+- [[_COMMUNITY_Community 131|Community 131]]
+- [[_COMMUNITY_Community 132|Community 132]]
+- [[_COMMUNITY_Community 133|Community 133]]
+- [[_COMMUNITY_Community 134|Community 134]]
+- [[_COMMUNITY_Community 135|Community 135]]
+- [[_COMMUNITY_Community 136|Community 136]]
+- [[_COMMUNITY_Community 137|Community 137]]
+- [[_COMMUNITY_Community 138|Community 138]]
+- [[_COMMUNITY_Community 139|Community 139]]
+- [[_COMMUNITY_Community 140|Community 140]]
+- [[_COMMUNITY_Community 141|Community 141]]
+- [[_COMMUNITY_Community 142|Community 142]]
+- [[_COMMUNITY_Community 143|Community 143]]
+- [[_COMMUNITY_Community 144|Community 144]]
+- [[_COMMUNITY_Community 145|Community 145]]
+- [[_COMMUNITY_Community 146|Community 146]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `LabReportExtraction` - 71 edges
@@ -75,7 +76,7 @@
 5. `UserProfile` - 69 edges
 6. `DatabaseError` - 63 edges
 7. `RecordNotFoundError` - 52 edges
-8. `createClient()` - 52 edges
+8. `createClient()` - 51 edges
 9. `AiApiClient` - 41 edges
 10. `ChatPromptBuilder` - 34 edges
 
@@ -94,16 +95,16 @@
 ## Communities
 
 ### Community 0 - "Community 0"
+Cohesion: 0.04
+Nodes (84): AdminLayout(), HomePage(), handleSubmit(), updateFeedbackStatus(), runFoodVisionAnalyzer(), formatBiomarkersForLLM(), generateBiomarkersHash(), lookupCachedNotes() (+76 more)
+
+### Community 1 - "Community 1"
 Cohesion: 0.06
 Nodes (81): DatabaseError, Custom exception hierarchy for database / repository operations.  All exceptio, Base exception for all database-related errors., Raised when a queried record does not exist., Raised when an insert violates a uniqueness constraint., RecordAlreadyExistsError, RecordNotFoundError, analyze_session() (+73 more)
 
-### Community 1 - "Community 1"
-Cohesion: 0.04
-Nodes (77): AdminLayout(), run(), getAppConfigKeys(), updateAppConfigItem(), handleUpdate(), AiSettingsPage(), HomePage(), handleSubmit() (+69 more)
-
 ### Community 2 - "Community 2"
 Cohesion: 0.08
-Nodes (94): calculate_norm(), enrich_biomarkers_with_insights(), get_lab_scan_status(), global_exception_handler(), health_check(), http_exception_handler(), lifespan(), LifespanTextEmbedding (+86 more)
+Nodes (98): calculate_norm(), enrich_biomarkers_with_insights(), get_lab_scan_status(), global_exception_handler(), health_check(), http_exception_handler(), lifespan(), LifespanTextEmbedding (+90 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.05
@@ -114,16 +115,16 @@ Cohesion: 0.04
 Nodes (25): ActiveTypewriterNode(), handleImageSelect(), handleUpdate(), NutrPill(), parseNutrientTags(), getMicronutrientColor(), useTypewriter(), compressImage() (+17 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.07
-Nodes (30): analyzeSymptomCorrelation(), buildPsychologicalFallback(), generateDiagnosticHypothesis(), generatePsychologicalResponse(), callLlmStructured(), runFoodVisionAnalyzer(), formatBiomarkersForLLM(), generateBiomarkersHash() (+22 more)
-
-### Community 6 - "Community 6"
 Cohesion: 0.08
 Nodes (3): AiApiClient, getApiBaseUrl(), getAuthToken()
 
-### Community 7 - "Community 7"
+### Community 6 - "Community 6"
 Cohesion: 0.06
 Nodes (2): ChatPromptBuilder, getLocalizedPersona()
+
+### Community 7 - "Community 7"
+Cohesion: 0.15
+Nodes (14): analyzeSymptomCorrelation(), buildPsychologicalFallback(), generateDiagnosticHypothesis(), generatePsychologicalResponse(), callLlmStructured(), handleAnalyze(), handleCorrelateSymptoms(), handleDiagnose() (+6 more)
 
 ### Community 8 - "Community 8"
 Cohesion: 0.12
@@ -134,36 +135,36 @@ Cohesion: 0.23
 Nodes (12): get_lab_schedule(), get_micronutrient_trends(), REST API endpoints for user analytics and insights.  Exposes ``GET`` operation, Fetch and aggregate daily micronutrient intake., Fetch and aggregate daily micronutrient intake., Generate predictive lab schedule., Generate predictive lab schedule., LabScheduleItem (+4 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.19
-Nodes (13): extract_biomarkers(), extract_biomarkers_from_image(), extract_biomarkers_from_image_batch(), _extract_text_from_docx(), _extract_text_from_pdf(), _extract_text_from_txt(), File Parser Service — Multi-format biomarker extraction using AI.  Supports PD, Decode plain-text bytes (UTF-8 with fallback to cp1251). (+5 more)
-
-### Community 12 - "Community 12"
 Cohesion: 0.24
 Nodes (9): get_supabase_client(), Async Supabase client connection manager.  Provides a lazily-initialised, appl, FastAPI dependency that yields an async client.      If an Authorization heade, Manages the lifecycle of a single ``AsyncClient`` instance.      The client is, Return the cached async Supabase client.          Creates the client on first, Gracefully close the underlying HTTP connections., SupabaseClientManager, DatabaseConnectionError (+1 more)
 
-### Community 13 - "Community 13"
+### Community 12 - "Community 12"
 Cohesion: 0.24
 Nodes (10): Exception, extract_text_from_pdf(), LLMParsingError, parse_biomarkers_with_llm(), PDFExtractionError, PDFExtractorService, PDF Extractor Service — extracts biomarker data from lab reports.  Provides tw, Raised when PDF text extraction fails. (+2 more)
 
-### Community 14 - "Community 14"
+### Community 13 - "Community 13"
 Cohesion: 0.24
 Nodes (9): BiomarkerBase, BiomarkerCreate, BiomarkerRead, BiomarkerUpdate, Pydantic V2 schemas for the ``biomarkers`` table.  Provides request/response m, Shared fields for biomarker create and read operations., Schema for creating a new biomarker (admin/service_role only)., Schema for partial biomarker updates (PATCH semantics).      All fields are op (+1 more)
 
-### Community 15 - "Community 15"
+### Community 14 - "Community 14"
 Cohesion: 0.24
 Nodes (6): detectAndParseFoodLog(), fetchUserPreferences(), handleUpdateWeight(), loadHistory(), getTzDayBoundaries(), getTzToday()
 
-### Community 17 - "Community 17"
+### Community 16 - "Community 16"
 Cohesion: 0.28
 Nodes (4): buildChunk(), chunkSectionContent(), generateEmbedding(), getModel()
 
-### Community 18 - "Community 18"
+### Community 17 - "Community 17"
 Cohesion: 0.32
 Nodes (7): DynamicNormRuleBase, DynamicNormRuleCreate, DynamicNormRuleRead, Pydantic V2 schemas for the ``dynamic_norm_rules`` table.  These schemas repre, Shared fields for dynamic norm rules.      Attributes:         biomarker_id:, Schema for inserting a new dynamic norm rule., Schema returned when reading a dynamic norm rule.
 
-### Community 19 - "Community 19"
+### Community 18 - "Community 18"
 Cohesion: 0.32
 Nodes (7): Pydantic V2 schemas for the ``user_dynamic_norms`` table.  Represents the cach, Shared fields for user dynamic norms.      Attributes:         user_id: FK to, Schema for inserting or upserting a computed norm., Schema returned when reading a computed norm., UserDynamicNormBase, UserDynamicNormRead, UserDynamicNormUpsert
+
+### Community 19 - "Community 19"
+Cohesion: 0.25
+Nodes (8): extract_biomarkers(), _extract_text_from_docx(), _extract_text_from_pdf(), _extract_text_from_txt(), Decode plain-text bytes (UTF-8 with fallback to cp1251)., Extract standard biomarkers from PDF, DOCX, or TXT file using AI.      Args:, Extract text from PDF bytes using pypdf., Extract text from DOCX bytes using python-docx.
 
 ### Community 20 - "Community 20"
 Cohesion: 0.39
@@ -173,231 +174,233 @@ Nodes (6): createAdminClient(), banUser(), createUser(), deleteUser(), unbanUser
 Cohesion: 0.33
 Nodes (5): REST API endpoints for user feedback.  Handles submission of feedback/bug repo, Inserts a feedback row into the db.     Includes a 60-second rate-limit via che, Inserts a feedback row into the db.     Includes a 60-second rate-limit via che, submit_feedback(), FeedbackCreate
 
-### Community 25 - "Community 25"
+### Community 22 - "Community 22"
+Cohesion: 0.29
+Nodes (4): getAppConfigKeys(), updateAppConfigItem(), handleUpdate(), AiSettingsPage()
+
+### Community 23 - "Community 23"
+Cohesion: 0.29
+Nodes (4): createKbDocument(), deleteKnowledgeDocument(), handleSubmit(), handleDelete()
+
+### Community 24 - "Community 24"
+Cohesion: 0.4
+Nodes (5): parse_lab_report(), BiomarkerResult, extract_biomarkers(), PDF Parser Service — Regex-based extraction of biomarker values.  This service, Extract standard biomarkers from PDF bytes using Regex.
+
+### Community 28 - "Community 28"
 Cohesion: 0.33
 Nodes (1): HealthEventBus
 
-### Community 26 - "Community 26"
-Cohesion: 0.5
-Nodes (4): BiomarkerResult, extract_biomarkers(), PDF Parser Service — Regex-based extraction of biomarker values.  This service, Extract standard biomarkers from PDF bytes using Regex.
-
-### Community 27 - "Community 27"
+### Community 29 - "Community 29"
 Cohesion: 0.4
 Nodes (4): BaseSettings, Application configuration loaded from environment variables.  Uses ``pydantic-, Central configuration for the VITOGRAPH API.      Attributes:         supabas, Settings
 
-### Community 32 - "Community 32"
+### Community 34 - "Community 34"
 Cohesion: 0.5
 Nodes (3): negotiateLocale(), proxy(), updateSession()
 
-### Community 34 - "Community 34"
+### Community 36 - "Community 36"
 Cohesion: 0.67
 Nodes (2): generateSecurePassword(), handleLogin()
 
-### Community 38 - "Community 38"
+### Community 40 - "Community 40"
 Cohesion: 0.67
 Nodes (2): handleUpdate(), loadData()
 
-### Community 39 - "Community 39"
+### Community 41 - "Community 41"
 Cohesion: 0.67
 Nodes (2): translateUnit(), translateValueWithUnit()
 
 ### Community 42 - "Community 42"
-Cohesion: 0.67
-Nodes (1): run()
-
-### Community 43 - "Community 43"
 Cohesion: 1.0
 Nodes (2): set(), unflatten()
 
-### Community 155 - "Community 155"
+### Community 95 - "Community 95"
 Cohesion: 1.0
 Nodes (1): Extract all text from a PDF file.          Reads every page of the PDF and con
 
-### Community 156 - "Community 156"
+### Community 96 - "Community 96"
 Cohesion: 1.0
 Nodes (1): Parse extracted text into structured biomarker data.          Uses OpenAI ``As
 
-### Community 181 - "Community 181"
+### Community 122 - "Community 122"
 Cohesion: 1.0
 Nodes (1): The root structure expected from the LLM.
 
-### Community 182 - "Community 182"
+### Community 123 - "Community 123"
 Cohesion: 1.0
 Nodes (1): Extract text from PDF bytes using pypdf.
 
-### Community 183 - "Community 183"
+### Community 124 - "Community 124"
 Cohesion: 1.0
 Nodes (1): Extract text from DOCX bytes using python-docx.
 
-### Community 184 - "Community 184"
+### Community 125 - "Community 125"
 Cohesion: 1.0
 Nodes (1): Decode plain-text bytes (UTF-8 with fallback to cp1251).
 
-### Community 185 - "Community 185"
+### Community 126 - "Community 126"
 Cohesion: 1.0
 Nodes (1): Extract standard biomarkers from PDF, DOCX, or TXT file using AI.      Args:
 
-### Community 186 - "Community 186"
+### Community 127 - "Community 127"
 Cohesion: 1.0
 Nodes (1): Extract biomarkers from a PHOTO of a lab report using GPT-4o Vision.      Send
 
-### Community 187 - "Community 187"
+### Community 128 - "Community 128"
 Cohesion: 1.0
 Nodes (1): Extract biomarkers from a batch of PHOTOS of a lab report using GPT-4o Vision.
 
-### Community 188 - "Community 188"
+### Community 129 - "Community 129"
 Cohesion: 1.0
 Nodes (1): Schema for creating a new user profile.      The ``id`` is provided by Supabas
 
-### Community 189 - "Community 189"
+### Community 130 - "Community 130"
 Cohesion: 1.0
 Nodes (1): Schema for partial profile updates (PATCH semantics).      All fields are opti
 
-### Community 190 - "Community 190"
+### Community 131 - "Community 131"
 Cohesion: 1.0
 Nodes (1): Schema returned by the API when reading a profile.
 
-### Community 191 - "Community 191"
+### Community 132 - "Community 132"
 Cohesion: 1.0
 Nodes (1): Represents aggregated micronutrients for a single day.          Since the keys
 
-### Community 192 - "Community 192"
+### Community 133 - "Community 133"
 Cohesion: 1.0
 Nodes (1): Represents a recommendation for a single biomarker test.
 
-### Community 193 - "Community 193"
+### Community 134 - "Community 134"
 Cohesion: 1.0
 Nodes (1): Encapsulates the reference range explicitly stated in the document.
 
-### Community 194 - "Community 194"
+### Community 135 - "Community 135"
 Cohesion: 1.0
 Nodes (1): A single biomarker extracted dynamically from the lab report.
 
-### Community 195 - "Community 195"
+### Community 136 - "Community 136"
 Cohesion: 1.0
 Nodes (1): The root structure expected from the LLM.
 
-### Community 196 - "Community 196"
+### Community 137 - "Community 137"
 Cohesion: 1.0
 Nodes (1): Extract text from PDF bytes using pypdf.
 
-### Community 197 - "Community 197"
+### Community 138 - "Community 138"
 Cohesion: 1.0
 Nodes (1): Extract text from DOCX bytes using python-docx.
 
-### Community 198 - "Community 198"
+### Community 139 - "Community 139"
 Cohesion: 1.0
 Nodes (1): Decode plain-text bytes (UTF-8 with fallback to cp1251).
 
-### Community 199 - "Community 199"
+### Community 140 - "Community 140"
 Cohesion: 1.0
 Nodes (1): Extract standard biomarkers from PDF, DOCX, or TXT file using AI.      Args:
 
-### Community 200 - "Community 200"
+### Community 141 - "Community 141"
 Cohesion: 1.0
 Nodes (1): Extract biomarkers from a PHOTO of a lab report using GPT-4o Vision.      Send
 
-### Community 201 - "Community 201"
+### Community 142 - "Community 142"
 Cohesion: 1.0
 Nodes (1): Extract biomarkers from a batch of PHOTOS of a lab report using GPT-4o Vision.
 
-### Community 202 - "Community 202"
+### Community 143 - "Community 143"
 Cohesion: 1.0
 Nodes (1): Calculate personalized norms based on profile factors (Mock Logic).
 
-### Community 203 - "Community 203"
+### Community 144 - "Community 144"
 Cohesion: 1.0
 Nodes (1): Extract standard biomarkers from PDF bytes using Regex.
 
-### Community 204 - "Community 204"
+### Community 145 - "Community 145"
 Cohesion: 1.0
 Nodes (1): Extract biomarkers from a PHOTO of a lab report using GPT-4o Vision.      Send
 
-### Community 205 - "Community 205"
+### Community 146 - "Community 146"
 Cohesion: 1.0
 Nodes (1): Extract biomarkers from a batch of PHOTOS of a lab report using GPT-4o Vision.
 
 ## Knowledge Gaps
 - **76 isolated node(s):** `Application configuration loaded from environment variables.  Uses ``pydantic-`, `Central configuration for the VITOGRAPH API.      Attributes:         supabas`, `Custom exception hierarchy for database / repository operations.  All exceptio`, `Base exception for all database-related errors.`, `Raised when a queried record does not exist.` (+71 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 7`** (37 nodes): `chat-prompt-builder.ts`, `localized-personas.ts`, `ChatPromptBuilder`, `.build()`, `.constructor()`, `.withActiveSkills()`, `.withAssistantMode()`, `.withChronicConditions()`, `.withCoachingMode()`, `.withDiaryMode()`, `.withDiarySecurityRule()`, `.withDietaryRestrictions()`, `.withEmotionalContext()`, `.withFoodZones()`, `.withGlycemicAwareRule()`, `.withGoalManagement()`, `.withHealthGoals()`, `.withHistorySynopsis()`, `.withKnowledgeBase()`, `.withKnowledgeBases()`, `.withLabReport()`, `.withLanguageDirective()`, `.withMealLogs()`, `.withNutritionTargets()`, `.withPastActions()`, `.withPersona()`, `.withPreviousInsight()`, `.withProfile()`, `.withSemanticMemory()`, `.withSkillDocument()`, `.withSupplementProtocol()`, `.withTestResults()`, `.withTodayProgress()`, `.withTodaySupplements()`, `.withWaterContext()`, `.withWeatherAlert()`, `getLocalizedPersona()`
+- **Thin community `Community 6`** (37 nodes): `chat-prompt-builder.ts`, `localized-personas.ts`, `ChatPromptBuilder`, `.build()`, `.constructor()`, `.withActiveSkills()`, `.withAssistantMode()`, `.withChronicConditions()`, `.withCoachingMode()`, `.withDiaryMode()`, `.withDiarySecurityRule()`, `.withDietaryRestrictions()`, `.withEmotionalContext()`, `.withFoodZones()`, `.withGlycemicAwareRule()`, `.withGoalManagement()`, `.withHealthGoals()`, `.withHistorySynopsis()`, `.withKnowledgeBase()`, `.withKnowledgeBases()`, `.withLabReport()`, `.withLanguageDirective()`, `.withMealLogs()`, `.withNutritionTargets()`, `.withPastActions()`, `.withPersona()`, `.withPreviousInsight()`, `.withProfile()`, `.withSemanticMemory()`, `.withSkillDocument()`, `.withSupplementProtocol()`, `.withTestResults()`, `.withTodayProgress()`, `.withTodaySupplements()`, `.withWaterContext()`, `.withWeatherAlert()`, `getLocalizedPersona()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 25`** (6 nodes): `health-event-bus.ts`, `HealthEventBus`, `.constructor()`, `.emit()`, `.on()`, `.removeAllListeners()`
+- **Thin community `Community 28`** (6 nodes): `health-event-bus.ts`, `HealthEventBus`, `.constructor()`, `.emit()`, `.on()`, `.removeAllListeners()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 34`** (4 nodes): `page.tsx`, `checkSession()`, `generateSecurePassword()`, `handleLogin()`
+- **Thin community `Community 36`** (4 nodes): `page.tsx`, `checkSession()`, `generateSecurePassword()`, `handleLogin()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 38`** (4 nodes): `HealthGoalsWidget.tsx`, `handleRemoveGoal()`, `handleUpdate()`, `loadData()`
+- **Thin community `Community 40`** (4 nodes): `HealthGoalsWidget.tsx`, `handleRemoveGoal()`, `handleUpdate()`, `loadData()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 39`** (4 nodes): `nutrient-utils.ts`, `normalizeMicronutrientKey()`, `translateUnit()`, `translateValueWithUnit()`
+- **Thin community `Community 41`** (4 nodes): `nutrient-utils.ts`, `normalizeMicronutrientKey()`, `translateUnit()`, `translateValueWithUnit()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 42`** (3 nodes): `run()`, `flush_queue.js`, `flush_queue.mjs`
+- **Thin community `Community 42`** (3 nodes): `unflatten-json.js`, `set()`, `unflatten()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 43`** (3 nodes): `unflatten-json.js`, `set()`, `unflatten()`
+- **Thin community `Community 95`** (1 nodes): `Extract all text from a PDF file.          Reads every page of the PDF and con`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 155`** (1 nodes): `Extract all text from a PDF file.          Reads every page of the PDF and con`
+- **Thin community `Community 96`** (1 nodes): `Parse extracted text into structured biomarker data.          Uses OpenAI ``As`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 156`** (1 nodes): `Parse extracted text into structured biomarker data.          Uses OpenAI ``As`
+- **Thin community `Community 122`** (1 nodes): `The root structure expected from the LLM.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 181`** (1 nodes): `The root structure expected from the LLM.`
+- **Thin community `Community 123`** (1 nodes): `Extract text from PDF bytes using pypdf.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 182`** (1 nodes): `Extract text from PDF bytes using pypdf.`
+- **Thin community `Community 124`** (1 nodes): `Extract text from DOCX bytes using python-docx.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 183`** (1 nodes): `Extract text from DOCX bytes using python-docx.`
+- **Thin community `Community 125`** (1 nodes): `Decode plain-text bytes (UTF-8 with fallback to cp1251).`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 184`** (1 nodes): `Decode plain-text bytes (UTF-8 with fallback to cp1251).`
+- **Thin community `Community 126`** (1 nodes): `Extract standard biomarkers from PDF, DOCX, or TXT file using AI.      Args:`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 185`** (1 nodes): `Extract standard biomarkers from PDF, DOCX, or TXT file using AI.      Args:`
+- **Thin community `Community 127`** (1 nodes): `Extract biomarkers from a PHOTO of a lab report using GPT-4o Vision.      Send`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 186`** (1 nodes): `Extract biomarkers from a PHOTO of a lab report using GPT-4o Vision.      Send`
+- **Thin community `Community 128`** (1 nodes): `Extract biomarkers from a batch of PHOTOS of a lab report using GPT-4o Vision.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 187`** (1 nodes): `Extract biomarkers from a batch of PHOTOS of a lab report using GPT-4o Vision.`
+- **Thin community `Community 129`** (1 nodes): `Schema for creating a new user profile.      The ``id`` is provided by Supabas`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 188`** (1 nodes): `Schema for creating a new user profile.      The ``id`` is provided by Supabas`
+- **Thin community `Community 130`** (1 nodes): `Schema for partial profile updates (PATCH semantics).      All fields are opti`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 189`** (1 nodes): `Schema for partial profile updates (PATCH semantics).      All fields are opti`
+- **Thin community `Community 131`** (1 nodes): `Schema returned by the API when reading a profile.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 190`** (1 nodes): `Schema returned by the API when reading a profile.`
+- **Thin community `Community 132`** (1 nodes): `Represents aggregated micronutrients for a single day.          Since the keys`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 191`** (1 nodes): `Represents aggregated micronutrients for a single day.          Since the keys`
+- **Thin community `Community 133`** (1 nodes): `Represents a recommendation for a single biomarker test.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 192`** (1 nodes): `Represents a recommendation for a single biomarker test.`
+- **Thin community `Community 134`** (1 nodes): `Encapsulates the reference range explicitly stated in the document.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 193`** (1 nodes): `Encapsulates the reference range explicitly stated in the document.`
+- **Thin community `Community 135`** (1 nodes): `A single biomarker extracted dynamically from the lab report.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 194`** (1 nodes): `A single biomarker extracted dynamically from the lab report.`
+- **Thin community `Community 136`** (1 nodes): `The root structure expected from the LLM.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 195`** (1 nodes): `The root structure expected from the LLM.`
+- **Thin community `Community 137`** (1 nodes): `Extract text from PDF bytes using pypdf.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 196`** (1 nodes): `Extract text from PDF bytes using pypdf.`
+- **Thin community `Community 138`** (1 nodes): `Extract text from DOCX bytes using python-docx.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 197`** (1 nodes): `Extract text from DOCX bytes using python-docx.`
+- **Thin community `Community 139`** (1 nodes): `Decode plain-text bytes (UTF-8 with fallback to cp1251).`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 198`** (1 nodes): `Decode plain-text bytes (UTF-8 with fallback to cp1251).`
+- **Thin community `Community 140`** (1 nodes): `Extract standard biomarkers from PDF, DOCX, or TXT file using AI.      Args:`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 199`** (1 nodes): `Extract standard biomarkers from PDF, DOCX, or TXT file using AI.      Args:`
+- **Thin community `Community 141`** (1 nodes): `Extract biomarkers from a PHOTO of a lab report using GPT-4o Vision.      Send`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 200`** (1 nodes): `Extract biomarkers from a PHOTO of a lab report using GPT-4o Vision.      Send`
+- **Thin community `Community 142`** (1 nodes): `Extract biomarkers from a batch of PHOTOS of a lab report using GPT-4o Vision.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 201`** (1 nodes): `Extract biomarkers from a batch of PHOTOS of a lab report using GPT-4o Vision.`
+- **Thin community `Community 143`** (1 nodes): `Calculate personalized norms based on profile factors (Mock Logic).`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 202`** (1 nodes): `Calculate personalized norms based on profile factors (Mock Logic).`
+- **Thin community `Community 144`** (1 nodes): `Extract standard biomarkers from PDF bytes using Regex.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 203`** (1 nodes): `Extract standard biomarkers from PDF bytes using Regex.`
+- **Thin community `Community 145`** (1 nodes): `Extract biomarkers from a PHOTO of a lab report using GPT-4o Vision.      Send`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 204`** (1 nodes): `Extract biomarkers from a PHOTO of a lab report using GPT-4o Vision.      Send`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 205`** (1 nodes): `Extract biomarkers from a batch of PHOTOS of a lab report using GPT-4o Vision.`
+- **Thin community `Community 146`** (1 nodes): `Extract biomarkers from a batch of PHOTOS of a lab report using GPT-4o Vision.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `createClient()` connect `Community 1` to `Community 20`, `Community 3`, `Community 4`, `Community 5`?**
-  _High betweenness centrality (0.031) - this node is a cross-community bridge._
-- **Why does `DatabaseError` connect `Community 0` to `Community 21`, `Community 12`, `Community 13`?**
-  _High betweenness centrality (0.021) - this node is a cross-community bridge._
-- **Why does `ProfileUpdate` connect `Community 0` to `Community 2`?**
-  _High betweenness centrality (0.017) - this node is a cross-community bridge._
+- **Why does `createClient()` connect `Community 0` to `Community 3`, `Community 4`, `Community 7`, `Community 20`, `Community 22`, `Community 23`?**
+  _High betweenness centrality (0.047) - this node is a cross-community bridge._
+- **Why does `DatabaseError` connect `Community 1` to `Community 10`, `Community 12`, `Community 21`?**
+  _High betweenness centrality (0.026) - this node is a cross-community bridge._
+- **Why does `ProfileUpdate` connect `Community 1` to `Community 2`?**
+  _High betweenness centrality (0.022) - this node is a cross-community bridge._
 - **Are the 67 inferred relationships involving `LabReportExtraction` (e.g. with `LifespanTextEmbedding` and `RefreshNotesRequest`) actually correct?**
   _`LabReportExtraction` has 67 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 67 inferred relationships involving `ReferenceRange` (e.g. with `LifespanTextEmbedding` and `RefreshNotesRequest`) actually correct?**
