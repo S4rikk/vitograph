@@ -10,21 +10,79 @@ import { X, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 function calculateTotalWeight(text: string): number | null {
-  const regex = /(?:^|\s|[.,;(\[-])(\d+)\s*(?:г|гр|g|grams?|грамм(?:ов|а)?)(?:\.?(?:\s|[.,;)(\]|-]|$))/gi;
   let total = 0;
   let hasMatches = false;
+  let hasExplicit = false;
+
+  let normalizedText = text.toLowerCase();
+
+  // 1. Normalize text numbers to digits using Cyrillic-safe boundaries
+  const numMap: Record<string, string> = {
+    'один': '1', 'одна': '1', 'одно': '1', 'одну': '1',
+    'два': '2', 'две': '2', 'пару': '2', 'пара': '2',
+    'три': '3',
+    'четыре': '4',
+    'пять': '5',
+    'пол': '0.5', 'половина': '0.5', 'половину': '0.5'
+  };
+
+  for (const [word, digit] of Object.entries(numMap)) {
+    const rx = new RegExp(`(?:^|[^а-яёa-z])(${word})(?![а-яёa-z])`, 'g');
+    normalizedText = normalizedText.replace(rx, (match, p1) => match.replace(p1, digit));
+  }
+
+  // Normalize commas in numbers to dots (e.g. 1,5г -> 1.5г)
+  normalizedText = normalizedText.replace(/(\d),(\d)/g, '$1.$2');
+
+  // 2. Sum up explicit grams using safe boundaries AND decimal support
+  const explicitGramsRegex = /(?:^|\s|[.,;(\[-])(\d+(?:\.\d+)?)\s*(г|гр|g|grams?|грамм(?:ов|а)?)(?![а-яёa-z])/gi;
   let match;
-  
-  regex.lastIndex = 0;
-  while ((match = regex.exec(text)) !== null) {
-    const val = parseInt(match[1], 10);
+  while ((match = explicitGramsRegex.exec(normalizedText)) !== null) {
+    const val = parseFloat(match[1]);
     if (!isNaN(val)) {
       total += val;
       hasMatches = true;
+      hasExplicit = true;
     }
   }
-  
-  return hasMatches ? total : null;
+
+  // Remove matched explicit grams from text to avoid conflicts
+  const textForNatural = normalizedText.replace(explicitGramsRegex, ' ');
+
+  // 3. Natural measures dictionary using Cyrillic-safe boundaries
+  const NATURAL_MEASURES = [
+    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(яйц[оае]|яиц)(?![а-яёa-z])/gi, weight: 55 },
+    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(яблок[оаи])(?![а-яёa-z])/gi, weight: 150 },
+    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(банан[ыа]?)(?![а-яёa-z])/gi, weight: 120 },
+    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(апельсин[ыа]?)(?![а-яёa-z])/gi, weight: 150 },
+    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(мандарин[ыа]?)(?![а-яёa-z])/gi, weight: 50 },
+    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(помидор[ыа]?|томат[ыа]?)(?![а-яёa-z])/gi, weight: 120 },
+    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(огуре[цц]?[аы]?)(?![а-яёa-z])/gi, weight: 100 },
+    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(горст[ьи])(?![а-яёa-z])/gi, weight: 30 },
+    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(кружк[аи]|стакан[а-я]*)(?![а-яёa-z])/gi, weight: 200 },
+    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(ст\.?\s*л\.?|столов[а-я]* ложк[а-я]*)(?![а-яёa-z])/gi, weight: 15 },
+    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(ч\.?\s*л\.?|чайн[а-я]* ложк[а-я]*)(?![а-яёa-z])/gi, weight: 5 },
+    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(кусо[чк][еа-я]*)(?![а-яёa-z])/gi, weight: 40 },
+    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(порци[яи])(?![а-яёa-z])/gi, weight: 250 },
+    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(тарелк[аи])(?![а-яёa-z])/gi, weight: 300 },
+  ];
+
+  for (const measure of NATURAL_MEASURES) {
+    measure.regex.lastIndex = 0;
+    while ((match = measure.regex.exec(textForNatural)) !== null) {
+      const qtyStr = match[1];
+      const qty = qtyStr ? parseFloat(qtyStr) : 1;
+      
+      if (!qtyStr && hasExplicit) {
+        continue;
+      }
+      
+      total += qty * measure.weight;
+      hasMatches = true;
+    }
+  }
+
+  return hasMatches ? Math.round(total) : null;
 }
 
 type FoodInputFormProps = {

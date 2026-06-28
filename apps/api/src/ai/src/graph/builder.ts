@@ -163,9 +163,9 @@ async function callModel(state: typeof GraphAnnotation.State, config?: any) {
     const { SystemMessage } = await import("@langchain/core/messages");
     const visionSystemMessage = new SystemMessage(
       `CRITICAL VISION ENFORCEMENT: The user has previously analyzed this meal via Vision. 
-       You MUST use EXACTLY these nutritional values for the \`log_meal\` tool:
+       The recognized vision data is:
        ${JSON.stringify(nutritionalContext)}
-       Do not estimate them yourself. If the user changed the weight, these values have already been scaled correctly.`
+       If the 'userEnteredWeight' differs from the total 'estimated_weight_g' in the vision result, you MUST scale all calories and macronutrients proportionally to match the userEnteredWeight. Do not estimate base values yourself, just apply proportional math to the provided vision values.`
     );
     convoMessages = [visionSystemMessage, ...convoMessages];
   }
