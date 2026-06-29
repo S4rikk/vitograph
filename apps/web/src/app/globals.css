@@ -348,3 +348,10 @@ body {
     transform: scale(2);
   }
 }
+
+/* ── Capacitor text selection override ────────────────────── */
+.select-text {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  -webkit-touch-callout: default !important;
+}
