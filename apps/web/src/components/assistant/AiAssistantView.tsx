@@ -729,7 +729,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-border/50 p-3 pb-5 sm:p-6 bg-cloud-light/30">
+      <div className="border-t border-border/50 p-3 pb-6 sm:p-6 bg-cloud-light/30">
         {selectedImageBase64 && (
           <div className="relative inline-block mb-3 border border-cloud rounded-lg overflow-hidden shadow-sm">
             <img src={selectedImageBase64} alt="Selected" className="h-20 w-auto object-cover" />
