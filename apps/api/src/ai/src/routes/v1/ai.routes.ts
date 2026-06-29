@@ -51,6 +51,7 @@ import {
   handleAnalyzeWearable,
   handleSaveWearableMetrics,
   handleGetSystemGraph,
+  handleEstimateWeight,
 } from "../../ai.controller.js";
 
 /** AI engine router — mount at /api/v1/ai */
@@ -70,6 +71,7 @@ aiRouter.post("/analyze", validate(AnalyzeRequestSchema), handleAnalyze);
 aiRouter.post("/diagnose", validate(DiagnoseRequestSchema), handleDiagnose);
 aiRouter.post("/analyze-somatic", validate(AnalyzeSomaticRequestSchema), handleAnalyzeSomatic);
 aiRouter.post("/analyze-food", validate(AnalyzeFoodRequestSchema), handleAnalyzeFood);
+aiRouter.post("/estimate-weight", handleEstimateWeight);
 aiRouter.post("/vision/label", validate(AnalyzeLabelRequestSchema), handleAnalyzeLabel);
 aiRouter.post("/vision/wearable", validate(AnalyzeWearableRequestSchema), handleAnalyzeWearable);
 aiRouter.post("/vision/wearable/save", validate(SaveWearableMetricsSchema), handleSaveWearableMetrics);

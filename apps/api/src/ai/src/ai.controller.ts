@@ -48,7 +48,7 @@ import { getOrFetchWeatherContext } from "./weather.service.js";
 import { fetchAdvancedMemoryContext } from "./services/memory.service.js";
 import { fetchActiveSkills, fetchMatchingSkillDocument } from "./services/skills.service.js";
 import { fetchKnowledgeBaseContext } from "./services/kb.service.js";
-import { callLlmStructured, LLM_TIMEOUTS, LLM_RETRIES } from "./llm-client.js";
+import { callLlmStructured, LLM_TIMEOUTS, LLM_RETRIES, estimateFoodWeight } from "./llm-client.js";
 import { z } from "zod";
 
 // ── Deterministic Micronutrient Norms (mirrors DailyAllowancesPanel.tsx) ──
@@ -3785,6 +3785,29 @@ export async function handleGetSystemGraph(req: Request, res: Response, next: Ne
     return res.sendFile(graphPath);
   } catch (error) {
     console.error("[GET_SYSTEM_GRAPH_ERROR]", error);
+    next(error);
+  }
+}
+
+/**
+ * POST /api/v1/ai/estimate-weight
+ * Estimates food weight from natural language text using GPT-4o-mini.
+ */
+export async function handleEstimateWeight(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const { text } = req.body;
+    if (!text || typeof text !== "string") {
+      return res.status(400).json({ error: "Missing or invalid 'text' field" });
+    }
+    
+    const weight = await estimateFoodWeight(text);
+    return res.json({ success: true, data: { weight } });
+  } catch (error) {
+    console.error("[handleEstimateWeight] Error:", error);
     next(error);
   }
 }

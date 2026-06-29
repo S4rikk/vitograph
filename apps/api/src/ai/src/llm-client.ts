@@ -217,3 +217,26 @@ function handleFinalFailure(error: any, startTime: number, schemaName: string, m
     errorMessage: errorMessage,
   };
 }
+
+/**
+ * Estimates the weight of food in grams from natural language text using GPT-4o-mini.
+ * Returns null if the weight cannot be determined.
+ */
+export async function estimateFoodWeight(text: string): Promise<number | null> {
+  const schema = z.object({
+    weightInGrams: z.number().nullable().describe("Total weight in grams, or null if unknown"),
+  });
+
+  const result = await callLlmStructured({
+    schema,
+    schemaName: "FoodWeightEstimation",
+    systemPrompt: "Ты — калькулятор веса еды. Проанализируй текст и верни примерный общий вес всех съедобных продуктов в граммах. Если вес невозможно определить, верни null.",
+    userMessage: text,
+    timeoutMs: LLM_TIMEOUTS.sync,
+    maxRetries: LLM_RETRIES.sync,
+    fallback: { weightInGrams: null },
+    model: "gpt-4o-mini",
+  });
+
+  return result.data.weightInGrams;
+}

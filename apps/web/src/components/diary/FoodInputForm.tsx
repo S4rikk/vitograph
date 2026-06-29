@@ -6,86 +6,11 @@ import { compressImage } from "@/lib/image-utils";
 import { apiClient } from "@/lib/api-client";
 import type { FoodRecognitionResult, LabelScannerOutput } from "@/lib/api-client";
 import { MealScoreBadge } from "./MealScoreBadge";
-import { X, Trash2, Mic, Loader2 } from "lucide-react";
+import { X, Trash2, Mic, Loader2, CornerDownLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 
-function calculateTotalWeight(text: string): number | null {
-  let total = 0;
-  let hasMatches = false;
-  let hasExplicit = false;
-
-  let normalizedText = text.toLowerCase();
-
-  // 1. Normalize text numbers to digits using Cyrillic-safe boundaries
-  const numMap: Record<string, string> = {
-    'один': '1', 'одна': '1', 'одно': '1', 'одну': '1',
-    'два': '2', 'две': '2', 'пару': '2', 'пара': '2',
-    'три': '3',
-    'четыре': '4',
-    'пять': '5',
-    'пол': '0.5', 'половина': '0.5', 'половину': '0.5'
-  };
-
-  for (const [word, digit] of Object.entries(numMap)) {
-    const rx = new RegExp(`(?:^|[^а-яёa-z])(${word})(?![а-яёa-z])`, 'g');
-    normalizedText = normalizedText.replace(rx, (match, p1) => match.replace(p1, digit));
-  }
-
-  // Normalize commas in numbers to dots (e.g. 1,5г -> 1.5г)
-  normalizedText = normalizedText.replace(/(\d),(\d)/g, '$1.$2');
-
-  // 2. Sum up explicit grams using safe boundaries AND decimal support
-  const explicitGramsRegex = /(?:^|\s|[.,;(\[-])(\d+(?:\.\d+)?)\s*(г|гр|g|grams?|грамм(?:ов|а)?)(?![а-яёa-z])/gi;
-  let match;
-  while ((match = explicitGramsRegex.exec(normalizedText)) !== null) {
-    const val = parseFloat(match[1]);
-    if (!isNaN(val)) {
-      total += val;
-      hasMatches = true;
-      hasExplicit = true;
-    }
-  }
-
-  // Remove matched explicit grams from text to avoid conflicts
-  const textForNatural = normalizedText.replace(explicitGramsRegex, ' ');
-
-  // 3. Natural measures dictionary using Cyrillic-safe boundaries
-  const NATURAL_MEASURES = [
-    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(яйц[оае]|яиц)(?![а-яёa-z])/gi, weight: 55 },
-    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(яблок[оаи])(?![а-яёa-z])/gi, weight: 150 },
-    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(банан[ыа]?)(?![а-яёa-z])/gi, weight: 120 },
-    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(апельсин[ыа]?)(?![а-яёa-z])/gi, weight: 150 },
-    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(мандарин[ыа]?)(?![а-яёa-z])/gi, weight: 50 },
-    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(помидор[ыа]?|томат[ыа]?)(?![а-яёa-z])/gi, weight: 120 },
-    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(огуре[цц]?[аы]?)(?![а-яёa-z])/gi, weight: 100 },
-    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(горст[ьи])(?![а-яёa-z])/gi, weight: 30 },
-    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(кружк[аи]|стакан[а-я]*)(?![а-яёa-z])/gi, weight: 200 },
-    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(ст\.?\s*л\.?|столов[а-я]* ложк[а-я]*)(?![а-яёa-z])/gi, weight: 15 },
-    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(ч\.?\s*л\.?|чайн[а-я]* ложк[а-я]*)(?![а-яёa-z])/gi, weight: 5 },
-    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(кусо[чк][еа-я]*)(?![а-яёa-z])/gi, weight: 40 },
-    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(порци[яи])(?![а-яёa-z])/gi, weight: 250 },
-    { regex: /(?:^|[^а-яёa-z])(?:(\d+(?:\.\d+)?)\s*)?(тарелк[аи])(?![а-яёa-z])/gi, weight: 300 },
-  ];
-
-  for (const measure of NATURAL_MEASURES) {
-    measure.regex.lastIndex = 0;
-    while ((match = measure.regex.exec(textForNatural)) !== null) {
-      const qtyStr = match[1];
-      const qty = qtyStr ? parseFloat(qtyStr) : 1;
-      
-      if (!qtyStr && hasExplicit) {
-        continue;
-      }
-      
-      total += qty * measure.weight;
-      hasMatches = true;
-    }
-  }
-
-  return hasMatches ? Math.round(total) : null;
-}
-
+// Weight is estimated via AI API with debounce
 type FoodInputFormProps = {
   /** Called when the form is submitted with valid data. */
   onSubmit: (name: string, weight: number, nutritionalContext?: any) => void;
@@ -116,6 +41,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
   const [weight, setWeight] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [isEstimatingWeight, setIsEstimatingWeight] = useState(false);
   const { isRecording, startRecording, stopRecording } = useAudioRecorder();
   const [photoResult, setPhotoResult] = useState<FoodRecognitionResult | null>(null);
   const [isAnalyzingLabel, setIsAnalyzingLabel] = useState(false);
@@ -168,20 +94,32 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
     }
   }, [photoResult, name, weight]);
 
+  const handleEstimateWeight = useCallback(async (textOverride?: string | React.MouseEvent) => {
+    const targetName = typeof textOverride === "string" ? textOverride : name;
+    if (!targetName || targetName.trim().length === 0) return;
+
+    setIsEstimatingWeight(true);
+    const estimatedWeight = await apiClient.estimateWeight(targetName.trim());
+    setIsEstimatingWeight(false);
+
+    if (estimatedWeight !== null && estimatedWeight > 0) {
+      setWeight(String(estimatedWeight));
+    }
+  }, [name]);
+
   const handleMicClick = useCallback(async () => {
     if (isRecording) {
       try {
         setIsTranscribing(true);
         const blob = await stopRecording();
         const text = await apiClient.transcribeAudio(blob);
+        let finalName = text;
         setName((prev) => {
-          const newVal = prev ? `${prev} ${text}` : text;
-          const totalWeight = calculateTotalWeight(newVal);
-          if (totalWeight !== null) {
-            setWeight(String(totalWeight));
-          }
-          return newVal;
+          finalName = prev ? `${prev} ${text}` : text;
+          return finalName;
         });
+        // Auto-calculate weight after voice input
+        handleEstimateWeight(finalName);
       } catch (err) {
         console.error("Transcription failed", err);
       } finally {
@@ -509,7 +447,7 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
       {/* ── Form ────────────────────────────────────────────────── */}
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-1.5 rounded-2xl border border-white/70 dark:border-white/30 bg-surface/80 backdrop-blur-2xl shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_1px_0_2px_rgba(255,255,255,0.5),inset_-1px_0_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.2),0_10px_20px_-10px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_1px_0_2px_rgba(255,255,255,0.15),inset_-1px_0_2px_rgba(255,255,255,0.15),inset_0_-1px_2px_rgba(255,255,255,0.05),0_10px_20px_-10px_rgba(0,0,0,0.5)] px-3 py-2"
+        className="flex flex-col gap-1.5 rounded-2xl mb-5 border border-white/70 dark:border-white/30 bg-surface/80 backdrop-blur-2xl shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_1px_0_2px_rgba(255,255,255,0.5),inset_-1px_0_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.2),0_10px_20px_-10px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_1px_0_2px_rgba(255,255,255,0.15),inset_-1px_0_2px_rgba(255,255,255,0.15),inset_0_-1px_2px_rgba(255,255,255,0.05),0_10px_20px_-10px_rgba(0,0,0,0.5)] px-3 py-2"
       >
         {/* Row 1: Dish name — full width */}
         <div className="w-full">
@@ -557,29 +495,48 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
             className="absolute w-0 h-0 opacity-0 -z-10 pointer-events-none"
             aria-hidden="true"
           />
-          <textarea
-            ref={nameRef}
-            id="food-name"
-            placeholder={t('dishName')}
-            value={name}
-            onChange={(e) => {
-              const val = e.target.value;
-              setName(val);
-              const totalWeight = calculateTotalWeight(val);
-              if (totalWeight !== null) {
-                setWeight(String(totalWeight));
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmit(e);
-              }
-            }}
-            rows={1}
-            style={{ fieldSizing: "content" } as any}
-            className="w-full rounded-lg border border-border bg-surface-muted px-3 py-1 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-100 max-h-[150px] min-h-[30px] overflow-y-auto resize-none"
-          />
+          <div className="relative w-full">
+            <textarea
+              ref={nameRef}
+              id="food-name"
+              placeholder={t('dishName')}
+              value={name}
+              onChange={(e) => {
+                const val = e.target.value;
+                setName(val);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit(e);
+                }
+              }}
+              rows={1}
+              style={{ fieldSizing: "content" } as any}
+              className="w-full rounded-lg border border-border bg-surface-muted px-3 pr-16 py-1 text-sm text-ink placeholder-ink-faint transition-colors duration-150 focus:border-primary-400 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-100 max-h-[150px] min-h-[30px] overflow-y-auto resize-none"
+            />
+            {/* Action buttons inside textarea */}
+            <div className="absolute right-1 top-1 flex items-center gap-1">
+              <button
+                type="button"
+                onClick={handleEstimateWeight}
+                disabled={isEstimatingWeight || !name.trim()}
+                className="inline-flex items-center justify-center p-1 rounded-lg transition-colors focus:outline-none text-green-600 hover:text-green-700 hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Calculate Weight"
+              >
+                {isEstimatingWeight ? <Loader2 className="w-4 h-4 animate-spin" /> : <CornerDownLeft className="w-4 h-4" />}
+              </button>
+              <button
+                type="button"
+                onClick={handleMicClick}
+                disabled={isAnalyzing || isAnalyzingLabel || isTranscribing}
+                className={`inline-flex items-center justify-center p-1 rounded-lg transition-colors focus:outline-none ${isRecording ? "text-red-600 animate-pulse bg-red-50" : "text-blue-600 hover:text-blue-700 hover:bg-blue-50"} disabled:opacity-50 disabled:cursor-not-allowed`}
+                title="Dictate food"
+              >
+                {isTranscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Row 2: Camera | Label | Weight | Submit */}
@@ -617,22 +574,8 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
             </button>
           </div>
 
-          {/* Mic button */}
-          <div className="flex-1 flex flex-col gap-0.5">
-            <span className="text-xs font-medium text-ink-muted">Голос</span>
-            <button
-              type="button"
-              onClick={handleMicClick}
-              disabled={isAnalyzing || isAnalyzingLabel || isTranscribing}
-              className={`h-[30px] w-full rounded-xl ${isRecording ? "bg-red-50 text-red-600 animate-pulse" : "bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700"} transition-colors focus:outline-none focus:ring-2 focus:ring-blue-200 shadow-sm flex items-center justify-center ${isAnalyzing || isAnalyzingLabel || isTranscribing ? "opacity-50 cursor-not-allowed" : ""}`}
-              title="Dictate food"
-            >
-              {isTranscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />}
-            </button>
-          </div>
-
           {/* Weight input */}
-          <div className="flex-1 flex flex-col gap-0.5">
+          <div className="flex-1 flex flex-col gap-0.5 relative">
             <label htmlFor="food-weight" className="text-xs font-medium text-ink-muted">
               {t('weightLabel')}
             </label>

@@ -279,6 +279,19 @@ class AiApiClient {
   }
 
   /**
+   * Estimates food weight in grams based on natural language text.
+   */
+  public async estimateWeight(text: string): Promise<number | null> {
+    try {
+      const response = await this.post<{ weight: number | null }>("/estimate-weight", { text });
+      return response?.weight ?? null;
+    } catch (error) {
+      console.error("[AiClient] Failed to estimate weight:", error);
+      return null;
+    }
+  }
+
+  /**
    * Generic GET request handler
    */
   private async get<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -819,7 +832,31 @@ class AiApiClient {
     }
 
     const json = await response.json();
-    return json.text;
+    let text = json.text || "";
+
+    const lowerText = text.trim().toLowerCase();
+    const hallucinations = [
+      "start version more videos",
+      "thank you",
+      "спасибо",
+      "спасибо за просмотр",
+      "подписывайтесь на канал",
+      "subtitles by",
+      "amara.org",
+      "субтитры",
+      "subscribe",
+      "please subscribe",
+      "mbc 뉴스"
+    ];
+    
+    // Catch Korean, Japanese, and Chinese characters (common Whisper hallucinations on silence)
+    const cjkRegex = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af]/;
+    
+    if (!text.trim() || cjkRegex.test(text) || hallucinations.some(h => lowerText.includes(h.toLowerCase()))) {
+      return "[Голос не распознан]";
+    }
+
+    return text;
   }
 
   /**
