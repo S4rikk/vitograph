@@ -16,7 +16,7 @@ echo "Building AI Engine..."
 cd apps/api/src/ai
 npm install
 npm run build
-cd ../../../
+cd /opt/vitograph
 
 # Обновление Python Core
 echo "Updating Python Engine..."

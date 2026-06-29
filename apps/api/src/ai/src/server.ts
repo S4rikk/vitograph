@@ -26,6 +26,7 @@ import { supplementRouter } from "./routes/v1/supplement.routes.js";
 import { profilesRouter } from "./routes/v1/profiles.routes.js";
 import { usersRouter } from "./routes/v1/users.routes.js";
 import { integrationRouter } from "./routes/integration.js";
+import { speechRouter } from "./routes/v1/speech.routes.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import { initCheckpointer } from "./graph/checkpointer.js";
 
@@ -73,6 +74,7 @@ app.use("/api/v1/supplements", requireAuth, supplementRouter);
 app.use("/api/v1/profiles", requireAuth, profilesRouter);
 app.use("/api/v1/users", requireAuth, usersRouter);
 app.use("/api/v1/integration", requireAuth, integrationRouter);
+app.use("/api/v1/speech", requireAuth, speechRouter);
 
 // ── 404 fallback ────────────────────────────────────────────────────
 

@@ -239,6 +239,20 @@ class PythonCoreClient {
       10_000
     );
   }
+
+  /**
+   * Proxy transcribe request to Python Core speech transcription endpoint
+   */
+  async transcribeAudio(audioBuffer: Buffer, mimeType: string, filename: string): Promise<{ text: string }> {
+    const formData = new FormData();
+    const blob = new Blob([audioBuffer], { type: mimeType });
+    formData.append("audio_file", blob, filename);
+
+    return this.request<{ text: string }>("/api/v1/speech/transcribe", {
+      method: "POST",
+      body: formData,
+    });
+  }
 }
 
 export const pythonCore = new PythonCoreClient(PYTHON_CORE_URL);
