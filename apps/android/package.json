@@ -19,9 +19,12 @@
     "@capacitor/haptics": "^8.0.2",
     "@capacitor/push-notifications": "^8.0.3",
     "@capacitor/splash-screen": "^8.0.1",
-    "@capacitor/status-bar": "^8.0.2"
+    "@capacitor/status-bar": "^8.0.2",
+    "capacitor-voice-recorder": "^7.0.6"
   },
   "devDependencies": {
-    "playwright": "^1.59.1"
+    "patch-package": "^8.0.1",
+    "playwright": "^1.59.1",
+    "postinstall-postinstall": "^2.1.0"
   }
 }

@@ -812,7 +812,12 @@ class AiApiClient {
    */
   async transcribeAudio(audioBlob: Blob): Promise<string> {
     const formData = new FormData();
-    const extension = audioBlob.type.includes('mp4') ? 'mp4' : 'webm';
+    let extension = 'webm';
+    if (audioBlob.type.includes('mp4')) extension = 'mp4';
+    else if (audioBlob.type.includes('aac')) extension = 'm4a'; // OpenAI Whisper accepts .m4a for AAC streams
+    else if (audioBlob.type.includes('m4a')) extension = 'm4a';
+    else if (audioBlob.type.includes('wav')) extension = 'wav';
+    
     formData.append('audio_file', audioBlob, `recording.${extension}`);
 
     const url = `${this.baseUrl.replace('/ai', '/speech')}/transcribe`;
