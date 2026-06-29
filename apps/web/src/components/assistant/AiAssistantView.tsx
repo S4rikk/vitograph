@@ -279,7 +279,11 @@ export default function AiAssistantView({ userId }: { userId: string }) {
         setIsTranscribing(false);
       }
     } else {
-      await startRecording();
+      try {
+        await startRecording();
+      } catch (err: any) {
+        alert(err.message || "Не удалось получить доступ к микрофону.");
+      }
     }
   }, [isRecording, startRecording, stopRecording]);
 

@@ -126,9 +126,13 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
         setIsTranscribing(false);
       }
     } else {
-      await startRecording();
+      try {
+        await startRecording();
+      } catch (err: any) {
+        alert(err.message || "Не удалось получить доступ к микрофону.");
+      }
     }
-  }, [isRecording, startRecording, stopRecording]);
+  }, [isRecording, startRecording, stopRecording, handleEstimateWeight]);
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {

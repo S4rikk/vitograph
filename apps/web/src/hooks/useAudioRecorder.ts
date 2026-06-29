@@ -7,6 +7,9 @@ export function useAudioRecorder() {
 
   const startRecording = useCallback(async () => {
     try {
+      if (typeof window !== 'undefined' && (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)) {
+        throw new Error('Браузер заблокировал доступ к микрофону. Убедитесь, что сайт открыт по безопасному протоколу HTTPS.');
+      }
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
