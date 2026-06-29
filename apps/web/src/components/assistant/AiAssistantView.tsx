@@ -133,7 +133,10 @@ const AssistantMessageContent = ({ content }: { content: string }) => {
   // Render in a container with pre-wrap to respect the preserved double-newlines as paragraph breaks
   return (
     <div className="assistant-content flex flex-col gap-3">
-      <div className="whitespace-pre-wrap leading-relaxed text-[0.9375rem] text-ink-muted/90 select-text">
+      <div 
+        className="whitespace-pre-wrap leading-relaxed text-[0.9375rem] text-ink-muted/90 select-text"
+        style={{ WebkitUserSelect: 'text', userSelect: 'text', WebkitTouchCallout: 'default' }}
+      >
         {fragments}
       </div>
     </div>
@@ -674,7 +677,12 @@ export default function AiAssistantView({ userId }: { userId: string }) {
                   {msg.role === "assistant" ? (
                     <TypewritingAssistantMessage content={msg.content} isTyping={!!msg.isStreaming} />
                   ) : (
-                    <p className="whitespace-pre-wrap text-[0.9375rem] select-text">{msg.content}</p>
+                    <p 
+                      className="whitespace-pre-wrap text-[0.9375rem] select-text"
+                      style={{ WebkitUserSelect: 'text', userSelect: 'text', WebkitTouchCallout: 'default' }}
+                    >
+                      {msg.content}
+                    </p>
                   )}
                 </div>
             </div>
