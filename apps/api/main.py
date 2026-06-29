@@ -905,9 +905,10 @@ async def transcribe_speech(audio_file: UploadFile = File(...)) -> dict:
     content_type = audio_file.content_type or "audio/webm"
 
     try:
+        # Let OpenAI guess the mime type from the filename extension (.m4a)
         response = await client.audio.transcriptions.create(
             model="whisper-1",
-            file=(filename, content, content_type)
+            file=(filename, content)
         )
         return {"text": response.text}
     except Exception as e:
