@@ -141,7 +141,7 @@ export function MobileDashboardLayout({ userId, userEmail, desktopChildren }: Mo
       )}
 
       {displayTab === 1 && (
-        <div className="flex-grow flex flex-col min-h-0 relative z-10 pb-[84px]">
+        <div className="flex-grow flex flex-col min-h-0 relative z-10">
           <div className="flex-1 min-h-0 relative">
             {!isTransitioning && <FoodDiaryView />}
           </div>
@@ -149,7 +149,7 @@ export function MobileDashboardLayout({ userId, userEmail, desktopChildren }: Mo
       )}
 
       {displayTab === 2 && (
-        <div className="flex-grow flex flex-col min-h-0 relative z-10 pb-[84px]">
+        <div className="flex-grow flex flex-col min-h-0 relative z-10">
           <div className="flex-1 min-h-0 relative">
             {!isTransitioning && <AiAssistantView userId={userId} />}
           </div>

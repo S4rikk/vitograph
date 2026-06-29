@@ -1,4 +1,4 @@
-"use client";
+          "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -754,7 +754,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="inline-flex items-center justify-center w-7 h-11 text-ink-muted hover:text-primary-600 transition-colors focus:outline-none"
+            className="inline-flex items-center justify-center w-7 h-9 text-ink-muted hover:text-primary-600 transition-colors focus:outline-none"
             title={t("attachPhotoTitle")}
           >
             <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -777,7 +777,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
                   handleSubmit(e);
                 }
               }}
-              className="w-full rounded-xl border border-cloud-dark bg-surface pl-4 pr-11 py-2.5 text-[0.9375rem] text-ink shadow-sm transition-all focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 max-h-[150px] min-h-[44px] overflow-y-auto resize-none scrollbar-thin scrollbar-thumb-ink-muted/20 scrollbar-track-transparent"
+              className="w-full rounded-xl border border-cloud-dark bg-surface pl-4 pr-11 py-1.5 text-[0.9375rem] text-ink shadow-sm transition-all focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 max-h-[150px] min-h-[38px] overflow-y-auto resize-none scrollbar-thin scrollbar-thumb-ink-muted/20 scrollbar-track-transparent"
             />
             {/* Mic Button inside textarea */}
             <button
@@ -793,7 +793,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
           <button
             type="submit"
             disabled={isLoading || (!input.trim() && !selectedImageBase64)}
-            className="inline-flex items-center justify-center rounded-xl bg-primary-600 px-3 sm:px-5 py-2.5 text-[0.9375rem] font-semibold text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-cloud-dark disabled:text-ink-muted disabled:shadow-none min-h-[44px]"
+            className="inline-flex items-center justify-center rounded-xl bg-primary-600 px-3 sm:px-5 py-1.5 text-[0.9375rem] font-semibold text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-cloud-dark disabled:text-ink-muted disabled:shadow-none min-h-[38px]"
           >
             <span className="hidden sm:inline">{t("send")}</span>
             <svg className="w-5 h-5 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
