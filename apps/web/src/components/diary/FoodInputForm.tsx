@@ -6,8 +6,9 @@ import { compressImage } from "@/lib/image-utils";
 import { apiClient } from "@/lib/api-client";
 import type { FoodRecognitionResult, LabelScannerOutput } from "@/lib/api-client";
 import { MealScoreBadge } from "./MealScoreBadge";
-import { X, Trash2 } from "lucide-react";
+import { X, Trash2, Mic, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 
 function calculateTotalWeight(text: string): number | null {
   let total = 0;
@@ -114,6 +115,8 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
   const [name, setName] = useState("");
   const [weight, setWeight] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const { isRecording, startRecording, stopRecording } = useAudioRecorder();
   const [photoResult, setPhotoResult] = useState<FoodRecognitionResult | null>(null);
   const [isAnalyzingLabel, setIsAnalyzingLabel] = useState(false);
   const [labelResult, setLabelResult] = useState<LabelScannerOutput | null>(null);
@@ -164,6 +167,30 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
       sessionStorage.setItem("vitograph_diary_weight", weight);
     }
   }, [photoResult, name, weight]);
+
+  const handleMicClick = useCallback(async () => {
+    if (isRecording) {
+      try {
+        setIsTranscribing(true);
+        const blob = await stopRecording();
+        const text = await apiClient.transcribeAudio(blob);
+        setName((prev) => {
+          const newVal = prev ? `${prev} ${text}` : text;
+          const totalWeight = calculateTotalWeight(newVal);
+          if (totalWeight !== null) {
+            setWeight(String(totalWeight));
+          }
+          return newVal;
+        });
+      } catch (err) {
+        console.error("Transcription failed", err);
+      } finally {
+        setIsTranscribing(false);
+      }
+    } else {
+      await startRecording();
+    }
+  }, [isRecording, startRecording, stopRecording]);
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -587,6 +614,20 @@ export default function FoodInputForm({ onSubmit, onPhotoResult, onPreviewStateC
               <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 12h14M5 16h14m-3.5 4H19a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4.5"/>
               </svg>
+            </button>
+          </div>
+
+          {/* Mic button */}
+          <div className="flex-1 flex flex-col gap-0.5">
+            <span className="text-xs font-medium text-ink-muted">Голос</span>
+            <button
+              type="button"
+              onClick={handleMicClick}
+              disabled={isAnalyzing || isAnalyzingLabel || isTranscribing}
+              className={`h-[30px] w-full rounded-xl ${isRecording ? "bg-red-50 text-red-600 animate-pulse" : "bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700"} transition-colors focus:outline-none focus:ring-2 focus:ring-blue-200 shadow-sm flex items-center justify-center ${isAnalyzing || isAnalyzingLabel || isTranscribing ? "opacity-50 cursor-not-allowed" : ""}`}
+              title="Dictate food"
+            >
+              {isTranscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />}
             </button>
           </div>
 

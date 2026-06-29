@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   async rewrites() {
     return [
+      { source: "/api/v1/speech/:path*", destination: "http://localhost:8001/api/v1/speech/:path*" },
       { source: "/api/v1/profiles/:path*", destination: "http://localhost:8001/api/v1/profiles/:path*" },
       { source: "/api/v1/analytics/:path*", destination: "http://localhost:8001/api/v1/analytics/:path*" },
       { source: "/api/v1/users/:path*", destination: "http://localhost:8001/api/v1/users/:path*" },

@@ -795,6 +795,34 @@ class AiApiClient {
   }
 
   /**
+   * Transcribes an audio blob using OpenAI Whisper via backend.
+   */
+  async transcribeAudio(audioBlob: Blob): Promise<string> {
+    const formData = new FormData();
+    const extension = audioBlob.type.includes('mp4') ? 'mp4' : 'webm';
+    formData.append('audio_file', audioBlob, `recording.${extension}`);
+
+    const url = `${this.baseUrl.replace('/ai', '/speech')}/transcribe`;
+    const token = await getAuthToken();
+    const headers: HeadersInit = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Audio transcription failed: ${response.status}`);
+    }
+
+    const json = await response.json();
+    return json.text;
+  }
+
+  /**
    * Uploads a food photo for AI recognition and nutritional analysis.
    */
   async analyzeFood(imageBase64: string): Promise<FoodRecognitionResult> {

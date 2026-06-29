@@ -10,8 +10,9 @@ import React from "react";
 import HealthGoalsWidget from "@/components/shared/HealthGoalsWidget";
 import { useTypewriter } from "@/hooks/use-typewriter";
 import { useTranslations } from "next-intl";
-import { BrainCircuit } from "lucide-react";
+import { BrainCircuit, Mic, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 
 // ── CUSTOM PREMIUM RENDERERS ──
 
@@ -225,6 +226,9 @@ export default function AiAssistantView({ userId }: { userId: string }) {
   const [zoomedImageId, setZoomedImageId] = useState<string | null>(null);
   const [profile, setProfile] = useState<any>(null);
 
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const { isRecording, startRecording, stopRecording } = useAudioRecorder();
+
   // --- INSIGHT WIDGET STATE ---
   const [supabase] = useState(() => createClient());
   const [isInsightReady, setIsInsightReady] = useState(false);
@@ -260,7 +264,24 @@ export default function AiAssistantView({ userId }: { userId: string }) {
       }
     }
     checkInsightReadiness();
-  }, [supabase, userId]);
+  }, [userId, supabase, isInsightDismissed, isOnCooldown]);
+
+  const handleMicClick = useCallback(async () => {
+    if (isRecording) {
+      try {
+        setIsTranscribing(true);
+        const blob = await stopRecording();
+        const text = await apiClient.transcribeAudio(blob);
+        setInput((prev) => (prev ? `${prev} ${text}` : text));
+      } catch (err) {
+        console.error("Transcription failed", err);
+      } finally {
+        setIsTranscribing(false);
+      }
+    } else {
+      await startRecording();
+    }
+  }, [isRecording, startRecording, stopRecording]);
 
   const dismissInsight = () => {
     setIsInsightDismissed(true);
@@ -708,7 +729,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-border/50 p-3 sm:p-6 bg-cloud-light/30">
+      <div className="border-t border-border/50 p-3 pb-5 sm:p-6 bg-cloud-light/30">
         {selectedImageBase64 && (
           <div className="relative inline-block mb-3 border border-cloud rounded-lg overflow-hidden shadow-sm">
             <img src={selectedImageBase64} alt="Selected" className="h-20 w-auto object-cover" />
@@ -722,7 +743,7 @@ export default function AiAssistantView({ userId }: { userId: string }) {
             </button>
           </div>
         )}
-        <form onSubmit={handleSubmit} className="flex space-x-3 items-end">
+        <form onSubmit={handleSubmit} className="flex space-x-2 items-center">
           <input 
             type="file" 
             accept="image/*" 
@@ -733,33 +754,46 @@ export default function AiAssistantView({ userId }: { userId: string }) {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="inline-flex items-center justify-center rounded-xl bg-surface border border-cloud-dark px-3 py-3 text-ink-muted hover:text-primary-600 hover:border-primary-300 transition-colors focus:outline-none min-h-[44px]"
+            className="inline-flex items-center justify-center w-7 h-11 text-ink-muted hover:text-primary-600 transition-colors focus:outline-none"
             title={t("attachPhotoTitle")}
           >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </button>
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            disabled={isLoading}
-            placeholder={t("inputPlaceholder")}
-            rows={1}
-            style={{ fieldSizing: "content" } as any}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmit(e);
-              }
-            }}
-            className="flex-1 rounded-xl border-cloud-dark bg-surface px-4 py-3 text-[0.9375rem] text-ink shadow-sm transition-all focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 max-h-[150px] min-h-[44px] overflow-y-auto resize-none scrollbar-thin scrollbar-thumb-ink-muted/20 scrollbar-track-transparent"
-          />
+          
+          <div className="relative flex-1 flex items-center">
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              disabled={isLoading}
+              placeholder={t("inputPlaceholder")}
+              rows={1}
+              style={{ fieldSizing: "content" } as any}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit(e);
+                }
+              }}
+              className="w-full rounded-xl border border-cloud-dark bg-surface pl-4 pr-11 py-2.5 text-[0.9375rem] text-ink shadow-sm transition-all focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 max-h-[150px] min-h-[44px] overflow-y-auto resize-none scrollbar-thin scrollbar-thumb-ink-muted/20 scrollbar-track-transparent"
+            />
+            {/* Mic Button inside textarea */}
+            <button
+              type="button"
+              onClick={handleMicClick}
+              disabled={isLoading || isTranscribing}
+              className={`absolute right-2 top-1/2 -translate-y-1/2 inline-flex items-center justify-center p-1.5 rounded-lg transition-colors focus:outline-none ${isRecording ? "text-red-600 animate-pulse bg-red-50" : "text-ink-muted hover:text-blue-600 hover:bg-blue-50"} disabled:opacity-50 disabled:cursor-not-allowed`}
+              title="Dictate message"
+            >
+              {isTranscribing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Mic className="w-5 h-5" />}
+            </button>
+          </div>
           <button
             type="submit"
             disabled={isLoading || (!input.trim() && !selectedImageBase64)}
-            className="inline-flex items-center justify-center rounded-xl bg-primary-600 px-3 sm:px-5 py-3 text-[0.9375rem] font-semibold text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-cloud-dark disabled:text-ink-muted disabled:shadow-none min-h-[44px]"
+            className="inline-flex items-center justify-center rounded-xl bg-primary-600 px-3 sm:px-5 py-2.5 text-[0.9375rem] font-semibold text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-cloud-dark disabled:text-ink-muted disabled:shadow-none min-h-[44px]"
           >
             <span className="hidden sm:inline">{t("send")}</span>
             <svg className="w-5 h-5 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">

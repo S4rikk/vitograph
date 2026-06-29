@@ -885,6 +885,36 @@ async def calculate_norm(biomarker: str, profile: UserProfile):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ── Speech to Text (Whisper) ─────────────────────────────────────────
+
+
+@app.post("/api/v1/speech/transcribe", tags=["speech"])
+async def transcribe_speech(audio_file: UploadFile = File(...)) -> dict:
+    """Transcribe audio to text using OpenAI Whisper."""
+    if not settings.openai_api_key:
+        raise HTTPException(status_code=500, detail="OpenAI API key not configured")
+
+    # Limit file size to 5MB
+    MAX_FILE_SIZE = 5 * 1024 * 1024
+    content = await audio_file.read()
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=413, detail="Audio file too large (max 5MB)")
+
+    client = AsyncOpenAI(api_key=settings.openai_api_key)
+    filename = audio_file.filename or "audio.webm"
+    content_type = audio_file.content_type or "audio/webm"
+
+    try:
+        response = await client.audio.transcriptions.create(
+            model="whisper-1",
+            file=(filename, content, content_type)
+        )
+        return {"text": response.text}
+    except Exception as e:
+        logger.error(f"Whisper transcription failed: {e}")
+        raise HTTPException(status_code=500, detail="Transcription failed")
+
+
 # ── Health Check ─────────────────────────────────────────────────────
 
 
